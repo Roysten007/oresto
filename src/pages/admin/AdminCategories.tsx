@@ -1,0 +1,8 @@
+export default function AdminCategories() {
+  return (
+    <div className="space-y-6">
+      <h1 className="font-heading text-2xl font-bold text-foreground">Catégories</h1>
+      <p className="font-body text-muted-foreground">Gestion des catégories — bientôt disponible.</p>
+    </div>
+  );
+}
