@@ -3,7 +3,7 @@ import { Check } from "lucide-react";
 
 export default function VendorSubscription() {
   const { vendorProfile } = useAuth();
-  const currentPlan = vendorProfile?.plan || "pro";
+  const currentPlan = vendorProfile?.plan || "starter";
 
   const plans = [
     { id: "starter", name: "STARTER", price: "10 000", features: ["Fiche marketplace", "20 produits max", "50 commandes/mois", "Paiement Cash"] },
@@ -15,7 +15,7 @@ export default function VendorSubscription() {
     <div className="space-y-6">
       <h1 className="font-heading text-2xl font-bold text-foreground">Abonnement</h1>
       <div className="p-4 rounded-2xl bg-oresto-orange-light border border-primary/20">
-        <p className="font-sub text-sm text-foreground">Votre plan actuel : <span className="font-bold text-primary">{currentPlan.toUpperCase()}</span> · Renouvellement le 01/02/2025</p>
+        <p className="font-sub text-sm text-foreground">Votre plan actuel : <span className="font-bold text-primary">{currentPlan.toUpperCase()}</span> · Bienvenue sur Oresto !</p>
       </div>
       <div className="grid md:grid-cols-3 gap-4">
         {plans.map(plan => (

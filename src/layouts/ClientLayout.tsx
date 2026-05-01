@@ -1,70 +1,181 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Home, Search, ShoppingCart, ClipboardList, Heart, UserCircle, Bell } from "lucide-react";
+import { useClient } from "@/contexts/ClientContext";
+import { useCart } from "@/contexts/CartContext";
+import { Home, Search, ClipboardList, MessageCircle, UserCircle, Bell, MapPin, ChevronDown, ShoppingCart } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import Onboarding from "@/components/app/Onboarding";
 
 const navItems = [
-  { path: "/app/home", icon: Home, label: "Accueil" },
-  { path: "/app/search", icon: Search, label: "Recherche" },
-  { path: "/app/cart", icon: ShoppingCart, label: "Panier" },
-  { path: "/app/orders", icon: ClipboardList, label: "Commandes" },
-  { path: "/app/profile", icon: UserCircle, label: "Profil" },
+  { path: "/app/home",     icon: Home,          label: "Accueil" },
+  { path: "/app/decouvrir",icon: Search,         label: "Découvrir" },
+  { path: "/app/orders",   icon: ClipboardList,  label: "Commandes" },
+  { path: "/app/messages", icon: MessageCircle,  label: "Messages" },
+  { path: "/app/profile",  icon: UserCircle,     label: "Profil" },
 ];
 
 export default function ClientLayout() {
-  const { user, sessionWarning, dismissWarning, logout } = useAuth();
+  const { user } = useAuth();
+  const { onboardingCompleted, city, unreadCount } = useClient();
+  const { totalItems } = useCart();
   const location = useLocation();
 
-  return (
-    <div className="min-h-screen bg-background pb-20 md:pb-0">
-      {/* Top bar */}
-      <header className="sticky top-0 z-40 bg-background border-b border-border px-4 py-3">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div>
-            <span className="font-heading text-lg font-bold text-primary">ORESTO</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <button className="relative text-muted-foreground hover:text-foreground transition-colors">
-              <Bell size={20} />
-              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center">3</span>
-            </button>
-            <Link to="/app/profile" className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-heading text-xs font-bold">
-              {user?.firstName?.[0] || "U"}
-            </Link>
-          </div>
-        </div>
-      </header>
+  // Pages immersives qui gèrent leur propre nav
+  const isImmersivePage =
+    location.pathname.includes("/app/shop/") ||
+    location.pathname.includes("/app/order/") ||
+    location.pathname.includes("/app/cart") ||
+    location.pathname.includes("/app/rate/");
 
-      <main className="max-w-7xl mx-auto">
-        <Outlet />
+  if (!onboardingCompleted) {
+    return <Onboarding />;
+  }
+
+  return (
+    <div className={`min-h-screen bg-[#FAFAFA] ${isImmersivePage ? "" : "pb-24"}`}>
+      {/* Header */}
+      <AnimatePresence>
+        {!isImmersivePage && (
+          <motion.header
+            initial={{ y: -60, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -60, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-gray-100/80 px-6 py-3 shadow-sm shadow-gray-100/60"
+          >
+            <div className="max-w-7xl mx-auto flex items-center justify-between">
+              <div className="flex flex-col">
+                <span className="text-[9px] font-black uppercase tracking-[0.25em] text-gray-400 leading-none mb-1">Livraison à</span>
+                <button className="flex items-center gap-1.5 text-sm font-black uppercase tracking-tight hover:text-primary transition-colors">
+                  <MapPin size={13} className="text-primary" />
+                  {city || "Cotonou"}
+                  <ChevronDown size={13} className="text-gray-400" />
+                </button>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <Link
+                  to="/app/notifications"
+                  className="relative w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-all"
+                >
+                  <Bell size={19} />
+                  {unreadCount > 0 && (
+                    <motion.span
+                      initial={{ scale: 0 }} animate={{ scale: 1 }}
+                      className="absolute top-0 right-0 w-5 h-5 rounded-full bg-primary text-white text-[9px] font-black flex items-center justify-center border-2 border-white"
+                    >
+                      {unreadCount}
+                    </motion.span>
+                  )}
+                </Link>
+                <Link
+                  to="/app/cart"
+                  className="relative w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-all"
+                >
+                  <ShoppingCart size={19} />
+                  <AnimatePresence>
+                    {totalItems > 0 && (
+                      <motion.span
+                        initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
+                        className="absolute top-0 right-0 w-5 h-5 rounded-full bg-primary text-white text-[9px] font-black flex items-center justify-center border-2 border-white"
+                      >
+                        {totalItems}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </Link>
+                <Link
+                  to="/app/profile"
+                  className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white font-black text-sm shadow-lg hover:bg-primary transition-colors"
+                >
+                  {user?.firstName?.[0]?.toUpperCase() || user?.name?.[0]?.toUpperCase() || "U"}
+                </Link>
+              </div>
+            </div>
+          </motion.header>
+        )}
+      </AnimatePresence>
+
+      {/* Main content */}
+      <main className={`max-w-7xl mx-auto ${isImmersivePage ? "" : "px-6"}`}>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+          >
+            <Outlet />
+          </motion.div>
+        </AnimatePresence>
       </main>
 
-      {/* Bottom nav mobile */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border z-40">
-        <div className="flex items-center justify-around py-2">
-          {navItems.map(item => {
-            const active = location.pathname === item.path;
-            return (
-              <Link key={item.path} to={item.path} className={`flex flex-col items-center gap-0.5 px-2 py-1 ${active ? "text-primary" : "text-muted-foreground"}`}>
-                <item.icon size={20} />
-                <span className="text-[10px] font-sub">{item.label}</span>
-              </Link>
-            );
-          })}
-        </div>
-      </nav>
+      {/* Bottom Nav — visible uniquement sur pages non-immersives */}
+      <AnimatePresence>
+        {!isImmersivePage && (
+          <motion.nav
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="fixed bottom-0 left-0 right-0 z-40"
+          >
+            {/* Glassmorphism background */}
+            <div className="absolute inset-0 bg-white/85 backdrop-blur-xl border-t border-gray-100/80 shadow-[0_-4px_24px_rgba(0,0,0,0.06)]" />
 
-      {sessionWarning && (
-        <div className="fixed inset-0 bg-foreground/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-card rounded-2xl p-6 max-w-sm w-full shadow-xl">
-            <h3 className="font-heading font-bold text-foreground mb-2">Session bientôt expirée</h3>
-            <p className="font-body text-muted-foreground text-sm mb-4">Votre session expire dans 5 minutes. Voulez-vous rester connecté ?</p>
-            <div className="flex gap-3">
-              <button onClick={logout} className="flex-1 py-2 rounded-full border border-border text-foreground font-sub text-sm">Déconnexion</button>
-              <button onClick={dismissWarning} className="flex-1 py-2 rounded-full bg-primary text-primary-foreground font-sub text-sm">Rester connecté</button>
+            <div className="relative max-w-md mx-auto px-4 pt-2 pb-[max(env(safe-area-inset-bottom),12px)]">
+              <div className="flex items-end justify-around">
+                {navItems.map((item) => {
+                  const active = location.pathname === item.path;
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      className="flex flex-col items-center gap-1 relative group"
+                    >
+                      <motion.div
+                        whileTap={{ scale: 0.85 }}
+                        className={`relative flex items-center justify-center transition-all duration-200 ${
+                          active
+                            ? "w-12 h-12 rounded-2xl bg-primary/12 text-primary"
+                            : "w-10 h-10 text-gray-400 group-hover:text-gray-600"
+                        }`}
+                      >
+                        <Icon
+                          size={active ? 22 : 21}
+                          strokeWidth={active ? 2.5 : 1.8}
+                        />
+                        {/* Active dot */}
+                        {active && (
+                          <motion.span
+                            layoutId="navDot"
+                            className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary"
+                          />
+                        )}
+                      {/* Cart badge on orders, unread badge on messages */}
+                        {item.path === "/app/orders" && totalItems > 0 && !active && (
+                          <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-white text-[8px] font-black rounded-full flex items-center justify-center">
+                            {totalItems}
+                          </span>
+                        )}
+                      </motion.div>
+                      <span
+                        className={`text-[8px] font-black uppercase tracking-wider transition-all ${
+                          active ? "text-primary" : "text-gray-400 group-hover:text-gray-600"
+                        }`}
+                      >
+                        {item.label}
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </motion.nav>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

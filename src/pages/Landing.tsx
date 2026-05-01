@@ -1,396 +1,315 @@
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { FadeIn } from "@/hooks/useFadeIn";
-import { categories } from "@/data/mockData";
-import Navbar from "@/components/landing/Navbar";
-import Footer from "@/components/landing/Footer";
-import { Check, X } from "lucide-react";
+import { 
+  ArrowRight, 
+  Bot, 
+  Globe, 
+  Zap, 
+  ShieldCheck, 
+  Smartphone, 
+  Store, 
+  UtensilsCrossed, 
+  ChevronRight, 
+  CheckCircle2,
+  Lock,
+  Sparkles,
+  TrendingUp,
+  Layout
+} from "lucide-react";
 
-const trustItems = ["🇧🇯 Bénin", "🇹🇬 Togo", "🇨🇮 Côte d'Ivoire", "🇸🇳 Sénégal", "MTN MoMo", "Moov Money", "WhatsApp", "Google Maps"];
+/* ─── Reveal Component (Standard CSS Animation) ─── */
+function Reveal({ children, className = "", delay = 0 }: { children: React.ReactNode, className?: string, delay?: number }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
 
-const steps = [
-  { num: 1, icon: "🔍", title: "Cherchez", desc: "Tapez un plat, un commerce, une ville" },
-  { num: 2, icon: "🛒", title: "Commandez", desc: "Ajoutez au panier, payez en MoMo" },
-  { num: 3, icon: "🚀", title: "Recevez", desc: "Votre livreur part en ~20 min" },
-];
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setIsVisible(true);
+        observer.unobserve(entry.target);
+      }
+    }, { threshold: 0.1 });
+    
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
 
-const clientFeatures = [
-  "Géolocalisation automatique de votre ville",
-  "Filtres : ouvert maintenant, note, quartier",
-  "Suivi livraison en temps réel",
-  "Paiement MTN & Moov MoMo intégré",
-  "Historique et avis après chaque commande",
-];
-
-const vendorFeatures = [
-  "Créez votre catalogue ou menu facilement",
-  "Recevez des commandes en temps réel",
-  "Gérez vos livreurs et zones de livraison",
-  "Statistiques de ventes et revenus",
-  "Badge vérifié, QR Code, codes promo",
-];
-
-const testimonials = [
-  { quote: "Je reçois 3 fois plus de commandes depuis Oresto.", initials: "A.S.", name: "Aminata S.", role: "Restauratrice", city: "Cotonou 🇧🇯" },
-  { quote: "En 10 minutes ma boutique était en ligne. Incroyable.", initials: "K.M.", name: "Kofi M.", role: "Épicier", city: "Lomé 🇹🇬" },
-  { quote: "Le paiement MoMo intégré, c'est exactement ce qu'il fallait.", initials: "F.D.", name: "Fatou D.", role: "Cliente", city: "Abidjan 🇨🇮" },
-];
-
-const countries = [
-  { flag: "🇧🇯", name: "Bénin", status: "Actif", color: "bg-green-100 text-green-700" },
-  { flag: "🇹🇬", name: "Togo", status: "Bientôt", color: "bg-muted text-muted-foreground" },
-  { flag: "🇨🇮", name: "Côte d'Ivoire", status: "Q3 2025", color: "bg-muted text-muted-foreground" },
-  { flag: "🇸🇳", name: "Sénégal", status: "Q4 2025", color: "bg-muted text-muted-foreground" },
-];
-
-interface PlanFeature { text: string; included: boolean }
-const starterFeatures: PlanFeature[] = [
-  { text: "Fiche marketplace", included: true },
-  { text: "20 produits max", included: true },
-  { text: "50 commandes/mois", included: true },
-  { text: "Paiement Cash", included: true },
-  { text: "MoMo", included: false },
-  { text: "Stats avancées", included: false },
-];
-const proFeatures: PlanFeature[] = [
-  { text: "Tout Starter", included: true },
-  { text: "Catalogue illimité", included: true },
-  { text: "Commandes illimitées", included: true },
-  { text: "MTN & Moov MoMo", included: true },
-  { text: "Stats de base", included: true },
-  { text: "Badge Pro + QR Code", included: true },
-];
-const premiumFeatures: PlanFeature[] = [
-  { text: "Tout Pro", included: true },
-  { text: "Mise en avant recherche", included: true },
-  { text: "Badge Vérifié ✅", included: true },
-  { text: "Stats avancées", included: true },
-  { text: "Programme fidélité", included: true },
-  { text: "Codes promo", included: true },
-  { text: "WhatsApp Business", included: true },
-  { text: "Gestionnaire dédié", included: true },
-  { text: "Pub page d'accueil", included: true },
-];
+  return (
+    <div 
+      ref={ref} 
+      className={className} 
+      style={{
+        opacity: isVisible ? 1 : 0,
+        transform: isVisible ? "translateY(0)" : "translateY(20px)",
+        transition: `all 600ms ease-out ${delay}ms`
+      }}
+    >
+      {children}
+    </div>
+  );
+}
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
+    <div className="min-h-screen bg-white text-foreground selection:bg-primary selection:text-white">
+      
+      {/* ─── Navigation ─── */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
+              <Zap size={22} fill="currentColor" />
+            </div>
+            <span className="font-heading text-2xl font-black tracking-tighter uppercase">Oresto <span className="text-primary">Connect</span></span>
+          </div>
+          <div className="hidden md:flex items-center gap-8 font-sub text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+            <a href="#vision" className="hover:text-primary transition-colors">Vision</a>
+            <a href="#iza" className="hover:text-primary transition-colors">IZA AI</a>
+            <a href="#confidentiality" className="hover:text-primary transition-colors">Sécurité</a>
+          </div>
+          <div className="flex items-center gap-4">
+            <Link to="/login" className="px-6 py-2.5 rounded-full font-sub text-[10px] font-black uppercase tracking-widest hover:bg-gray-50 transition-colors">Connexion</Link>
+            <Link to="/register" className="px-6 py-2.5 bg-black text-white rounded-full font-sub text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-xl">Rejoindre</Link>
+          </div>
+        </div>
+      </nav>
 
-      {/* HERO */}
-      <section id="accueil" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          <FadeIn>
-            <span className="inline-block px-4 py-1.5 rounded-full bg-oresto-orange-light text-primary font-sub text-sm font-medium mb-6">
-              🌍 La super-app du commerce local
-            </span>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold leading-tight text-foreground">
-              Tout ce dont vous avez besoin, livré depuis votre quartier.
+      {/* ─── Hero Section ─── */}
+      <section className="relative pt-40 pb-32 px-6 overflow-hidden">
+        <div className="max-w-7xl mx-auto text-center relative z-10">
+          <Reveal delay={100} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 border border-primary/10 text-primary font-sub text-[10px] font-black uppercase tracking-widest mb-8">
+            <Sparkles size={14} /> L'application web qui révolutionne la restauration
+          </Reveal>
+          
+          <Reveal delay={200}>
+            <h1 className="font-heading text-5xl md:text-8xl font-black leading-[0.9] tracking-tighter mb-8 uppercase">
+              Ne créez pas un site. <br/>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-600">Lancez un empire.</span>
             </h1>
-            <p className="mt-6 text-lg font-sub text-muted-foreground max-w-lg">
-              Oresto connecte les clients aux commerces locaux d'Afrique de l'Ouest. Commandez, payez en MoMo, suivez en temps réel.
+          </Reveal>
+
+          <Reveal delay={300} className="max-w-2xl mx-auto mb-12">
+            <p className="text-lg md:text-xl text-muted-foreground font-body leading-relaxed">
+              Oresto Connect n'est pas un catalogue. C'est une <strong>PaaS (Platform as a Service)</strong> qui génère instantanément votre application web de vente premium, pilotée par une intelligence artificielle de pointe.
             </p>
-            <div className="flex flex-wrap gap-3 mt-8">
-              <Link to="/register" className="px-6 py-3 rounded-full bg-primary text-primary-foreground font-sub font-semibold btn-hover">
-                📱 Télécharger l'app
-              </Link>
-              <Link to="/register" className="px-6 py-3 rounded-full border-2 border-foreground text-foreground font-sub font-semibold btn-hover">
-                🏪 Ouvrir ma boutique
-              </Link>
+          </Reveal>
+
+          <Reveal delay={400} className="flex flex-col sm:flex-row items-center justify-center gap-6">
+            <Link to="/register" className="group w-full sm:w-auto px-10 py-5 bg-primary text-white rounded-[24px] font-sub text-sm font-black uppercase tracking-widest flex items-center justify-center gap-3 shadow-2xl shadow-primary/30 hover:scale-105 transition-all">
+              Démarrer mon restaurant <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+            </Link>
+            <div className="flex items-center gap-3 px-6 py-4 rounded-[24px] bg-white border border-gray-100 shadow-sm font-sub text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+              <CheckCircle2 size={16} className="text-emerald-500" /> Site prêt en 2 minutes
             </div>
-            <div className="flex flex-wrap gap-3 mt-6">
-              <span className="px-4 py-2 rounded-2xl bg-muted font-sub text-sm">🏪 +2 400 boutiques</span>
-              <span className="px-4 py-2 rounded-2xl bg-muted font-sub text-sm">⭐ 4.8/5</span>
-              <span className="px-4 py-2 rounded-2xl bg-muted font-sub text-sm">🚀 ~20 min</span>
-            </div>
-          </FadeIn>
-          <FadeIn className="flex justify-center">
-            <div className="w-[280px] h-[560px] rounded-[40px] border-4 border-foreground bg-background shadow-2xl overflow-hidden p-3">
-              <div className="w-full h-full rounded-[28px] bg-muted overflow-hidden">
-                <div className="p-4 space-y-3">
-                  <div className="h-8 flex items-center justify-between">
-                    <span className="font-heading font-bold text-primary text-lg">ORESTO</span>
-                    <div className="w-8 h-8 rounded-full bg-primary/20" />
-                  </div>
-                  <div className="h-10 rounded-full bg-background border border-border flex items-center px-3">
-                    <span className="text-xs text-muted-foreground">🔍 Que cherchez-vous ?</span>
-                  </div>
-                  <div className="flex gap-2 overflow-hidden">
-                    {["🍽️", "💊", "🛒", "👗"].map((icon, i) => (
-                      <div key={i} className="w-12 h-12 rounded-2xl bg-background flex items-center justify-center text-lg flex-shrink-0">{icon}</div>
-                    ))}
-                  </div>
-                  {[1, 2, 3].map(i => (
-                    <div key={i} className="rounded-2xl bg-background p-2 shadow-sm">
-                      <div className="h-20 rounded-xl bg-gradient-to-r from-primary/10 to-primary/5 mb-2" />
-                      <div className="h-3 w-3/4 rounded bg-foreground/10" />
-                      <div className="h-2 w-1/2 rounded bg-foreground/5 mt-1" />
+          </Reveal>
+        </div>
+
+        {/* Floating elements simulation */}
+        <div className="absolute top-1/2 left-0 w-64 h-64 bg-primary/10 rounded-full blur-[120px] -z-10 animate-pulse" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-orange-500/5 rounded-full blur-[140px] -z-10" />
+      </section>
+
+      {/* ─── The Concept: Site Factory ─── */}
+      <section id="vision" className="py-32 px-6 bg-gray-50/50">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+            <Reveal delay={100}>
+              <div className="space-y-6">
+                <p className="font-sub text-[10px] font-black uppercase tracking-[0.3em] text-primary">Le Concept : Site Factory</p>
+                <h2 className="font-heading text-4xl md:text-6xl font-black leading-tight uppercase tracking-tighter">
+                  Une présence digitale <br/>
+                  <span className="text-muted-foreground">sans la complexité.</span>
+                </h2>
+                <p className="text-lg text-muted-foreground leading-relaxed">
+                  Qu'il s'agisse d'un petit restaurant de quartier ou d'un établissement premium, notre application web vous offre une infrastructure complète. Vous vous connectez, vous configurez votre identité, et votre site est prêt à encaisser vos premières commandes.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6">
+                  {[
+                    { title: "Dashboard Unifié", desc: "Suivez vos ventes et clients en temps réel.", icon: Layout },
+                    { title: "Design Premium", desc: "Des interfaces qui donnent faim.", icon: Globe },
+                    { title: "Paiement Direct", desc: "WhatsApp, MoMo & Cash.", icon: ShieldCheck },
+                    { title: "Zéro Code", desc: "Concentrez-vous sur votre cuisine.", icon: Zap }
+                  ].map((item, i) => (
+                    <div key={i} className="flex gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-primary shrink-0">
+                        <item.icon size={20} />
+                      </div>
+                      <div>
+                        <h4 className="font-heading font-black text-sm uppercase tracking-tight">{item.title}</h4>
+                        <p className="text-xs text-muted-foreground mt-1">{item.desc}</p>
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
-            </div>
-          </FadeIn>
-        </div>
-      </section>
-
-      {/* TRUST BAR */}
-      <div className="bg-muted py-4 overflow-hidden">
-        <div className="animate-scroll-left flex gap-12 whitespace-nowrap">
-          {[...trustItems, ...trustItems].map((item, i) => (
-            <span key={i} className="font-sub text-sm text-muted-foreground flex-shrink-0">{item}</span>
-          ))}
-        </div>
-      </div>
-
-      {/* CATEGORIES */}
-      <section id="fonctionnalites" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <FadeIn className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground">Trouvez ce qu'il vous faut</h2>
-        </FadeIn>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {categories.map((cat, i) => (
-            <FadeIn key={i}>
-              <div className="card-hover p-6 rounded-2xl bg-card border border-border text-center cursor-pointer hover:border-primary group">
-                <div className="w-14 h-14 rounded-full bg-oresto-orange-light flex items-center justify-center text-2xl mx-auto mb-3 group-hover:bg-primary/20 transition-colors">
-                  {cat.icon}
+            </Reveal>
+            <Reveal delay={300} className="relative">
+              <div className="aspect-square bg-white rounded-[60px] shadow-2xl border border-gray-100 p-4 overflow-hidden group">
+                <div className="h-full w-full bg-gray-50 rounded-[48px] border border-gray-100 flex items-center justify-center relative overflow-hidden">
+                   <div className="text-center p-8">
+                      <Store size={80} className="mx-auto text-primary/20 mb-6 group-hover:scale-110 transition-transform duration-700" />
+                      <p className="font-heading text-xl font-black uppercase">Aujourd'hui : Restaurants</p>
+                      <p className="text-sm text-muted-foreground mt-2 italic">Demain : Boutiques, Pharmacies, Epiceries...</p>
+                   </div>
+                   <div className="absolute top-0 right-0 p-6">
+                      <span className="px-3 py-1 rounded-full bg-primary text-white text-[10px] font-black uppercase tracking-widest shadow-lg">Phase 1</span>
+                   </div>
                 </div>
-                <span className="font-sub font-medium text-foreground">{cat.label}</span>
               </div>
-            </FadeIn>
-          ))}
+            </Reveal>
+          </div>
         </div>
       </section>
 
-      {/* HOW IT WORKS */}
-      <section className="bg-muted py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <FadeIn className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground">En 3 étapes, c'est livré</h2>
-          </FadeIn>
-          <div className="grid md:grid-cols-3 gap-8 relative">
-            <div className="hidden md:block absolute top-16 left-1/6 right-1/6 border-t-2 border-dashed border-border" />
-            {steps.map((step) => (
-              <FadeIn key={step.num}>
-                <div className="text-center relative">
-                  <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-lg font-heading font-bold mx-auto mb-4">
-                    {step.num}
+      {/* ─── IZA AI Section ─── */}
+      <section id="iza" className="py-32 px-6 bg-black text-white relative overflow-hidden">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-24">
+            <Reveal delay={100} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-white font-sub text-[10px] font-black uppercase tracking-widest mb-8">
+              <Bot size={14} className="text-primary" /> Intelligence Artificielle Opérationnelle
+            </Reveal>
+            <Reveal delay={200}>
+              <h2 className="font-heading text-4xl md:text-7xl font-black leading-none uppercase tracking-tighter mb-8">
+                Rencontrez <span className="text-primary italic">IZA</span>. <br/>
+                <span className="text-white/40">Votre nouvelle directrice.</span>
+              </h2>
+            </Reveal>
+            <Reveal delay={300} className="max-w-2xl mx-auto">
+              <p className="text-lg text-white/60 leading-relaxed">
+                IZA n'est pas un chatbot classique. C'est une intelligence intégrée qui analyse vos performances, suggère des optimisations de menu et gère vos clients pendant que vous cuisinez.
+              </p>
+            </Reveal>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+             {[
+               { title: "Analyse Temps Réel", desc: "IZA surveille vos stocks et vos pics de commande.", icon: TrendingUp },
+               { title: "Assistance Vendeur", desc: "Posez-lui des questions sur votre business, elle répond.", icon: Bot },
+               { title: "Automatisation", desc: "IZA peut modifier vos prix ou fermer votre boutique sur simple commande vocale.", icon: Zap }
+             ].map((feature, i) => (
+               <Reveal key={i} delay={400 + (i * 100)} className="p-10 rounded-[40px] bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+                  <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center mb-8 shadow-xl shadow-primary/20">
+                    <feature.icon size={24} />
                   </div>
-                  <span className="text-3xl mb-3 block">{step.icon}</span>
-                  <h3 className="font-heading font-semibold text-lg text-foreground mb-2">{step.title}</h3>
-                  <p className="font-body text-muted-foreground">{step.desc}</p>
+                  <h3 className="font-heading text-xl font-black uppercase tracking-tight mb-4">{feature.title}</h3>
+                  <p className="text-white/40 text-sm leading-relaxed">{feature.desc}</p>
+               </Reveal>
+             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Why Oresto Connect? ─── */}
+      <section className="py-32 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-24">
+            <h2 className="font-heading text-4xl md:text-6xl font-black uppercase tracking-tighter">Pourquoi nous ?</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+            {[
+              { label: "Vitesse", text: "Déployez votre application web de vente en moins de 120 secondes chrono.", icon: Zap },
+              { label: "Autonomie", text: "Prenez le contrôle total de votre design, vos prix et vos livraisons.", icon: Smartphone },
+              { label: "Visibilité", text: "Un site premium optimisé pour le référencement et le partage social.", icon: Globe },
+              { label: "Croissance", text: "Rejoignez un écosystème conçu pour multiplier votre chiffre d'affaires.", icon: TrendingUp }
+            ].map((reason, i) => (
+              <Reveal key={i} delay={i * 100} className="text-center">
+                <div className="w-20 h-20 mx-auto rounded-full bg-gray-50 flex items-center justify-center text-primary mb-8 border border-gray-100 shadow-sm">
+                  <reason.icon size={32} />
                 </div>
-              </FadeIn>
+                <h4 className="font-heading font-black text-sm uppercase tracking-widest mb-4">{reason.label}</h4>
+                <p className="text-muted-foreground text-sm leading-relaxed">{reason.text}</p>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CLIENT SECTION */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          <FadeIn className="flex justify-center order-2 md:order-1">
-            <div className="w-[240px] h-[480px] rounded-[36px] border-4 border-foreground bg-background shadow-xl overflow-hidden p-2">
-              <div className="w-full h-full rounded-[28px] bg-muted flex items-center justify-center">
-                <span className="text-6xl">📱</span>
-              </div>
+      {/* ─── Confidentiality & Data ─── */}
+      <section id="confidentiality" className="py-32 px-6 bg-gray-50">
+        <div className="max-w-4xl mx-auto">
+          <Reveal delay={100} className="p-12 md:p-20 rounded-[60px] bg-white border border-gray-100 shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-12 opacity-5">
+              <ShieldCheck size={200} className="text-black" />
             </div>
-          </FadeIn>
-          <FadeIn className="order-1 md:order-2">
-            <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-8">Votre ville, dans votre poche</h2>
-            <ul className="space-y-4">
-              {clientFeatures.map((feat, i) => (
-                <li key={i} className="flex items-start gap-3">
-                  <span className="text-primary mt-0.5">✅</span>
-                  <span className="font-body text-foreground">{feat}</span>
-                </li>
-              ))}
-            </ul>
-            <Link to="/register" className="inline-block mt-8 px-6 py-3 rounded-full bg-primary text-primary-foreground font-sub font-semibold btn-hover">
-              Télécharger l'app →
-            </Link>
-          </FadeIn>
-        </div>
-      </section>
-
-      {/* VENDOR SECTION */}
-      <section className="bg-oresto-black py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <FadeIn>
-              <h2 className="text-3xl md:text-4xl font-heading font-bold text-primary-foreground mb-8">Ouvrez votre vitrine en 10 minutes</h2>
-              <ul className="space-y-4">
-                {vendorFeatures.map((feat, i) => (
-                  <li key={i} className="flex items-start gap-3">
-                    <span className="text-primary mt-0.5">✅</span>
-                    <span className="font-body text-primary-foreground/80">{feat}</span>
-                  </li>
-                ))}
-              </ul>
-              <Link to="/register" className="inline-block mt-8 px-6 py-3 rounded-full bg-primary text-primary-foreground font-sub font-semibold btn-hover">
-                Créer mon espace vendeur →
-              </Link>
-            </FadeIn>
-            <FadeIn className="flex justify-center">
-              <div className="w-full max-w-sm rounded-2xl bg-foreground/10 p-6 space-y-4">
-                <div className="flex gap-3">
-                  {["📦 12", "💰 45k", "⭐ 4.8"].map((stat, i) => (
-                    <div key={i} className="flex-1 rounded-xl bg-foreground/10 p-3 text-center">
-                      <span className="text-primary-foreground text-sm font-sub">{stat}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="h-32 rounded-xl bg-foreground/5 flex items-center justify-center">
-                  <span className="text-primary-foreground/30 text-sm">📊 Graphique revenus</span>
-                </div>
-                {[1, 2].map(i => (
-                  <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-foreground/5">
-                    <div className="w-8 h-8 rounded-full bg-primary/30" />
-                    <div className="flex-1">
-                      <div className="h-2.5 w-24 rounded bg-primary-foreground/20" />
-                      <div className="h-2 w-16 rounded bg-primary-foreground/10 mt-1" />
-                    </div>
-                    <span className="text-xs text-primary px-2 py-0.5 rounded-full bg-primary/20">Nouveau</span>
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-10 text-primary">
+                <Lock size={28} />
+                <h2 className="font-heading text-3xl font-black uppercase tracking-tighter">Données & Confidentialité</h2>
+              </div>
+              <div className="space-y-8 text-muted-foreground">
+                <p className="text-lg leading-relaxed">
+                  Votre business, vos données. Oresto Connect utilise une infrastructure **Firebase sécurisée** où chaque utilisateur possède son propre environnement cloisonné.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                  <div className="space-y-4">
+                    <h5 className="font-heading font-black text-xs uppercase tracking-widest text-foreground">Stockage Isolé</h5>
+                    <p className="text-xs">Vos conversations avec IZA et vos historiques de vente sont inaccessibles aux autres utilisateurs.</p>
                   </div>
-                ))}
-              </div>
-            </FadeIn>
-          </div>
-        </div>
-      </section>
-
-      {/* PRICING */}
-      <section id="abonnements" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <FadeIn className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground">Choisissez votre plan vendeur</h2>
-          <p className="mt-3 font-sub text-muted-foreground">Sans engagement. Changez de plan à tout moment.</p>
-        </FadeIn>
-        <div className="grid md:grid-cols-3 gap-6 items-end">
-          {/* STARTER */}
-          <FadeIn>
-            <div className="card-hover rounded-2xl border-2 border-foreground p-8 bg-card">
-              <h3 className="font-heading font-bold text-xl text-foreground">STARTER</h3>
-              <p className="font-heading text-3xl font-bold text-foreground mt-2">10 000 <span className="text-base font-normal text-muted-foreground">FCFA/mois</span></p>
-              <ul className="mt-6 space-y-3">
-                {starterFeatures.map((f, i) => (
-                  <li key={i} className="flex items-center gap-2 font-body text-sm">
-                    {f.included ? <Check size={16} className="text-primary flex-shrink-0" /> : <X size={16} className="text-muted-foreground flex-shrink-0" />}
-                    <span className={f.included ? "text-foreground" : "text-muted-foreground"}>{f.text}</span>
-                  </li>
-                ))}
-              </ul>
-              <Link to="/register" className="mt-8 block text-center px-6 py-3 rounded-full border-2 border-foreground text-foreground font-sub font-semibold btn-hover">
-                Commencer
-              </Link>
-            </div>
-          </FadeIn>
-
-          {/* PRO */}
-          <FadeIn>
-            <div className="card-hover rounded-2xl p-8 bg-oresto-black text-primary-foreground relative scale-105">
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-primary text-primary-foreground text-xs font-sub font-semibold">
-                LE PLUS POPULAIRE
-              </span>
-              <h3 className="font-heading font-bold text-xl">PRO</h3>
-              <p className="font-heading text-3xl font-bold mt-2">25 000 <span className="text-base font-normal text-primary-foreground/60">FCFA/mois</span></p>
-              <ul className="mt-6 space-y-3">
-                {proFeatures.map((f, i) => (
-                  <li key={i} className="flex items-center gap-2 font-body text-sm">
-                    <Check size={16} className="text-primary flex-shrink-0" />
-                    <span>{f.text}</span>
-                  </li>
-                ))}
-              </ul>
-              <Link to="/register" className="mt-8 block text-center px-6 py-3 rounded-full bg-primary text-primary-foreground font-sub font-semibold btn-hover">
-                Commencer
-              </Link>
-            </div>
-          </FadeIn>
-
-          {/* PREMIUM */}
-          <FadeIn>
-            <div className="card-hover rounded-2xl border border-border p-8 bg-card border-t-4 border-t-primary">
-              <h3 className="font-heading font-bold text-xl text-foreground">PREMIUM</h3>
-              <p className="font-heading text-3xl font-bold text-foreground mt-2">50 000 <span className="text-base font-normal text-muted-foreground">FCFA/mois</span></p>
-              <ul className="mt-6 space-y-3">
-                {premiumFeatures.map((f, i) => (
-                  <li key={i} className="flex items-center gap-2 font-body text-sm">
-                    <Check size={16} className="text-primary flex-shrink-0" />
-                    <span className="text-foreground">{f.text}</span>
-                  </li>
-                ))}
-              </ul>
-              <Link to="/register" className="mt-8 block text-center px-6 py-3 rounded-full border-2 border-foreground text-foreground font-sub font-semibold btn-hover">
-                Commencer
-              </Link>
-            </div>
-          </FadeIn>
-        </div>
-      </section>
-
-      {/* TESTIMONIALS */}
-      <section className="bg-muted py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <FadeIn className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground">Ils font confiance à Oresto</h2>
-          </FadeIn>
-          <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map((t, i) => (
-              <FadeIn key={i}>
-                <div className="card-hover rounded-2xl bg-card p-6 shadow-md">
-                  <div className="text-primary mb-3">⭐⭐⭐⭐⭐</div>
-                  <p className="font-body italic text-foreground mb-6">"{t.quote}"</p>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-heading font-bold text-sm">
-                      {t.initials}
-                    </div>
-                    <div>
-                      <p className="font-sub font-semibold text-sm text-foreground">{t.name}</p>
-                      <p className="font-body text-xs text-muted-foreground">{t.role}, {t.city}</p>
-                    </div>
+                  <div className="space-y-4">
+                    <h5 className="font-heading font-black text-xs uppercase tracking-widest text-foreground">Transparence Totale</h5>
+                    <p className="text-xs">Nous ne vendons jamais vos données. Nous fournissons l'outil, vous possédez le résultat.</p>
                   </div>
                 </div>
-              </FadeIn>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* COUNTRIES */}
-      <section id="pays" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <FadeIn className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground">Déjà présent, bientôt partout</h2>
-        </FadeIn>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {countries.map((c, i) => (
-            <FadeIn key={i}>
-              <div className="card-hover rounded-2xl bg-card border border-border p-6 text-center">
-                <span className="text-4xl mb-3 block">{c.flag}</span>
-                <h3 className="font-heading font-semibold text-foreground">{c.name}</h3>
-                <span className={`inline-block mt-2 px-3 py-1 rounded-full text-xs font-sub font-medium ${c.color}`}>{c.status}</span>
+                <p className="text-sm italic pt-8 border-t border-gray-100">
+                  En utilisant Oresto Connect, vous acceptez notre engagement sur la protection de la vie privée et la sécurité de vos informations opérationnelles.
+                </p>
               </div>
-            </FadeIn>
-          ))}
+            </div>
+          </Reveal>
         </div>
-        <p className="text-center mt-8 font-sub text-muted-foreground">Et toute l'Afrique de l'Ouest dans notre viseur 🌍</p>
       </section>
 
-      {/* FINAL CTA */}
-      <section className="bg-oresto-black py-20">
-        <div className="max-w-3xl mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-heading font-bold text-primary-foreground">Rejoignez la révolution du commerce local.</h2>
-          <p className="mt-4 font-sub text-primary-foreground/60">Des milliers de commerçants et clients vous attendent.</p>
-          <div className="flex flex-wrap justify-center gap-4 mt-8">
-            <Link to="/register" className="px-6 py-3 rounded-full bg-primary text-primary-foreground font-sub font-semibold btn-hover">
-              📱 Télécharger l'app
+      {/* ─── Footer / Final CTA ─── */}
+      <footer className="py-32 px-6 bg-black text-white">
+        <div className="max-w-7xl mx-auto text-center">
+          <Reveal delay={100}>
+            <h2 className="font-heading text-5xl md:text-8xl font-black leading-none uppercase tracking-tighter mb-12">
+              Prêt à dominer <br/>
+              <span className="text-primary italic">le digital ?</span>
+            </h2>
+          </Reveal>
+          <Reveal delay={200} className="mb-20">
+            <Link to="/register" className="inline-flex items-center gap-4 px-12 py-6 bg-white text-black rounded-[28px] font-sub text-sm font-black uppercase tracking-widest hover:scale-105 transition-all shadow-2xl">
+              Lancer mon App Web <ChevronRight size={20} />
             </Link>
-            <Link to="/register" className="px-6 py-3 rounded-full border-2 border-primary-foreground/30 text-primary-foreground font-sub font-semibold btn-hover hover:border-primary-foreground">
-              🏪 Ouvrir ma boutique
-            </Link>
+          </Reveal>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 text-left pt-20 border-t border-white/10">
+            <div className="space-y-6">
+              <div className="flex items-center gap-2">
+                <Zap size={20} className="text-primary" />
+                <span className="font-heading text-lg font-black tracking-tighter uppercase">Oresto</span>
+              </div>
+              <p className="text-white/40 text-xs leading-relaxed max-w-xs">
+                La première plateforme de Site Factory pilotée par IA pour la restauration et le commerce en Afrique de l'Ouest.
+              </p>
+            </div>
+            <div>
+              <h5 className="font-sub text-[10px] font-black uppercase tracking-widest text-white mb-6">Plateforme</h5>
+              <ul className="space-y-4 text-white/40 text-xs">
+                <li><Link to="/login" className="hover:text-primary transition-colors">Connexion</Link></li>
+                <li><Link to="/register" className="hover:text-primary transition-colors">Inscription</Link></li>
+                <li><a href="#iza" className="hover:text-primary transition-colors">Fonctionnalités IA</a></li>
+              </ul>
+            </div>
+            <div>
+              <h5 className="font-sub text-[10px] font-black uppercase tracking-widest text-white mb-6">Légal</h5>
+              <ul className="space-y-4 text-white/40 text-xs">
+                <li><a href="#confidentiality" className="hover:text-primary transition-colors">Confidentialité</a></li>
+                <li><a href="#" className="hover:text-primary transition-colors">Conditions Générales</a></li>
+                <li><a href="#" className="hover:text-primary transition-colors">Support</a></li>
+              </ul>
+            </div>
+            <div className="text-right flex flex-col justify-between">
+              <p className="font-sub text-[10px] font-black uppercase tracking-widest text-white">© 2026 Oresto Connect</p>
+              <div className="flex justify-end gap-4 mt-6">
+                 <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white hover:text-primary transition-colors cursor-pointer"><Store size={14} /></div>
+                 <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white hover:text-primary transition-colors cursor-pointer"><Bot size={14} /></div>
+              </div>
+            </div>
           </div>
         </div>
-      </section>
+      </footer>
 
-      <Footer />
     </div>
   );
 }

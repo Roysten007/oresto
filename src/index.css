@@ -133,3 +133,42 @@
 .btn-hover:hover {
   transform: scale(1.03);
 }
+
+/* ── Mobile optimizations ── */
+html {
+  scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Hide scrollbars but keep scrollability */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Better touch handling */
+* {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent text size changes on orientation change */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Smooth card press effect */
+.press-effect {
+  @apply transition-transform active:scale-95;
+}
+
+/* Gradient text utility */
+.text-gradient {
+  background: linear-gradient(135deg, hsl(25, 100%, 50%), hsl(30, 100%, 60%));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}

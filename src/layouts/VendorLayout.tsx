@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { LayoutDashboard, Package, ShoppingCart, Truck, BarChart3, CreditCard, Settings, Eye, LogOut, Menu, X } from "lucide-react";
+import { LayoutDashboard, UtensilsCrossed, ShoppingCart, Truck, BarChart3, CreditCard, Settings, Eye, LogOut, Menu, X, Globe } from "lucide-react";
 
 const navItems = [
   { path: "/vendor/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { path: "/vendor/catalogue", icon: Package, label: "Catalogue" },
+  { path: "/vendor/site", icon: Globe, label: "Mon Site" },
+  { path: "/vendor/catalogue", icon: UtensilsCrossed, label: "Mon Menu" },
   { path: "/vendor/orders", icon: ShoppingCart, label: "Commandes" },
   { path: "/vendor/delivery", icon: Truck, label: "Livraison" },
   { path: "/vendor/stats", icon: BarChart3, label: "Statistiques" },

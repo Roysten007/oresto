@@ -1,17 +1,28 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
-import { mockUsers, mockVendors, User, VendorProfile } from "@/data/mockData";
+import { User, VendorProfile } from "@/data/mockData";
+import { auth, db } from "@/lib/firebase";
+import { 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  signOut,
+  onAuthStateChanged,
+  signInAnonymously
+} from "firebase/auth";
+import { ref, get, set, child } from "firebase/database";
 
 interface AuthState {
   user: User | null;
   role: "client" | "vendor" | null;
   vendorProfile: VendorProfile | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
 }
 
 interface AuthContextType extends AuthState {
-  login: (email: string, password: string) => { success: boolean; error?: string };
-  logout: () => void;
-  register: (data: Partial<User> & { password: string }) => { success: boolean; error?: string };
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string; role?: string }>;
+  loginAsGuest: () => Promise<{ success: boolean; error?: string }>;
+  logout: () => Promise<void>;
+  register: (data: any) => Promise<{ success: boolean; error?: string; role?: string; uid?: string }>;
   failedAttempts: number;
   lockedUntil: number | null;
   sessionWarning: boolean;
@@ -21,28 +32,100 @@ interface AuthContextType extends AuthState {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 const SESSION_DURATION = 30 * 60 * 1000; // 30 min
-const WARNING_BEFORE = 5 * 60 * 1000; // 5 min before
+const WARNING_BEFORE = 5 * 60 * 1000;
 const LOCKOUT_DURATION = 15 * 60 * 1000;
 const MAX_ATTEMPTS = 3;
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<AuthState>({ user: null, role: null, vendorProfile: null, isAuthenticated: false });
+  const [state, setState] = useState<AuthState>({ 
+    user: null, role: null, vendorProfile: null, isAuthenticated: false, isLoading: true 
+  });
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
   const [lastActivity, setLastActivity] = useState(Date.now());
   const [sessionWarning, setSessionWarning] = useState(false);
 
-  // Restore session
+  // Écouteur global de Firebase Auth
   useEffect(() => {
-    const token = localStorage.getItem("oresto_token");
-    const userData = localStorage.getItem("oresto_user");
-    if (token && userData) {
-      try {
-        const user = JSON.parse(userData) as User;
-        const vendor = user.vendorId ? mockVendors.find(v => v.id === user.vendorId) || null : null;
-        setState({ user, role: user.role, vendorProfile: vendor, isAuthenticated: true });
-      } catch { localStorage.removeItem("oresto_token"); localStorage.removeItem("oresto_user"); }
+    if (!auth) {
+      setState(s => ({ ...s, isLoading: false }));
+      return;
     }
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        if (!db) {
+          setState(s => ({ ...s, isLoading: false }));
+          return;
+        }
+        try {
+          const userSnapshot = await get(child(ref(db), `users/${firebaseUser.uid}`));
+
+          let userData: User;
+
+          if (userSnapshot.exists()) {
+            userData = userSnapshot.val() as User;
+          } else {
+            // L'utilisateur existe dans Auth mais pas en DB → créer une entrée minimale
+            // (peut arriver si l'inscription a partiellement échoué)
+            userData = {
+              id: firebaseUser.uid,
+              name: firebaseUser.displayName || firebaseUser.email?.split("@")[0] || "Utilisateur",
+              firstName: firebaseUser.displayName?.split(" ")[0] || "",
+              email: firebaseUser.email || "",
+              password: "",
+              role: "client",
+              phone: "",
+              city: "",
+              neighborhood: "",
+            };
+            await set(ref(db, `users/${firebaseUser.uid}`), userData);
+          }
+
+          let vendorData: VendorProfile | null = null;
+          if (userData.vendorId) {
+            const vendorSnapshot = await get(child(ref(db), `vendors/${userData.vendorId}`));
+            if (vendorSnapshot.exists()) {
+              vendorData = vendorSnapshot.val() as VendorProfile;
+            }
+          }
+
+          setState({
+            user: userData,
+            role: userData.role,
+            vendorProfile: vendorData,
+            isAuthenticated: true,
+            isLoading: false
+          });
+          setLastActivity(Date.now());
+        } catch (error) {
+          console.error("Erreur lecture base de données:", error);
+          // Ne pas déconnecter l'utilisateur en cas d'erreur réseau RTDB
+          // On le garde connecté avec les infos minimales de Firebase Auth
+          const fallbackUser: User = {
+            id: firebaseUser.uid,
+            name: firebaseUser.email?.split("@")[0] || "Utilisateur",
+            firstName: "",
+            email: firebaseUser.email || "",
+            password: "",
+            role: "client",
+            phone: "",
+            city: "",
+            neighborhood: "",
+          };
+          setState({
+            user: fallbackUser,
+            role: "client",
+            vendorProfile: null,
+            isAuthenticated: true,
+            isLoading: false
+          });
+        }
+      } else {
+        setState({ user: null, role: null, vendorProfile: null, isAuthenticated: false, isLoading: false });
+      }
+    });
+
+    return () => unsubscribe();
   }, []);
 
   // Activity tracking
@@ -76,59 +159,133 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [lockedUntil]);
 
-  const login = useCallback((email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string) => {
+    if (!auth || !db) return { success: false, error: "Firebase n'est pas configuré" };
     if (lockedUntil && Date.now() < lockedUntil) {
       return { success: false, error: "Compte bloqué. Réessayez dans 15 minutes." };
     }
-    const user = mockUsers.find(u => u.email === email && u.password === password);
-    if (!user) {
+    
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+
+      // Fetch the role quickly to allow navigation
+      const userDoc = await get(child(ref(db), `users/${userCredential.user.uid}`));
+      const userData = userDoc.exists() ? userDoc.val() : null;
+
+      const role = userData ? userData.role : "client";
+
+      setFailedAttempts(0);
+      setLastActivity(Date.now());
+      return { success: true, role };
+    } catch (error: any) {
       const newAttempts = failedAttempts + 1;
       setFailedAttempts(newAttempts);
       if (newAttempts >= MAX_ATTEMPTS) {
         setLockedUntil(Date.now() + LOCKOUT_DURATION);
         return { success: false, error: "Compte bloqué pendant 15 minutes." };
       }
-      return { success: false, error: "Identifiants incorrects." };
+      return { success: false, error: "Email ou mot de passe incorrect." };
     }
-    const vendor = user.vendorId ? mockVendors.find(v => v.id === user.vendorId) || null : null;
-    const token = btoa(JSON.stringify({ userId: user.id, exp: Date.now() + SESSION_DURATION }));
-    localStorage.setItem("oresto_token", token);
-    localStorage.setItem("oresto_user", JSON.stringify(user));
-    setState({ user, role: user.role, vendorProfile: vendor, isAuthenticated: true });
-    setFailedAttempts(0);
-    setLastActivity(Date.now());
-    return { success: true };
   }, [failedAttempts, lockedUntil]);
 
-  const logout = useCallback(() => {
-    localStorage.removeItem("oresto_token");
-    localStorage.removeItem("oresto_user");
-    setState({ user: null, role: null, vendorProfile: null, isAuthenticated: false });
+  const loginAsGuest = useCallback(async () => {
+    if (!auth) return { success: false, error: "Auth non initialisé" };
+    try {
+      const cred = await signInAnonymously(auth);
+      if (db) {
+        // Enregistrer le profil invité en base
+        await set(child(ref(db), `users/${cred.user.uid}`), {
+          id: cred.user.uid,
+          role: "client",
+          name: "Invité",
+          firstName: "Client",
+          email: "invite@oresto.app",
+          isGuest: true,
+          created_at: new Date().toISOString()
+        });
+      }
+      return { success: true };
+    } catch (error: any) {
+      console.error("Erreur connexion invité:", error);
+      return { success: false, error: "Impossible de continuer sans compte." };
+    }
+  }, []);
+
+  const logout = useCallback(async () => {
+    if (auth) await signOut(auth);
     setSessionWarning(false);
   }, []);
 
-  const register = useCallback((data: Partial<User> & { password: string }) => {
-    const exists = mockUsers.find(u => u.email === data.email);
-    if (exists) return { success: false, error: "Cet email est déjà utilisé." };
-    const newUser: User = {
-      id: `u${Date.now()}`,
-      name: `${data.firstName || ""} ${data.name || ""}`.trim(),
-      firstName: data.firstName || "",
-      email: data.email || "",
-      password: data.password,
-      role: data.role || "client",
-      phone: data.phone,
-      vendorId: data.vendorId,
-      city: data.city,
-      neighborhood: data.neighborhood,
-    };
-    mockUsers.push(newUser);
-    const token = btoa(JSON.stringify({ userId: newUser.id, exp: Date.now() + SESSION_DURATION }));
-    localStorage.setItem("oresto_token", token);
-    localStorage.setItem("oresto_user", JSON.stringify(newUser));
-    setState({ user: newUser, role: newUser.role, vendorProfile: null, isAuthenticated: true });
-    setLastActivity(Date.now());
-    return { success: true };
+  const register = useCallback(async (data: any) => {
+    if (!auth || !db) return { success: false, error: "Firebase n'est pas configuré" };
+    
+    try {
+      // 1. Créer le compte Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(auth, data.email!, data.password);
+      const uid = userCredential.user.uid;
+
+      // 2. Préparer les données
+      let vendorId = data.vendorId;
+      
+      const newUser: User = {
+        id: uid,
+        name: `${data.firstName || ""} ${data.name || ""}`.trim(),
+        firstName: data.firstName || "",
+        email: data.email || "",
+        password: "", // Ne jamais stocker le mot de passe en clair dans Firestore !
+        role: data.role || "client",
+        phone: data.phone || "",
+        verificationMethod: data.verificationMethod || "email",
+        phoneVerified: false,
+        vendorId: vendorId,
+        city: data.city || "",
+        neighborhood: data.neighborhood || "",
+      };
+
+      // 3. Sauvegarder l'utilisateur dans Realtime Database
+      await set(ref(db, `users/${uid}`), newUser);
+
+      // 4. Si c'est un vendeur, on crée aussi un profil vendeur vide/basique
+      if (data.role === "vendor") {
+        vendorId = `v_${uid}`;
+        newUser.vendorId = vendorId;
+        // Met à jour l'utilisateur pour inclure son vendorId
+        await set(ref(db, `users/${uid}/vendorId`), vendorId);
+
+        const newVendorProfile: VendorProfile = {
+          id: vendorId,
+          userId: uid,
+          name: data.shopName || `${data.firstName} Store`,
+          description: "Nouvelle boutique",
+          category: data.category || "Général",
+          rating: 0,
+          reviewCount: 0,
+          totalSales: 0,
+          totalOrders: 0,
+          revenue: 0,
+          phone: data.shopPhone || data.phone || "",
+          whatsapp: data.shopPhone || data.phone || "",
+          city: data.city || "",
+          neighborhood: data.neighborhood || "",
+          status: "pending", // L'admin devra valider
+          joinedDate: new Date().toISOString().split("T")[0],
+          plan: "starter",
+          verified: false,
+          open: false,
+          deliveryTime: "30-45 min"
+        };
+        await set(ref(db, `vendors/${vendorId}`), newVendorProfile);
+      }
+
+      setLastActivity(Date.now());
+      return { success: true, role: newUser.role, uid };
+    } catch (error: any) {
+      console.error(error);
+      if (error.code === 'auth/email-already-in-use') {
+        return { success: false, error: "Cet email est déjà utilisé." };
+      }
+      return { success: false, error: "Une erreur est survenue lors de l'inscription." };
+    }
   }, []);
 
   const dismissWarning = useCallback(() => {
@@ -137,7 +294,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ ...state, login, logout, register, failedAttempts, lockedUntil, sessionWarning, dismissWarning }}>
+    <AuthContext.Provider value={{ ...state, login,
+      loginAsGuest,
+      logout,
+      register,
+      failedAttempts, lockedUntil, sessionWarning, dismissWarning }}>
       {children}
     </AuthContext.Provider>
   );
@@ -148,3 +309,4 @@ export function useAuth() {
   if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;
 }
+

@@ -1,11 +1,17 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import MapComponent from "@/components/MapComponent";
 
 const tabs = ["🏪 Ma Boutique", "📍 Localisation", "⏰ Horaires", "🚚 Livraison", "💳 Paiements", "🎯 Offres", "🔐 Sécurité"];
 
 export default function VendorSettings() {
   const { vendorProfile } = useAuth();
   const [activeTab, setActiveTab] = useState(0);
+  const [markerPos, setMarkerPos] = useState({ lat: 6.3654, lng: 2.4183 });
+
+  const handleMapClick = (lat: number, lng: number) => {
+    setMarkerPos({ lat, lng });
+  };
 
   return (
     <div className="space-y-6">
@@ -51,8 +57,19 @@ export default function VendorSettings() {
                 className="w-full px-4 py-3 rounded-2xl border border-border bg-background font-body focus:ring-2 focus:ring-primary outline-none" />
             </div>
           ))}
-          <div className="h-40 rounded-2xl bg-muted flex items-center justify-center text-muted-foreground font-body">📍 Carte</div>
-          <button className="px-6 py-3 rounded-full bg-primary text-primary-foreground font-sub font-semibold btn-hover">Sauvegarder la localisation</button>
+          <div className="space-y-1">
+            <label className="font-sub text-sm font-medium text-foreground block">Position sur la carte</label>
+            <p className="text-xs text-muted-foreground mb-2 italic">Cliquez sur la carte pour placer votre boutique précisément</p>
+            <div className="h-60 rounded-2xl overflow-hidden border border-border shadow-sm">
+              <MapComponent 
+                center={markerPos}
+                zoom={14}
+                markers={[{ ...markerPos, title: "Ma Boutique" }]}
+                onMapClick={handleMapClick}
+              />
+            </div>
+          </div>
+          <button className="px-6 py-3 rounded-full bg-primary text-primary-foreground font-sub font-semibold btn-hover w-full md:w-auto">Sauvegarder la localisation</button>
         </div>
       )}
 

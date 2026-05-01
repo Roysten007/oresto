@@ -14,11 +14,11 @@ interface AdminContextType extends AdminState {
 
 const AdminContext = createContext<AdminContextType | null>(null);
 
-const ADMIN_EMAIL = "admin@oresto.com";
-const ADMIN_PASSWORD = "oresto2025!";
+const ADMIN_EMAIL = "roystendesign@gmail.com";
+const ADMIN_PASSWORD = "creativecode@gmail.com";
 const ADMIN_SESSION = 15 * 60 * 1000;
 const LOCKOUT_DURATION = 15 * 60 * 1000;
-const MAX_ATTEMPTS = 3;
+const MAX_ATTEMPTS = 5;
 
 export function AdminProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AdminState>({ isAdminAuthenticated: false, adminEmail: null });
@@ -62,7 +62,9 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     if (lockedUntil && Date.now() < lockedUntil) {
       return { success: false, error: "Compte bloqué. Réessayez dans 15 minutes." };
     }
-    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+    const emailMatch = email.trim().toLowerCase() === ADMIN_EMAIL.trim().toLowerCase();
+    const pwMatch = password === ADMIN_PASSWORD;
+    if (emailMatch && pwMatch) {
       const token = btoa(JSON.stringify({ email, exp: Date.now() + ADMIN_SESSION }));
       localStorage.setItem("oresto_admin_token", token);
       setState({ isAdminAuthenticated: true, adminEmail: email });
