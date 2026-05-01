@@ -8,7 +8,7 @@ import {
   onAuthStateChanged,
   signInAnonymously
 } from "firebase/auth";
-import { ref, get, set, child } from "firebase/database";
+import { ref, get, set, child, onValue } from "firebase/database";
 
 interface AuthState {
   user: User | null;
