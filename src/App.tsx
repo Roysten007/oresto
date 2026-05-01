@@ -31,6 +31,10 @@ import Favorites from "./pages/app/Favorites";
 import Profile from "./pages/app/Profile";
 import Notifications from "./pages/app/Notifications";
 import Messages from "./pages/app/Messages";
+import Addresses from "./pages/app/Addresses";
+import Payments from "./pages/app/Payments";
+import HelpCenter from "./pages/app/HelpCenter";
+import Privacy from "./pages/app/Privacy";
 
 import VendorLayout from "./layouts/VendorLayout";
 import VendorDashboard from "./pages/vendor/VendorDashboard";
@@ -95,6 +99,10 @@ const App = () => (
                       <Route path="profile" element={<Profile />} />
                       <Route path="notifications" element={<Notifications />} />
                       <Route path="messages" element={<Messages />} />
+                      <Route path="addresses" element={<Addresses />} />
+                      <Route path="payments" element={<Payments />} />
+                      <Route path="help" element={<HelpCenter />} />
+                      <Route path="privacy" element={<Privacy />} />
                     </Route>
 
                     {/* Vendor routes */}

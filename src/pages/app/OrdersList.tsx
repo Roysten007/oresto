@@ -106,7 +106,7 @@ export default function OrdersList() {
                         <StatusIcon size={24} />
                       </div>
                       <div className="space-y-0.5">
-                        <h3 className="font-black text-sm uppercase leading-tight">{order.vendorName}</h3>
+                        <p className="font-black text-xs uppercase tracking-widest truncate">{order.vendorName || "Restaurant Inconnu"}</p>
                         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{new Date(order.date).toLocaleDateString()}</p>
                       </div>
                     </div>

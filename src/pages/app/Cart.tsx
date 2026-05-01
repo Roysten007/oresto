@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { db } from "@/lib/firebase";
-import { ref, get } from "firebase/database";
+import { ref, get, child } from "firebase/database";
 
 const PAYMENT_METHODS = [
   { id: "momo_mtn", label: "MTN MoMo", icon: "📱", color: "bg-yellow-400" },
@@ -113,11 +113,21 @@ export default function Cart() {
 
     setIsProcessing(true);
 
+    let actualVendorName = "Restaurant";
+    if (restaurantId && db) {
+      try {
+        const snap = await get(child(ref(db), `vendors/${restaurantId}/name`));
+        if (snap.exists()) {
+          actualVendorName = snap.val();
+        }
+      } catch (e) {}
+    }
+
     const orderData = {
       clientId: user.id,
       clientName: `${user.firstName || ""} ${user.name || ""}`.trim(),
       vendorId: restaurantId || "v1",
-      vendorName: "Restaurant",
+      vendorName: actualVendorName,
       items: items.map(item => ({
         name: item.product.name,
         qty: item.quantity,

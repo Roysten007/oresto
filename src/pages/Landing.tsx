@@ -51,7 +51,7 @@ function Reveal({ children, className = "", delay = 0 }: { children: React.React
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-white text-foreground selection:bg-primary selection:text-white">
+    <div className="min-h-screen w-full overflow-x-hidden bg-white text-foreground selection:bg-primary selection:text-white">
       
       {/* ─── Navigation ─── */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100">
@@ -82,7 +82,7 @@ export default function Landing() {
           </Reveal>
           
           <Reveal delay={200}>
-            <h1 className="font-heading text-5xl md:text-8xl font-black leading-[0.9] tracking-tighter mb-8 uppercase">
+            <h1 className="font-heading text-4xl sm:text-5xl md:text-8xl font-black leading-[0.9] tracking-tighter mb-8 uppercase break-words">
               Ne créez pas un site. <br/>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-600">Lancez un empire.</span>
             </h1>
@@ -223,6 +223,35 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      {/* ─── How it Works ─── */}
+      <section className="py-32 px-6 bg-gray-50/50">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-24">
+            <Reveal delay={100} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 border border-primary/10 text-primary font-sub text-[10px] font-black uppercase tracking-widest mb-4">
+              Simple & Rapide
+            </Reveal>
+            <h2 className="font-heading text-4xl md:text-6xl font-black uppercase tracking-tighter">Comment ça marche ?</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
+            <div className="hidden md:block absolute top-12 left-1/6 right-1/6 h-0.5 bg-gradient-to-r from-transparent via-gray-200 to-transparent -z-10" />
+            {[
+              { step: "01", title: "Inscription", text: "Créez votre compte vendeur en renseignant les informations de base de votre restaurant." },
+              { step: "02", title: "Configuration", text: "Ajoutez vos plats, définissez vos zones de livraison et choisissez un thème visuel." },
+              { step: "03", title: "Lancement", text: "Votre site est en ligne. Oresto Connect gère vos commandes, IZA gère vos statistiques." }
+            ].map((s, i) => (
+              <Reveal key={i} delay={i * 200} className="text-center bg-white p-10 rounded-[40px] shadow-sm border border-gray-100 relative group hover:-translate-y-2 transition-transform">
+                <div className="w-20 h-20 mx-auto bg-black text-white rounded-[24px] flex items-center justify-center font-heading text-3xl font-black shadow-2xl mb-8 group-hover:bg-primary transition-colors">
+                  {s.step}
+                </div>
+                <h3 className="font-heading text-2xl font-black uppercase tracking-tighter mb-4">{s.title}</h3>
+                <p className="text-muted-foreground leading-relaxed text-sm">{s.text}</p>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
 
       {/* ─── Confidentiality & Data ─── */}
       <section id="confidentiality" className="py-32 px-6 bg-gray-50">

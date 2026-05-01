@@ -13,9 +13,13 @@ import {
   Star,
   Bell,
   HelpCircle,
-  Edit2
+  Edit2,
+  CheckCircle2
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
+import { db } from "@/lib/firebase";
+import { ref, update } from "firebase/database";
 
 export default function Profile() {
   const { user, logout } = useAuth();
@@ -28,6 +32,27 @@ export default function Profile() {
     phone: user?.phone || "+229 00 00 00 00",
     email: user?.email || "contact@oresto.bj",
   });
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSaveProfile = async () => {
+    if (!user || !db) return;
+    setIsSaving(true);
+    try {
+      await update(ref(db, `users/${user.id}`), {
+        firstName: form.firstName,
+        name: form.name,
+        phone: form.phone,
+        email: form.email,
+      });
+      toast.success("Profil mis à jour !");
+      setIsEditing(false);
+    } catch (e) {
+      toast.error("Erreur de sauvegarde");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -43,13 +68,28 @@ export default function Profile() {
                </div>
             </div>
           </div>
-          <button className="absolute bottom-0 right-0 w-10 h-10 rounded-2xl bg-black text-white flex items-center justify-center shadow-xl border-4 border-white active:scale-90 transition-all">
-            <Edit2 size={16} />
+          <button 
+            onClick={() => isEditing ? handleSaveProfile() : setIsEditing(true)}
+            className="absolute bottom-0 right-0 w-10 h-10 rounded-2xl bg-black text-white flex items-center justify-center shadow-xl border-4 border-white active:scale-90 transition-all"
+            disabled={isSaving}
+          >
+            {isSaving ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : (isEditing ? <CheckCircle2 size={16} /> : <Edit2 size={16} />)}
           </button>
         </div>
-        <div className="space-y-1">
-          <h1 className="text-3xl font-black uppercase tracking-tighter leading-none">{form.firstName} {form.name}</h1>
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{form.phone}</p>
+        <div className="space-y-1 w-full max-w-xs mx-auto">
+          {isEditing ? (
+            <div className="space-y-3">
+              <input type="text" value={form.firstName} onChange={e => setForm({...form, firstName: e.target.value})} className="w-full text-center py-2 border-b-2 border-primary outline-none font-black text-xl" placeholder="Prénom" />
+              <input type="text" value={form.name} onChange={e => setForm({...form, name: e.target.value})} className="w-full text-center py-2 border-b-2 border-primary outline-none font-black text-xl uppercase" placeholder="Nom" />
+              <input type="text" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} className="w-full text-center py-2 border-b-2 border-primary outline-none font-bold text-sm text-gray-500" placeholder="Téléphone" />
+              <input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} className="w-full text-center py-2 border-b-2 border-primary outline-none font-bold text-sm text-gray-500" placeholder="Email" />
+            </div>
+          ) : (
+            <>
+              <h1 className="text-3xl font-black uppercase tracking-tighter leading-none">{form.firstName} {form.name}</h1>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{form.phone}</p>
+            </>
+          )}
         </div>
       </div>
 
@@ -105,14 +145,15 @@ export default function Profile() {
         <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 px-4">Paramètres & Aide</h2>
         <div className="space-y-2">
           {[
-            { icon: Bell, label: "Notifications", color: "text-blue-500", bg: "bg-blue-50", badge: unreadCount },
-            { icon: MapPin, label: "Mes Adresses", color: "text-emerald-500", bg: "bg-emerald-50" },
-            { icon: CreditCard, label: "Moyens de Paiement", color: "text-purple-500", bg: "bg-purple-50" },
-            { icon: HelpCircle, label: "Centre d'Aide", color: "text-orange-500", bg: "bg-orange-50" },
-            { icon: Settings, label: "Confidentialité", color: "text-gray-500", bg: "bg-gray-100" },
+            { icon: Bell, label: "Notifications", color: "text-blue-500", bg: "bg-blue-50", badge: unreadCount, path: "/app/notifications" },
+            { icon: MapPin, label: "Mes Adresses", color: "text-emerald-500", bg: "bg-emerald-50", path: "/app/addresses" },
+            { icon: CreditCard, label: "Moyens de Paiement", color: "text-purple-500", bg: "bg-purple-50", path: "/app/payments" },
+            { icon: HelpCircle, label: "Centre d'Aide", color: "text-orange-500", bg: "bg-orange-50", path: "/app/help" },
+            { icon: Settings, label: "Confidentialité", color: "text-gray-500", bg: "bg-gray-100", path: "/app/privacy" },
           ].map((item, i) => (
             <button 
               key={i}
+              onClick={() => item.path ? navigate(item.path) : (item.action && item.action())}
               className="w-full p-5 rounded-[32px] bg-white border border-gray-50 flex items-center justify-between group active:bg-gray-50 transition-all"
             >
               <div className="flex items-center gap-4">
