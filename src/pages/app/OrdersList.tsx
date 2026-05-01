@@ -1,7 +1,26 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useOrders } from "@/contexts/OrderContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { db } from "@/lib/firebase";
+import { ref, get, child } from "firebase/database";
+
+function VendorNameDisplay({ vendorId, fallbackName }: { vendorId: string, fallbackName: string }) {
+  const [name, setName] = useState(fallbackName || "Restaurant Inconnu");
+
+  useEffect(() => {
+    if (!vendorId || !db) return;
+    if (fallbackName && fallbackName !== "Restaurant" && fallbackName !== "Restaurant Inconnu") return;
+    
+    get(child(ref(db), `vendors/${vendorId}/name`)).then(snap => {
+      if (snap.exists()) {
+        setName(snap.val());
+      }
+    }).catch(() => {});
+  }, [vendorId, fallbackName]);
+
+  return <>{name}</>;
+}
 import { 
   ShoppingBag, 
   Clock, 
@@ -27,6 +46,7 @@ export default function OrdersList() {
   const { orders, isLoading } = useOrders();
   const navigate = useNavigate();
   const [filter, setFilter] = useState("all");
+  const [timeFilter, setTimeFilter] = useState("all");
   
   if (isLoading) return (
     <div className="min-h-screen flex items-center justify-center">
@@ -34,9 +54,23 @@ export default function OrdersList() {
     </div>
   );
 
-  const filtered = filter === "all" ? orders : orders.filter(o => {
-    if (filter === "active") return ["pending", "preparing", "delivering"].includes(o.status);
-    return o.status === filter;
+  const filtered = orders.filter(o => {
+    // Status
+    if (filter === "active" && !["pending", "preparing", "delivering"].includes(o.status)) return false;
+    if (filter !== "all" && filter !== "active" && o.status !== filter) return false;
+
+    // Time
+    if (timeFilter !== "all" && o.createdAt) {
+      const orderDate = new Date(o.createdAt);
+      const now = new Date();
+      const diffTime = Math.abs(now.getTime() - orderDate.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (timeFilter === "7days" && diffDays > 7) return false;
+      if (timeFilter === "1month" && diffDays > 30) return false;
+      if (timeFilter === "3months" && diffDays > 90) return false;
+    }
+    return true;
   });
 
   return (
@@ -47,23 +81,46 @@ export default function OrdersList() {
       </div>
 
       {/* Filters */}
-      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide px-2">
-        {[
-          { key: "all", label: "Toutes" },
-          { key: "active", label: "En cours" },
-          { key: "delivered", label: "Livrées" },
-          { key: "cancelled", label: "Annulées" }
-        ].map(f => (
-          <button 
-            key={f.key} 
-            onClick={() => setFilter(f.key)}
-            className={`px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all ${
-              filter === f.key ? "bg-black text-white shadow-xl" : "bg-white border border-gray-100 text-gray-400 hover:border-gray-200"
-            }`}
-          >
-            {f.label}
-          </button>
-        ))}
+      <div className="flex flex-col gap-4 px-2">
+        {/* Status Filters */}
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+          {[
+            { key: "all", label: "Toutes" },
+            { key: "active", label: "En cours" },
+            { key: "delivered", label: "Livrées" },
+            { key: "cancelled", label: "Annulées" }
+          ].map(f => (
+            <button 
+              key={f.key} 
+              onClick={() => setFilter(f.key)}
+              className={`px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all ${
+                filter === f.key ? "bg-black text-white shadow-xl" : "bg-white border border-gray-100 text-gray-400 hover:border-gray-200"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Time Filters */}
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+          {[
+            { key: "all", label: "Tout le temps" },
+            { key: "7days", label: "7 derniers jours" },
+            { key: "1month", label: "Mois en cours" },
+            { key: "3months", label: "3 derniers mois" }
+          ].map(f => (
+            <button 
+              key={f.key} 
+              onClick={() => setTimeFilter(f.key)}
+              className={`px-4 py-2 rounded-full text-[9px] font-bold uppercase tracking-widest whitespace-nowrap transition-all ${
+                timeFilter === f.key ? "bg-primary text-white" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="space-y-6 px-2">
@@ -105,8 +162,10 @@ export default function OrdersList() {
                       <div className={`w-12 h-12 rounded-2xl ${config.bg} ${config.color} flex items-center justify-center`}>
                         <StatusIcon size={24} />
                       </div>
-                      <div className="space-y-0.5">
-                        <p className="font-black text-xs uppercase tracking-widest truncate">{order.vendorName || "Restaurant Inconnu"}</p>
+                      <div className="space-y-0.5 min-w-0">
+                        <p className="font-black text-xs uppercase tracking-widest truncate">
+                          <VendorNameDisplay vendorId={order.vendorId} fallbackName={order.vendorName} />
+                        </p>
                         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{new Date(order.date).toLocaleDateString()}</p>
                       </div>
                     </div>

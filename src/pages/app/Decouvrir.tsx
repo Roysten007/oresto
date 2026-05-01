@@ -12,7 +12,7 @@ const FILTERS = [
   { id: "rating", label: "⭐ Mieux notés" },
   { id: "fast", label: "🕐 Rapides (<25min)" },
   { id: "cheap", label: "💰 Moins chers" },
-  { id: "near", label: "📍 Moins de 2km" },
+  { id: "near", label: "📍 Zone de Faim (<15km)" },
   { id: "open", label: "🟢 Ouverts maintenant" },
 ];
 
@@ -24,18 +24,43 @@ export default function Decouvrir() {
   const [activeFilter, setActiveFilter] = useState("all");
   const [viewMode, setViewMode] = useState<"list" | "map">("list");
 
+  const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const R = 6371; // km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  };
+
   useEffect(() => {
     const vendorsRef = ref(db, 'vendors');
     const unsubscribe = onValue(vendorsRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        const list = Object.keys(data).map(key => ({ id: key, ...data[key] })) as VendorProfile[];
-        setRestaurants(list.filter(r => r.is_published));
+        let list = Object.keys(data).map(key => ({ id: key, ...data[key] })) as VendorProfile[];
+        list = list.filter(r => r.is_published);
+
+        if (location) {
+          list = list.map(r => {
+            const vLat = r.location?.lat || (6.36536 + (r.id.length % 10) * 0.01);
+            const vLng = r.location?.lng || (2.41833 + (r.id.length % 5) * 0.01);
+            return { ...r, distance: getDistance(location.lat, location.lng, vLat, vLng) };
+          });
+          // Sort by distance by default
+          list = list.sort((a: any, b: any) => a.distance - b.distance);
+        }
+
+        setRestaurants(list);
+      } else {
+        setRestaurants([]);
       }
       setLoading(false);
     });
     return () => unsubscribe();
-  }, []);
+  }, [location]);
 
   const filteredRestaurants = useMemo(() => {
     let result = restaurants.filter(r => 
@@ -49,8 +74,7 @@ export default function Decouvrir() {
       case "fast": result = result.filter(r => (r.avg_delivery_time || 30) <= 25); break;
       case "open": result = result.filter(r => r.open); break;
       case "near": 
-        // Simulation: on prend les 3 premiers si localisation activée
-        if (location) result = result.slice(0, 3);
+        if (location) result = result.filter((r: any) => r.distance < 15);
         break;
       case "cheap":
         result = result.filter(r => r.avg_price_range?.includes("500") || r.avg_price_range?.includes("1000"));
@@ -181,7 +205,9 @@ export default function Decouvrir() {
                           <h3 className="font-black text-xl uppercase tracking-tight truncate leading-none group-hover:text-primary transition-colors">{shop.name}</h3>
                           <div className="flex items-center gap-1 mt-1 text-gray-400 font-bold text-[10px] uppercase tracking-widest">
                             <MapPin size={10} className="text-primary" />
-                            <span className="truncate">{shop.neighborhood} • 1.2 km</span>
+                            <span className="truncate">
+                              {shop.neighborhood} {shop.distance ? `• ${shop.distance.toFixed(1)} km` : ''}
+                            </span>
                           </div>
                         </div>
                         <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-xl text-xs font-black">

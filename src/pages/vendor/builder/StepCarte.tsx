@@ -53,12 +53,13 @@ export default function StepCarte({ products, vendorId, onSave, onDelete }: Prop
     finally { setSaving(false); }
   };
 
-  const categorizedProducts = CATEGORIES.map(cat => ({
+  const allCategories = Array.from(new Set([...CATEGORIES, ...products.map(p => p.category)])).filter(Boolean);
+  const categorizedProducts = allCategories.map(cat => ({
     cat,
     items: products.filter(p => p.category === cat)
   })).filter(g => g.items.length > 0);
 
-  const ungrouped = products.filter(p => !CATEGORIES.includes(p.category));
+  const ungrouped = products.filter(p => !p.category);
 
   return (
     <div className="space-y-8">
@@ -169,10 +170,19 @@ export default function StepCarte({ products, vendorId, onSave, onDelete }: Prop
 
               <div>
                 <label className="text-xs font-bold uppercase tracking-widest text-gray-400 block mb-2">Catégorie</label>
-                <div className="flex flex-wrap gap-2">
-                  {CATEGORIES.map(c => (
-                    <button key={c} type="button" onClick={() => setEditing({ ...editing, category: c })} className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${editing.category === c ? "bg-black text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>{c}</button>
-                  ))}
+                <div className="flex flex-col gap-3">
+                  <div className="flex flex-wrap gap-2">
+                    {Array.from(new Set([...CATEGORIES, ...products.map(p => p.category)])).filter(Boolean).map(c => (
+                      <button key={c} type="button" onClick={() => setEditing({ ...editing, category: c })} className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${editing.category === c ? "bg-black text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>{c}</button>
+                    ))}
+                  </div>
+                  <input
+                    type="text"
+                    value={editing.category || ""}
+                    onChange={e => setEditing({ ...editing, category: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl bg-gray-100 font-bold text-sm outline-none focus:ring-2 focus:ring-black"
+                    placeholder="Ou tapez une nouvelle catégorie (ex: Boissons fraîches)..."
+                  />
                 </div>
               </div>
 

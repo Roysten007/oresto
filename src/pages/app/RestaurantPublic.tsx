@@ -276,32 +276,36 @@ export default function RestaurantPublic() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative h-[40vh] md:h-[50vh] overflow-hidden">
-        <img 
-          src={vendor.cover_url || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1600"} 
-          className="w-full h-full object-cover"
-          alt={vendor.name}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 p-8 flex flex-col items-center text-center text-white space-y-4">
+      <section className="relative h-[45vh] md:h-[55vh] flex items-end justify-center z-0">
+        <div className="absolute inset-0 z-[-1] bg-black overflow-hidden">
+          <img 
+            src={vendor.cover_url || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1600"} 
+            className="w-full h-full object-cover opacity-70"
+            alt={vendor.name}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#FAFAFA] via-black/20 to-transparent" />
+        </div>
+        
+        <div className="relative z-10 translate-y-1/2">
           <motion.div 
             initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
-            className="w-24 h-24 rounded-[32px] border-4 border-white bg-white overflow-hidden shadow-2xl"
+            className="w-32 h-32 md:w-40 md:h-40 rounded-[40px] border-8 border-[#FAFAFA] bg-white overflow-hidden shadow-2xl"
           >
             <img src={vendor.logo_url || `https://ui-avatars.com/api/?name=${vendor.name}`} className="w-full h-full object-cover" alt="" />
           </motion.div>
-          <div className="space-y-1">
-            <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">{vendor.name}</h1>
-            <div className="flex items-center justify-center gap-4 text-xs font-bold opacity-80 uppercase tracking-widest">
-              <span>{vendor.category}</span>
-              <span>•</span>
-              <span>{vendor.neighborhood}</span>
-            </div>
-          </div>
         </div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-6 space-y-12 pb-40">
+      <div className="max-w-7xl mx-auto px-6 space-y-12 pb-40 relative z-10">
+        {/* Title and Metadata */}
+        <div className="text-center pt-20 md:pt-24 pb-4">
+          <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-black">{vendor.name}</h1>
+          <div className="flex items-center justify-center gap-4 text-xs font-bold text-gray-500 uppercase tracking-widest mt-3">
+            <span className="px-3 py-1 bg-gray-100 rounded-full">{vendor.category}</span>
+            <span>•</span>
+            <span className="flex items-center gap-1"><MapPin size={12} className="text-primary"/> {vendor.neighborhood}</span>
+          </div>
+        </div>
         {/* Stats Bar */}
         <div className="grid grid-cols-3 gap-4 -translate-y-8">
           {[
@@ -406,29 +410,30 @@ export default function RestaurantPublic() {
                       key={p.id}
                       layout
                       whileHover={{ scale: 1.02 }}
-                      className="bg-white p-5 rounded-[40px] shadow-sm border border-gray-50 flex gap-5 group"
+                      className="group bg-white rounded-[32px] overflow-hidden shadow-sm hover:shadow-2xl border border-gray-100 transition-all duration-500 flex flex-col"
                     >
-                      <div className="w-28 h-28 rounded-3xl overflow-hidden bg-gray-50 flex-shrink-0">
+                      <div className="relative h-48 sm:h-56 w-full overflow-hidden bg-gray-50">
                         <img 
-                          src={p.image || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=200"} 
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          src={p.image || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800"} 
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                           alt={p.name}
                         />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-md px-4 py-2 rounded-2xl shadow-xl">
+                          <span className="font-black text-sm text-primary">{p.price.toLocaleString()} F</span>
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
-                        <div>
-                          <h3 className="font-black text-sm uppercase truncate leading-tight">{p.name}</h3>
-                          <p className="text-[10px] text-gray-400 line-clamp-2 mt-1 leading-relaxed">{p.description}</p>
+                      <div className="p-6 flex-1 flex flex-col justify-between bg-white relative z-10">
+                        <div className="mb-6">
+                          <h3 className="font-black text-lg uppercase tracking-tight leading-tight group-hover:text-primary transition-colors">{p.name}</h3>
+                          <p className="text-xs text-gray-400 line-clamp-2 mt-2 leading-relaxed">{p.description}</p>
                         </div>
-                        <div className="flex items-center justify-between mt-2">
-                          <span className="font-black text-base">{p.price.toLocaleString()} F</span>
-                          <button 
-                            onClick={() => handleAddToCart(p)}
-                            className="w-10 h-10 rounded-2xl bg-primary text-white flex items-center justify-center shadow-lg active:scale-90 transition-all"
-                          >
-                            <Plus size={18} />
-                          </button>
-                        </div>
+                        <button 
+                          onClick={() => handleAddToCart(p)}
+                          className="w-full py-4 rounded-[20px] bg-gray-50 hover:bg-black hover:text-white text-black font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2 group/btn"
+                        >
+                          <Plus size={16} className="group-hover/btn:rotate-90 transition-transform duration-300" /> Ajouter
+                        </button>
                       </div>
                     </motion.div>
                   ))}

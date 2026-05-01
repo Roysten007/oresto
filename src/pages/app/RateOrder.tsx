@@ -58,6 +58,7 @@ export default function RateOrder() {
   const { user } = useAuth();
   const [ratings, setRatings] = useState({ quality: 0, speed: 0, service: 0 });
   const [comment, setComment] = useState("");
+  const [isPublic, setIsPublic] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [orderInfo, setOrderInfo] = useState<{ vendorId?: string; vendorName?: string } | null>(null);
@@ -95,6 +96,7 @@ export default function RateOrder() {
         ratings,
         average: parseFloat(avg.toFixed(1)),
         comment: comment.trim(),
+        isPublic,
         date: new Date().toISOString(),
       });
 
@@ -198,6 +200,22 @@ export default function RateOrder() {
             placeholder="Partagez votre expérience... Les restaurateurs lisent vos avis !"
             className="w-full p-5 rounded-[32px] bg-white border border-gray-100 shadow-sm outline-none text-sm font-medium leading-relaxed focus:border-primary/30 transition-all resize-none"
           />
+        </div>
+
+        {/* Public/Private Toggle */}
+        <div className="flex items-center gap-3 px-2">
+          <button 
+            onClick={() => setIsPublic(!isPublic)}
+            className={`w-12 h-6 rounded-full p-1 transition-colors relative flex items-center ${isPublic ? "bg-primary" : "bg-gray-200"}`}
+          >
+            <div className={`w-4 h-4 rounded-full bg-white transition-transform ${isPublic ? "translate-x-6" : "translate-x-0"}`} />
+          </button>
+          <div className="flex-1">
+            <p className="text-[10px] font-black uppercase tracking-widest">{isPublic ? "Avis Publique" : "Avis Privé"}</p>
+            <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">
+              {isPublic ? "Visible par tous les clients" : "Visible uniquement par le vendeur"}
+            </p>
+          </div>
         </div>
 
         {/* Submit */}

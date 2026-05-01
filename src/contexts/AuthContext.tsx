@@ -170,9 +170,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Fetch the role quickly to allow navigation
       const userDoc = await get(child(ref(db), `users/${userCredential.user.uid}`));
-      const userData = userDoc.exists() ? userDoc.val() : null;
+      const userData = userDoc.exists() ? userDoc.val() as User : { 
+        id: userCredential.user.uid, 
+        name: email.split("@")[0], 
+        role: "client" 
+      } as User;
 
-      const role = userData ? userData.role : "client";
+      let vendorData: VendorProfile | null = null;
+      if (userData.vendorId) {
+        const vendorSnapshot = await get(child(ref(db), `vendors/${userData.vendorId}`));
+        if (vendorSnapshot.exists()) {
+          vendorData = vendorSnapshot.val() as VendorProfile;
+        }
+      }
+
+      const role = userData.role;
+
+      // Update state immediately to avoid race condition with router
+      setState({
+        user: userData,
+        role: role,
+        vendorProfile: vendorData,
+        isAuthenticated: true,
+        isLoading: false
+      });
 
       setFailedAttempts(0);
       setLastActivity(Date.now());

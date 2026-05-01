@@ -77,8 +77,11 @@ export default function Landing() {
       {/* ─── Hero Section ─── */}
       <section className="relative pt-40 pb-32 px-6 overflow-hidden">
         <div className="max-w-7xl mx-auto text-center relative z-10">
-          <Reveal delay={100} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 border border-primary/10 text-primary font-sub text-[10px] font-black uppercase tracking-widest mb-8">
-            <Sparkles size={14} /> L'application web qui révolutionne la restauration
+          <Reveal delay={100} className="inline-flex items-center gap-3 p-1.5 pr-5 rounded-full bg-white border border-gray-100 shadow-sm text-black font-sub text-[10px] font-black uppercase tracking-widest mb-8">
+            <span className="px-3 py-1.5 bg-primary text-white rounded-full shadow-sm shadow-primary/20 flex items-center gap-1">
+              <Sparkles size={12} /> NOUVEAU
+            </span>
+            <span className="opacity-80">La super-app de restauration est là</span>
           </Reveal>
           
           <Reveal delay={200}>
@@ -130,13 +133,13 @@ export default function Landing() {
                     { title: "Paiement Direct", desc: "WhatsApp, MoMo & Cash.", icon: ShieldCheck },
                     { title: "Zéro Code", desc: "Concentrez-vous sur votre cuisine.", icon: Zap }
                   ].map((item, i) => (
-                    <div key={i} className="flex gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-primary shrink-0">
-                        <item.icon size={20} />
+                    <div key={i} className="flex items-start gap-4 p-5 bg-white rounded-[24px] border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group">
+                      <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-primary shrink-0 group-hover:scale-110 group-hover:bg-primary/10 transition-all">
+                        <item.icon size={22} />
                       </div>
-                      <div>
-                        <h4 className="font-heading font-black text-sm uppercase tracking-tight">{item.title}</h4>
-                        <p className="text-xs text-muted-foreground mt-1">{item.desc}</p>
+                      <div className="flex flex-col justify-center pt-1">
+                        <h4 className="font-heading font-black text-sm uppercase tracking-tight mb-1">{item.title}</h4>
+                        <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
                       </div>
                     </div>
                   ))}

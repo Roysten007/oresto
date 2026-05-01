@@ -66,7 +66,7 @@ function RestaurantCard({ restaurant, featured = false }: { restaurant: VendorPr
 
 export default function ClientHome() {
   const { user } = useAuth();
-  const { city } = useClient();
+  const { city, location } = useClient();
   const [restaurants, setRestaurants] = useState<VendorProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [promoIndex, setPromoIndex] = useState(0);
@@ -78,17 +78,45 @@ export default function ClientHome() {
     return "Bonsoir";
   }, []);
 
+  const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const R = 6371; // km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  };
+
+  const [isHungerZoneActive, setIsHungerZoneActive] = useState(false);
+
   useEffect(() => {
     const unsub = onValue(ref(db, "vendors"), snap => {
       const data = snap.val();
       if (data) {
-        const list = Object.keys(data).map(k => ({ id: k, ...data[k] })) as VendorProfile[];
-        setRestaurants(list.filter(r => r.is_published));
+        let list = Object.keys(data).map(k => ({ id: k, ...data[k] })) as VendorProfile[];
+        list = list.filter(r => r.is_published);
+        
+        // Add distance if client location is known
+        if (location) {
+          list = list.map(r => {
+            const vLat = r.location?.lat || (6.36536 + (r.id.length % 10) * 0.01);
+            const vLng = r.location?.lng || (2.41833 + (r.id.length % 5) * 0.01);
+            return { ...r, distance: getDistance(location.lat, location.lng, vLat, vLng) };
+          });
+          // Sort by closest by default
+          list = list.sort((a: any, b: any) => a.distance - b.distance);
+        }
+
+        setRestaurants(list);
+      } else {
+        setRestaurants([]);
       }
       setLoading(false);
     });
     return () => unsub();
-  }, []);
+  }, [location]);
 
   useEffect(() => {
     if (restaurants.length < 2) return;
@@ -111,36 +139,60 @@ export default function ClientHome() {
     );
   }
 
-  const promoList = restaurants.filter(r => r.promo_banner_url || r.cover_url).slice(0, 5);
+  const displayedRestaurants = isHungerZoneActive && location
+    ? restaurants.filter((r: any) => r.distance < 15)
+    : restaurants;
+
+  const promoList = displayedRestaurants.filter(r => r.promo_banner_url || r.cover_url).slice(0, 5);
 
   return (
     <div className="py-8 space-y-12 pb-32">
       {/* Greeting */}
       <div className="flex items-center justify-between px-2">
-        <div className="space-y-1">
+        <div className="space-y-1 w-full">
           <motion.p initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">
-            {greeting}, {user?.firstName || "Gourmet"} 👋
+            {greeting}, {user?.firstName && user.firstName !== "Client" ? user.firstName : (user?.name && user.name !== "Invité" ? user.name : "Gourmet")} 👋
           </motion.p>
-          <h1 className="text-3xl font-black uppercase tracking-tighter leading-none">
+          <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tighter leading-none whitespace-nowrap">
             Envie de <span className="text-primary">manger ?</span>
           </h1>
         </div>
-        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
-          <Sparkles size={22} />
-        </div>
       </div>
 
-      {/* Search */}
-      <Link
-        to="/app/decouvrir"
-        className="flex items-center gap-4 px-6 py-5 rounded-[28px] bg-white shadow-lg shadow-gray-100/80 border border-gray-50 group hover:border-primary/30 transition-all"
-      >
-        <Search size={20} className="text-gray-400 group-hover:text-primary transition-colors flex-shrink-0" />
-        <span className="text-xs font-bold text-gray-400 group-hover:text-gray-600 flex-1">Chercher un restaurant, un plat...</span>
-        <div className="px-3 py-1.5 rounded-full bg-gray-50 text-gray-400 text-[9px] font-black uppercase tracking-widest">
-          {city || "Cotonou"}
+      {/* Search and Hunger Zone */}
+      <div className="space-y-4 px-2">
+        <Link
+          to="/app/decouvrir"
+          className="flex items-center gap-4 px-6 py-5 rounded-[28px] bg-white shadow-lg shadow-gray-100/80 border border-gray-50 group hover:border-primary/30 transition-all"
+        >
+          <Search size={20} className="text-gray-400 group-hover:text-primary transition-colors flex-shrink-0" />
+          <span className="text-xs font-bold text-gray-400 group-hover:text-gray-600 flex-1">Chercher un restaurant, un plat...</span>
+          <div className="px-3 py-1.5 rounded-full bg-gray-50 text-gray-400 text-[9px] font-black uppercase tracking-widest">
+            {city || "Cotonou"}
+          </div>
+        </Link>
+
+        <div className="flex items-center justify-between px-6 py-4 bg-black text-white rounded-[24px] shadow-xl">
+          <div className="flex items-center gap-3">
+            <div className={`p-2 rounded-xl ${isHungerZoneActive ? 'bg-primary text-white' : 'bg-white/10 text-white'}`}>
+              <MapPin size={16} />
+            </div>
+            <div>
+              <h3 className="text-xs font-black uppercase tracking-widest">Zone de faim</h3>
+              <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest mt-0.5">Restaurants à moins de 15km</p>
+            </div>
+          </div>
+          <button 
+            onClick={() => setIsHungerZoneActive(!isHungerZoneActive)}
+            className={`w-12 h-6 rounded-full p-1 transition-colors ${isHungerZoneActive ? "bg-primary" : "bg-white/20"}`}
+          >
+            <motion.div 
+              animate={{ x: isHungerZoneActive ? 24 : 0 }} 
+              className="w-4 h-4 rounded-full bg-white shadow-sm"
+            />
+          </button>
         </div>
-      </Link>
+      </div>
 
       {/* Promo Carousel */}
       {promoList.length > 0 && (
