@@ -55,21 +55,21 @@ export default function Landing() {
       
       {/* ─── Navigation ─── */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
-              <Zap size={22} fill="currentColor" />
+        <div className="max-w-7xl mx-auto px-4 md:px-6 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
+              <Zap size={18} fill="currentColor" className="md:w-5 md:h-5" />
             </div>
-            <span className="font-heading text-2xl font-black tracking-tighter uppercase">Oresto <span className="text-primary">Connect</span></span>
+            <span className="font-heading text-lg md:text-2xl font-black tracking-tighter uppercase">Oresto <span className="text-primary hidden sm:inline">Connect</span></span>
           </div>
           <div className="hidden md:flex items-center gap-8 font-sub text-[10px] font-black uppercase tracking-widest text-muted-foreground">
             <a href="#vision" className="hover:text-primary transition-colors">Vision</a>
             <a href="#iza" className="hover:text-primary transition-colors">IZA AI</a>
             <a href="#confidentiality" className="hover:text-primary transition-colors">Sécurité</a>
           </div>
-          <div className="flex items-center gap-4">
-            <Link to="/login" className="px-6 py-2.5 rounded-full font-sub text-[10px] font-black uppercase tracking-widest hover:bg-gray-50 transition-colors">Connexion</Link>
-            <Link to="/register" className="px-6 py-2.5 bg-black text-white rounded-full font-sub text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-xl">Rejoindre</Link>
+          <div className="flex items-center gap-2 md:gap-4 shrink-0">
+            <Link to="/login" className="px-3 md:px-6 py-2 md:py-2.5 rounded-full font-sub text-[9px] md:text-[10px] font-black uppercase tracking-widest hover:bg-gray-50 transition-colors">Connexion</Link>
+            <Link to="/register" className="px-4 md:px-6 py-2 md:py-2.5 bg-black text-white rounded-full font-sub text-[9px] md:text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-xl">Rejoindre</Link>
           </div>
         </div>
       </nav>
