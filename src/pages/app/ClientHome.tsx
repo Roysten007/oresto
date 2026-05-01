@@ -43,8 +43,11 @@ function RestaurantCard({ restaurant, featured = false }: { restaurant: VendorPr
           <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between text-white">
             <div className="min-w-0 flex-1 mr-2">
               <h3 className="font-black text-base uppercase tracking-tight truncate leading-none mb-1">{restaurant.name}</h3>
-              <p className="text-[9px] font-bold opacity-75 uppercase tracking-widest flex items-center gap-1">
-                <Clock size={9} /> {restaurant.deliveryTime || "25-35 min"}
+              <p className="text-[9px] font-bold opacity-75 uppercase tracking-widest flex items-center gap-2">
+                <span className="flex items-center gap-1"><Clock size={9} /> {restaurant.deliveryTime || "25-35 min"}</span>
+                {restaurant.distance && (
+                  <span className="flex items-center gap-1 text-primary font-black"><MapPin size={9} /> {restaurant.distance.toFixed(1)} km</span>
+                )}
               </p>
             </div>
             <div className="flex items-center gap-1 bg-white/20 backdrop-blur-md px-2 py-1 rounded-xl shrink-0">
@@ -89,7 +92,13 @@ export default function ClientHome() {
     return R * c;
   };
 
-  const [isHungerZoneActive, setIsHungerZoneActive] = useState(false);
+  const [isHungerZoneActive, setIsHungerZoneActive] = useState(() => {
+    return localStorage.getItem("oresto_hunger_zone") === "true";
+  });
+
+  useEffect(() => {
+    localStorage.setItem("oresto_hunger_zone", isHungerZoneActive.toString());
+  }, [isHungerZoneActive]);
 
   useEffect(() => {
     const unsub = onValue(ref(db, "vendors"), snap => {
@@ -103,18 +112,23 @@ export default function ClientHome() {
         const refLng = location?.lng || 2.41833;
 
         list = list.map(r => {
-          const vLat = r.location?.lat || (6.36536 + (r.id.length % 10) * 0.01);
-          const vLng = r.location?.lng || (2.41833 + (r.id.length % 5) * 0.01);
-          return { ...r, distance: getDistance(refLat, refLng, vLat, vLng) };
+          // If vendor has no location, simulate one near Cotonou
+          const vLat = r.location?.lat || (6.36536 + (r.id.charCodeAt(0) % 10) * 0.01);
+          const vLng = r.location?.lng || (2.41833 + (r.id.charCodeAt(r.id.length - 1) % 10) * 0.01);
+          const dist = getDistance(refLat, refLng, vLat, vLng);
+          return { ...r, distance: dist };
         });
         
         // Sort by closest by default
-        list = list.sort((a: any, b: any) => a.distance - b.distance);
+        list = list.sort((a: any, b: any) => (a.distance || 0) - (b.distance || 0));
 
         setRestaurants(list);
       } else {
         setRestaurants([]);
       }
+      setLoading(false);
+    }, (error) => {
+      console.error("Firebase error:", error);
       setLoading(false);
     });
     return () => unsub();
@@ -142,9 +156,9 @@ export default function ClientHome() {
   }
 
   const displayedRestaurants = useMemo(() => {
-    return isHungerZoneActive
-      ? restaurants.filter((r: any) => r.distance < 15)
-      : restaurants;
+    if (!isHungerZoneActive) return restaurants;
+    // Strict 15km filter
+    return restaurants.filter((r: any) => r.distance && r.distance < 15);
   }, [isHungerZoneActive, restaurants]);
 
   const promoList = useMemo(() => {
