@@ -9,7 +9,8 @@ import {
   Bell,
   Calendar,
   DollarSign,
-  Activity
+  Activity,
+  ExternalLink
 } from "lucide-react";
 import {
   AreaChart,
@@ -124,6 +125,14 @@ export default function VendorDashboard() {
         </div>
 
         <div className="flex items-center gap-3">
+          {vendorProfile?.slug && (
+            <button 
+              onClick={() => window.open(`/r/${vendorProfile.slug}`, '_blank')}
+              className="hidden md:flex items-center gap-2 px-6 py-3 rounded-2xl bg-primary text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-105 transition-all"
+            >
+              Voir mon site public <ExternalLink size={14} />
+            </button>
+          )}
           <button className="relative p-3 rounded-2xl bg-card border border-border hover:bg-muted transition-colors">
             <Bell size={20} className="text-foreground" />
             <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full border-2 border-card" />

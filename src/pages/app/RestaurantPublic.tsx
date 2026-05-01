@@ -68,13 +68,17 @@ export default function RestaurantPublic() {
         if (snap.exists()) {
           const v = snap.val();
           const vendorData = { id: vendorId, ...v } as VendorProfile;
-          const owner = user?.vendorId === vendorId;
+          
+          // Safer owner check: either vendorId matches or userId matches
+          const owner = user?.vendorId === vendorId || user?.id === vendorData.userId;
           setIsOwner(owner);
           
           console.log("Vendor found:", vendorData.name, "Published:", vendorData.is_published, "IsOwner:", owner);
 
-          // We check if site is published. If not, only the owner can see it.
-          if (vendorData.is_published !== true && !owner) {
+          // Use a more flexible check for published status (handle string "true" or boolean true)
+          const isPublished = vendorData.is_published === true || vendorData.is_published === "true";
+
+          if (!isPublished && !owner) {
             console.log("Access denied: Not published and not owner");
             setLoading(false);
             setVendor(null);

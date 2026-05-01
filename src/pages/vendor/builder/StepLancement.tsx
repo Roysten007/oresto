@@ -1,4 +1,4 @@
-import { Copy, Rocket } from "lucide-react";
+import { Copy, Rocket, ExternalLink } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
 import { VendorProfile } from "@/data/mockData";
@@ -73,13 +73,23 @@ export default function StepLancement({ formData, products, isSaving, onPublish 
         </div>
       )}
 
-      <button
-        onClick={onPublish}
-        disabled={isSaving}
-        className="w-full py-5 rounded-2xl bg-black text-white font-black text-sm uppercase tracking-widest hover:bg-gray-800 transition-colors shadow-2xl disabled:opacity-50"
-      >
-        {isSaving ? "Publication en cours..." : formData.is_published ? "Mettre à jour le site" : "🚀 Lancer mon site maintenant"}
-      </button>
+      <div className="flex gap-4">
+        <button
+          onClick={onPublish}
+          disabled={isSaving}
+          className="flex-1 py-5 rounded-2xl bg-black text-white font-black text-sm uppercase tracking-widest hover:bg-gray-800 transition-colors shadow-2xl disabled:opacity-50"
+        >
+          {isSaving ? "Publication..." : formData.is_published ? "Mettre à jour" : "🚀 Publier"}
+        </button>
+        {formData.is_published && (
+          <button
+            onClick={() => window.open(fullUrl, '_blank')}
+            className="px-8 py-5 rounded-2xl bg-primary text-white font-black text-sm uppercase tracking-widest hover:bg-orange-600 transition-colors shadow-xl flex items-center gap-2"
+          >
+            Voir le site <ExternalLink size={18} />
+          </button>
+        )}
+      </div>
     </div>
   );
 }
