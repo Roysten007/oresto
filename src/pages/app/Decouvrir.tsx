@@ -12,7 +12,7 @@ const FILTERS = [
   { id: "rating", label: "⭐ Mieux notés" },
   { id: "fast", label: "🕐 Rapides (<25min)" },
   { id: "cheap", label: "💰 Moins chers" },
-  { id: "near", label: "📍 Zone de Faim (<15km)" },
+  { id: "near", label: "📍 Zone de Faim (<5km)" },
   { id: "open", label: "🟢 Ouverts maintenant" },
 ];
 
@@ -77,7 +77,7 @@ export default function Decouvrir() {
       case "fast": result = result.filter(r => (r.avg_delivery_time || 30) <= 25); break;
       case "open": result = result.filter(r => r.open); break;
       case "near": 
-        result = result.filter((r: any) => r.distance < 15);
+        result = result.filter((r: any) => r.distance < 5);
         break;
       case "cheap":
         result = result.filter(r => r.avg_price_range?.includes("500") || r.avg_price_range?.includes("1000"));

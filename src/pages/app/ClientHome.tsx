@@ -157,8 +157,8 @@ export default function ClientHome() {
 
   const displayedRestaurants = useMemo(() => {
     if (!isHungerZoneActive) return restaurants;
-    // Strict 15km filter
-    return restaurants.filter((r: any) => r.distance && r.distance < 15);
+    // Strict 5km filter
+    return restaurants.filter((r: any) => r.distance && r.distance < 5);
   }, [isHungerZoneActive, restaurants]);
 
   const promoList = useMemo(() => {
@@ -206,7 +206,7 @@ export default function ClientHome() {
             </div>
             <div className="min-w-0">
               <h3 className="text-xs font-black uppercase tracking-widest">Zone de faim</h3>
-              <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest mt-0.5 truncate">Max 15km autour de vous</p>
+              <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest mt-0.5 truncate">Max 5km autour de vous</p>
             </div>
           </div>
           <button 
@@ -294,9 +294,6 @@ export default function ClientHome() {
           </div>
         </section>
       )}
-    </div>
-  );
-}
     </div>
   );
 }

@@ -141,7 +141,7 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Loyalty Card & Promo */}
+      {/* Loyalty Card */}
       <motion.div 
         initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
         className="p-8 rounded-[48px] bg-black text-white relative overflow-hidden shadow-2xl"
@@ -151,30 +151,45 @@ export default function Profile() {
           <div className="flex justify-between items-start">
             <div className="space-y-1">
               <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60">Points Fidélité</p>
-              <h2 className="text-5xl font-black">{loyaltyPoints || 0}</h2>
+              <h2 className="text-5xl font-black">{loyaltyPoints}</h2>
             </div>
             <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/10">
               <Star className="text-primary fill-primary" size={28} />
             </div>
           </div>
           <div className="space-y-3">
-            <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden">
-              <div className="h-full bg-primary" style={{ width: '65%' }} />
-            </div>
-            <p className="text-[9px] font-bold uppercase tracking-widest opacity-60 italic">Encore 350 pts pour votre prochain plat offert !</p>
+            {/* Dynamic progress: milestone every 500 pts */}
+            {(() => {
+              const MILESTONE = 500;
+              const progress = loyaltyPoints % MILESTONE;
+              const remaining = MILESTONE - progress;
+              const pct = Math.min((progress / MILESTONE) * 100, 100);
+              return (
+                <>
+                  <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-full bg-primary transition-all duration-700" style={{ width: `${pct}%` }} />
+                  </div>
+                  <p className="text-[9px] font-bold uppercase tracking-widest opacity-60 italic">
+                    {loyaltyPoints === 0
+                      ? "Passez votre première commande pour gagner des points !"
+                      : remaining === MILESTONE
+                      ? "🎉 Palier atteint ! Profitez de votre récompense."
+                      : `Encore ${remaining} pts pour votre prochain plat offert !`}
+                  </p>
+                </>
+              );
+            })()}
           </div>
           
-          {/* Promotions Exclusives */}
-          <div className="pt-4 border-t border-white/10 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                <Gift size={14} className="text-primary" />
-              </div>
-              <span className="font-bold text-xs uppercase tracking-widest">Promos exclusives</span>
+          {/* How to earn */}
+          <div className="pt-4 border-t border-white/10 space-y-2">
+            <p className="text-[9px] font-black uppercase tracking-widest opacity-40">Comment gagner des points ?</p>
+            <div className="flex items-center gap-2 text-[10px] font-bold opacity-70">
+              <span className="text-primary font-black">+1pt</span> par 100 FCFA dépensés
             </div>
-            <button className="text-[10px] font-black uppercase tracking-widest text-primary hover:text-white transition-colors">
-              Voir 2 offres
-            </button>
+            <div className="flex items-center gap-2 text-[10px] font-bold opacity-70">
+              <span className="text-primary font-black">+5pts</span> bonus si livraison par le restaurant
+            </div>
           </div>
         </div>
       </motion.div>

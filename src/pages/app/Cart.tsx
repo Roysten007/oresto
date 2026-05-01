@@ -4,6 +4,7 @@ import { Minus, Plus, Trash2, ShoppingBag, Wallet, ChevronRight, Truck, Store, M
 import { useCart } from "@/contexts/CartContext";
 import { useOrders } from "@/contexts/OrderContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useClient } from "@/contexts/ClientContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { db } from "@/lib/firebase";
@@ -28,10 +29,15 @@ function estimateDistance(userAddress: string): number {
   return parseFloat((1.5 + seed * 0.65).toFixed(1));
 }
 
+// Points: 1 pt per 100 FCFA + 5 bonus points if using restaurant delivery
+const POINTS_PER_100F = 1;
+const DELIVERY_BONUS_POINTS = 5;
+
 export default function Cart() {
   const { items, updateQuantity, clearCart, totalPrice, totalItems, restaurantId } = useCart();
   const { placeOrder } = useOrders();
   const { user } = useAuth();
+  const { loyaltyPoints, updateLoyaltyPoints } = useClient();
   const [paymentMethod, setPaymentMethod] = useState("momo_mtn");
   const [deliveryMode, setDeliveryMode] = useState<"delivery" | "pickup">("delivery");
   const [address, setAddress] = useState(
@@ -144,6 +150,14 @@ export default function Cart() {
     const result = await placeOrder(orderData);
 
     if (result.success) {
+      // Earn loyalty points: 1 pt per 100 FCFA + 5 bonus for delivery
+      const earned = Math.floor(finalTotal / 100) * POINTS_PER_100F;
+      const bonus = deliveryMode === "delivery" ? DELIVERY_BONUS_POINTS : 0;
+      const totalEarned = earned + bonus;
+      if (totalEarned > 0) {
+        await updateLoyaltyPoints(loyaltyPoints + totalEarned);
+        toast.success(`🌟 +${totalEarned} points de fidélité gagnés !`, { duration: 4000 });
+      }
       clearCart();
       navigate(`/app/order/${result.orderId}`);
     }
