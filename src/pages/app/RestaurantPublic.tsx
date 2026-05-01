@@ -73,7 +73,8 @@ export default function RestaurantPublic() {
           
           console.log("Vendor found:", vendorData.name, "Published:", vendorData.is_published, "IsOwner:", owner);
 
-          if (!vendorData.is_published && !owner) {
+          // We check if site is published. If not, only the owner can see it.
+          if (vendorData.is_published !== true && !owner) {
             console.log("Access denied: Not published and not owner");
             setLoading(false);
             setVendor(null);
@@ -89,6 +90,7 @@ export default function RestaurantPublic() {
         }
       }, (err) => {
         console.error("Firebase onValue error:", err);
+        toast.error("Erreur de connexion aux données du restaurant");
         setLoading(false);
       });
 
@@ -104,43 +106,54 @@ export default function RestaurantPublic() {
       });
     };
 
-    // 1. Resolve vendorId from slug or direct ID
-    console.log("Resolving slug:", slug);
-    const vendorsRef = ref(db, 'vendors');
-    const slugQuery = query(vendorsRef, orderByChild('slug'), equalTo(slug));
-    
-    get(slugQuery).then((snapshot) => {
-      if (snapshot.exists()) {
-        const resolvedId = Object.keys(snapshot.val())[0];
-        console.log("Resolved vendor ID from slug query:", resolvedId);
-        startListeners(resolvedId);
-      } else {
-        // Not found as slug, try as direct ID
-        console.log("No slug match, trying as direct ID:", slug);
-        get(ref(db, `vendors/${slug}`)).then(directSnap => {
-          if (directSnap.exists()) {
-            console.log("Found as direct ID!");
-            startListeners(slug);
-          } else {
-            // Last resort: case-insensitive slug search (slow)
-            get(vendorsRef).then(allSnap => {
-              const all = allSnap.val();
-              const foundKey = all ? Object.keys(all).find(k => all[k].slug?.toLowerCase() === slug.toLowerCase()) : null;
-              if (foundKey) {
-                console.log("Found via case-insensitive scan:", foundKey);
-                startListeners(foundKey);
-              } else {
-                console.log("Truly not found.");
-                setLoading(false);
-              }
-            });
+    const resolveAndStart = async () => {
+      try {
+        console.log("Resolving slug:", slug);
+        const vendorsRef = ref(db, 'vendors');
+        
+        // 1. Slug query (exact)
+        const slugQuery = query(vendorsRef, orderByChild('slug'), equalTo(slug));
+        const slugSnap = await get(slugQuery);
+        if (slugSnap.exists()) {
+          const resolvedId = Object.keys(slugSnap.val())[0];
+          console.log("Found via slug query:", resolvedId);
+          startListeners(resolvedId);
+          return;
+        }
+
+        // 2. Direct ID
+        const idSnap = await get(ref(db, `vendors/${slug}`));
+        if (idSnap.exists()) {
+          console.log("Found via ID lookup:", slug);
+          startListeners(slug!);
+          return;
+        }
+
+        // 3. Scan all (fallback)
+        console.log("Not found by ID/Slug, scanning names...");
+        const allSnap = await get(vendorsRef);
+        const all = allSnap.val();
+        if (all) {
+          const foundKey = Object.keys(all).find(k => 
+            all[k].slug?.toLowerCase() === slug?.toLowerCase() ||
+            all[k].name?.toLowerCase().replace(/\s+/g, '-') === slug?.toLowerCase()
+          );
+          if (foundKey) {
+            console.log("Found via scan fallback:", foundKey);
+            startListeners(foundKey);
+            return;
           }
-        });
+        }
+        
+        console.log("No match found for:", slug);
+        setLoading(false);
+      } catch (err) {
+        console.error("Resolution failed:", err);
+        startListeners(slug!); // Final hail mary
       }
-    }).catch((err) => {
-      console.error("Slug resolution error:", err);
-      startListeners(slug);
-    });
+    };
+
+    resolveAndStart();
 
     return () => {
       clearTimeout(timeout);
