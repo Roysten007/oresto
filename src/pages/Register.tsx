@@ -58,7 +58,7 @@ export default function Register() {
   return (
     <div className="min-h-screen bg-white flex flex-col lg:flex-row" style={{ fontFamily: "'Outfit', sans-serif" }}>
       {/* Left Panel - Hero Info */}
-      <div className="lg:w-1/3 bg-[#0A0A0A] p-10 lg:p-16 flex flex-col justify-between relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/3 bg-[#0A0A0A] p-10 lg:p-16 flex-col justify-between relative overflow-hidden">
         <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-[#FF6B00] opacity-5 blur-[80px] rounded-full translate-x-1/2 -translate-y-1/2" />
         
         <Link to="/" className="relative z-10 flex items-center gap-1 no-underline">
@@ -96,6 +96,14 @@ export default function Register() {
 
       {/* Right Panel - Steps Form */}
       <div className="flex-1 flex flex-col items-center justify-center p-6 lg:p-20">
+        <div className="lg:hidden mb-8 w-full flex justify-center">
+          <Link to="/" className="flex items-center gap-1 no-underline">
+            <span style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: 24, color: "#0A0A0A" }}>OREST</span>
+            <span style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: 24, color: "#0A0A0A", position: "relative" }}>
+              O<div className="absolute bottom-1 right-[-6px] w-[6px] h-[6px] bg-[#FF6B00] rounded-[1px]" />
+            </span>
+          </Link>
+        </div>
         <div className="w-full max-w-lg">
           {/* Progress Bar */}
           <div className="flex gap-2 mb-12">

@@ -33,7 +33,7 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-white flex flex-col lg:flex-row" style={{ fontFamily: "'Outfit', sans-serif" }}>
       {/* Left Panel - Brand / Hero */}
-      <div className="lg:w-1/2 bg-[#0A0A0A] p-10 lg:p-20 flex flex-col justify-between relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 bg-[#0A0A0A] p-10 lg:p-20 flex-col justify-between relative overflow-hidden">
         {/* Subtle orange glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#FF6B00] opacity-10 blur-[100px] rounded-full" />
         
@@ -66,7 +66,15 @@ export default function Login() {
       </div>
 
       {/* Right Panel - Form */}
-      <div className="flex-1 flex items-center justify-center p-6 lg:p-20">
+      <div className="flex-1 flex flex-col items-center justify-center p-6 lg:p-20">
+        <div className="lg:hidden mb-8 w-full flex justify-center">
+          <Link to="/" className="flex items-center gap-1 no-underline">
+            <span style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: 24, color: "#0A0A0A" }}>OREST</span>
+            <span style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: 24, color: "#0A0A0A", position: "relative" }}>
+              O<div className="absolute bottom-1 right-[-6px] w-[6px] h-[6px] bg-[#FF6B00] rounded-[1px]" />
+            </span>
+          </Link>
+        </div>
         <div className="w-full max-w-md">
           <div className="mb-10 text-center lg:text-left">
             <h2 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800 }} className="text-3xl text-[#0A0A0A] mb-2">Connexion</h2>
