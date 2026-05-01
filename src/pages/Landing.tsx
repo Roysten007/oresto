@@ -70,7 +70,7 @@ export default function Landing() {
           </FadeIn>
 
           <FadeIn delay={0.2}>
-            <h1 className="font-heading text-5xl md:text-8xl lg:text-[110px] font-[900] leading-[0.85] tracking-tighter mb-10 uppercase">
+            <h1 className="font-heading text-4xl md:text-7xl lg:text-[80px] font-[900] leading-[0.85] tracking-tighter mb-10 uppercase">
               <span className="block">Ne créez pas un site.</span>
               <span className="text-primary italic block">Lancez un empire.</span>
             </h1>
@@ -98,11 +98,11 @@ export default function Landing() {
       </section>
 
       {/* ─── Core Pillars ─── */}
-      <section id="concept" className="py-28 px-6">
+      <section id="concept" className="py-20 px-6">
         <div className="max-w-7xl mx-auto">
           <FadeIn className="text-center mb-16">
             <p className="font-sub text-[11px] font-black uppercase tracking-[0.4em] text-primary mb-3">Ce qu'inclut Oresto Connect</p>
-            <h2 className="font-heading text-4xl md:text-6xl font-black uppercase tracking-tighter">Une plateforme, tout l'essentiel.</h2>
+            <h2 className="font-heading text-3xl md:text-5xl font-black uppercase tracking-tighter">Une plateforme, tout l'essentiel.</h2>
           </FadeIn>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
@@ -111,12 +111,12 @@ export default function Landing() {
               { title: "Écosystème Local", icon: Globe, desc: "Adapté à l'Afrique de l'Ouest : Mobile Money, WhatsApp, livraison de proximité, paiement cash.", color: "bg-emerald-500" },
             ].map((p, i) => (
               <FadeIn key={i} delay={i * 0.1} className="h-full">
-                <div className="h-full p-10 rounded-[48px] bg-gray-50/50 border border-gray-100 hover:bg-white hover:shadow-xl transition-all">
-                  <div className={`w-14 h-14 ${p.color} rounded-2xl flex items-center justify-center text-white mb-8 shadow-lg`}>
-                    <p.icon size={26} />
+                <div className="h-full p-8 rounded-[32px] bg-gray-50/50 border border-gray-100 hover:bg-white hover:shadow-xl transition-all">
+                  <div className={`w-12 h-12 ${p.color} rounded-xl flex items-center justify-center text-white mb-6 shadow-lg`}>
+                    <p.icon size={22} />
                   </div>
-                  <h3 className="font-heading text-2xl font-black uppercase tracking-tighter mb-4">{p.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed italic text-sm">{p.desc}</p>
+                  <h3 className="font-heading text-xl font-black uppercase tracking-tighter mb-3">{p.title}</h3>
+                  <p className="text-muted-foreground leading-relaxed italic text-xs">{p.desc}</p>
                 </div>
               </FadeIn>
             ))}
@@ -125,12 +125,12 @@ export default function Landing() {
       </section>
 
       {/* ─── Client Experience Section ─── */}
-      <section id="experience" className="py-28 px-6 bg-gray-50/30">
+      <section id="experience" className="py-20 px-6 bg-gray-50/30">
         <div className="max-w-7xl mx-auto">
           <FadeIn className="text-center mb-16">
             <p className="font-sub text-[11px] font-black uppercase tracking-[0.4em] text-primary mb-3">Expérience Client</p>
-            <h2 className="font-heading text-4xl md:text-6xl font-black uppercase tracking-tighter">Vos clients adorent l'expérience.</h2>
-            <p className="text-xl text-muted-foreground mt-4 max-w-2xl mx-auto italic">
+            <h2 className="font-heading text-3xl md:text-5xl font-black uppercase tracking-tighter">Vos clients adoreent l'expérience.</h2>
+            <p className="text-lg text-muted-foreground mt-4 max-w-2xl mx-auto italic">
               Oresto Connect ne se limite pas aux commerçants. L'application client est pensée pour être fluide, engageante et fidélisante.
             </p>
           </FadeIn>
@@ -142,12 +142,12 @@ export default function Landing() {
               { icon: Truck, title: "Suivi en Temps Réel", desc: "Vos clients suivent leur commande étape par étape, de la préparation à la livraison.", color: "bg-emerald-50", iconColor: "text-emerald-500" },
             ].map((f, i) => (
               <FadeIn key={i} delay={i * 0.1} className="h-full">
-                <div className={`p-8 rounded-[40px] ${f.color} border border-white h-full space-y-4 hover:shadow-lg transition-all`}>
-                  <div className={`w-12 h-12 rounded-2xl bg-white flex items-center justify-center ${f.iconColor} shadow-sm`}>
-                    <f.icon size={24} />
+                <div className={`p-6 rounded-[28px] ${f.color} border border-white h-full space-y-4 hover:shadow-lg transition-all`}>
+                  <div className={`w-10 h-10 rounded-xl bg-white flex items-center justify-center ${f.iconColor} shadow-sm`}>
+                    <f.icon size={20} />
                   </div>
-                  <h4 className="font-heading font-black text-base uppercase tracking-tighter">{f.title}</h4>
-                  <p className="text-sm text-muted-foreground leading-relaxed italic">{f.desc}</p>
+                  <h4 className="font-heading font-black text-sm uppercase tracking-tighter">{f.title}</h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed italic">{f.desc}</p>
                 </div>
               </FadeIn>
             ))}
@@ -156,11 +156,11 @@ export default function Landing() {
       </section>
 
       {/* ─── How it Works ─── */}
-      <section className="py-28 px-6">
+      <section className="py-20 px-6">
         <div className="max-w-7xl mx-auto">
           <FadeIn className="text-center mb-16">
-            <h2 className="font-heading text-4xl md:text-6xl font-black uppercase tracking-tighter">Comment ça marche ?</h2>
-            <p className="text-xl text-muted-foreground mt-4 italic">Trois étapes pour lancer votre présence digitale.</p>
+            <h2 className="font-heading text-3xl md:text-5xl font-black uppercase tracking-tighter">Comment ça marche ?</h2>
+            <p className="text-lg text-muted-foreground mt-4 italic">Trois étapes pour lancer votre présence digitale.</p>
           </FadeIn>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             {[
@@ -169,13 +169,13 @@ export default function Landing() {
               { step: "03", title: "Lancement", desc: "Votre application est live. Partagez votre lien et commencez à recevoir des commandes.", icon: Rocket },
             ].map((s, i) => (
               <FadeIn key={i} delay={i * 0.2}>
-                <div className="bg-white p-10 rounded-[40px] border border-gray-100 shadow-sm text-center group hover:border-primary/30 transition-all">
-                  <div className="w-12 h-12 bg-black text-white rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform shadow-lg">
-                    <s.icon size={20} />
+                <div className="bg-white p-8 rounded-[28px] border border-gray-100 shadow-sm text-center group hover:border-primary/30 transition-all">
+                  <div className="w-10 h-10 bg-black text-white rounded-xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform shadow-lg">
+                    <s.icon size={18} />
                   </div>
                   <span className="text-[10px] font-black uppercase tracking-widest text-primary mb-2 block">Étape {s.step}</span>
-                  <h4 className="font-heading text-xl font-black uppercase tracking-tighter mb-4">{s.title}</h4>
-                  <p className="text-sm text-muted-foreground leading-relaxed italic opacity-80">{s.desc}</p>
+                  <h4 className="font-heading text-lg font-black uppercase tracking-tighter mb-4">{s.title}</h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed italic opacity-80">{s.desc}</p>
                 </div>
               </FadeIn>
             ))}
@@ -184,14 +184,14 @@ export default function Landing() {
       </section>
 
       {/* ─── IZA AI ─── */}
-      <section id="iza" className="py-28 px-6 bg-[#0a0a0a] text-white overflow-hidden rounded-[60px] mx-4 md:mx-10">
+      <section id="iza" className="py-20 px-6 bg-[#0a0a0a] text-white overflow-hidden rounded-[60px] mx-4 md:mx-10">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
             <FadeIn>
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-primary font-sub text-[10px] font-black uppercase tracking-widest mb-8">
                 <Bot size={14} /> Intelligence Opérationnelle
               </div>
-              <h2 className="font-heading text-4xl md:text-7xl font-black leading-[0.95] uppercase tracking-tighter mb-10 max-w-[280px] md:max-w-none">
+              <h2 className="font-heading text-3xl md:text-5xl font-black leading-[0.95] uppercase tracking-tighter mb-10 max-w-[280px] md:max-w-none">
                 Gérez avec <br/><span className="text-primary italic">IZA AI.</span>
               </h2>
               <p className="text-xl text-white/50 mb-10 leading-relaxed max-w-xl">
@@ -219,12 +219,12 @@ export default function Landing() {
       </section>
 
       {/* ─── Market / Local ─── */}
-      <section id="market" className="py-28 px-6">
+      <section id="market" className="py-20 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
             <FadeIn className="space-y-8">
               <p className="font-sub text-[11px] font-black uppercase tracking-[0.4em] text-primary">Marché Local</p>
-              <h2 className="font-heading text-4xl md:text-7xl font-[900] leading-[0.9] uppercase tracking-tighter">
+              <h2 className="font-heading text-3xl md:text-5xl font-[900] leading-[0.9] uppercase tracking-tighter">
                 Adapté au <span className="text-muted-foreground">terrain.</span>
               </h2>
               <p className="text-xl text-muted-foreground leading-relaxed italic">
@@ -249,8 +249,8 @@ export default function Landing() {
                   { icon: BarChart3, label: "Tableau de bord", color: "text-orange-500", bg: "bg-orange-50/50 border-orange-100" },
                   { icon: Globe2, label: "Hébergement Cloud", color: "text-gray-700", bg: "bg-gray-50 border-gray-200" },
                 ].map((item, i) => (
-                  <div key={i} className={`p-10 rounded-[48px] ${item.bg} border flex flex-col items-center justify-center text-center gap-4 h-full shadow-sm`}>
-                    <item.icon className={item.color} size={32} />
+                  <div key={i} className={`p-8 rounded-[32px] ${item.bg} border flex flex-col items-center justify-center text-center gap-4 h-full shadow-sm`}>
+                    <item.icon className={item.color} size={28} />
                     <span className="text-[10px] font-black uppercase tracking-widest opacity-60 leading-tight">{item.label}</span>
                   </div>
                 ))}
@@ -261,14 +261,14 @@ export default function Landing() {
       </section>
 
       {/* ─── Security ─── */}
-      <section className="py-28 px-6 bg-gray-50/50">
+      <section className="py-20 px-6 bg-gray-50/50">
         <div className="max-w-4xl mx-auto">
           <FadeIn>
-            <div className="p-12 md:p-20 rounded-[56px] bg-white border border-gray-100 shadow-xl text-center">
-              <div className="w-16 h-16 bg-black text-white rounded-2xl flex items-center justify-center mx-auto mb-8">
-                <Lock size={28} />
+            <div className="p-8 md:p-14 rounded-[32px] bg-white border border-gray-100 shadow-xl text-center">
+              <div className="w-14 h-14 bg-black text-white rounded-xl flex items-center justify-center mx-auto mb-8">
+                <Lock size={24} />
               </div>
-              <h2 className="font-heading text-2xl md:text-5xl font-black uppercase tracking-tighter mb-6 leading-none">
+              <h2 className="font-heading text-2xl md:text-4xl font-black uppercase tracking-tighter mb-6 leading-none">
                 Confidentialité & <span className="text-primary italic">Sécurité</span>
               </h2>
               <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto mb-10 italic">
@@ -287,7 +287,7 @@ export default function Landing() {
       </section>
 
       {/* ─── CGU Summary ─── */}
-      <section id="legal" className="py-28 px-6">
+      <section id="legal" className="py-20 px-6">
         <div className="max-w-4xl mx-auto">
           <FadeIn className="text-center mb-12">
             <p className="font-sub text-[11px] font-black uppercase tracking-[0.4em] text-primary mb-3">Conditions d'utilisation</p>
@@ -326,7 +326,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-20">
             <FadeIn>
-              <h2 className="font-heading text-5xl md:text-9xl font-[900] leading-none uppercase tracking-tighter mb-12 italic">
+              <h2 className="font-heading text-4xl md:text-7xl font-[900] leading-none uppercase tracking-tighter mb-12 italic">
                 Prêt à <br/><span className="text-primary">Démarrer ?</span>
               </h2>
               <Link to="/register" className="inline-flex items-center gap-4 px-8 py-4 sm:px-12 sm:py-6 bg-white text-black rounded-full font-sub text-[10px] sm:text-sm font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_20px_60px_rgba(255,255,255,0.1)]">
