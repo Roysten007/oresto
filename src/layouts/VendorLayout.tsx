@@ -32,7 +32,9 @@ export default function VendorLayout() {
           {vendorProfile && (
             <div className="mb-6 p-3 rounded-2xl bg-muted">
               <p className="font-heading text-sm font-semibold text-foreground truncate">{vendorProfile.name}</p>
-              <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-[10px] font-sub">{vendorProfile.plan.toUpperCase()}</span>
+              <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-[10px] font-sub">
+                {(vendorProfile.plan || "starter").toUpperCase()}
+              </span>
             </div>
           )}
           <nav className="flex-1 space-y-1">

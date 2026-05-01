@@ -54,7 +54,7 @@ function OrderCard({
               {meta.label}
             </span>
             <span className="text-[9px] font-bold text-muted-foreground">
-              {new Date(order.date).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+              {order.date ? new Date(order.date).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : "--:--"}
             </span>
           </div>
           <p className="font-black text-sm text-foreground">{order.clientName}</p>
@@ -67,10 +67,10 @@ function OrderCard({
 
       {/* Items */}
       <div className="space-y-1.5 p-3 rounded-2xl bg-muted/50">
-        {order.items.map((item, i) => (
+        {order.items?.map((item, i) => (
           <div key={i} className="flex justify-between text-[10px] font-bold uppercase tracking-tight text-muted-foreground">
             <span>{item.qty}× {item.name}</span>
-            <span className="text-foreground">{item.price.toLocaleString()} F</span>
+            <span className="text-foreground">{(item.price || 0).toLocaleString()} F</span>
           </div>
         ))}
       </div>
@@ -85,7 +85,7 @@ function OrderCard({
 
       {/* Footer */}
       <div className="flex items-center justify-between pt-2 border-t border-border">
-        <p className="font-black text-base text-primary">{order.total.toLocaleString()} F</p>
+        <p className="font-black text-base text-primary">{(order.total || 0).toLocaleString()} F</p>
         <div className="flex items-center gap-2">
           {/* Chat button */}
           <button

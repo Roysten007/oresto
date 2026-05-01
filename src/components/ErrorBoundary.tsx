@@ -40,18 +40,44 @@ class ErrorBoundary extends Component<Props, State> {
             </div>
             
             {this.state.error && (
-              <div className="p-4 bg-gray-50 rounded-2xl text-[10px] font-mono text-gray-400 break-all text-left overflow-auto max-h-32">
-                {this.state.error.toString()}
+              <div className="relative group">
+                <div className="p-4 bg-gray-50 rounded-2xl text-[10px] font-mono text-gray-400 break-all text-left overflow-auto max-h-48 border border-gray-100">
+                  <p className="font-bold text-red-400 mb-1">Détails techniques :</p>
+                  {this.state.error.stack || this.state.error.toString()}
+                </div>
+                <button 
+                  onClick={() => {
+                    navigator.clipboard.writeText(this.state.error?.stack || this.state.error?.toString() || "");
+                    alert("Copié ! Envoyez-moi ce texte.");
+                  }}
+                  className="absolute top-2 right-2 p-2 bg-white rounded-lg shadow-sm opacity-0 group-hover:opacity-100 transition-opacity text-[8px] font-bold uppercase"
+                >
+                  Copier
+                </button>
               </div>
             )}
 
-            <button
-              onClick={() => window.location.reload()}
-              className="w-full py-4 rounded-2xl bg-black text-white font-black text-xs uppercase tracking-widest hover:bg-primary transition-all flex items-center justify-center gap-2 shadow-xl shadow-black/10"
-            >
-              <RotateCcw size={16} />
-              Recharger l'application
-            </button>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => window.location.reload()}
+                className="w-full py-4 rounded-2xl bg-black text-white font-black text-xs uppercase tracking-widest hover:bg-primary transition-all flex items-center justify-center gap-2 shadow-xl shadow-black/10"
+              >
+                <RotateCcw size={16} />
+                Recharger l'application
+              </button>
+              
+              <a
+                href="/login"
+                onClick={(e) => { 
+                  e.preventDefault();
+                  this.setState({ hasError: false, error: null }); 
+                  window.location.href = "/login"; 
+                }}
+                className="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-black transition-colors"
+              >
+                Retour à la connexion
+              </a>
+            </div>
           </div>
         </div>
       );

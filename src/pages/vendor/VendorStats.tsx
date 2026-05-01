@@ -40,9 +40,9 @@ export default function VendorStats() {
   }, [validOrders]);
 
   const metrics = [
-    { label: "Total commandes", value: stats.totalOrders.toLocaleString() },
-    { label: "Total revenus", value: `${stats.totalRevenue.toLocaleString()} FCFA` },
-    { label: "Panier moyen", value: `${stats.avgOrder.toLocaleString()} FCFA` },
+    { label: "Total commandes", value: (stats.totalOrders || 0).toLocaleString() },
+    { label: "Total revenus", value: `${(stats.totalRevenue || 0).toLocaleString()} FCFA` },
+    { label: "Panier moyen", value: `${(stats.avgOrder || 0).toLocaleString()} FCFA` },
     { label: "Note moyenne", value: vendorProfile?.rating?.toFixed(1) || "4.8" },
   ];
 

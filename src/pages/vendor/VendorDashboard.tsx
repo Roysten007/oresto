@@ -245,12 +245,12 @@ export default function VendorDashboard() {
                     <div className="flex items-center gap-2 mt-0.5">
                       <Clock size={10} className="text-muted-foreground" />
                       <span className="text-[10px] text-muted-foreground">
-                        {new Date(order.date).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                        {order.date ? new Date(order.date).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : "--:--"}
                       </span>
                     </div>
                   </div>
                   <p className="font-heading text-sm font-black text-primary">
-                    {order.total.toLocaleString()} F
+                    {(order.total || 0).toLocaleString()} F
                   </p>
                 </div>
               ))

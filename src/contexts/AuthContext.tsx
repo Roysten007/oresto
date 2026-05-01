@@ -68,17 +68,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const userRef = ref(db, `users/${firebaseUser.uid}`);
         unsubUser = onValue(userRef, async (userSnap) => {
           if (!userSnap.exists()) {
-            console.log("Creating new user profile in DB...");
-            const newUser = {
-              id: firebaseUser.uid,
-              name: firebaseUser.displayName || firebaseUser.email?.split("@")[0] || "Utilisateur",
-              firstName: firebaseUser.displayName?.split(" ")[0] || "",
-              email: firebaseUser.email || "",
-              role: "client",
-              created_at: new Date().toISOString()
-            };
-            await set(ref(db, `users/${firebaseUser.uid}`), newUser);
-            // The next onValue trigger will handle setting the state
+            console.log("User profile missing in DB, waiting...");
+            // If it's a fresh registration, the profile might be created in a few ms.
+            // We give it a short window before giving up.
+            setTimeout(() => {
+              if (state.isLoading) {
+                 setState(s => ({ ...s, isLoading: false, isAuthenticated: false }));
+              }
+            }, 2000);
             return;
           }
 
@@ -364,11 +361,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       setLastActivity(Date.now());
-      // Trigger a state update immediately
+      // Trigger a state update immediately with what we have
       setState({
         user: newUser,
         role: newUser.role,
-        vendorProfile: data.role === "vendor" ? null : null, // Will be fetched by onValue
+        vendorProfile: null, // Will be fetched by onValue listener starting up
         isAuthenticated: true,
         isLoading: false
       });

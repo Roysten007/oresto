@@ -134,6 +134,16 @@ export default function ClientHome() {
     return () => unsub();
   }, [location]);
 
+  const displayedRestaurants = useMemo(() => {
+    if (!isHungerZoneActive) return restaurants;
+    // Strict 5km filter
+    return restaurants.filter((r: any) => r.distance && r.distance < 5);
+  }, [isHungerZoneActive, restaurants]);
+
+  const promoList = useMemo(() => {
+    return displayedRestaurants.filter(r => r.promo_banner_url || r.cover_url).slice(0, 5);
+  }, [displayedRestaurants]);
+
   useEffect(() => {
     if (promoList.length < 2) {
       setPromoIndex(0);
@@ -164,16 +174,6 @@ export default function ClientHome() {
       </div>
     );
   }
-
-  const displayedRestaurants = useMemo(() => {
-    if (!isHungerZoneActive) return restaurants;
-    // Strict 5km filter
-    return restaurants.filter((r: any) => r.distance && r.distance < 5);
-  }, [isHungerZoneActive, restaurants]);
-
-  const promoList = useMemo(() => {
-    return displayedRestaurants.filter(r => r.promo_banner_url || r.cover_url).slice(0, 5);
-  }, [displayedRestaurants]);
 
   return (
     <div className="py-8 space-y-12 pb-32">
