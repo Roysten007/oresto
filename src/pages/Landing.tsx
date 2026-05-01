@@ -20,10 +20,6 @@ const FadeIn = ({ children, delay = 0, y = 20, className = "" }: { children: Rea
 );
 
 export default function Landing() {
-  const { scrollYProgress } = useScroll();
-  const opacity = useTransform(scrollYProgress, [0, 0.05], [1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 0.05], [1, 0.98]);
-
   return (
     <div className="min-h-screen w-full bg-white text-foreground selection:bg-primary selection:text-white font-body overflow-x-hidden">
 
@@ -56,33 +52,35 @@ export default function Landing() {
 
       {/* ─── Hero ─── */}
       <section className="relative pt-44 pb-28 px-6">
-        <motion.div style={{ opacity, scale }} className="max-w-4xl mx-auto text-center relative z-10">
+        <motion.div className="max-w-5xl mx-auto text-center relative z-10">
           <FadeIn delay={0.1}>
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-50 border border-gray-100 text-black font-sub text-[10px] font-black uppercase tracking-widest mb-10">
-              <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-              L'infrastructure complète du commerce local
+            <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white border border-gray-100 shadow-sm mb-12">
+              <span className="px-2 py-0.5 rounded-md bg-primary text-white font-black text-[8px] uppercase tracking-widest flex items-center gap-1">
+                <Zap size={8} fill="currentColor" /> Nouveau
+              </span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">La super-app de restauration est là</span>
             </div>
           </FadeIn>
 
           <FadeIn delay={0.2}>
-            <h1 className="font-heading text-5xl md:text-8xl lg:text-9xl font-[900] leading-[0.85] tracking-tighter mb-10 uppercase italic">
-              Vendez plus.<br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-black via-primary to-orange-600">Fidélisez mieux.</span>
+            <h1 className="font-heading text-6xl md:text-8xl lg:text-[110px] font-[900] leading-[0.85] tracking-tighter mb-10 uppercase">
+              Ne créez pas un site.<br/>
+              <span className="text-primary italic">Lancez un empire.</span>
             </h1>
           </FadeIn>
 
-          <FadeIn delay={0.3} className="max-w-2xl mx-auto mb-16">
-            <p className="text-xl md:text-2xl text-muted-foreground font-body leading-relaxed">
-              Oresto Connect est une <strong>Platform as a Service (PaaS)</strong> : une application de vente, un système de messagerie intégré, un chatbot IA, des points de fidélité, et bien plus — le tout en quelques minutes.
+          <FadeIn delay={0.3} className="max-w-3xl mx-auto mb-16">
+            <p className="text-xl md:text-2xl text-muted-foreground font-body leading-relaxed italic opacity-80">
+              Oresto Connect est bien plus qu'un site : c'est une infrastructure complète (PaaS) avec messagerie, chatbot IA et système de fidélité pour dominer votre marché local.
             </p>
           </FadeIn>
 
           <FadeIn delay={0.4} className="flex flex-col sm:flex-row items-center justify-center gap-6">
-            <Link to="/register" className="group w-full sm:w-auto px-12 py-6 bg-primary text-white rounded-full font-sub text-sm font-black uppercase tracking-widest flex items-center justify-center gap-3 shadow-[0_20px_50px_rgba(234,88,12,0.15)] hover:scale-105 transition-all">
-              Créer ma boutique <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+            <Link to="/register" className="group w-full sm:w-auto px-12 py-6 bg-primary text-white rounded-full font-sub text-sm font-black uppercase tracking-widest flex items-center justify-center gap-3 shadow-[0_20px_50px_rgba(234,88,12,0.2)] hover:scale-105 transition-all">
+              Démarrer mon restaurant <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
             </Link>
             <div className="flex items-center gap-3 px-8 py-5 rounded-full bg-white border border-gray-100 shadow-sm font-sub text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-              <CheckCircle2 size={18} className="text-emerald-500" /> Sans programmation
+              <CheckCircle2 size={18} className="text-emerald-500" /> Site prêt en 2 minutes
             </div>
           </FadeIn>
         </motion.div>
@@ -105,7 +103,7 @@ export default function Landing() {
               { title: "IZA AI Director", icon: Bot, desc: "Intelligence artificielle intégrée : analyse des ventes, gestion du catalogue, assistance à la décision en temps réel.", color: "bg-primary" },
               { title: "Écosystème Local", icon: Globe, desc: "Adapté à l'Afrique de l'Ouest : Mobile Money, WhatsApp, livraison de proximité, paiement cash.", color: "bg-emerald-500" },
             ].map((p, i) => (
-              <FadeIn key={i} delay={i * 0.1}>
+              <FadeIn key={i} delay={i * 0.1} className="h-full">
                 <div className="h-full p-10 rounded-[48px] bg-gray-50/50 border border-gray-100 hover:bg-white hover:shadow-xl transition-all">
                   <div className={`w-14 h-14 ${p.color} rounded-2xl flex items-center justify-center text-white mb-8 shadow-lg`}>
                     <p.icon size={26} />
@@ -136,7 +134,7 @@ export default function Landing() {
               { icon: Star, title: "Points de Fidélité", desc: "1 point par 100 FCFA dépensés + 5 points bonus avec la livraison. Récompenses automatiques.", color: "bg-amber-50", iconColor: "text-amber-500" },
               { icon: Truck, title: "Suivi en Temps Réel", desc: "Vos clients suivent leur commande étape par étape, de la préparation à la livraison.", color: "bg-emerald-50", iconColor: "text-emerald-500" },
             ].map((f, i) => (
-              <FadeIn key={i} delay={i * 0.1}>
+              <FadeIn key={i} delay={i * 0.1} className="h-full">
                 <div className={`p-8 rounded-[40px] ${f.color} border border-white h-full space-y-4 hover:shadow-lg transition-all`}>
                   <div className={`w-12 h-12 rounded-2xl bg-white flex items-center justify-center ${f.iconColor} shadow-sm`}>
                     <f.icon size={24} />
@@ -236,18 +234,20 @@ export default function Landing() {
                 </div>
               </div>
             </FadeIn>
-            <FadeIn delay={0.2} className="grid grid-cols-2 gap-6">
-              {[
-                { icon: CreditCard, label: "Paiements flexibles", color: "text-emerald-500", bg: "bg-emerald-50/50 border-emerald-100" },
-                { icon: Target, label: "SEO Proximité", color: "text-blue-500", bg: "bg-blue-50/50 border-blue-100", offset: true },
-                { icon: BarChart3, label: "Tableau de bord", color: "text-orange-500", bg: "bg-orange-50/50 border-orange-100" },
-                { icon: Globe2, label: "Hébergement Cloud", color: "text-gray-700", bg: "bg-gray-50 border-gray-200", offset: true },
-              ].map((item, i) => (
-                <div key={i} className={`p-10 rounded-[48px] ${item.bg} border flex flex-col items-center text-center gap-4 ${item.offset ? "mt-8" : ""}`}>
-                  <item.icon className={item.color} size={32} />
-                  <span className="text-[10px] font-black uppercase tracking-widest opacity-60">{item.label}</span>
-                </div>
-              ))}
+            <FadeIn delay={0.2} className="h-full">
+              <div className="grid grid-cols-2 gap-6 h-full">
+                {[
+                  { icon: CreditCard, label: "Paiements flexibles", color: "text-emerald-500", bg: "bg-emerald-50/50 border-emerald-100" },
+                  { icon: Target, label: "SEO Proximité", color: "text-blue-500", bg: "bg-blue-50/50 border-blue-100" },
+                  { icon: BarChart3, label: "Tableau de bord", color: "text-orange-500", bg: "bg-orange-50/50 border-orange-100" },
+                  { icon: Globe2, label: "Hébergement Cloud", color: "text-gray-700", bg: "bg-gray-50 border-gray-200" },
+                ].map((item, i) => (
+                  <div key={i} className={`p-10 rounded-[48px] ${item.bg} border flex flex-col items-center justify-center text-center gap-4 h-full shadow-sm`}>
+                    <item.icon className={item.color} size={32} />
+                    <span className="text-[10px] font-black uppercase tracking-widest opacity-60 leading-tight">{item.label}</span>
+                  </div>
+                ))}
+              </div>
             </FadeIn>
           </div>
         </div>
@@ -294,17 +294,17 @@ export default function Landing() {
               { icon: Shield, title: "Données personnelles", desc: "Vos données et celles de vos clients ne sont jamais revendues. Elles sont utilisées uniquement pour faire fonctionner la plateforme." },
               { icon: MessageCircle, title: "Messagerie & Chat", desc: "Les échanges via la messagerie intégrée sont privés. Oresto Connect ne lit pas le contenu de vos conversations." },
               { icon: Star, title: "Points de Fidélité", desc: "Les points sont crédités automatiquement après chaque commande validée. Ils ne sont pas convertibles en argent, uniquement en avantages sur la plateforme." },
-            ].map((item, i) => (
-              <FadeIn key={i} delay={i * 0.1}>
-                <div className="p-8 rounded-[40px] bg-white border border-gray-100 shadow-sm space-y-4 hover:shadow-lg transition-all">
-                  <div className="w-10 h-10 rounded-2xl bg-black text-white flex items-center justify-center">
-                    <item.icon size={18} />
+              ].map((item, i) => (
+                <FadeIn key={i} delay={i * 0.1} className="h-full">
+                  <div className="p-8 rounded-[40px] bg-white border border-gray-100 shadow-sm space-y-4 hover:shadow-lg transition-all h-full">
+                    <div className="w-10 h-10 rounded-2xl bg-black text-white flex items-center justify-center">
+                      <item.icon size={18} />
+                    </div>
+                    <h4 className="font-heading font-black text-lg uppercase tracking-tighter">{item.title}</h4>
+                    <p className="text-sm text-muted-foreground leading-relaxed italic">{item.desc}</p>
                   </div>
-                  <h4 className="font-heading font-black text-lg uppercase tracking-tighter">{item.title}</h4>
-                  <p className="text-sm text-muted-foreground leading-relaxed italic">{item.desc}</p>
-                </div>
-              </FadeIn>
-            ))}
+                </FadeIn>
+              ))}
           </div>
           <FadeIn delay={0.3} className="text-center mt-10">
             <p className="text-xs text-muted-foreground italic opacity-60">
