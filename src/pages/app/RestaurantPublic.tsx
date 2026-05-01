@@ -147,10 +147,18 @@ export default function RestaurantPublic() {
         console.log("Not found by ID/Slug/Map, scanning names...");
         const allSnap = await get(vendorsRef);
         const all = allSnap.val();
+        
+        if (slug === "debug") {
+           console.log("DEBUG: All vendors in DB:", all);
+           toast.info(`Vendeurs trouvés: ${Object.keys(all || {}).length}`);
+        }
+
         if (all) {
           const foundKey = Object.keys(all).find(k => 
             all[k].slug?.toLowerCase() === slug?.toLowerCase() ||
-            all[k].name?.toLowerCase().replace(/\s+/g, '-') === slug?.toLowerCase()
+            all[k].name?.toLowerCase().replace(/\s+/g, '-') === slug?.toLowerCase() ||
+            k === slug ||
+            k === `v_${slug}`
           );
           if (foundKey) {
             console.log("Found via scan fallback:", foundKey);
@@ -161,9 +169,10 @@ export default function RestaurantPublic() {
         
         console.log("No match found for:", slug);
         setLoading(false);
-      } catch (err) {
+      } catch (err: any) {
         console.error("Resolution failed:", err);
-        startListeners(slug!); // Final hail mary
+        toast.error("Erreur résolution: " + err.message);
+        startListeners(slug!); 
       }
     };
 
