@@ -64,8 +64,8 @@ export default function Landing() {
 
           <FadeIn delay={0.2}>
             <h1 className="font-heading text-6xl md:text-8xl lg:text-[110px] font-[900] leading-[0.85] tracking-tighter mb-10 uppercase">
-              Ne créez pas un site.<br/>
-              <span className="text-primary italic">Lancez un empire.</span>
+              <span className="block">Ne créez pas un site.</span>
+              <span className="text-primary italic block">Lancez un empire.</span>
             </h1>
           </FadeIn>
 
