@@ -62,7 +62,7 @@ export default function RestaurantPublic() {
     }, 5000);
     
     const startListeners = (vendorId: string) => {
-      // 2. Set up real-time listener for this vendor
+      console.log("Starting listeners for vendor:", vendorId);
       const vendorRef = ref(db, `vendors/${vendorId}`);
       unsubVendor = onValue(vendorRef, (snap) => {
         if (snap.exists()) {
@@ -71,9 +71,12 @@ export default function RestaurantPublic() {
           const owner = user?.vendorId === vendorId;
           setIsOwner(owner);
           
+          console.log("Vendor found:", vendorData.name, "Published:", vendorData.is_published, "IsOwner:", owner);
+
           if (!vendorData.is_published && !owner) {
+            console.log("Access denied: Not published and not owner");
             setLoading(false);
-            setVendor(null); // This will trigger the "Coming Soon" screen
+            setVendor(null);
             return;
           }
           
@@ -81,11 +84,14 @@ export default function RestaurantPublic() {
           setLoading(false);
           clearTimeout(timeout);
         } else {
+          console.log("Vendor document not found in DB at /vendors/", vendorId);
           setLoading(false);
         }
+      }, (err) => {
+        console.error("Firebase onValue error:", err);
+        setLoading(false);
       });
 
-      // 3. Set up real-time listener for products
       const productsRef = ref(db, 'products');
       unsubProducts = onValue(productsRef, (psnap) => {
         const pData = psnap.val();
@@ -99,23 +105,40 @@ export default function RestaurantPublic() {
     };
 
     // 1. Resolve vendorId from slug or direct ID
+    console.log("Resolving slug:", slug);
     const vendorsRef = ref(db, 'vendors');
     const slugQuery = query(vendorsRef, orderByChild('slug'), equalTo(slug));
     
     get(slugQuery).then((snapshot) => {
-      let resolvedId = slug; // Fallback
-      
       if (snapshot.exists()) {
-        resolvedId = Object.keys(snapshot.val())[0];
-        console.log("Resolved vendor ID from slug:", resolvedId);
+        const resolvedId = Object.keys(snapshot.val())[0];
+        console.log("Resolved vendor ID from slug query:", resolvedId);
+        startListeners(resolvedId);
       } else {
-        console.log("No slug match found, using as ID:", slug);
+        // Not found as slug, try as direct ID
+        console.log("No slug match, trying as direct ID:", slug);
+        get(ref(db, `vendors/${slug}`)).then(directSnap => {
+          if (directSnap.exists()) {
+            console.log("Found as direct ID!");
+            startListeners(slug);
+          } else {
+            // Last resort: case-insensitive slug search (slow)
+            get(vendorsRef).then(allSnap => {
+              const all = allSnap.val();
+              const foundKey = all ? Object.keys(all).find(k => all[k].slug?.toLowerCase() === slug.toLowerCase()) : null;
+              if (foundKey) {
+                console.log("Found via case-insensitive scan:", foundKey);
+                startListeners(foundKey);
+              } else {
+                console.log("Truly not found.");
+                setLoading(false);
+              }
+            });
+          }
+        });
       }
-      
-      startListeners(resolvedId);
     }).catch((err) => {
       console.error("Slug resolution error:", err);
-      // Try using slug as ID anyway
       startListeners(slug);
     });
 

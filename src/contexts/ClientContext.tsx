@@ -36,6 +36,9 @@ export function ClientProvider({ children }: { children: ReactNode }) {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [loyaltyPoints, setLoyaltyPoints] = useState(0);
 
+  const [addresses, setAddresses] = useState<any[]>([]);
+  const [language, setLanguage] = useState<string>("fr");
+
   // Load preferences from Firebase
   useEffect(() => {
     if (!user || !db) return;
@@ -50,6 +53,8 @@ export function ClientProvider({ children }: { children: ReactNode }) {
         if (data.city) setCity(data.city);
         if (data.favorites) setFavorites(data.favorites);
         if (data.loyalty_points) setLoyaltyPoints(data.loyalty_points);
+        if (data.addresses) setAddresses(data.addresses);
+        if (data.language) setLanguage(data.language);
       }
     });
     return () => unsubscribe();
@@ -65,7 +70,11 @@ export function ClientProvider({ children }: { children: ReactNode }) {
         const list = Object.keys(data).map(key => ({
           id: key,
           ...data[key]
-        })).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        })).sort((a, b) => {
+          const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+          const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+          return dateB - dateA;
+        });
         setNotifications(list);
       }
     });
@@ -81,6 +90,21 @@ export function ClientProvider({ children }: { children: ReactNode }) {
         location_lng: lng,
         city: cityName || city
       });
+    }
+  };
+
+  const addAddress = async (addr: { label: string; address: string; lat: number; lng: number }) => {
+    const newAddresses = [...addresses, { ...addr, id: Date.now().toString() }];
+    setAddresses(newAddresses);
+    if (user && db) {
+      await update(ref(db, `user_preferences/${user.id}`), { addresses: newAddresses });
+    }
+  };
+
+  const updateLanguage = async (lang: string) => {
+    setLanguage(lang);
+    if (user && db) {
+      await update(ref(db, `user_preferences/${user.id}`), { language: lang });
     }
   };
 
@@ -138,6 +162,10 @@ export function ClientProvider({ children }: { children: ReactNode }) {
       location,
       city,
       updateLocation,
+      addAddress,
+      addresses,
+      language,
+      updateLanguage,
       updateCity,
       onboardingCompleted,
       completeOnboarding,

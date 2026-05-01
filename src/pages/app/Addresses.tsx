@@ -36,13 +36,10 @@ function ChangeView({ center }: { center: [number, number] }) {
 
 export default function Addresses() {
   const navigate = useNavigate();
-  const { location, updateLocation } = useClient();
-  const [addresses, setAddresses] = useState([
-    { id: 1, type: "Domicile", address: "Quartier Haie Vive, Cotonou, Bénin", lat: 6.3653, lng: 2.4183 }
-  ]);
+  const { location, updateLocation, addresses, addAddress } = useClient();
   const [isAdding, setIsAdding] = useState(false);
   const [selectedPos, setSelectedPos] = useState<[number, number] | null>(null);
-  const [newAddrType, setNewAddrType] = useState("Autre");
+  const [newAddrType, setNewAddrType] = useState("Domicile");
 
   const handleSaveMapLocation = async () => {
     if (!selectedPos) {
@@ -51,14 +48,17 @@ export default function Addresses() {
     }
     
     try {
+      // 1. Update main location
       await updateLocation(selectedPos[0], selectedPos[1], "Cotonou");
-      setAddresses([...addresses, { 
-        id: Date.now(), 
-        type: newAddrType, 
-        address: `Position choisie (${selectedPos[0].toFixed(4)}, ${selectedPos[1].toFixed(4)})`,
+      
+      // 2. Add to saved addresses list
+      await addAddress({
+        label: newAddrType,
+        address: `Secteur ${selectedPos[0].toFixed(3)}, ${selectedPos[1].toFixed(3)}`,
         lat: selectedPos[0],
         lng: selectedPos[1]
-      }]);
+      });
+
       setIsAdding(false);
       setSelectedPos(null);
       toast.success("Adresse enregistrée avec succès !");
@@ -102,7 +102,7 @@ export default function Addresses() {
                 <MapPin size={24} />
               </div>
               <div>
-                <h3 className="font-black text-sm uppercase tracking-widest mb-1">{addr.type}</h3>
+                <h3 className="font-black text-sm uppercase tracking-widest mb-1">{addr.label}</h3>
                 <p className="text-xs text-gray-500">{addr.address}</p>
               </div>
             </div>

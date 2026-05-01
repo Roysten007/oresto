@@ -30,7 +30,7 @@ import { sendPasswordResetEmail, getAuth } from "firebase/auth";
 
 export default function Profile() {
   const { user, logout } = useAuth();
-  const { notifications, loyaltyPoints } = useClient();
+  const { notifications, loyaltyPoints, language, updateLanguage } = useClient();
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -44,7 +44,7 @@ export default function Profile() {
   const [isSaving, setIsSaving] = useState(false);
   const [showLanguageModal, setShowLanguageModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [language, setLanguage] = useState("fr");
+
 
   const handleSaveProfile = async () => {
     if (!user || !db) return;
@@ -272,10 +272,10 @@ export default function Profile() {
                 <button onClick={() => setShowLanguageModal(false)} className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center"><X size={20} /></button>
               </div>
               <div className="space-y-3">
-                <button onClick={() => { setLanguage("fr"); setShowLanguageModal(false); toast.success("Langue changée en Français"); }} className={`w-full p-4 rounded-2xl font-black flex justify-between items-center ${language === 'fr' ? 'bg-primary text-white' : 'bg-gray-50'}`}>
+                <button onClick={() => { updateLanguage("fr"); setShowLanguageModal(false); toast.success("Langue changée en Français"); }} className={`w-full p-4 rounded-2xl font-black flex justify-between items-center ${language === 'fr' ? 'bg-primary text-white' : 'bg-gray-50'}`}>
                   Français {language === 'fr' && <CheckCircle2 size={20} />}
                 </button>
-                <button onClick={() => { setLanguage("en"); setShowLanguageModal(false); toast.success("Language changed to English"); }} className={`w-full p-4 rounded-2xl font-black flex justify-between items-center ${language === 'en' ? 'bg-primary text-white' : 'bg-gray-50'}`}>
+                <button onClick={() => { updateLanguage("en"); setShowLanguageModal(false); toast.success("Language changed to English"); }} className={`w-full p-4 rounded-2xl font-black flex justify-between items-center ${language === 'en' ? 'bg-primary text-white' : 'bg-gray-50'}`}>
                   English {language === 'en' && <CheckCircle2 size={20} />}
                 </button>
               </div>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase";
-import { ref, get, set, update } from "firebase/database";
+import { ref, update } from "firebase/database";
 import MapComponent from "@/components/MapComponent";
 import { 
   Store, 
@@ -337,28 +337,32 @@ export default function VendorSettings() {
                </div>
             </div>
           )}
+
           {activeTab === 6 && (
             <div className="space-y-8 animate-in fade-in duration-500">
                <div className="p-8 rounded-[40px] bg-card border border-border shadow-sm space-y-6">
                   <h3 className="font-heading text-xl font-bold text-foreground">Sécurité du Compte</h3>
                   <div className="space-y-4">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-2">Mot de passe actuel</label>
-                      <input type="password" placeholder="••••••••" className="w-full p-4 rounded-2xl bg-muted/20 border border-border focus:outline-none" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-2">Nouveau</label>
-                        <input type="password" placeholder="••••••••" className="w-full p-4 rounded-2xl bg-muted/20 border border-border focus:outline-none" />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-2">Confirmer</label>
-                        <input type="password" placeholder="••••••••" className="w-full p-4 rounded-2xl bg-muted/20 border border-border focus:outline-none" />
-                      </div>
-                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Pour votre sécurité, la modification du mot de passe se fait via un lien de réinitialisation envoyé à votre adresse email : <b>{user?.email}</b>.
+                    </p>
                   </div>
-                  <button className="px-8 py-4 rounded-2xl bg-black text-white font-sub text-[10px] font-black uppercase tracking-widest hover:bg-primary transition-colors">
-                    Mettre à jour le mot de passe
+                  <button 
+                    onClick={async () => {
+                      try {
+                        const { getAuth, sendPasswordResetEmail } = await import("firebase/auth");
+                        const auth = getAuth();
+                        if (user?.email) {
+                          await sendPasswordResetEmail(auth, user.email);
+                          toast.success("Email de réinitialisation envoyé !");
+                        }
+                      } catch (e) {
+                        toast.error("Erreur lors de l'envoi de l'email.");
+                      }
+                    }}
+                    className="px-8 py-4 rounded-2xl bg-black text-white font-sub text-[10px] font-black uppercase tracking-widest hover:bg-primary transition-colors"
+                  >
+                    Recevoir le lien de réinitialisation
                   </button>
                </div>
                
