@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { 
   ArrowRight, 
   Bot, 
@@ -14,334 +15,386 @@ import {
   Lock,
   Sparkles,
   TrendingUp,
-  Layout
+  Layout,
+  MessageSquare,
+  CreditCard,
+  Rocket,
+  Search,
+  Users
 } from "lucide-react";
 
-/* ─── Reveal Component (Standard CSS Animation) ─── */
-function Reveal({ children, className = "", delay = 0 }: { children: React.ReactNode, className?: string, delay?: number }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
+/* ─── Premium Components ─── */
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        setIsVisible(true);
-        observer.unobserve(entry.target);
-      }
-    }, { threshold: 0.1 });
-    
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, []);
+const FadeIn = ({ children, delay = 0, y = 20 }: { children: React.ReactNode, delay?: number, y?: number }) => (
+  <motion.div
+    initial={{ opacity: 0, y }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.8, delay, ease: [0.16, 1, 0.3, 1] }}
+  >
+    {children}
+  </motion.div>
+);
 
-  return (
-    <div 
-      ref={ref} 
-      className={className} 
-      style={{
-        opacity: isVisible ? 1 : 0,
-        transform: isVisible ? "translateY(0)" : "translateY(20px)",
-        transition: `all 600ms ease-out ${delay}ms`
-      }}
-    >
-      {children}
-    </div>
-  );
-}
+const GlassCard = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
+  <div className={`backdrop-blur-xl bg-white/60 border border-white/40 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] rounded-[32px] ${className}`}>
+    {children}
+  </div>
+);
 
 export default function Landing() {
+  const { scrollYProgress } = useScroll();
+  const opacity = useTransform(scrollYProgress, [0, 0.05], [1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.05], [1, 0.95]);
+
   return (
-    <div className="min-h-screen w-full overflow-x-hidden bg-white text-foreground selection:bg-primary selection:text-white">
+    <div className="min-h-screen w-full bg-white text-foreground selection:bg-primary selection:text-white font-body overflow-x-hidden">
       
       {/* ─── Navigation ─── */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-2 shrink-0">
-            <div className="w-8 h-8 md:w-10 md:h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
-              <Zap size={18} fill="currentColor" className="md:w-5 md:h-5" />
+      <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-6 pointer-events-none">
+        <div className="max-w-7xl mx-auto flex items-center justify-between pointer-events-auto">
+          <GlassCard className="px-6 py-3 flex items-center gap-3">
+            <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center text-white shadow-lg">
+              <Zap size={20} fill="currentColor" />
             </div>
-            <span className="font-heading text-lg md:text-2xl font-black tracking-tighter uppercase">Oresto <span className="text-primary hidden sm:inline">Connect</span></span>
+            <span className="font-heading text-xl font-black tracking-tighter uppercase">Oresto <span className="text-primary">Connect</span></span>
+          </GlassCard>
+          
+          <div className="hidden md:flex items-center">
+            <GlassCard className="px-8 py-3 flex gap-8 font-sub text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+              <a href="#concept" className="hover:text-primary transition-colors">Le Concept</a>
+              <a href="#iza" className="hover:text-primary transition-colors">IZA AI</a>
+              <a href="#market" className="hover:text-primary transition-colors">Marché</a>
+              <a href="#securite" className="hover:text-primary transition-colors">Sécurité</a>
+            </GlassCard>
           </div>
-          <div className="hidden md:flex items-center gap-8 font-sub text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-            <a href="#vision" className="hover:text-primary transition-colors">Vision</a>
-            <a href="#iza" className="hover:text-primary transition-colors">IZA AI</a>
-            <a href="#confidentiality" className="hover:text-primary transition-colors">Sécurité</a>
-          </div>
-          <div className="flex items-center gap-2 md:gap-4 shrink-0">
-            <Link to="/login" className="px-3 md:px-6 py-2 md:py-2.5 rounded-full font-sub text-[9px] md:text-[10px] font-black uppercase tracking-widest hover:bg-gray-50 transition-colors">Connexion</Link>
-            <Link to="/register" className="px-4 md:px-6 py-2 md:py-2.5 bg-black text-white rounded-full font-sub text-[9px] md:text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-xl">Rejoindre</Link>
-          </div>
+
+          <GlassCard className="px-4 py-2 flex items-center gap-2">
+            <Link to="/login" className="px-5 py-2 rounded-full font-sub text-[10px] font-black uppercase tracking-widest hover:bg-gray-50 transition-colors">Connexion</Link>
+            <Link to="/register" className="px-6 py-2 bg-black text-white rounded-full font-sub text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-xl">Rejoindre</Link>
+          </GlassCard>
         </div>
       </nav>
 
       {/* ─── Hero Section ─── */}
-      <section className="relative pt-40 pb-32 px-6 overflow-hidden">
-        <div className="max-w-7xl mx-auto text-center relative z-10">
-          <Reveal delay={100} className="inline-flex items-center gap-3 p-1.5 pr-5 rounded-full bg-white border border-gray-100 shadow-sm text-black font-sub text-[10px] font-black uppercase tracking-widest mb-8">
-            <span className="px-3 py-1.5 bg-primary text-white rounded-full shadow-sm shadow-primary/20 flex items-center gap-1">
-              <Sparkles size={12} /> NOUVEAU
-            </span>
-            <span className="opacity-80">La super-app de restauration est là</span>
-          </Reveal>
+      <section className="relative pt-48 pb-32 px-6">
+        <motion.div style={{ opacity, scale }} className="max-w-7xl mx-auto text-center relative z-10">
+          <FadeIn delay={0.1}>
+            <div className="inline-flex items-center gap-3 p-1.5 pr-5 rounded-full bg-gray-50 border border-gray-100 text-black font-sub text-[10px] font-black uppercase tracking-widest mb-10">
+              <span className="px-3 py-1.5 bg-primary text-white rounded-full shadow-sm flex items-center gap-1">
+                <Sparkles size={12} /> PaaS v2.0
+              </span>
+              <span className="opacity-80">Plus qu'un site, une infrastructure de croissance</span>
+            </div>
+          </FadeIn>
           
-          <Reveal delay={200}>
-            <h1 className="font-heading text-4xl sm:text-5xl md:text-8xl font-black leading-[0.9] tracking-tighter mb-8 uppercase break-words">
-              Ne créez pas un site. <br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-600">Lancez un empire.</span>
+          <FadeIn delay={0.2}>
+            <h1 className="font-heading text-5xl md:text-8xl lg:text-[110px] font-[900] leading-[0.85] tracking-tighter mb-10 uppercase italic">
+              Ne créez pas un site.<br/>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-black via-primary to-orange-600">Lancez un empire.</span>
             </h1>
-          </Reveal>
+          </FadeIn>
 
-          <Reveal delay={300} className="max-w-2xl mx-auto mb-12">
-            <p className="text-lg md:text-xl text-muted-foreground font-body leading-relaxed">
-              Oresto Connect n'est pas un catalogue. C'est une <strong>PaaS (Platform as a Service)</strong> qui génère instantanément votre application web de vente premium, pilotée par une intelligence artificielle de pointe.
+          <FadeIn delay={0.3} className="max-w-3xl mx-auto mb-16">
+            <p className="text-xl md:text-2xl text-muted-foreground font-body leading-relaxed">
+              Oresto Connect est la première <strong>Platform as a Service (PaaS)</strong> d'Afrique de l'Ouest qui génère instantanément votre application de vente premium, pilotée par une IA opérationnelle de pointe.
             </p>
-          </Reveal>
+          </FadeIn>
 
-          <Reveal delay={400} className="flex flex-col sm:flex-row items-center justify-center gap-6">
-            <Link to="/register" className="group w-full sm:w-auto px-10 py-5 bg-primary text-white rounded-[24px] font-sub text-sm font-black uppercase tracking-widest flex items-center justify-center gap-3 shadow-2xl shadow-primary/30 hover:scale-105 transition-all">
+          <FadeIn delay={0.4} className="flex flex-col sm:flex-row items-center justify-center gap-6">
+            <Link to="/register" className="group w-full sm:w-auto px-12 py-6 bg-primary text-white rounded-full font-sub text-sm font-black uppercase tracking-widest flex items-center justify-center gap-3 shadow-[0_20px_50px_rgba(234,88,12,0.3)] hover:scale-105 transition-all">
               Démarrer mon restaurant <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
             </Link>
-            <div className="flex items-center gap-3 px-6 py-4 rounded-[24px] bg-white border border-gray-100 shadow-sm font-sub text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-              <CheckCircle2 size={16} className="text-emerald-500" /> Site prêt en 2 minutes
+            <div className="flex items-center gap-3 px-8 py-5 rounded-full bg-white border border-gray-100 shadow-sm font-sub text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+              <CheckCircle2 size={18} className="text-emerald-500" /> Déploiement en 120 secondes
             </div>
-          </Reveal>
-        </div>
+          </FadeIn>
+        </motion.div>
 
-        {/* Floating elements simulation */}
-        <div className="absolute top-1/2 left-0 w-64 h-64 bg-primary/10 rounded-full blur-[120px] -z-10 animate-pulse" />
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-orange-500/5 rounded-full blur-[140px] -z-10" />
-      </section>
-
-      {/* ─── The Concept: Site Factory ─── */}
-      <section id="vision" className="py-32 px-6 bg-gray-50/50">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-            <Reveal delay={100}>
-              <div className="space-y-6">
-                <p className="font-sub text-[10px] font-black uppercase tracking-[0.3em] text-primary">Le Concept : Site Factory</p>
-                <h2 className="font-heading text-4xl md:text-6xl font-black leading-tight uppercase tracking-tighter">
-                  Une présence digitale <br/>
-                  <span className="text-muted-foreground">sans la complexité.</span>
-                </h2>
-                <p className="text-lg text-muted-foreground leading-relaxed">
-                  Qu'il s'agisse d'un petit restaurant de quartier ou d'un établissement premium, notre application web vous offre une infrastructure complète. Vous vous connectez, vous configurez votre identité, et votre site est prêt à encaisser vos premières commandes.
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6">
-                  {[
-                    { title: "Dashboard Unifié", desc: "Suivez vos ventes et clients en temps réel.", icon: Layout },
-                    { title: "Design Premium", desc: "Des interfaces qui donnent faim.", icon: Globe },
-                    { title: "Paiement Direct", desc: "WhatsApp, MoMo & Cash.", icon: ShieldCheck },
-                    { title: "Zéro Code", desc: "Concentrez-vous sur votre cuisine.", icon: Zap }
-                  ].map((item, i) => (
-                    <div key={i} className="flex items-start gap-4 p-5 bg-white rounded-[24px] border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group">
-                      <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-primary shrink-0 group-hover:scale-110 group-hover:bg-primary/10 transition-all">
-                        <item.icon size={22} />
-                      </div>
-                      <div className="flex flex-col justify-center pt-1">
-                        <h4 className="font-heading font-black text-sm uppercase tracking-tight mb-1">{item.title}</h4>
-                        <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </Reveal>
-            <Reveal delay={300} className="relative">
-              <div className="aspect-square bg-white rounded-[60px] shadow-2xl border border-gray-100 p-4 overflow-hidden group">
-                <div className="h-full w-full bg-gray-50 rounded-[48px] border border-gray-100 flex items-center justify-center relative overflow-hidden">
-                   <div className="text-center p-8">
-                      <Store size={80} className="mx-auto text-primary/20 mb-6 group-hover:scale-110 transition-transform duration-700" />
-                      <p className="font-heading text-xl font-black uppercase">Aujourd'hui : Restaurants</p>
-                      <p className="text-sm text-muted-foreground mt-2 italic">Demain : Boutiques, Pharmacies, Epiceries...</p>
-                   </div>
-                   <div className="absolute top-0 right-0 p-6">
-                      <span className="px-3 py-1 rounded-full bg-primary text-white text-[10px] font-black uppercase tracking-widest shadow-lg">Phase 1</span>
-                   </div>
-                </div>
-              </div>
-            </Reveal>
-          </div>
+        {/* Dynamic Background */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full -z-10 opacity-30">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[120px] animate-pulse" />
+          <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-orange-400/10 rounded-full blur-[140px]" />
         </div>
       </section>
 
-      {/* ─── IZA AI Section ─── */}
-      <section id="iza" className="py-32 px-6 bg-black text-white relative overflow-hidden">
+      {/* ─── The 3 Pillars Section ─── */}
+      <section id="concept" className="py-32 px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-24">
-            <Reveal delay={100} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-white font-sub text-[10px] font-black uppercase tracking-widest mb-8">
-              <Bot size={14} className="text-primary" /> Intelligence Artificielle Opérationnelle
-            </Reveal>
-            <Reveal delay={200}>
-              <h2 className="font-heading text-4xl md:text-7xl font-black leading-none uppercase tracking-tighter mb-8">
-                Rencontrez <span className="text-primary italic">IZA</span>. <br/>
-                <span className="text-white/40">Votre nouvelle directrice.</span>
-              </h2>
-            </Reveal>
-            <Reveal delay={300} className="max-w-2xl mx-auto">
-              <p className="text-lg text-white/60 leading-relaxed">
-                IZA n'est pas un chatbot classique. C'est une intelligence intégrée qui analyse vos performances, suggère des optimisations de menu et gère vos clients pendant que vous cuisinez.
-              </p>
-            </Reveal>
+          <div className="text-center mb-20">
+            <FadeIn>
+              <p className="font-sub text-[11px] font-black uppercase tracking-[0.4em] text-primary mb-4">Comprendre Oresto Connect</p>
+              <h2 className="font-heading text-4xl md:text-6xl font-black uppercase tracking-tighter">Trois piliers pour votre succès</h2>
+            </FadeIn>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-             {[
-               { title: "Analyse Temps Réel", desc: "IZA surveille vos stocks et vos pics de commande.", icon: TrendingUp },
-               { title: "Assistance Vendeur", desc: "Posez-lui des questions sur votre business, elle répond.", icon: Bot },
-               { title: "Automatisation", desc: "IZA peut modifier vos prix ou fermer votre boutique sur simple commande vocale.", icon: Zap }
-             ].map((feature, i) => (
-               <Reveal key={i} delay={400 + (i * 100)} className="p-10 rounded-[40px] bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
-                  <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center mb-8 shadow-xl shadow-primary/20">
-                    <feature.icon size={24} />
+            {[
+              { 
+                title: "Site Factory", 
+                icon: Rocket, 
+                desc: "Générez instantanément une application web premium personnalisée à votre image. Pas de code, juste du résultat.",
+                color: "bg-blue-500"
+              },
+              { 
+                title: "IZA AI Director", 
+                icon: Bot, 
+                desc: "Une IA qui ne se contente pas de parler. Elle analyse vos ventes, gère vos clients et pilote votre boutique.",
+                color: "bg-primary"
+              },
+              { 
+                title: "Local Ecosystem", 
+                icon: Globe, 
+                desc: "Intégration native des réalités locales : WhatsApp, Mobile Money, Cash et logistique de proximité.",
+                color: "bg-emerald-500"
+              }
+            ].map((pillar, i) => (
+              <FadeIn key={i} delay={i * 0.1}>
+                <div className="h-full p-10 rounded-[48px] bg-gray-50 border border-gray-100 hover:bg-white hover:shadow-2xl hover:scale-[1.02] transition-all group">
+                  <div className={`w-16 h-16 ${pillar.color} rounded-2xl flex items-center justify-center text-white mb-8 shadow-xl group-hover:rotate-6 transition-transform`}>
+                    <pillar.icon size={30} />
                   </div>
-                  <h3 className="font-heading text-xl font-black uppercase tracking-tight mb-4">{feature.title}</h3>
-                  <p className="text-white/40 text-sm leading-relaxed">{feature.desc}</p>
-               </Reveal>
-             ))}
+                  <h3 className="font-heading text-2xl font-black uppercase tracking-tighter mb-4">{pillar.title}</h3>
+                  <p className="text-muted-foreground leading-relaxed italic">"{pillar.desc}"</p>
+                </div>
+              </FadeIn>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ─── Why Oresto Connect? ─── */}
+      {/* ─── IZA AI Feature ─── */}
+      <section id="iza" className="py-32 px-6 bg-black text-white relative overflow-hidden rounded-[80px] mx-4 md:mx-10 my-20">
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+            <div>
+              <FadeIn>
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-primary font-sub text-[10px] font-black uppercase tracking-widest mb-8">
+                  <Bot size={14} /> Intelligence Opérationnelle
+                </div>
+                <h2 className="font-heading text-5xl md:text-8xl font-black leading-[0.9] uppercase tracking-tighter mb-10">
+                  Rencontrez <span className="text-primary italic">IZA</span>.<br/>
+                  <span className="text-white/30">Votre nouvelle directrice.</span>
+                </h2>
+                <p className="text-xl text-white/50 mb-12 leading-relaxed max-w-xl">
+                  IZA n'est pas un chatbot. C'est une intelligence intégrée qui analyse vos performances en temps réel, optimise votre menu et gère vos clients pendant que vous vous concentrez sur votre cuisine.
+                </p>
+                
+                <div className="space-y-6">
+                  {[
+                    "Analyse prédictive des stocks et ventes",
+                    "Modification du catalogue par commande vocale",
+                    "Assistance client automatisée 24/7",
+                    "Rapports de performance quotidiens"
+                  ].map((feature, i) => (
+                    <div key={i} className="flex items-center gap-4 text-sm font-sub font-black uppercase tracking-widest opacity-80">
+                      <div className="w-6 h-6 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center text-primary">
+                        <CheckCircle2 size={14} />
+                      </div>
+                      {feature}
+                    </div>
+                  ))}
+                </div>
+              </FadeIn>
+            </div>
+            
+            <FadeIn delay={0.2} className="relative">
+              <div className="aspect-square bg-gradient-to-br from-primary/20 to-orange-600/20 rounded-[80px] border border-white/10 flex items-center justify-center relative overflow-hidden group">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(234,88,12,0.1),transparent_70%)] group-hover:scale-150 transition-transform duration-1000" />
+                <Bot size={120} className="text-primary animate-pulse" />
+                
+                {/* Floating UI elements simulation */}
+                <div className="absolute top-10 right-10 p-6 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 animate-bounce" style={{ animationDuration: "3s" }}>
+                  <TrendingUp className="text-primary mb-2" />
+                  <p className="text-[10px] font-black uppercase tracking-widest">Ventes +24%</p>
+                </div>
+                <div className="absolute bottom-20 left-10 p-6 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 animate-bounce" style={{ animationDuration: "4s" }}>
+                  <Users className="text-emerald-500 mb-2" />
+                  <p className="text-[10px] font-black uppercase tracking-widest">Nouveaux Clients: 12</p>
+                </div>
+              </div>
+            </FadeIn>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Local Realities Section ─── */}
+      <section id="market" className="py-32 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
+            <FadeIn className="order-2 lg:order-1">
+              <div className="grid grid-cols-2 gap-6">
+                <div className="p-10 rounded-[48px] bg-emerald-50 border border-emerald-100 space-y-4">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-500 flex items-center justify-center text-white shadow-lg">
+                    <Smartphone size={24} />
+                  </div>
+                  <h4 className="font-heading font-black text-xl uppercase tracking-tighter">MoMo Native</h4>
+                  <p className="text-sm text-emerald-900/60 leading-relaxed">Intégration fluide de Mobile Money (Orange, MTN, Wave).</p>
+                </div>
+                <div className="p-10 rounded-[48px] bg-blue-50 border border-blue-100 space-y-4 mt-8">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-500 flex items-center justify-center text-white shadow-lg">
+                    <MessageSquare size={24} />
+                  </div>
+                  <h4 className="font-heading font-black text-xl uppercase tracking-tighter">WhatsApp</h4>
+                  <p className="text-sm text-blue-900/60 leading-relaxed">Notifications et gestion des commandes via WhatsApp.</p>
+                </div>
+                <div className="p-10 rounded-[48px] bg-orange-50 border border-orange-100 space-y-4">
+                  <div className="w-12 h-12 rounded-2xl bg-orange-500 flex items-center justify-center text-white shadow-lg">
+                    <CreditCard size={24} />
+                  </div>
+                  <h4 className="font-heading font-black text-xl uppercase tracking-tighter">Cash & Collect</h4>
+                  <p className="text-sm text-orange-900/60 leading-relaxed">Gestion flexible du paiement à la livraison et du retrait.</p>
+                </div>
+                <div className="p-10 rounded-[48px] bg-gray-100 border border-gray-200 space-y-4 mt-8">
+                  <div className="w-12 h-12 rounded-2xl bg-black flex items-center justify-center text-white shadow-lg">
+                    <Search size={24} />
+                  </div>
+                  <h4 className="font-heading font-black text-xl uppercase tracking-tighter">SEO Local</h4>
+                  <p className="text-sm text-gray-600 leading-relaxed">Soyez trouvé par vos clients de proximité instantanément.</p>
+                </div>
+              </div>
+            </FadeIn>
+            
+            <FadeIn className="order-1 lg:order-2 space-y-8">
+              <p className="font-sub text-[11px] font-black uppercase tracking-[0.4em] text-primary">Le Marché</p>
+              <h2 className="font-heading text-4xl md:text-7xl font-[900] leading-tight uppercase tracking-tighter">
+                L'infrastructure du commerce <span className="text-muted-foreground">en Afrique de l'Ouest.</span>
+              </h2>
+              <p className="text-xl text-muted-foreground leading-relaxed italic">
+                "Nous avons conçu Oresto Connect pour répondre aux réalités du terrain. Pas de barrières technologiques, juste des outils qui fonctionnent là où vous êtes."
+              </p>
+              <div className="flex items-center gap-6 pt-6">
+                <div className="flex -space-x-4">
+                  {[1,2,3,4].map(i => (
+                    <div key={i} className="w-12 h-12 rounded-full border-4 border-white bg-gray-200" />
+                  ))}
+                </div>
+                <p className="text-sm font-sub font-black uppercase tracking-widest">+500 commerçants nous font confiance</p>
+              </div>
+            </FadeIn>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Security Section ─── */}
+      <section id="securite" className="py-32 px-6 bg-gray-50/50">
+        <div className="max-w-4xl mx-auto">
+          <FadeIn>
+            <div className="p-16 md:p-24 rounded-[64px] bg-white border border-gray-100 shadow-2xl relative overflow-hidden">
+               <div className="absolute -top-10 -right-10 opacity-5">
+                  <ShieldCheck size={300} />
+               </div>
+               <div className="relative z-10 text-center">
+                  <div className="w-20 h-20 bg-black text-white rounded-[24px] flex items-center justify-center mx-auto mb-10 shadow-2xl">
+                    <Lock size={32} />
+                  </div>
+                  <h2 className="font-heading text-4xl md:text-5xl font-black uppercase tracking-tighter mb-8">Vos données, <span className="text-primary italic">votre empire.</span></h2>
+                  <p className="text-lg text-muted-foreground leading-relaxed mb-12">
+                    Votre business est sacré. Chaque utilisateur d'Oresto Connect bénéficie d'un environnement **Firebase cloisonné** et ultra-sécurisé. Vos conversations avec IZA et vos données clients ne quittent jamais votre espace privé.
+                  </p>
+                  <div className="flex flex-wrap justify-center gap-4">
+                    <span className="px-6 py-2 rounded-full bg-gray-100 text-[10px] font-black uppercase tracking-widest">Chiffrement AES-256</span>
+                    <span className="px-6 py-2 rounded-full bg-gray-100 text-[10px] font-black uppercase tracking-widest">Hébergement Firebase</span>
+                    <span className="px-6 py-2 rounded-full bg-gray-100 text-[10px] font-black uppercase tracking-widest">RGPD Compliant</span>
+                  </div>
+               </div>
+            </div>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* ─── Future Vision ─── */}
       <section className="py-32 px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-24">
-            <h2 className="font-heading text-4xl md:text-6xl font-black uppercase tracking-tighter">Pourquoi nous ?</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+          <FadeIn className="text-center mb-20">
+            <h2 className="font-heading text-4xl md:text-6xl font-black uppercase tracking-tighter mb-6">Demain, nous irons encore plus loin</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto italic">Oresto Connect commence avec la restauration, mais l'infrastructure est prête pour tout type de commerce.</p>
+          </FadeIn>
+          
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {[
-              { label: "Vitesse", text: "Déployez votre application web de vente en moins de 120 secondes chrono.", icon: Zap },
-              { label: "Autonomie", text: "Prenez le contrôle total de votre design, vos prix et vos livraisons.", icon: Smartphone },
-              { label: "Visibilité", text: "Un site premium optimisé pour le référencement et le partage social.", icon: Globe },
-              { label: "Croissance", text: "Rejoignez un écosystème conçu pour multiplier votre chiffre d'affaires.", icon: TrendingUp }
-            ].map((reason, i) => (
-              <Reveal key={i} delay={i * 100} className="text-center">
-                <div className="w-20 h-20 mx-auto rounded-full bg-gray-50 flex items-center justify-center text-primary mb-8 border border-gray-100 shadow-sm">
-                  <reason.icon size={32} />
+              { label: "Restaurants", status: "Actuel", icon: UtensilsCrossed, active: true },
+              { label: "Boutiques", status: "Bientôt", icon: Store, active: false },
+              { label: "Pharmacies", status: "Bientôt", icon: Zap, active: false },
+              { label: "Epiceries", status: "Bientôt", icon: Smartphone, active: false }
+            ].map((cat, i) => (
+              <FadeIn key={i} delay={i * 0.1}>
+                <div className={`p-10 rounded-[40px] text-center border transition-all ${cat.active ? 'bg-white border-primary shadow-xl scale-105' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
+                  <div className={`w-14 h-14 mx-auto rounded-2xl flex items-center justify-center mb-6 ${cat.active ? 'bg-primary text-white' : 'bg-gray-200 text-gray-400'}`}>
+                    <cat.icon size={24} />
+                  </div>
+                  <h4 className="font-heading font-black text-sm uppercase tracking-widest mb-2">{cat.label}</h4>
+                  <span className={`text-[9px] font-black uppercase tracking-[0.2em] ${cat.active ? 'text-primary' : 'text-gray-400'}`}>{cat.status}</span>
                 </div>
-                <h4 className="font-heading font-black text-sm uppercase tracking-widest mb-4">{reason.label}</h4>
-                <p className="text-muted-foreground text-sm leading-relaxed">{reason.text}</p>
-              </Reveal>
+              </FadeIn>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ─── How it Works ─── */}
-      <section className="py-32 px-6 bg-gray-50/50">
+      {/* ─── Footer ─── */}
+      <footer className="pt-32 pb-20 px-6 bg-black text-white rounded-t-[80px]">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-24">
-            <Reveal delay={100} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 border border-primary/10 text-primary font-sub text-[10px] font-black uppercase tracking-widest mb-4">
-              Simple & Rapide
-            </Reveal>
-            <h2 className="font-heading text-4xl md:text-6xl font-black uppercase tracking-tighter">Comment ça marche ?</h2>
+          <div className="text-center mb-32">
+            <FadeIn>
+              <h2 className="font-heading text-6xl md:text-[140px] font-[900] leading-[0.8] uppercase tracking-tighter mb-16 italic">
+                Prêt à dominer<br/>
+                <span className="text-primary italic">le digital ?</span>
+              </h2>
+              <Link to="/register" className="inline-flex items-center gap-5 px-16 py-8 bg-white text-black rounded-full font-sub text-base font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_30px_60px_rgba(255,255,255,0.1)]">
+                Lancer mon App Web <ChevronRight size={24} />
+              </Link>
+            </FadeIn>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
-            <div className="hidden md:block absolute top-12 left-1/6 right-1/6 h-0.5 bg-gradient-to-r from-transparent via-gray-200 to-transparent -z-10" />
-            {[
-              { step: "01", title: "Inscription", text: "Créez votre compte vendeur en renseignant les informations de base de votre restaurant." },
-              { step: "02", title: "Configuration", text: "Ajoutez vos plats, définissez vos zones de livraison et choisissez un thème visuel." },
-              { step: "03", title: "Lancement", text: "Votre site est en ligne. Oresto Connect gère vos commandes, IZA gère vos statistiques." }
-            ].map((s, i) => (
-              <Reveal key={i} delay={i * 200} className="text-center bg-white p-10 rounded-[40px] shadow-sm border border-gray-100 relative group hover:-translate-y-2 transition-transform">
-                <div className="w-20 h-20 mx-auto bg-black text-white rounded-[24px] flex items-center justify-center font-heading text-3xl font-black shadow-2xl mb-8 group-hover:bg-primary transition-colors">
-                  {s.step}
+          
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-16 pt-20 border-t border-white/10">
+            <div className="space-y-8">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
+                  <Zap size={20} fill="currentColor" />
                 </div>
-                <h3 className="font-heading text-2xl font-black uppercase tracking-tighter mb-4">{s.title}</h3>
-                <p className="text-muted-foreground leading-relaxed text-sm">{s.text}</p>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-
-      {/* ─── Confidentiality & Data ─── */}
-      <section id="confidentiality" className="py-32 px-6 bg-gray-50">
-        <div className="max-w-4xl mx-auto">
-          <Reveal delay={100} className="p-12 md:p-20 rounded-[60px] bg-white border border-gray-100 shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-12 opacity-5">
-              <ShieldCheck size={200} className="text-black" />
-            </div>
-            <div className="relative z-10">
-              <div className="flex items-center gap-3 mb-10 text-primary">
-                <Lock size={28} />
-                <h2 className="font-heading text-3xl font-black uppercase tracking-tighter">Données & Confidentialité</h2>
+                <span className="font-heading text-2xl font-black tracking-tighter uppercase">Oresto</span>
               </div>
-              <div className="space-y-8 text-muted-foreground">
-                <p className="text-lg leading-relaxed">
-                  Votre business, vos données. Oresto Connect utilise une infrastructure **Firebase sécurisée** où chaque utilisateur possède son propre environnement cloisonné.
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                  <div className="space-y-4">
-                    <h5 className="font-heading font-black text-xs uppercase tracking-widest text-foreground">Stockage Isolé</h5>
-                    <p className="text-xs">Vos conversations avec IZA et vos historiques de vente sont inaccessibles aux autres utilisateurs.</p>
-                  </div>
-                  <div className="space-y-4">
-                    <h5 className="font-heading font-black text-xs uppercase tracking-widest text-foreground">Transparence Totale</h5>
-                    <p className="text-xs">Nous ne vendons jamais vos données. Nous fournissons l'outil, vous possédez le résultat.</p>
-                  </div>
-                </div>
-                <p className="text-sm italic pt-8 border-t border-gray-100">
-                  En utilisant Oresto Connect, vous acceptez notre engagement sur la protection de la vie privée et la sécurité de vos informations opérationnelles.
-                </p>
-              </div>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* ─── Footer / Final CTA ─── */}
-      <footer className="py-32 px-6 bg-black text-white">
-        <div className="max-w-7xl mx-auto text-center">
-          <Reveal delay={100}>
-            <h2 className="font-heading text-5xl md:text-8xl font-black leading-none uppercase tracking-tighter mb-12">
-              Prêt à dominer <br/>
-              <span className="text-primary italic">le digital ?</span>
-            </h2>
-          </Reveal>
-          <Reveal delay={200} className="mb-20">
-            <Link to="/register" className="inline-flex items-center gap-4 px-12 py-6 bg-white text-black rounded-[28px] font-sub text-sm font-black uppercase tracking-widest hover:scale-105 transition-all shadow-2xl">
-              Lancer mon App Web <ChevronRight size={20} />
-            </Link>
-          </Reveal>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 text-left pt-20 border-t border-white/10">
-            <div className="space-y-6">
-              <div className="flex items-center gap-2">
-                <Zap size={20} className="text-primary" />
-                <span className="font-heading text-lg font-black tracking-tighter uppercase">Oresto</span>
-              </div>
-              <p className="text-white/40 text-xs leading-relaxed max-w-xs">
-                La première plateforme de Site Factory pilotée par IA pour la restauration et le commerce en Afrique de l'Ouest.
+              <p className="text-white/40 text-sm leading-relaxed max-w-xs italic">
+                "La super-app de commerce et de restauration d'Afrique de l'Ouest. Propulsée par l'IA, conçue pour l'excellence."
               </p>
             </div>
+            
             <div>
-              <h5 className="font-sub text-[10px] font-black uppercase tracking-widest text-white mb-6">Plateforme</h5>
-              <ul className="space-y-4 text-white/40 text-xs">
+              <h5 className="font-sub text-[10px] font-black uppercase tracking-widest text-white mb-8 opacity-40">Navigation</h5>
+              <ul className="space-y-4 text-sm font-sub font-black uppercase tracking-widest">
                 <li><Link to="/login" className="hover:text-primary transition-colors">Connexion</Link></li>
                 <li><Link to="/register" className="hover:text-primary transition-colors">Inscription</Link></li>
-                <li><a href="#iza" className="hover:text-primary transition-colors">Fonctionnalités IA</a></li>
+                <li><a href="#iza" className="hover:text-primary transition-colors">IZA AI Director</a></li>
               </ul>
             </div>
+
             <div>
-              <h5 className="font-sub text-[10px] font-black uppercase tracking-widest text-white mb-6">Légal</h5>
-              <ul className="space-y-4 text-white/40 text-xs">
-                <li><a href="#confidentiality" className="hover:text-primary transition-colors">Confidentialité</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Conditions Générales</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Support</a></li>
+              <h5 className="font-sub text-[10px] font-black uppercase tracking-widest text-white mb-8 opacity-40">Plateforme</h5>
+              <ul className="space-y-4 text-sm font-sub font-black uppercase tracking-widest">
+                <li><a href="#market" className="hover:text-primary transition-colors">Marché Local</a></li>
+                <li><a href="#concept" className="hover:text-primary transition-colors">Concept PaaS</a></li>
+                <li><a href="#securite" className="hover:text-primary transition-colors">Confidentialité</a></li>
               </ul>
             </div>
-            <div className="text-right flex flex-col justify-between">
-              <p className="font-sub text-[10px] font-black uppercase tracking-widest text-white">© 2026 Oresto Connect</p>
-              <div className="flex justify-end gap-4 mt-6">
-                 <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white hover:text-primary transition-colors cursor-pointer"><Store size={14} /></div>
-                 <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white hover:text-primary transition-colors cursor-pointer"><Bot size={14} /></div>
+
+            <div className="text-right flex flex-col justify-between items-end">
+              <div className="flex gap-4">
+                 <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:text-primary transition-colors cursor-pointer group">
+                    <Store size={20} className="group-hover:scale-110 transition-transform" />
+                 </div>
+                 <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:text-primary transition-colors cursor-pointer group">
+                    <Bot size={20} className="group-hover:scale-110 transition-transform" />
+                 </div>
+              </div>
+              <div className="space-y-2 mt-20">
+                <p className="font-sub text-[10px] font-black uppercase tracking-[0.3em] text-white/40">© 2026 Oresto Connect</p>
+                <p className="text-[10px] font-sub font-black uppercase tracking-widest text-primary italic">Designed for Impact</p>
               </div>
             </div>
           </div>
         </div>
       </footer>
-
     </div>
   );
 }
