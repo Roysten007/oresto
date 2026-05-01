@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { db } from "@/lib/firebase";
-import { ref, onValue, get, query, orderByChild, equalTo } from "firebase/database";
+import { ref, onValue, get, query, orderByChild, equalTo, update } from "firebase/database";
 import { 
   ShoppingCart, 
   Clock, 
@@ -25,7 +25,8 @@ import {
   Heart,
   Truck,
   Store,
-  Rocket
+  Rocket,
+  AlertTriangle
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { VendorProfile, Product, Review } from "@/data/mockData";
@@ -240,21 +241,71 @@ export default function RestaurantPublic() {
   );
 
 
-  if (!vendor || (!vendor.is_published && !isOwner)) {
+  if (!vendor && !loading) {
+    // Truly not found
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-10 text-center">
+        <div className="w-24 h-24 bg-red-50 rounded-full flex items-center justify-center text-red-500 mb-6">
+          <Utensils size={40} />
+        </div>
+        <h1 className="text-3xl font-black uppercase tracking-tighter mb-4">Restaurant introuvable</h1>
+        <p className="text-gray-500 max-w-xs mx-auto mb-8 font-medium">Ce restaurant n'existe pas ou le lien est incorrect.</p>
+        <button onClick={() => navigate('/app')} className="px-8 py-4 bg-black text-white rounded-2xl font-black text-xs uppercase tracking-widest">Retour à l'accueil</button>
+      </div>
+    );
+  }
+
+  const isPublished = vendor?.is_published === true || vendor?.is_published === "true";
+
+  if (!isPublished && !isOwner && !loading) {
     return (
       <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center">
         <div className="w-24 h-24 bg-primary/10 rounded-[40px] flex items-center justify-center text-primary mb-8 animate-pulse">
           <Rocket size={48} />
         </div>
-        <h1 className="font-heading text-4xl font-black uppercase tracking-tighter mb-4">
-          Bientôt disponible
-        </h1>
+        <h1 className="font-heading text-4xl font-black uppercase tracking-tighter mb-4">Bientôt disponible</h1>
         <p className="text-muted-foreground max-w-md italic mb-10">
-          Ce restaurant prépare son ouverture digitale sur <span className="text-primary font-bold">Oresto</span>. Revenez très bientôt pour découvrir leur carte et commander en ligne !
+          Ce restaurant prépare son ouverture sur <span className="text-primary font-bold">Oresto</span>. Revenez bientôt !
         </p>
-        <Link to="/" className="px-8 py-4 bg-black text-white rounded-full font-sub text-xs font-black uppercase tracking-widest hover:scale-105 transition-all">
-          Retour à l'accueil
-        </Link>
+        <Link to="/" className="px-8 py-4 bg-black text-white rounded-full font-sub text-xs font-black uppercase tracking-widest">Retour à l'accueil</Link>
+      </div>
+    );
+  }
+
+  // SPECIAL CASE: Owner viewing unpublished site
+  if (!isPublished && isOwner && !loading) {
+    return (
+      <div className="min-h-screen bg-orange-50 flex flex-col items-center justify-center p-10 text-center">
+        <div className="w-20 h-20 bg-orange-100 rounded-3xl flex items-center justify-center text-orange-600 mb-6">
+          <AlertTriangle size={40} />
+        </div>
+        <h1 className="text-2xl font-black uppercase tracking-tight mb-2">Votre site n'est pas encore public</h1>
+        <p className="text-orange-800/70 max-w-sm mx-auto mb-8 text-sm font-medium">
+          Vous voyez cet écran car vous êtes le propriétaire, mais vos clients ne peuvent pas encore accéder à votre site.
+        </p>
+        <div className="flex flex-col gap-3 w-full max-w-xs">
+          <button 
+            onClick={async () => {
+              if (!vendor?.id) return;
+              try {
+                await update(ref(db, `vendors/${vendor.id}`), { is_published: true });
+                toast.success("Félicitations ! Votre site est maintenant public.");
+                window.location.reload();
+              } catch (e) {
+                toast.error("Erreur lors de la publication.");
+              }
+            }}
+            className="w-full py-4 bg-orange-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-orange-600/20"
+          >
+            🚀 Rendre mon site public maintenant
+          </button>
+          <button 
+            onClick={() => navigate('/vendor/site-builder')}
+            className="w-full py-4 bg-white border border-orange-200 text-orange-900 rounded-2xl font-black text-xs uppercase tracking-widest"
+          >
+            Retour au constructeur
+          </button>
+        </div>
       </div>
     );
   }
