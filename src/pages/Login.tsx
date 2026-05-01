@@ -38,10 +38,7 @@ export default function Login() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#FF6B00] opacity-10 blur-[100px] rounded-full" />
         
         <Link to="/" className="relative z-10 flex items-center gap-1 no-underline">
-          <span style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: 24, color: "white" }}>OREST</span>
-          <span style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: 24, color: "white", position: "relative" }}>
-            O<div className="absolute bottom-1 right-[-6px] w-[6px] h-[6px] bg-[#FF6B00] rounded-[1px]" />
-          </span>
+          <span style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: 24, color: "white" }}>ORESTO</span>
         </Link>
 
         <div className="relative z-10 mt-20 lg:mt-0">
@@ -69,10 +66,7 @@ export default function Login() {
       <div className="flex-1 flex flex-col items-center justify-center p-6 lg:p-20">
         <div className="lg:hidden mb-8 w-full flex justify-center">
           <Link to="/" className="flex items-center gap-1 no-underline">
-            <span style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: 24, color: "#0A0A0A" }}>OREST</span>
-            <span style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: 24, color: "#0A0A0A", position: "relative" }}>
-              O<div className="absolute bottom-1 right-[-6px] w-[6px] h-[6px] bg-[#FF6B00] rounded-[1px]" />
-            </span>
+            <span style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: 24, color: "#0A0A0A" }}>ORESTO</span>
           </Link>
         </div>
         <div className="w-full max-w-md">
@@ -165,12 +159,12 @@ export default function Login() {
             <p className="text-[10px] font-bold text-[#BBB] uppercase tracking-widest mb-4">Accès rapides (Démo)</p>
             <div className="space-y-3">
               <div className="flex justify-between items-center text-xs">
-                <span className="text-[#777]">Client: <b className="text-[#0A0A0A]">aminata@test.com</b></span>
-                <span className="text-[#BBB]">client123</span>
+                <span className="text-[#777]">Client: <b className="text-[#0A0A0A]">aminat@test.com</b></span>
+                <span className="text-[#BBB]">password</span>
               </div>
               <div className="flex justify-between items-center text-xs">
                 <span className="text-[#777]">Vendeur: <b className="text-[#0A0A0A]">kofi@test.com</b></span>
-                <span className="text-[#BBB]">vendor123</span>
+                <span className="text-[#BBB]">password</span>
               </div>
             </div>
           </div>

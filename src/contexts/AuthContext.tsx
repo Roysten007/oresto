@@ -149,12 +149,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(async (email: string, password: string) => {
     // === Dev Fallback for test accounts ===
-    if (email === "aminat@test.com" && password === "password") {
+    const isDemoAccount = (email === "aminat@test.com" || email === "aminata@test.com") && password === "password";
+    
+    if (isDemoAccount) {
       const mockAminat: User = {
         id: "mock_aminat",
         name: "Aminat Test",
         firstName: "Aminat",
-        email: "aminat@test.com",
+        email: email,
         password: "",
         role: "client",
         phone: "+229 00000000",
@@ -181,10 +183,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const uid = userCredential.user.uid;
 
       // Fetch user data first
-      const userSnap = await get(child(ref(db), `users/${uid}`));
+      let userSnap = await get(child(ref(db), `users/${uid}`));
       
       if (!userSnap.exists()) {
-        throw new Error("Profil utilisateur introuvable en base.");
+        // Auto-create profile if it exists in Auth but not in DB
+        const newUser = {
+          id: uid,
+          name: email.split("@")[0],
+          email: email,
+          role: "client",
+        };
+        await set(ref(db, `users/${uid}`), newUser);
+        userSnap = await get(child(ref(db), `users/${uid}`));
       }
 
       const userData = userSnap.val() as User;
@@ -259,14 +269,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const uid = userCredential.user.uid;
 
       // 2. Préparer les données
-      let vendorId = data.vendorId;
+      let vendorId = data.vendorId || (data.role === "vendor" ? `v_${uid}` : null);
       
       const newUser: User = {
         id: uid,
         name: `${data.firstName || ""} ${data.name || ""}`.trim(),
         firstName: data.firstName || "",
         email: data.email || "",
-        password: "", // Ne jamais stocker le mot de passe en clair dans Firestore !
+        password: "", 
         role: data.role || "client",
         phone: data.phone || "",
         verificationMethod: data.verificationMethod || "email",
@@ -279,13 +289,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // 3. Sauvegarder l'utilisateur dans Realtime Database
       await set(ref(db, `users/${uid}`), newUser);
 
-      // 4. Si c'est un vendeur, on crée aussi un profil vendeur vide/basique
-      if (data.role === "vendor") {
-        vendorId = `v_${uid}`;
-        newUser.vendorId = vendorId;
-        // Met à jour l'utilisateur pour inclure son vendorId
-        await set(ref(db, `users/${uid}/vendorId`), vendorId);
-
+      // 4. Si c'est un vendeur, on crée aussi un profil vendeur
+      if (data.role === "vendor" && vendorId) {
         const newVendorProfile: VendorProfile = {
           id: vendorId,
           userId: uid,
@@ -301,7 +306,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           whatsapp: data.shopPhone || data.phone || "",
           city: data.city || "",
           neighborhood: data.neighborhood || "",
-          status: "pending", // L'admin devra valider
+          status: "pending",
           joinedDate: new Date().toISOString().split("T")[0],
           plan: "starter",
           verified: false,
@@ -312,6 +317,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       setLastActivity(Date.now());
+      // Trigger a state update immediately
+      setState({
+        user: newUser,
+        role: newUser.role,
+        vendorProfile: data.role === "vendor" ? null : null, // Will be fetched by onValue
+        isAuthenticated: true,
+        isLoading: false
+      });
+      
       return { success: true, role: newUser.role, uid };
     } catch (error: any) {
       console.error(error);
