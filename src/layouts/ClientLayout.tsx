@@ -44,14 +44,14 @@ export default function ClientLayout() {
             className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-gray-100/80 px-6 py-3 shadow-sm shadow-gray-100/60"
           >
             <div className="max-w-7xl mx-auto flex items-center justify-between">
-              <div className="flex flex-col">
-                <span className="text-[9px] font-black uppercase tracking-[0.25em] text-gray-400 leading-none mb-1">Livraison à</span>
-                <button className="flex items-center gap-1.5 text-sm font-black uppercase tracking-tight hover:text-primary transition-colors">
+              <Link to="/app/addresses" className="flex flex-col group min-w-0 flex-1 mr-4">
+                <span className="text-[9px] font-black uppercase tracking-[0.25em] text-gray-400 leading-none mb-1 group-hover:text-primary transition-colors">Livraison à</span>
+                <div className="flex items-center gap-1.5 text-sm font-black uppercase tracking-tight group-hover:text-primary transition-colors">
                   <MapPin size={13} className="text-primary" />
-                  {city || "Cotonou"}
-                  <ChevronDown size={13} className="text-gray-400" />
-                </button>
-              </div>
+                  <span className="truncate">{city || "Cotonou"}</span>
+                  <ChevronDown size={13} className="text-gray-400 group-hover:text-primary transition-colors shrink-0" />
+                </div>
+              </Link>
 
               <div className="flex items-center gap-3">
                 <Link

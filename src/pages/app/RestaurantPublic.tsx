@@ -299,24 +299,24 @@ export default function RestaurantPublic() {
       <div className="max-w-7xl mx-auto px-6 space-y-12 pb-40 relative z-10">
         {/* Title and Metadata */}
         <div className="text-center pt-20 md:pt-24 pb-4">
-          <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-black">{vendor.name}</h1>
-          <div className="flex items-center justify-center gap-4 text-xs font-bold text-gray-500 uppercase tracking-widest mt-3">
-            <span className="px-3 py-1 bg-gray-100 rounded-full">{vendor.category}</span>
-            <span>•</span>
-            <span className="flex items-center gap-1"><MapPin size={12} className="text-primary"/> {vendor.neighborhood}</span>
+          <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-black break-words leading-none">{vendor.name}</h1>
+          <div className="flex flex-wrap items-center justify-center gap-3 text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-widest mt-3 px-4">
+            <span className="px-3 py-1 bg-gray-100 rounded-full whitespace-nowrap">{vendor.category}</span>
+            <span className="hidden sm:inline">•</span>
+            <span className="flex items-center gap-1 whitespace-nowrap"><MapPin size={12} className="text-primary"/> {vendor.neighborhood}</span>
           </div>
         </div>
         {/* Stats Bar */}
-        <div className="grid grid-cols-3 gap-4 -translate-y-8">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 -translate-y-8 px-2 sm:px-0">
           {[
             { icon: Star, val: vendor.rating || "5.0", label: "Avis" },
             { icon: Clock, val: "25-35", label: "Min" },
             { icon: Info, val: "Infos", label: "Détails" },
           ].map((stat, i) => (
-            <div key={i} className="bg-white p-4 rounded-[32px] shadow-xl border border-gray-50 flex flex-col items-center justify-center gap-1">
-              <stat.icon size={18} className="text-primary mb-1" />
-              <span className="font-black text-sm">{stat.val}</span>
-              <span className="text-[8px] font-black uppercase tracking-widest text-gray-400">{stat.label}</span>
+            <div key={i} className="bg-white p-3 sm:p-4 rounded-[28px] sm:rounded-[32px] shadow-xl border border-gray-50 flex flex-col items-center justify-center gap-1 min-w-0">
+              <stat.icon size={16} className="text-primary mb-0.5 sm:mb-1 shrink-0" />
+              <span className="font-black text-xs sm:text-sm truncate w-full text-center">{stat.val}</span>
+              <span className="text-[7px] sm:text-[8px] font-black uppercase tracking-widest text-gray-400 truncate w-full text-center">{stat.label}</span>
             </div>
           ))}
         </div>

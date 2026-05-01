@@ -43,15 +43,18 @@ export default function Decouvrir() {
         let list = Object.keys(data).map(key => ({ id: key, ...data[key] })) as VendorProfile[];
         list = list.filter(r => r.is_published);
 
-        if (location) {
-          list = list.map(r => {
-            const vLat = r.location?.lat || (6.36536 + (r.id.length % 10) * 0.01);
-            const vLng = r.location?.lng || (2.41833 + (r.id.length % 5) * 0.01);
-            return { ...r, distance: getDistance(location.lat, location.lng, vLat, vLng) };
-          });
-          // Sort by distance by default
-          list = list.sort((a: any, b: any) => a.distance - b.distance);
-        }
+        // Add distance (use client location or default Cotonou center)
+        const refLat = location?.lat || 6.36536;
+        const refLng = location?.lng || 2.41833;
+
+        list = list.map(r => {
+          const vLat = r.location?.lat || (6.36536 + (r.id.length % 10) * 0.01);
+          const vLng = r.location?.lng || (2.41833 + (r.id.length % 5) * 0.01);
+          return { ...r, distance: getDistance(refLat, refLng, vLat, vLng) };
+        });
+        
+        // Sort by distance by default
+        list = list.sort((a: any, b: any) => a.distance - b.distance);
 
         setRestaurants(list);
       } else {
@@ -74,7 +77,7 @@ export default function Decouvrir() {
       case "fast": result = result.filter(r => (r.avg_delivery_time || 30) <= 25); break;
       case "open": result = result.filter(r => r.open); break;
       case "near": 
-        if (location) result = result.filter((r: any) => r.distance < 15);
+        result = result.filter((r: any) => r.distance < 15);
         break;
       case "cheap":
         result = result.filter(r => r.avg_price_range?.includes("500") || r.avg_price_range?.includes("1000"));
@@ -87,12 +90,12 @@ export default function Decouvrir() {
   return (
     <div className="py-8 space-y-8 pb-32">
       {/* Header & Toggle */}
-      <div className="flex items-center justify-between px-2">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-black uppercase tracking-tighter leading-none">Découvrir</h1>
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{filteredRestaurants.length} restaurants disponibles</p>
+      <div className="flex items-center justify-between px-2 gap-4">
+        <div className="space-y-1 min-w-0">
+          <h1 className="text-3xl font-black uppercase tracking-tighter leading-none truncate">Découvrir</h1>
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate">{filteredRestaurants.length} restaurants disponibles</p>
         </div>
-        <div className="flex bg-white p-1 rounded-2xl shadow-sm border border-gray-100">
+        <div className="flex bg-white p-1 rounded-2xl shadow-sm border border-gray-100 shrink-0">
           <button 
             onClick={() => setViewMode("list")}
             className={`p-2 rounded-xl transition-all ${viewMode === "list" ? "bg-black text-white shadow-lg" : "text-gray-400"}`}

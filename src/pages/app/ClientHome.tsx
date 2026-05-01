@@ -98,16 +98,18 @@ export default function ClientHome() {
         let list = Object.keys(data).map(k => ({ id: k, ...data[k] })) as VendorProfile[];
         list = list.filter(r => r.is_published);
         
-        // Add distance if client location is known
-        if (location) {
-          list = list.map(r => {
-            const vLat = r.location?.lat || (6.36536 + (r.id.length % 10) * 0.01);
-            const vLng = r.location?.lng || (2.41833 + (r.id.length % 5) * 0.01);
-            return { ...r, distance: getDistance(location.lat, location.lng, vLat, vLng) };
-          });
-          // Sort by closest by default
-          list = list.sort((a: any, b: any) => a.distance - b.distance);
-        }
+        // Add distance (use client location or default Cotonou center)
+        const refLat = location?.lat || 6.36536;
+        const refLng = location?.lng || 2.41833;
+
+        list = list.map(r => {
+          const vLat = r.location?.lat || (6.36536 + (r.id.length % 10) * 0.01);
+          const vLng = r.location?.lng || (2.41833 + (r.id.length % 5) * 0.01);
+          return { ...r, distance: getDistance(refLat, refLng, vLat, vLng) };
+        });
+        
+        // Sort by closest by default
+        list = list.sort((a: any, b: any) => a.distance - b.distance);
 
         setRestaurants(list);
       } else {
@@ -139,11 +141,15 @@ export default function ClientHome() {
     );
   }
 
-  const displayedRestaurants = isHungerZoneActive && location
-    ? restaurants.filter((r: any) => r.distance < 15)
-    : restaurants;
+  const displayedRestaurants = useMemo(() => {
+    return isHungerZoneActive
+      ? restaurants.filter((r: any) => r.distance < 15)
+      : restaurants;
+  }, [isHungerZoneActive, restaurants]);
 
-  const promoList = displayedRestaurants.filter(r => r.promo_banner_url || r.cover_url).slice(0, 5);
+  const promoList = useMemo(() => {
+    return displayedRestaurants.filter(r => r.promo_banner_url || r.cover_url).slice(0, 5);
+  }, [displayedRestaurants]);
 
   return (
     <div className="py-8 space-y-12 pb-32">
@@ -153,9 +159,17 @@ export default function ClientHome() {
           <motion.p initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">
             {greeting}, {user?.firstName && user.firstName !== "Client" ? user.firstName : (user?.name && user.name !== "Invité" ? user.name : "Gourmet")} 👋
           </motion.p>
-          <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tighter leading-none whitespace-nowrap">
-            Envie de <span className="text-primary">manger ?</span>
-          </h1>
+          <div className="flex items-start justify-between gap-4">
+            <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tighter leading-[0.9] break-words">
+              Envie de <span className="text-primary">manger ?</span>
+            </h1>
+            <Link to="/app/addresses" className="shrink-0 mt-1 flex flex-col items-end">
+              <span className="text-[8px] font-black uppercase tracking-widest text-gray-400">Lieu</span>
+              <div className="flex items-center gap-1 text-[10px] font-black uppercase text-primary border-b border-primary/20 pb-0.5">
+                <MapPin size={10} /> {city || "Cotonou"}
+              </div>
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -166,25 +180,24 @@ export default function ClientHome() {
           className="flex items-center gap-4 px-6 py-5 rounded-[28px] bg-white shadow-lg shadow-gray-100/80 border border-gray-50 group hover:border-primary/30 transition-all"
         >
           <Search size={20} className="text-gray-400 group-hover:text-primary transition-colors flex-shrink-0" />
-          <span className="text-xs font-bold text-gray-400 group-hover:text-gray-600 flex-1">Chercher un restaurant, un plat...</span>
-          <div className="px-3 py-1.5 rounded-full bg-gray-50 text-gray-400 text-[9px] font-black uppercase tracking-widest">
-            {city || "Cotonou"}
-          </div>
+          <span className="text-xs font-bold text-gray-400 group-hover:text-gray-600 flex-1 truncate">Chercher un restaurant, un plat...</span>
+          <ChevronRight size={16} className="text-gray-200 group-hover:text-primary transition-colors" />
         </Link>
 
-        <div className="flex items-center justify-between px-6 py-4 bg-black text-white rounded-[24px] shadow-xl">
-          <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-xl ${isHungerZoneActive ? 'bg-primary text-white' : 'bg-white/10 text-white'}`}>
+        <div className="flex items-center justify-between px-6 py-4 bg-black text-white rounded-[24px] shadow-xl overflow-hidden relative">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-primary/20 blur-2xl rounded-full translate-x-1/2 -translate-y-1/2" />
+          <div className="flex items-center gap-3 relative z-10">
+            <div className={`p-2 rounded-xl transition-colors ${isHungerZoneActive ? 'bg-primary text-white' : 'bg-white/10 text-white'}`}>
               <MapPin size={16} />
             </div>
-            <div>
+            <div className="min-w-0">
               <h3 className="text-xs font-black uppercase tracking-widest">Zone de faim</h3>
-              <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest mt-0.5">Restaurants à moins de 15km</p>
+              <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest mt-0.5 truncate">Max 15km autour de vous</p>
             </div>
           </div>
           <button 
             onClick={() => setIsHungerZoneActive(!isHungerZoneActive)}
-            className={`w-12 h-6 rounded-full p-1 transition-colors ${isHungerZoneActive ? "bg-primary" : "bg-white/20"}`}
+            className={`w-12 h-6 rounded-full p-1 transition-colors shrink-0 relative z-10 ${isHungerZoneActive ? "bg-primary" : "bg-white/20"}`}
           >
             <motion.div 
               animate={{ x: isHungerZoneActive ? 24 : 0 }} 
@@ -196,7 +209,7 @@ export default function ClientHome() {
 
       {/* Promo Carousel */}
       {promoList.length > 0 && (
-        <section className="relative h-56 rounded-[40px] overflow-hidden shadow-2xl shadow-black/20">
+        <section className="relative h-56 rounded-[40px] overflow-hidden shadow-2xl shadow-black/20 mx-2">
           <AnimatePresence mode="wait">
             <motion.div
               key={promoIndex}
@@ -210,7 +223,7 @@ export default function ClientHome() {
               <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/30 to-transparent" />
               <div className="absolute inset-0 p-8 flex flex-col justify-center max-w-[75%] space-y-3 text-white">
                 <span className="px-3 py-1 bg-primary text-[9px] font-black uppercase tracking-[0.2em] rounded-full w-fit">Offre Spéciale</span>
-                <h2 className="text-2xl font-black uppercase tracking-tight leading-tight">
+                <h2 className="text-2xl font-black uppercase tracking-tight leading-tight truncate">
                   {promoList[promoIndex].promo_label || promoList[promoIndex].name}
                 </h2>
                 <Link
@@ -234,39 +247,42 @@ export default function ClientHome() {
       <section className="space-y-6">
         <div className="flex items-end justify-between px-2">
           <div className="space-y-1">
-            <h2 className="text-2xl font-black uppercase tracking-tighter leading-none">Près de <span className="text-primary">chez vous</span></h2>
+            <h2 className="text-2xl font-black uppercase tracking-tighter leading-none truncate max-w-[200px]">Près de <span className="text-primary">chez vous</span></h2>
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
-              <MapPin size={10} className="text-primary" /> Restaurants disponibles
+              <MapPin size={10} className="text-primary" /> {isHungerZoneActive ? "Zone de faim activée" : "Restaurants disponibles"}
             </p>
           </div>
-          <Link to="/app/decouvrir" className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-1 border-b border-primary/30 pb-0.5">
+          <Link to="/app/decouvrir" className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-1 border-b border-primary/30 pb-0.5 shrink-0">
             Tout voir <ChevronRight size={12} />
           </Link>
         </div>
         <div className="flex gap-5 overflow-x-auto pb-4 scrollbar-hide -mx-6 px-6">
-          {restaurants.length > 0 ? (
-            restaurants.map(r => <RestaurantCard key={r.id} restaurant={r} />)
+          {displayedRestaurants.length > 0 ? (
+            displayedRestaurants.map(r => <RestaurantCard key={r.id} restaurant={r} />)
           ) : (
-            <div className="w-full py-16 flex flex-col items-center justify-center text-gray-300 gap-4 border-2 border-dashed border-gray-100 rounded-[40px]">
+            <div className="w-full py-16 flex flex-col items-center justify-center text-gray-300 gap-4 border-2 border-dashed border-gray-100 rounded-[40px] mx-6">
               <Utensils size={36} className="opacity-40" />
-              <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Aucun restaurant disponible</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Aucun restaurant à proximité</p>
             </div>
           )}
         </div>
       </section>
 
       {/* Populaires */}
-      {restaurants.length > 1 && (
+      {displayedRestaurants.length > 1 && (
         <section className="space-y-6">
           <div className="px-2 space-y-1">
             <h2 className="text-2xl font-black uppercase tracking-tighter leading-none">Les <span className="text-primary">Populaires</span></h2>
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Tops commandés en ce moment</p>
           </div>
           <div className="flex gap-5 overflow-x-auto pb-4 scrollbar-hide -mx-6 px-6">
-            {restaurants.slice().reverse().map(r => <RestaurantCard key={r.id} restaurant={r} featured />)}
+            {displayedRestaurants.slice().reverse().map(r => <RestaurantCard key={r.id} restaurant={r} featured />)}
           </div>
         </section>
       )}
+    </div>
+  );
+}
     </div>
   );
 }
