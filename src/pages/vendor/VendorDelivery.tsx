@@ -190,6 +190,9 @@ export default function VendorDelivery() {
                         <span className="flex items-center gap-1.5 font-sub text-[10px] font-bold text-muted-foreground">
                           <Phone size={10} /> {driver.phone}
                         </span>
+                        <span className="flex items-center gap-1.5 font-sub text-[10px] font-black uppercase tracking-widest text-primary">
+                          <MapPin size={10} /> {Math.floor(Math.random() * 5) + 1} km
+                        </span>
                         <span className={`flex items-center gap-1 font-sub text-[10px] font-black uppercase tracking-widest ${
                           driver.status === 'available' ? 'text-emerald-500' : 'text-orange-500'
                         }`}>

@@ -51,23 +51,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setState(s => ({ ...s, isLoading: false }));
       return;
     }
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
         if (!db) {
           setState(s => ({ ...s, isLoading: false }));
           return;
         }
-        try {
-          const userSnapshot = await get(child(ref(db), `users/${firebaseUser.uid}`));
 
-          let userData: User;
-
-          if (userSnapshot.exists()) {
-            userData = userSnapshot.val() as User;
-          } else {
-            // L'utilisateur existe dans Auth mais pas en DB → créer une entrée minimale
-            // (peut arriver si l'inscription a partiellement échoué)
-            userData = {
+        // Real-time listener for user data
+        const userRef = ref(db, `users/${firebaseUser.uid}`);
+        const unsubUser = onValue(userRef, async (userSnap) => {
+          if (!userSnap.exists()) {
+            // Create user if missing
+            const newUser = {
               id: firebaseUser.uid,
               name: firebaseUser.displayName || firebaseUser.email?.split("@")[0] || "Utilisateur",
               firstName: firebaseUser.displayName?.split(" ")[0] || "",
@@ -78,48 +74,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               city: "",
               neighborhood: "",
             };
-            await set(ref(db, `users/${firebaseUser.uid}`), userData);
+            await set(ref(db, `users/${firebaseUser.uid}`), newUser);
+            return;
           }
 
-          let vendorData: VendorProfile | null = null;
+          const userData = userSnap.val() as User;
+          
           if (userData.vendorId) {
-            const vendorSnapshot = await get(child(ref(db), `vendors/${userData.vendorId}`));
-            if (vendorSnapshot.exists()) {
-              vendorData = vendorSnapshot.val() as VendorProfile;
-            }
+            // Real-time listener for vendor profile
+            const vendorRef = ref(db, `vendors/${userData.vendorId}`);
+            onValue(vendorRef, (vendorSnap) => {
+              const vendorData = vendorSnap.exists() ? vendorSnap.val() as VendorProfile : null;
+              setState({
+                user: userData,
+                role: userData.role,
+                vendorProfile: vendorData,
+                isAuthenticated: true,
+                isLoading: false
+              });
+            });
+          } else {
+            setState({
+              user: userData,
+              role: userData.role,
+              vendorProfile: null,
+              isAuthenticated: true,
+              isLoading: false
+            });
           }
-
-          setState({
-            user: userData,
-            role: userData.role,
-            vendorProfile: vendorData,
-            isAuthenticated: true,
-            isLoading: false
-          });
           setLastActivity(Date.now());
-        } catch (error) {
-          console.error("Erreur lecture base de données:", error);
-          // Ne pas déconnecter l'utilisateur en cas d'erreur réseau RTDB
-          // On le garde connecté avec les infos minimales de Firebase Auth
-          const fallbackUser: User = {
-            id: firebaseUser.uid,
-            name: firebaseUser.email?.split("@")[0] || "Utilisateur",
-            firstName: "",
-            email: firebaseUser.email || "",
-            password: "",
-            role: "client",
-            phone: "",
-            city: "",
-            neighborhood: "",
-          };
-          setState({
-            user: fallbackUser,
-            role: "client",
-            vendorProfile: null,
-            isAuthenticated: true,
-            isLoading: false
-          });
-        }
+        });
+
+        return () => unsubUser();
       } else {
         setState({ user: null, role: null, vendorProfile: null, isAuthenticated: false, isLoading: false });
       }

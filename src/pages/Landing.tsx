@@ -20,12 +20,19 @@ const FadeIn = ({ children, delay = 0, y = 20, className = "" }: { children: Rea
 );
 
 export default function Landing() {
+  const { scrollY } = useScroll();
+  const navBg = useTransform(scrollY, [0, 50], ["rgba(255, 255, 255, 0)", "rgba(255, 255, 255, 0.95)"]);
+  const navBorder = useTransform(scrollY, [0, 50], ["transparent", "rgba(0, 0, 0, 0.05)"]);
+
   return (
     <div className="min-h-screen w-full bg-white text-foreground selection:bg-primary selection:text-white font-body overflow-x-hidden">
 
       {/* ─── Navigation ─── */}
-      <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-5 pointer-events-none">
-        <div className="max-w-7xl mx-auto flex items-center justify-between pointer-events-auto">
+      <motion.nav 
+        style={{ backgroundColor: navBg, borderBottom: `1px solid`, borderBottomColor: navBorder }}
+        className="fixed top-0 left-0 right-0 z-50 px-6 py-5"
+      >
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 bg-black rounded-xl flex items-center justify-center text-white shadow-lg">
               <Zap size={18} fill="currentColor" />
@@ -48,7 +55,7 @@ export default function Landing() {
             <Link to="/register" className="px-6 py-2.5 bg-black text-white rounded-full font-sub text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-xl">Essayer</Link>
           </div>
         </div>
-      </nav>
+      </motion.nav>
 
       {/* ─── Hero ─── */}
       <section className="relative pt-44 pb-28 px-6">

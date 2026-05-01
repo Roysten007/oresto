@@ -69,10 +69,13 @@ export default function VendorDashboard() {
     });
   }
 
+  // Weekly Revenue calculation (sum of all revenue in weeklyData)
+  const weeklyRevenue = weeklyData.reduce((s, d) => s + d.revenue, 0);
+
   const kpis = [
     {
-      label: "Chiffre d'Affaires",
-      value: `${todayRevenue.toLocaleString()} FCFA`,
+      label: "Chiffre d'Affaires (7j)",
+      value: `${weeklyRevenue.toLocaleString()} FCFA`,
       trend: "+12.5%",
       icon: DollarSign,
       color: "text-emerald-500",
