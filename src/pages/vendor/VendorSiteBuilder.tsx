@@ -136,6 +136,14 @@ export default function VendorSiteBuilder() {
       const updates = { ...formData };
       if (publish) updates.is_published = true;
       await update(ref(db, `vendors/${vendorProfile.id}`), updates);
+      
+      // Save slug mapping for fast lookup
+      if (formData.slug) {
+        await update(ref(db, `slugs/${formData.slug.toLowerCase()}`), { 
+          vendorId: vendorProfile.id 
+        });
+      }
+
       if (publish) {
         setFormData(prev => ({ ...prev, is_published: true }));
         toast.success("🎉 Votre site est en ligne !");

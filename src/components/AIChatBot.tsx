@@ -142,39 +142,22 @@ export default function AIChatBot() {
     setIsLoading(true);
 
     try {
-      const history = messages.slice(-8).map(m => ({ role: m.role, content: m.content }));
-      const currentContext = await buildContext();
-      const result = await askGemini(text, history, currentContext);
-
-      let finalContent = result.text;
-      
-      if (result.functionCalls && result.functionCalls.length > 0) {
-        const actionResults = await executeTools(result.functionCalls);
-        if (!finalContent) {
-           finalContent = actionResults.join("\n\n");
-        } else {
-           finalContent += "\n\n" + actionResults.join("\n\n");
-        }
-      }
-
-      if (!finalContent) finalContent = "Action effectuée.";
-
-      const assistantMsg: Message = {
+      const maintenanceMsg: Message = {
         role: "assistant",
-        content: finalContent,
+        content: "Désolé, pour des raisons de maintenance, l'IA est indisponible pour le moment. Nous travaillons à son rétablissement rapide. Merci de votre compréhension.",
         timestamp: new Date().toISOString(),
       };
-      setMessages(prev => [...prev, assistantMsg]);
+      
+      // Simulate a small delay for "realism"
+      setTimeout(() => {
+        setMessages(prev => [...prev, maintenanceMsg]);
+        setIsLoading(false);
+      }, 800);
+      
     } catch (error: any) {
-      console.error("IZA Error Details:", error);
-      toast.error(`Erreur IZA: ${error.message || "Problème technique"}`);
-      setMessages(prev => [...prev, {
-        role: "assistant",
-        content: `❌ Désolé, je rencontre un problème technique. (${error.message || "Erreur inconnue"})`,
-        timestamp: new Date().toISOString(),
-      }]);
-    } finally {
       setIsLoading(false);
+    } finally {
+      // Handled in setTimeout
     }
   };
 

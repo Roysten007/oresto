@@ -116,7 +116,16 @@ export default function RestaurantPublic() {
         console.log("Resolving slug:", slug);
         const vendorsRef = ref(db, 'vendors');
         
-        // 1. Slug query (exact)
+        // 0. Try dedicated 'slugs' node (NEW FAST LOOKUP)
+        const slugMapSnap = await get(ref(db, `slugs/${slug?.toLowerCase()}`));
+        if (slugMapSnap.exists()) {
+          const resolvedId = slugMapSnap.val().vendorId;
+          console.log("Found via slugs map:", resolvedId);
+          startListeners(resolvedId);
+          return;
+        }
+
+        // 1. Slug query (exact) - Fallback
         const slugQuery = query(vendorsRef, orderByChild('slug'), equalTo(slug));
         const slugSnap = await get(slugQuery);
         if (slugSnap.exists()) {
@@ -135,7 +144,7 @@ export default function RestaurantPublic() {
         }
 
         // 3. Scan all (fallback)
-        console.log("Not found by ID/Slug, scanning names...");
+        console.log("Not found by ID/Slug/Map, scanning names...");
         const allSnap = await get(vendorsRef);
         const all = allSnap.val();
         if (all) {
