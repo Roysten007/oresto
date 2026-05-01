@@ -60,19 +60,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Real-time listener for user data
         const userRef = ref(db, `users/${firebaseUser.uid}`);
+        let unsubVendor: (() => void) | null = null;
+
         const unsubUser = onValue(userRef, async (userSnap) => {
           if (!userSnap.exists()) {
-            // Create user if missing
             const newUser = {
               id: firebaseUser.uid,
               name: firebaseUser.displayName || firebaseUser.email?.split("@")[0] || "Utilisateur",
               firstName: firebaseUser.displayName?.split(" ")[0] || "",
               email: firebaseUser.email || "",
-              password: "",
               role: "client",
-              phone: "",
-              city: "",
-              neighborhood: "",
             };
             await set(ref(db, `users/${firebaseUser.uid}`), newUser);
             return;
@@ -81,9 +78,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const userData = userSnap.val() as User;
           
           if (userData.vendorId) {
-            // Real-time listener for vendor profile
+            if (unsubVendor) unsubVendor();
             const vendorRef = ref(db, `vendors/${userData.vendorId}`);
-            onValue(vendorRef, (vendorSnap) => {
+            unsubVendor = onValue(vendorRef, (vendorSnap) => {
               const vendorData = vendorSnap.exists() ? vendorSnap.val() as VendorProfile : null;
               setState({
                 user: userData,
@@ -105,7 +102,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setLastActivity(Date.now());
         });
 
-        return () => unsubUser();
+        return () => {
+          unsubUser();
+          if (unsubVendor) unsubVendor();
+        };
       } else {
         setState({ user: null, role: null, vendorProfile: null, isAuthenticated: false, isLoading: false });
       }
@@ -176,26 +176,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const uid = userCredential.user.uid;
 
-      // Fetch the role quickly to allow navigation
-      const userDoc = await get(child(ref(db), `users/${userCredential.user.uid}`));
+      // Parallelize DB fetches for speed
+      const [userDoc, vendorSnap] = await Promise.all([
+        get(child(ref(db), `users/${uid}`)),
+        get(child(ref(db), `vendors/v_${uid}`)) // Predictable vendor ID pattern
+      ]);
+
       const userData = userDoc.exists() ? userDoc.val() as User : { 
-        id: userCredential.user.uid, 
+        id: uid, 
         name: email.split("@")[0], 
         role: "client" 
       } as User;
 
-      let vendorData: VendorProfile | null = null;
-      if (userData.vendorId) {
-        const vendorSnapshot = await get(child(ref(db), `vendors/${userData.vendorId}`));
-        if (vendorSnapshot.exists()) {
-          vendorData = vendorSnapshot.val() as VendorProfile;
-        }
+      // If pattern didn't match, try the specific vendorId from user doc
+      let vendorData = vendorSnap.exists() ? vendorSnap.val() as VendorProfile : null;
+      if (!vendorData && userData.vendorId) {
+        const specificSnap = await get(child(ref(db), `vendors/${userData.vendorId}`));
+        if (specificSnap.exists()) vendorData = specificSnap.val() as VendorProfile;
       }
 
       const role = userData.role;
 
-      // Update state immediately to avoid race condition with router
       setState({
         user: userData,
         role: role,

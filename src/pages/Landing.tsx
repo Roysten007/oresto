@@ -34,7 +34,7 @@ export default function Landing() {
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-black rounded-xl flex items-center justify-center text-white shadow-lg">
+            <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg">
               <Zap size={18} fill="currentColor" />
             </div>
             <span className="font-heading text-xl font-black tracking-tighter uppercase">
@@ -51,8 +51,8 @@ export default function Landing() {
           </div>
 
           <div className="flex items-center gap-2">
-            <Link to="/login" className="px-5 py-2 rounded-full font-sub text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors">Connexion</Link>
-            <Link to="/register" className="px-6 py-2.5 bg-black text-white rounded-full font-sub text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-xl">Essayer</Link>
+            <Link to="/login" className="hidden sm:block px-5 py-2 rounded-full font-sub text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors">Connexion</Link>
+            <Link to="/register" className="px-4 py-2 sm:px-6 sm:py-2.5 bg-black text-white rounded-full font-sub text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-xl">Essayer</Link>
           </div>
         </div>
       </motion.nav>
@@ -70,7 +70,7 @@ export default function Landing() {
           </FadeIn>
 
           <FadeIn delay={0.2}>
-            <h1 className="font-heading text-6xl md:text-8xl lg:text-[110px] font-[900] leading-[0.85] tracking-tighter mb-10 uppercase">
+            <h1 className="font-heading text-5xl md:text-8xl lg:text-[110px] font-[900] leading-[0.85] tracking-tighter mb-10 uppercase">
               <span className="block">Ne créez pas un site.</span>
               <span className="text-primary italic block">Lancez un empire.</span>
             </h1>
@@ -83,11 +83,11 @@ export default function Landing() {
           </FadeIn>
 
           <FadeIn delay={0.4} className="flex flex-col sm:flex-row items-center justify-center gap-6">
-            <Link to="/register" className="group w-full sm:w-auto px-12 py-6 bg-primary text-white rounded-full font-sub text-sm font-black uppercase tracking-widest flex items-center justify-center gap-3 shadow-[0_20px_50px_rgba(234,88,12,0.2)] hover:scale-105 transition-all">
+            <Link to="/register" className="group w-full sm:w-auto px-8 py-4 sm:px-12 sm:py-6 bg-primary text-white rounded-full font-sub text-xs sm:text-sm font-black uppercase tracking-widest flex items-center justify-center gap-3 shadow-[0_20px_50px_rgba(234,88,12,0.2)] hover:scale-105 transition-all">
               Démarrer mon restaurant <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
             </Link>
             <div className="flex items-center gap-3 px-8 py-5 rounded-full bg-white border border-gray-100 shadow-sm font-sub text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-              <CheckCircle2 size={18} className="text-emerald-500" /> Site prêt en 2 minutes
+              <CheckCircle2 size={18} className="text-emerald-500" /> Site prêt en 12 minutes
             </div>
           </FadeIn>
         </motion.div>
@@ -106,7 +106,7 @@ export default function Landing() {
           </FadeIn>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { title: "Site Factory", icon: Rocket, desc: "Générez votre application web de vente en quelques minutes. Interface premium, catalogue dynamique, zéro code.", color: "bg-blue-500" },
+              { title: "Site Factory", icon: Rocket, desc: "Générez votre application web de vente en 12 minutes. Interface premium, catalogue dynamique, zéro code.", color: "bg-blue-500" },
               { title: "IZA AI Director", icon: Bot, desc: "Intelligence artificielle intégrée : analyse des ventes, gestion du catalogue, assistance à la décision en temps réel.", color: "bg-primary" },
               { title: "Écosystème Local", icon: Globe, desc: "Adapté à l'Afrique de l'Ouest : Mobile Money, WhatsApp, livraison de proximité, paiement cash.", color: "bg-emerald-500" },
             ].map((p, i) => (
@@ -191,7 +191,7 @@ export default function Landing() {
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-primary font-sub text-[10px] font-black uppercase tracking-widest mb-8">
                 <Bot size={14} /> Intelligence Opérationnelle
               </div>
-              <h2 className="font-heading text-5xl md:text-7xl font-black leading-[0.95] uppercase tracking-tighter mb-10">
+              <h2 className="font-heading text-4xl md:text-7xl font-black leading-[0.95] uppercase tracking-tighter mb-10 max-w-[280px] md:max-w-none">
                 Gérez avec <br/><span className="text-primary italic">IZA AI.</span>
               </h2>
               <p className="text-xl text-white/50 mb-10 leading-relaxed max-w-xl">
@@ -268,8 +268,8 @@ export default function Landing() {
               <div className="w-16 h-16 bg-black text-white rounded-2xl flex items-center justify-center mx-auto mb-8">
                 <Lock size={28} />
               </div>
-              <h2 className="font-heading text-4xl md:text-5xl font-black uppercase tracking-tighter mb-6">
-                Confidentialité & <span className="text-primary italic">Sécurité</span>
+              <h2 className="font-heading text-3xl md:text-5xl font-black uppercase tracking-tighter mb-6 max-w-[260px] md:max-w-none mx-auto">
+                Confidentialité & <br/><span className="text-primary italic">Sécurité</span>
               </h2>
               <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto mb-10 italic">
                 Vos données commerciales et celles de vos clients sont stockées dans un espace isolé et sécurisé. Aucune donnée n'est partagée entre commerçants.
@@ -326,10 +326,10 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-20">
             <FadeIn>
-              <h2 className="font-heading text-6xl md:text-9xl font-[900] leading-none uppercase tracking-tighter mb-12 italic">
+              <h2 className="font-heading text-5xl md:text-9xl font-[900] leading-none uppercase tracking-tighter mb-12 italic">
                 Prêt à <br/><span className="text-primary">Démarrer ?</span>
               </h2>
-              <Link to="/register" className="inline-flex items-center gap-4 px-12 py-6 bg-white text-black rounded-full font-sub text-sm font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_20px_60px_rgba(255,255,255,0.1)]">
+              <Link to="/register" className="inline-flex items-center gap-4 px-8 py-4 sm:px-12 sm:py-6 bg-white text-black rounded-full font-sub text-[10px] sm:text-sm font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_20px_60px_rgba(255,255,255,0.1)]">
                 Essayer gratuitement <ChevronRight size={20} />
               </Link>
             </FadeIn>

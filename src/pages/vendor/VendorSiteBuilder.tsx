@@ -162,7 +162,7 @@ export default function VendorSiteBuilder() {
       {/* Header */}
       <div className="bg-white border-b border-gray-100 px-6 md:px-10 py-5 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="w-10 h-10 bg-black rounded-2xl flex items-center justify-center shadow-lg">
+          <div className="w-10 h-10 bg-primary rounded-2xl flex items-center justify-center shadow-lg">
             <ChefHat size={20} className="text-white" />
           </div>
           <div>

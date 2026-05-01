@@ -12,8 +12,9 @@ interface Props {
 }
 
 export default function StepLancement({ formData, products, isSaving, onPublish }: Props) {
-  const url = `oresto.app/r/${formData.slug || "votre-restaurant"}`;
-  const fullUrl = `https://${url}`;
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  const displayUrl = typeof window !== 'undefined' ? `${window.location.host}/r/${formData.slug || "votre-restaurant"}` : `oresto.app/r/${formData.slug || "votre-restaurant"}`;
+  const fullUrl = `${baseUrl}/r/${formData.slug || "votre-restaurant"}`;
 
   const checks = [
     { label: "Nom du restaurant", ok: !!formData.name, fix: "Étape 1" },
@@ -58,7 +59,7 @@ export default function StepLancement({ formData, products, isSaving, onPublish 
           <QRCodeSVG value={fullUrl} size={150} />
         </div>
         <div className="w-full flex items-center justify-between bg-gray-100 rounded-2xl px-5 py-3">
-          <span className="font-mono text-sm text-gray-600 truncate flex-1">{url}</span>
+          <span className="font-mono text-sm text-gray-600 truncate flex-1">{displayUrl}</span>
           <button onClick={() => { navigator.clipboard.writeText(fullUrl); toast.success("Lien copié !"); }} className="ml-3 p-2 bg-white rounded-xl shadow-sm hover:bg-black hover:text-white transition-all">
             <Copy size={16} />
           </button>
