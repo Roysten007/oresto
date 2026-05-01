@@ -24,7 +24,8 @@ import {
   Info,
   Heart,
   Truck,
-  Store
+  Store,
+  Rocket
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { VendorProfile, Product, Review } from "@/data/mockData";

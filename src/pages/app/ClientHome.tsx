@@ -135,10 +135,20 @@ export default function ClientHome() {
   }, [location]);
 
   useEffect(() => {
-    if (restaurants.length < 2) return;
-    const id = setInterval(() => setPromoIndex(p => (p + 1) % Math.min(restaurants.length, 5)), 4000);
+    if (promoList.length < 2) {
+      setPromoIndex(0);
+      return;
+    }
+    const id = setInterval(() => setPromoIndex(p => (p + 1) % promoList.length), 4000);
     return () => clearInterval(id);
-  }, [restaurants]);
+  }, [promoList.length]);
+
+  // Ensure promoIndex is always valid
+  useEffect(() => {
+    if (promoIndex >= promoList.length && promoList.length > 0) {
+      setPromoIndex(0);
+    }
+  }, [promoList, promoIndex]);
 
   if (loading) {
     return (
@@ -225,29 +235,33 @@ export default function ClientHome() {
       {promoList.length > 0 && (
         <section className="relative h-56 rounded-[40px] overflow-hidden shadow-2xl shadow-black/20 mx-2">
           <AnimatePresence mode="wait">
-            <motion.div
-              key={promoIndex}
-              initial={{ opacity: 0, scale: 1.05 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.97 }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-              className="absolute inset-0"
-            >
-              <img src={promoList[promoIndex].promo_banner_url || promoList[promoIndex].cover_url} className="w-full h-full object-cover" alt="Promo" />
-              <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/30 to-transparent" />
-              <div className="absolute inset-0 p-8 flex flex-col justify-center max-w-[75%] space-y-3 text-white">
-                <span className="px-3 py-1 bg-primary text-[9px] font-black uppercase tracking-[0.2em] rounded-full w-fit">Offre Spéciale</span>
-                <h2 className="text-2xl font-black uppercase tracking-tight leading-tight truncate">
-                  {promoList[promoIndex].promo_label || promoList[promoIndex].name}
-                </h2>
-                <Link
-                  to={`/r/${promoList[promoIndex].slug || promoList[promoIndex].id}`}
-                  className="px-5 py-2.5 bg-white text-black text-[10px] font-black uppercase tracking-widest rounded-full w-fit hover:scale-105 transition-transform active:scale-95"
-                >
-                  Commander →
-                </Link>
-              </div>
-            </motion.div>
+              <motion.div
+                key={promoIndex}
+                initial={{ opacity: 0, scale: 1.05 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.97 }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+                className="absolute inset-0"
+              >
+                {promoList[promoIndex] && (
+                  <>
+                    <img src={promoList[promoIndex].promo_banner_url || promoList[promoIndex].cover_url} className="w-full h-full object-cover" alt="Promo" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/30 to-transparent" />
+                    <div className="absolute inset-0 p-8 flex flex-col justify-center max-w-[75%] space-y-3 text-white">
+                      <span className="px-3 py-1 bg-primary text-[9px] font-black uppercase tracking-[0.2em] rounded-full w-fit">Offre Spéciale</span>
+                      <h2 className="text-2xl font-black uppercase tracking-tight leading-tight truncate">
+                        {promoList[promoIndex].promo_label || promoList[promoIndex].name}
+                      </h2>
+                      <Link
+                        to={`/r/${promoList[promoIndex].slug || promoList[promoIndex].id}`}
+                        className="px-5 py-2.5 bg-white text-black text-[10px] font-black uppercase tracking-widest rounded-full w-fit hover:scale-105 transition-transform active:scale-95"
+                      >
+                        Commander →
+                      </Link>
+                    </div>
+                  </>
+                )}
+              </motion.div>
           </AnimatePresence>
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
             {promoList.map((_, i) => (

@@ -112,10 +112,18 @@ export default function Onboarding() {
                 </button>
                 <button
                   onClick={() => setShowCitySelector(true)}
-                  className="text-xs font-black uppercase tracking-widest text-muted-foreground hover:text-black transition-colors"
+                  className="w-full py-4 text-xs font-black uppercase tracking-widest text-muted-foreground hover:text-black transition-colors"
                 >
                   Choisir ma ville manuellement
                 </button>
+                <div className="pt-4">
+                  <button
+                    onClick={() => completeOnboarding()}
+                    className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-300 hover:text-primary transition-colors underline underline-offset-4"
+                  >
+                    Passer cette étape
+                  </button>
+                </div>
               </div>
             ) : (
               <motion.div

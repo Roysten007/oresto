@@ -68,14 +68,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const userRef = ref(db, `users/${firebaseUser.uid}`);
         unsubUser = onValue(userRef, async (userSnap) => {
           if (!userSnap.exists()) {
+            console.log("Creating new user profile in DB...");
             const newUser = {
               id: firebaseUser.uid,
               name: firebaseUser.displayName || firebaseUser.email?.split("@")[0] || "Utilisateur",
               firstName: firebaseUser.displayName?.split(" ")[0] || "",
               email: firebaseUser.email || "",
               role: "client",
+              created_at: new Date().toISOString()
             };
             await set(ref(db, `users/${firebaseUser.uid}`), newUser);
+            // The next onValue trigger will handle setting the state
             return;
           }
 
@@ -87,7 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               const vendorData = vendorSnap.exists() ? vendorSnap.val() as VendorProfile : null;
               setState({
                 user: userData,
-                role: userData.role,
+                role: userData.role as any,
                 vendorProfile: vendorData,
                 isAuthenticated: true,
                 isLoading: false
@@ -96,13 +99,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           } else {
             setState({
               user: userData,
-              role: userData.role,
+              role: userData.role as any,
               vendorProfile: null,
               isAuthenticated: true,
               isLoading: false
             });
           }
           setLastActivity(Date.now());
+        }, (err) => {
+          console.error("Auth DB Error:", err);
+          setState(s => ({ ...s, isLoading: false }));
         });
       } else {
         setState({ user: null, role: null, vendorProfile: null, isAuthenticated: false, isLoading: false });
