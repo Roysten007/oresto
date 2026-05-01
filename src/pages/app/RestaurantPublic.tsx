@@ -53,50 +53,41 @@ export default function RestaurantPublic() {
   useEffect(() => {
     if (!slug || !db) { setLoading(false); return; }
 
-    const timeout = setTimeout(() => setLoading(false), 8000);
+    let unsubVendor: (() => void) | null = null;
+    let unsubProducts: (() => void) | null = null;
     
-    // Function to handle vendor data once found
-    const handleVendorUpdate = (v: any, id: string) => {
-      const vendorData = { id, ...v } as VendorProfile;
-      const owner = user?.vendorId === id;
-      setIsOwner(owner);
-      
-      if (!vendorData.is_published && !owner) {
-        // Just stop loading and let the UI handle the "Coming Soon" state
-        setLoading(false);
-        return;
-      }
-      
-      setVendor(vendorData);
+    // Set a shorter timeout for the loading state as a safety measure
+    const timeout = setTimeout(() => {
       setLoading(false);
-      clearTimeout(timeout);
-    };
-
-    // 1. First, find the vendor ID by slug or direct ID
-    const slugQuery = query(ref(db, 'vendors'), orderByChild('slug'), equalTo(slug));
+    }, 5000);
     
-    get(slugQuery).then((snapshot) => {
-      let vendorId = slug; // Fallback to slug as ID
-      
-      if (snapshot.exists()) {
-        vendorId = Object.keys(snapshot.val())[0];
-      }
-
+    const startListeners = (vendorId: string) => {
       // 2. Set up real-time listener for this vendor
       const vendorRef = ref(db, `vendors/${vendorId}`);
-      const unsubVendor = onValue(vendorRef, (snap) => {
+      unsubVendor = onValue(vendorRef, (snap) => {
         if (snap.exists()) {
-          handleVendorUpdate(snap.val(), vendorId);
+          const v = snap.val();
+          const vendorData = { id: vendorId, ...v } as VendorProfile;
+          const owner = user?.vendorId === vendorId;
+          setIsOwner(owner);
+          
+          if (!vendorData.is_published && !owner) {
+            setLoading(false);
+            setVendor(null); // This will trigger the "Coming Soon" screen
+            return;
+          }
+          
+          setVendor(vendorData);
+          setLoading(false);
+          clearTimeout(timeout);
         } else {
-          // If not found by direct ID, maybe it's a slug but the query failed
-          // We already tried the query, so if we're here and snap is null, it's truly not found
           setLoading(false);
         }
       });
 
       // 3. Set up real-time listener for products
       const productsRef = ref(db, 'products');
-      const unsubProducts = onValue(productsRef, (psnap) => {
+      unsubProducts = onValue(productsRef, (psnap) => {
         const pData = psnap.val();
         if (pData) {
           const list = Object.keys(pData)
@@ -105,15 +96,35 @@ export default function RestaurantPublic() {
           setProducts(list);
         }
       });
+    };
 
-      return () => {
-        unsubVendor();
-        unsubProducts();
-      };
+    // 1. Resolve vendorId from slug or direct ID
+    const vendorsRef = ref(db, 'vendors');
+    const slugQuery = query(vendorsRef, orderByChild('slug'), equalTo(slug));
+    
+    get(slugQuery).then((snapshot) => {
+      let resolvedId = slug; // Fallback
+      
+      if (snapshot.exists()) {
+        resolvedId = Object.keys(snapshot.val())[0];
+        console.log("Resolved vendor ID from slug:", resolvedId);
+      } else {
+        console.log("No slug match found, using as ID:", slug);
+      }
+      
+      startListeners(resolvedId);
+    }).catch((err) => {
+      console.error("Slug resolution error:", err);
+      // Try using slug as ID anyway
+      startListeners(slug);
     });
 
-    return () => clearTimeout(timeout);
-  }, [slug, navigate, user]);
+    return () => {
+      clearTimeout(timeout);
+      if (unsubVendor) unsubVendor();
+      if (unsubProducts) unsubProducts();
+    };
+  }, [slug, user]);
 
 
   const handleAddToCart = (product: Product) => {

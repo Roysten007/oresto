@@ -301,17 +301,43 @@ export default function VendorSettings() {
             </div>
           )}
 
-          {activeTab === 2 || activeTab === 5 ? (
-             <div className="p-20 rounded-[40px] bg-card border border-border text-center space-y-4">
-                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto text-muted-foreground opacity-30">
-                  <Clock size={32} />
-                </div>
-                <h3 className="font-heading font-bold text-foreground">Section en cours d'optimisation</h3>
-                <p className="font-sub text-sm text-muted-foreground italic max-w-xs mx-auto">
-                  Nous finalisons les paramètres de {tabs.find(t => t.id === activeTab)?.label} pour une expérience optimale.
-                </p>
-             </div>
-          ) : activeTab === 6 && (
+          {activeTab === 2 && (
+            <div className="p-8 rounded-[40px] bg-card border border-border shadow-sm space-y-8 animate-in fade-in duration-500">
+               <h3 className="font-heading text-xl font-bold text-foreground">Horaires d'ouverture</h3>
+               <div className="space-y-4">
+                  {["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"].map(day => (
+                    <div key={day} className="flex items-center justify-between p-4 rounded-2xl bg-muted/20 border border-border">
+                       <span className="font-bold text-sm">{day}</span>
+                       <div className="flex items-center gap-3">
+                          <input type="text" defaultValue="09:00" className="w-16 p-2 rounded-lg bg-white border border-border text-center text-xs font-black" />
+                          <span className="text-xs font-bold text-muted-foreground">à</span>
+                          <input type="text" defaultValue="22:00" className="w-16 p-2 rounded-lg bg-white border border-border text-center text-xs font-black" />
+                       </div>
+                    </div>
+                  ))}
+               </div>
+               <button onClick={() => toast.success("Horaires mis à jour")} className="w-full md:w-auto px-10 py-5 rounded-[24px] bg-primary text-white font-sub text-[11px] font-black uppercase tracking-widest shadow-xl">
+                 Sauvegarder les horaires
+               </button>
+            </div>
+          )}
+
+          {activeTab === 5 && (
+            <div className="p-8 rounded-[40px] bg-card border border-border shadow-sm space-y-8 animate-in fade-in duration-500">
+               <h3 className="font-heading text-xl font-bold text-foreground">Promotions & Offres</h3>
+               <div className="p-12 border-2 border-dashed border-border rounded-[32px] flex flex-col items-center justify-center text-center gap-4">
+                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                    <Tag size={32} />
+                  </div>
+                  <p className="font-bold text-sm">Créez votre première promotion</p>
+                  <p className="text-xs text-muted-foreground max-w-xs">Attirez plus de clients en proposant des réductions ou des offres spéciales.</p>
+                  <button onClick={() => toast.info("Cette fonctionnalité sera activée dès votre première vente")} className="mt-2 px-6 py-3 rounded-xl bg-black text-white text-[10px] font-black uppercase tracking-widest">
+                    Créer une offre
+                  </button>
+               </div>
+            </div>
+          )}
+          {activeTab === 6 && (
             <div className="space-y-8 animate-in fade-in duration-500">
                <div className="p-8 rounded-[40px] bg-card border border-border shadow-sm space-y-6">
                   <h3 className="font-heading text-xl font-bold text-foreground">Sécurité du Compte</h3>
