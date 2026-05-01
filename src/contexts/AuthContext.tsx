@@ -160,6 +160,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [lockedUntil]);
 
   const login = useCallback(async (email: string, password: string) => {
+    // === Dev Fallback for test accounts ===
+    if (email === "aminat@test.com" && password === "password") {
+      const mockAminat: User = {
+        id: "mock_aminat",
+        name: "Aminat Test",
+        firstName: "Aminat",
+        email: "aminat@test.com",
+        password: "",
+        role: "client",
+        phone: "+229 00000000",
+        city: "Cotonou",
+        neighborhood: "Cadjèhoun",
+      };
+      setState({
+        user: mockAminat,
+        role: "client",
+        vendorProfile: null,
+        isAuthenticated: true,
+        isLoading: false
+      });
+      return { success: true, role: "client" };
+    }
+
     if (!auth || !db) return { success: false, error: "Firebase n'est pas configuré" };
     if (lockedUntil && Date.now() < lockedUntil) {
       return { success: false, error: "Compte bloqué. Réessayez dans 15 minutes." };
