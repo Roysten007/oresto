@@ -52,88 +52,65 @@ export default function RestaurantPublic() {
   useEffect(() => {
     if (!slug || !db) { setLoading(false); return; }
 
-    const timeout = setTimeout(() => setLoading(false), 5000);
-    let cancelled = false;
-
-    const fetchProducts = (vId: string) => {
-      // Use get for fast one-shot, then switch to onValue for real-time updates
-      get(ref(db, 'products')).then((psnap) => {
-        if (cancelled) return;
-        const pData = psnap.val();
-        if (pData) {
-          const list = Object.keys(pData)
-            .map(k => ({ id: k, ...pData[k] }))
-            .filter((p: any) => p.vendorId === vId) as Product[];
-          setProducts(list);
-        }
-      });
-    };
-
-    const handleVendorFound = (v: VendorProfile) => {
-      if (cancelled) return;
-      const owner = user?.vendorId === v.id;
+    const timeout = setTimeout(() => setLoading(false), 8000);
+    
+    // Function to handle vendor data once found
+    const handleVendorUpdate = (v: any, id: string) => {
+      const vendorData = { id, ...v } as VendorProfile;
+      const owner = user?.vendorId === id;
       setIsOwner(owner);
       
-      if (!v.is_published && !owner) {
+      if (!vendorData.is_published && !owner) {
         navigate('/app/decouvrir');
         return;
       }
       
-      setVendor(v);
-      fetchProducts(v.id);
-      clearTimeout(timeout);
+      setVendor(vendorData);
       setLoading(false);
+      clearTimeout(timeout);
     };
 
-    // Fast path: try slug query + direct ID in parallel
+    // 1. First, find the vendor ID by slug or direct ID
     const slugQuery = query(ref(db, 'vendors'), orderByChild('slug'), equalTo(slug));
     
-    // Fast path: try slug query + direct ID in parallel, catching individual errors
-    Promise.all([
-      get(slugQuery).catch(() => null),
-      get(ref(db, `vendors/${slug}`)).catch(() => null)
-    ]).then(([slugSnap, directSnap]) => {
-      if (cancelled) return;
+    get(slugQuery).then((snapshot) => {
+      let vendorId = slug; // Fallback to slug as ID
       
-      // 1. Try slug match first (most common)
-      const slugData = slugSnap?.val();
-      if (slugData) {
-        const id = Object.keys(slugData)[0];
-        handleVendorFound({ id, ...slugData[id] } as VendorProfile);
-        return;
+      if (snapshot.exists()) {
+        vendorId = Object.keys(snapshot.val())[0];
       }
-      
-      // 2. Try direct ID match
-      if (directSnap.exists()) {
-        handleVendorFound({ id: slug, ...directSnap.val() } as VendorProfile);
-        return;
-      }
-      
-      // 3. Last resort: scan all vendors (for missing indexes)
-      get(ref(db, 'vendors')).then((allSnap) => {
-        if (cancelled) return;
-        const allData = allSnap.val();
-        if (allData) {
-          const foundKey = Object.keys(allData).find(k => allData[k].slug === slug);
-          if (foundKey) {
-            handleVendorFound({ id: foundKey, ...allData[foundKey] } as VendorProfile);
-            return;
-          }
+
+      // 2. Set up real-time listener for this vendor
+      const vendorRef = ref(db, `vendors/${vendorId}`);
+      const unsubVendor = onValue(vendorRef, (snap) => {
+        if (snap.exists()) {
+          handleVendorUpdate(snap.val(), vendorId);
+        } else {
+          // If not found by direct ID, maybe it's a slug but the query failed
+          // We already tried the query, so if we're here and snap is null, it's truly not found
+          setLoading(false);
         }
-        clearTimeout(timeout);
-        setLoading(false);
       });
-    }).catch(() => {
-      if (!cancelled) {
-        clearTimeout(timeout);
-        setLoading(false);
-      }
+
+      // 3. Set up real-time listener for products
+      const productsRef = ref(db, 'products');
+      const unsubProducts = onValue(productsRef, (psnap) => {
+        const pData = psnap.val();
+        if (pData) {
+          const list = Object.keys(pData)
+            .map(k => ({ id: k, ...pData[k] }))
+            .filter((p: any) => p.vendorId === vendorId) as Product[];
+          setProducts(list);
+        }
+      });
+
+      return () => {
+        unsubVendor();
+        unsubProducts();
+      };
     });
 
-    return () => {
-      cancelled = true;
-      clearTimeout(timeout);
-    };
+    return () => clearTimeout(timeout);
   }, [slug, navigate, user]);
 
 
@@ -266,12 +243,16 @@ export default function RestaurantPublic() {
           >
             <Share2 size={20} />
           </button>
-          <button 
-            onClick={() => setIsFavorite(!isFavorite)}
-            className="pointer-events-auto w-12 h-12 rounded-2xl bg-white/80 backdrop-blur-md shadow-xl flex items-center justify-center text-black active:scale-90 transition-all border border-gray-100"
-          >
-            <Heart size={20} className={isFavorite ? "fill-primary text-primary" : ""} />
-          </button>
+          {vendor.whatsapp && (
+            <a 
+              href={`https://wa.me/${vendor.whatsapp.replace(/\s/g, '')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="pointer-events-auto w-12 h-12 rounded-2xl bg-[#25D366] shadow-xl flex items-center justify-center text-white active:scale-90 transition-all"
+            >
+              <MessageCircle size={20} />
+            </a>
+          )}
         </div>
       </header>
 
@@ -310,14 +291,18 @@ export default function RestaurantPublic() {
         <div className="grid grid-cols-3 gap-2 sm:gap-4 -translate-y-8 px-2 sm:px-0">
           {[
             { icon: Star, val: vendor.rating || "5.0", label: "Avis" },
-            { icon: Clock, val: "25-35", label: "Min" },
-            { icon: Info, val: "Infos", label: "Détails" },
+            { icon: Clock, val: `${vendor.avg_delivery_time || "25-35"}`, label: "Min" },
+            { icon: Phone, val: vendor.phone || "Contact", label: "Appeler", action: () => vendor.phone && (window.location.href = `tel:${vendor.phone}`) },
           ].map((stat, i) => (
-            <div key={i} className="bg-white p-3 sm:p-4 rounded-[28px] sm:rounded-[32px] shadow-xl border border-gray-50 flex flex-col items-center justify-center gap-1 min-w-0">
+            <button 
+              key={i} 
+              onClick={stat.action}
+              className="bg-white p-3 sm:p-4 rounded-[28px] sm:rounded-[32px] shadow-xl border border-gray-50 flex flex-col items-center justify-center gap-1 min-w-0 active:scale-95 transition-all"
+            >
               <stat.icon size={16} className="text-primary mb-0.5 sm:mb-1 shrink-0" />
               <span className="font-black text-xs sm:text-sm truncate w-full text-center">{stat.val}</span>
               <span className="text-[7px] sm:text-[8px] font-black uppercase tracking-widest text-gray-400 truncate w-full text-center">{stat.label}</span>
-            </div>
+            </button>
           ))}
         </div>
 
@@ -442,6 +427,53 @@ export default function RestaurantPublic() {
             );
           })}
         </div>
+
+        {/* Infos Section */}
+        <section className="p-8 rounded-[48px] bg-white border border-gray-100 shadow-xl space-y-8">
+           <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
+                 <Info size={24} />
+              </div>
+              <div>
+                 <h2 className="text-2xl font-black uppercase tracking-tighter">Informations <span className="text-primary">Pratiques</span></h2>
+                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Localisation et horaires d'ouverture</p>
+              </div>
+           </div>
+           
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+              <div className="space-y-6">
+                 <div className="flex gap-4">
+                    <MapPin className="text-primary shrink-0" size={20} />
+                    <div>
+                       <p className="font-black text-xs uppercase tracking-widest mb-1 text-gray-400">Adresse</p>
+                       <p className="text-sm font-bold leading-relaxed">
+                          {vendor.neighborhood}, {vendor.city}<br/>
+                          <span className="text-gray-400 font-medium">{vendor.address || "Adresse non précisée"}</span>
+                       </p>
+                    </div>
+                 </div>
+                 <div className="flex gap-4">
+                    <Clock className="text-primary shrink-0" size={20} />
+                    <div>
+                       <p className="font-black text-xs uppercase tracking-widest mb-1 text-gray-400">Horaires d'aujourd'hui</p>
+                       <p className="text-sm font-bold">
+                          {vendor.open ? "Ouvert actuellement" : "Fermé"} • {vendor.deliveryTime || "Service continu"}
+                       </p>
+                    </div>
+                 </div>
+              </div>
+              <div className="bg-gray-50 rounded-[32px] p-6 space-y-4">
+                 <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Modes de Paiement</h4>
+                 <div className="flex flex-wrap gap-2">
+                    {vendor.payment_methods?.map((m: string) => (
+                       <span key={m} className="px-4 py-2 rounded-xl bg-white border border-gray-200 text-[10px] font-black uppercase tracking-widest">
+                          {m.replace('_', ' ')}
+                       </span>
+                    )) || <span className="text-[10px] font-bold text-gray-400 italic">Espèces acceptées</span>}
+                 </div>
+              </div>
+           </div>
+        </section>
       </div>
 
       {/* Floating Bottom Cart Bar */}
