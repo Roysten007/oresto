@@ -148,63 +148,98 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [lockedUntil]);
 
   const login = useCallback(async (email: string, password: string) => {
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPassword = password.trim();
+
     // === Dev Fallback for test accounts ===
-    const isDemoAccount = (email === "aminat@test.com" || email === "aminata@test.com") && password === "password";
+    const isDemoAccount = (cleanEmail === "aminat@test.com" || cleanEmail === "aminata@test.com" || cleanEmail === "kofi@test.com") && cleanPassword === "password";
     
     if (isDemoAccount) {
-      const mockAminat: User = {
-        id: "mock_aminat",
-        name: "Aminat Test",
-        firstName: "Aminat",
-        email: email,
+      console.log("Demo login triggered for:", cleanEmail);
+      const mockUser: User = {
+        id: "mock_" + cleanEmail.split("@")[0],
+        name: cleanEmail === "kofi@test.com" ? "Kofi Test" : "Aminat Test",
+        firstName: cleanEmail === "kofi@test.com" ? "Kofi" : "Aminat",
+        email: cleanEmail,
         password: "",
-        role: "client",
+        role: cleanEmail === "kofi@test.com" ? "vendor" : "client",
         phone: "+229 00000000",
         city: "Cotonou",
         neighborhood: "Cadjèhoun",
+        vendorId: cleanEmail === "kofi@test.com" ? "v_mock_kofi" : undefined
       };
+      
+      let mockVendor: VendorProfile | null = null;
+      if (mockUser.vendorId) {
+        mockVendor = {
+          id: mockUser.vendorId,
+          userId: mockUser.id,
+          name: "Kofi's Shop",
+          description: "Boutique de test",
+          category: "Restaurants",
+          status: "active",
+          joinedDate: "2024-01-01",
+          verified: true,
+          open: true
+        } as any;
+      }
+
       setState({
-        user: mockAminat,
-        role: "client",
-        vendorProfile: null,
+        user: mockUser,
+        role: mockUser.role as any,
+        vendorProfile: mockVendor,
         isAuthenticated: true,
         isLoading: false
       });
-      return { success: true, role: "client" };
+      return { success: true, role: mockUser.role };
     }
 
-    if (!auth || !db) return { success: false, error: "Firebase n'est pas configuré" };
+    if (!auth || !db) {
+      console.error("Firebase not initialized");
+      return { success: false, error: "Le service d'authentification est indisponible." };
+    }
+    
     if (lockedUntil && Date.now() < lockedUntil) {
       return { success: false, error: "Compte bloqué. Réessayez dans 15 minutes." };
     }
     
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      console.log("Attempting Firebase login for:", cleanEmail);
+      const userCredential = await signInWithEmailAndPassword(auth, cleanEmail, cleanPassword);
       const uid = userCredential.user.uid;
 
-      // Fetch user data first
+      // Fetch user data
       let userSnap = await get(child(ref(db), `users/${uid}`));
       
       if (!userSnap.exists()) {
-        // Auto-create profile if it exists in Auth but not in DB
+        console.warn("User profile missing in DB, creating...");
         const newUser = {
           id: uid,
-          name: email.split("@")[0],
-          email: email,
+          name: cleanEmail.split("@")[0],
+          email: cleanEmail,
           role: "client",
+          created_at: new Date().toISOString()
         };
-        await set(ref(db, `users/${uid}`), newUser);
-        userSnap = await get(child(ref(db), `users/${uid}`));
+        try {
+          await set(ref(db, `users/${uid}`), newUser);
+          userSnap = await get(child(ref(db), `users/${uid}`));
+        } catch (dbErr) {
+          console.error("Database write error during login:", dbErr);
+          // Still allow login but warn
+        }
       }
 
-      const userData = userSnap.val() as User;
+      const userData = userSnap.exists() ? userSnap.val() as User : { id: uid, email: cleanEmail, role: "client" } as User;
       let vendorData: VendorProfile | null = null;
 
-      // Then fetch vendor data if applicable
       if (userData.vendorId) {
-        const vendorSnap = await get(child(ref(db), `vendors/${userData.vendorId}`));
-        if (vendorSnap.exists()) {
-          vendorData = vendorSnap.val() as VendorProfile;
+        try {
+          const vendorSnap = await get(child(ref(db), `vendors/${userData.vendorId}`));
+          if (vendorSnap.exists()) {
+            vendorData = vendorSnap.val() as VendorProfile;
+          }
+        } catch (vErr) {
+          console.error("Vendor fetch error:", vErr);
         }
       }
 
@@ -222,13 +257,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLastActivity(Date.now());
       return { success: true, role };
     } catch (error: any) {
+      console.error("Firebase Login Error:", error.code, error.message);
       const newAttempts = failedAttempts + 1;
       setFailedAttempts(newAttempts);
       if (newAttempts >= MAX_ATTEMPTS) {
         setLockedUntil(Date.now() + LOCKOUT_DURATION);
         return { success: false, error: "Compte bloqué pendant 15 minutes." };
       }
-      return { success: false, error: "Email ou mot de passe incorrect." };
+      
+      let errMsg = "Email ou mot de passe incorrect.";
+      if (error.code === 'auth/network-request-failed') errMsg = "Problème de connexion réseau.";
+      if (error.code === 'auth/user-not-found') errMsg = "Cet utilisateur n'existe pas.";
+      
+      return { success: false, error: errMsg };
     }
   }, [failedAttempts, lockedUntil]);
 
