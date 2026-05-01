@@ -51,18 +51,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setState(s => ({ ...s, isLoading: false }));
       return;
     }
+    let unsubUser: (() => void) | null = null;
+    let unsubVendor: (() => void) | null = null;
+
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      // Clean up previous listeners
+      if (unsubUser) { unsubUser(); unsubUser = null; }
+      if (unsubVendor) { unsubVendor(); unsubVendor = null; }
+
       if (firebaseUser) {
         if (!db) {
           setState(s => ({ ...s, isLoading: false }));
           return;
         }
 
-        // Real-time listener for user data
         const userRef = ref(db, `users/${firebaseUser.uid}`);
-        let unsubVendor: (() => void) | null = null;
-
-        const unsubUser = onValue(userRef, async (userSnap) => {
+        unsubUser = onValue(userRef, async (userSnap) => {
           if (!userSnap.exists()) {
             const newUser = {
               id: firebaseUser.uid,
@@ -79,8 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           
           if (userData.vendorId) {
             if (unsubVendor) unsubVendor();
-            const vendorRef = ref(db, `vendors/${userData.vendorId}`);
-            unsubVendor = onValue(vendorRef, (vendorSnap) => {
+            unsubVendor = onValue(ref(db, `vendors/${userData.vendorId}`), (vendorSnap) => {
               const vendorData = vendorSnap.exists() ? vendorSnap.val() as VendorProfile : null;
               setState({
                 user: userData,
@@ -101,17 +104,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
           setLastActivity(Date.now());
         });
-
-        return () => {
-          unsubUser();
-          if (unsubVendor) unsubVendor();
-        };
       } else {
         setState({ user: null, role: null, vendorProfile: null, isAuthenticated: false, isLoading: false });
       }
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      if (unsubUser) unsubUser();
+      if (unsubVendor) unsubVendor();
+    };
   }, []);
 
   // Activity tracking
@@ -178,23 +180,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const uid = userCredential.user.uid;
 
-      // Parallelize DB fetches for speed
-      const [userDoc, vendorSnap] = await Promise.all([
-        get(child(ref(db), `users/${uid}`)),
-        get(child(ref(db), `vendors/v_${uid}`)) // Predictable vendor ID pattern
-      ]);
+      // Fetch user data first
+      const userSnap = await get(child(ref(db), `users/${uid}`));
+      
+      if (!userSnap.exists()) {
+        throw new Error("Profil utilisateur introuvable en base.");
+      }
 
-      const userData = userDoc.exists() ? userDoc.val() as User : { 
-        id: uid, 
-        name: email.split("@")[0], 
-        role: "client" 
-      } as User;
+      const userData = userSnap.val() as User;
+      let vendorData: VendorProfile | null = null;
 
-      // If pattern didn't match, try the specific vendorId from user doc
-      let vendorData = vendorSnap.exists() ? vendorSnap.val() as VendorProfile : null;
-      if (!vendorData && userData.vendorId) {
-        const specificSnap = await get(child(ref(db), `vendors/${userData.vendorId}`));
-        if (specificSnap.exists()) vendorData = specificSnap.val() as VendorProfile;
+      // Then fetch vendor data if applicable
+      if (userData.vendorId) {
+        const vendorSnap = await get(child(ref(db), `vendors/${userData.vendorId}`));
+        if (vendorSnap.exists()) {
+          vendorData = vendorSnap.val() as VendorProfile;
+        }
       }
 
       const role = userData.role;

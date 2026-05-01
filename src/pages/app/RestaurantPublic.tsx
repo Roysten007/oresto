@@ -61,7 +61,8 @@ export default function RestaurantPublic() {
       setIsOwner(owner);
       
       if (!vendorData.is_published && !owner) {
-        navigate('/app/decouvrir');
+        // Just stop loading and let the UI handle the "Coming Soon" state
+        setLoading(false);
         return;
       }
       
@@ -187,21 +188,24 @@ export default function RestaurantPublic() {
   );
 
 
-  if (!vendor) return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-white text-center p-12 gap-8">
-      <div className="w-32 h-32 rounded-full bg-muted flex items-center justify-center text-muted-foreground text-5xl shadow-inner">🍽️</div>
-      <div className="space-y-4 max-w-md">
-         <h1 className="text-3xl font-black uppercase tracking-tight">Oups ! C'est vide.</h1>
-         <p className="text-muted-foreground font-sub text-sm leading-relaxed">
-           Ce restaurant n'est pas encore ouvert ou n'existe plus.<br/>
-           Explorez d'autres saveurs sur notre plateforme.
-         </p>
+  if (!vendor || (!vendor.is_published && !isOwner)) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-24 h-24 bg-primary/10 rounded-[40px] flex items-center justify-center text-primary mb-8 animate-pulse">
+          <Rocket size={48} />
+        </div>
+        <h1 className="font-heading text-4xl font-black uppercase tracking-tighter mb-4">
+          Bientôt disponible
+        </h1>
+        <p className="text-muted-foreground max-w-md italic mb-10">
+          Ce restaurant prépare son ouverture digitale sur <span className="text-primary font-bold">Oresto</span>. Revenez très bientôt pour découvrir leur carte et commander en ligne !
+        </p>
+        <Link to="/" className="px-8 py-4 bg-black text-white rounded-full font-sub text-xs font-black uppercase tracking-widest hover:scale-105 transition-all">
+          Retour à l'accueil
+        </Link>
       </div>
-      <button onClick={() => navigate('/app/decouvrir')} className="px-12 py-5 rounded-full bg-black text-white font-black text-xs uppercase tracking-widest hover:bg-primary transition-all shadow-2xl">
-        Découvrir les restaurants
-      </button>
-    </div>
-  );
+    );
+  }
 
   const theme = {
     primary: vendor.primary_color || "#E11D48",

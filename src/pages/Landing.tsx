@@ -38,7 +38,7 @@ export default function Landing() {
               <Zap size={18} fill="currentColor" />
             </div>
             <span className="font-heading text-xl font-black tracking-tighter uppercase">
-              Oresto <span className="text-primary">Connect</span>
+              Oresto
             </span>
           </div>
 
@@ -50,9 +50,9 @@ export default function Landing() {
             <a href="#legal" className="px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors">CGU</a>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Link to="/login" className="hidden sm:block px-5 py-2 rounded-full font-sub text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors">Connexion</Link>
-            <Link to="/register" className="px-4 py-2 sm:px-6 sm:py-2.5 bg-black text-white rounded-full font-sub text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-xl">Essayer</Link>
+          <div className="flex items-center gap-1 sm:gap-2">
+            <Link to="/login" className="px-3 sm:px-5 py-2 rounded-full font-sub text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors">Connexion</Link>
+            <Link to="/register" className="px-5 py-2.5 sm:px-8 sm:py-3 bg-primary text-white rounded-full font-sub text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_10px_30px_rgba(234,88,12,0.3)]">Essayer</Link>
           </div>
         </div>
       </motion.nav>
@@ -268,8 +268,8 @@ export default function Landing() {
               <div className="w-16 h-16 bg-black text-white rounded-2xl flex items-center justify-center mx-auto mb-8">
                 <Lock size={28} />
               </div>
-              <h2 className="font-heading text-3xl md:text-5xl font-black uppercase tracking-tighter mb-6 max-w-[260px] md:max-w-none mx-auto">
-                Confidentialité & <br/><span className="text-primary italic">Sécurité</span>
+              <h2 className="font-heading text-2xl md:text-5xl font-black uppercase tracking-tighter mb-6 leading-none">
+                Confidentialité & <span className="text-primary italic">Sécurité</span>
               </h2>
               <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto mb-10 italic">
                 Vos données commerciales et celles de vos clients sont stockées dans un espace isolé et sécurisé. Aucune donnée n'est partagée entre commerçants.
@@ -368,7 +368,7 @@ export default function Landing() {
             </div>
 
             <div className="flex flex-col justify-end items-end text-right space-y-3">
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20">© 2026 Oresto Connect</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20">© 2026 Oresto</p>
               <p className="text-[10px] font-black uppercase tracking-widest text-primary italic">L'infrastructure de votre croissance</p>
             </div>
           </div>
