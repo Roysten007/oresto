@@ -3,15 +3,17 @@ import { useParams, useNavigate } from "react-router-dom";
 import { db } from "@/lib/firebase";
 import { ref, onValue } from "firebase/database";
 import { Order } from "@/data/mockData";
-import { ArrowLeft, Clock, Package, Truck, CheckCircle2, ShoppingBag, MapPin, MessageCircle, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, Clock, Package, Truck, CheckCircle2, XCircle, ShoppingBag, MapPin, MessageCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import OrderChat from "@/components/OrderChat";
+import { useOrders } from "@/contexts/OrderContext";
 
 const statusSteps = [
   { key: "pending",   label: "Commande reçue",    sub: "Le restaurant a reçu votre commande",   icon: Clock,         color: "text-orange-500",  bg: "bg-orange-500" },
   { key: "preparing", label: "En préparation",     sub: "Votre repas est en cours de préparation", icon: Package,    color: "text-blue-500",    bg: "bg-blue-500" },
   { key: "delivering",label: "En route",           sub: "Un livreur est en chemin vers vous",    icon: Truck,         color: "text-purple-500",  bg: "bg-purple-500" },
   { key: "delivered", label: "Livré !",            sub: "Votre commande a bien été livrée",       icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-500" },
+  { key: "cancelled", label: "Annulée",            sub: "Cette commande a été annulée",           icon: XCircle,      color: "text-red-500",    bg: "bg-red-500" },
 ];
 
 const modeLabels: Record<string, string> = {
@@ -27,6 +29,14 @@ export default function OrderTracking() {
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showChat, setShowChat] = useState(false);
+  const { updateOrderStatus } = useOrders();
+
+  const handleCancelOrder = () => {
+    if (!id) return;
+    if (window.confirm("Es-tu sûr de vouloir annuler cette commande ?")) {
+      updateOrderStatus(id, "cancelled");
+    }
+  };
 
   useEffect(() => {
     if (!id || !db) { setIsLoading(false); return; }
@@ -75,6 +85,8 @@ export default function OrderTracking() {
   const currentStep = statusSteps[currentIdx] || statusSteps[0];
   const CurrentIcon = currentStep.icon;
   const isDelivered = order.status === "delivered";
+  const isCancelled = order.status === "cancelled";
+  const canCancel = order.status === "pending";
   const deliveryMode = (order as any).deliveryMode as string | undefined;
   const distanceKm = (order as any).distanceKm as number | undefined;
 
@@ -115,8 +127,8 @@ export default function OrderTracking() {
           <div className="relative z-10 flex items-center justify-between">
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.3em] opacity-60">
-                <span className={`w-2 h-2 rounded-full ${isDelivered ? "bg-emerald-400" : "bg-primary animate-pulse"}`} />
-                {isDelivered ? "Terminée" : "En cours"}
+                <span className={`w-2 h-2 rounded-full ${isCancelled ? "bg-red-400" : isDelivered ? "bg-emerald-400" : "bg-primary animate-pulse"}`} />
+                {isCancelled ? "Annulée" : isDelivered ? "Terminée" : "En cours"}
               </div>
               <h2 className="text-2xl font-black uppercase tracking-tight leading-tight">{currentStep.label}</h2>
               <p className="text-[10px] opacity-60 font-bold">{currentStep.sub}</p>
@@ -126,7 +138,7 @@ export default function OrderTracking() {
             </div>
           </div>
           {/* ETA */}
-          {!isDelivered && (
+          {!isDelivered && !isCancelled && (
             <div className="relative z-10 mt-6 pt-5 border-t border-white/10 flex items-center justify-between">
               <span className="text-[9px] font-black uppercase tracking-[0.3em] opacity-60">Arrivée estimée</span>
               <span className="font-black text-lg">15-25 <span className="text-xs opacity-60 font-bold">min</span></span>
@@ -134,47 +146,57 @@ export default function OrderTracking() {
           )}
         </motion.div>
 
-        {/* Progress Timeline */}
-        <div className="bg-white rounded-[36px] border border-gray-50 shadow-sm p-6 space-y-1">
-          <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 mb-5">Progression</h3>
-          {statusSteps.map((step, i) => {
-            const isDone = i <= currentIdx;
-            const isActive = i === currentIdx;
-            const Icon = step.icon;
-            return (
-              <div key={step.key} className="flex gap-4 relative">
-                <div className="flex flex-col items-center">
-                  <motion.div
-                    animate={{
-                      backgroundColor: isDone ? "#000" : "#F3F4F6",
-                      scale: isActive ? [1, 1.08, 1] : 1,
-                    }}
-                    transition={{ repeat: isActive ? Infinity : 0, duration: 1.8 }}
-                    className="w-11 h-11 rounded-2xl flex items-center justify-center z-10 shadow-sm border-4 border-white"
-                  >
-                    <Icon size={18} className={isDone ? "text-white" : "text-gray-300"} />
-                  </motion.div>
-                  {i < statusSteps.length - 1 && (
+        {/* Progress Timeline — cancelled orders show a simplified view */}
+        {isCancelled ? (
+          <div className="bg-white rounded-[36px] border border-red-100 shadow-sm p-6 space-y-1 text-center">
+            <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
+              <XCircle size={32} className="text-red-500" />
+            </div>
+            <h3 className="text-sm font-black uppercase tracking-tight text-red-600">Commande annulée</h3>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Cette commande a été annulée et ne sera pas traitée</p>
+          </div>
+        ) : (
+          <div className="bg-white rounded-[36px] border border-gray-50 shadow-sm p-6 space-y-1">
+            <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 mb-5">Progression</h3>
+            {statusSteps.map((step, i) => {
+              const isDone = i <= currentIdx;
+              const isActive = i === currentIdx;
+              const Icon = step.icon;
+              return (
+                <div key={step.key} className="flex gap-4 relative">
+                  <div className="flex flex-col items-center">
                     <motion.div
-                      animate={{ backgroundColor: isDone ? "#000" : "#F3F4F6" }}
-                      className="w-0.5 h-10 -mt-0.5"
-                    />
-                  )}
+                      animate={{
+                        backgroundColor: isDone ? "#000" : "#F3F4F6",
+                        scale: isActive ? [1, 1.08, 1] : 1,
+                      }}
+                      transition={{ repeat: isActive ? Infinity : 0, duration: 1.8 }}
+                      className="w-11 h-11 rounded-2xl flex items-center justify-center z-10 shadow-sm border-4 border-white"
+                    >
+                      <Icon size={18} className={isDone ? "text-white" : "text-gray-300"} />
+                    </motion.div>
+                    {i < statusSteps.length - 1 && (
+                      <motion.div
+                        animate={{ backgroundColor: isDone ? "#000" : "#F3F4F6" }}
+                        className="w-0.5 h-10 -mt-0.5"
+                      />
+                    )}
+                  </div>
+                  <div className="pt-2.5 pb-8 flex-1">
+                    <p className={`text-xs font-black uppercase tracking-wide ${isDone ? "text-black" : "text-gray-300"}`}>
+                      {step.label}
+                    </p>
+                    {isActive && (
+                      <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-[10px] font-bold text-primary mt-0.5">
+                        ● Action en cours...
+                      </motion.p>
+                    )}
+                  </div>
                 </div>
-                <div className="pt-2.5 pb-8 flex-1">
-                  <p className={`text-xs font-black uppercase tracking-wide ${isDone ? "text-black" : "text-gray-300"}`}>
-                    {step.label}
-                  </p>
-                  {isActive && (
-                    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-[10px] font-bold text-primary mt-0.5">
-                      ● Action en cours...
-                    </motion.p>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* Order details */}
         <div className="bg-white rounded-[36px] border border-gray-50 shadow-sm p-6 space-y-5">
@@ -254,6 +276,18 @@ export default function OrderTracking() {
             )}
           </AnimatePresence>
         </div>
+
+        {/* Pending — cancel button */}
+        {canCancel && (
+          <motion.button
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            onClick={handleCancelOrder}
+            className="w-full py-5 rounded-[32px] bg-red-500 text-white font-black text-xs uppercase tracking-[0.3em] shadow-xl hover:bg-red-600 active:scale-95 transition-all"
+          >
+            🚫 Annuler la commande
+          </motion.button>
+        )}
 
         {/* Delivered — rate button */}
         {isDelivered && (

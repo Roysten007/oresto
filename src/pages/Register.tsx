@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Eye, EyeOff, User, Store, ArrowRight, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function Register() {
   const { register } = useAuth();
@@ -20,20 +21,21 @@ export default function Register() {
     setError("");
     if (step === 1) { setStep(2); return; }
     if (step === 2) {
+      if (!form.firstName || !form.name || !form.email || !form.password) { setError("Veuillez remplir tous les champs obligatoires."); return; }
       if (form.password !== form.confirmPassword) { setError("Les mots de passe ne correspondent pas."); return; }
-      
+
       const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
       if (!passwordRegex.test(form.password)) {
         setError("Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.");
         return;
       }
 
-      if (!form.email || !form.password || !form.firstName) { setError("Veuillez remplir tous les champs obligatoires."); return; }
       if (role === "vendor") { setStep(3); return; }
       
       setLoading(true);
       const result = await register({ ...form, role });
       if (result.success) {
+        toast.success("Compte créé ! Vérifie tes emails 📧", { duration: 5000 });
         navigate("/app/home");
       } else { 
         setError(result.error || "Erreur"); 
@@ -42,9 +44,11 @@ export default function Register() {
       return;
     }
     if (step === 3) {
+      if (!vendorForm.shopName || !vendorForm.city) { setError("Veuillez renseigner au moins le nom et la ville de votre restaurant."); return; }
       setLoading(true);
       const result = await register({ ...form, ...vendorForm, role, category: "Restaurants", vendorId: `v${Date.now()}` });
       if (result.success) {
+        toast.success("Boutique créée ! Vérifie tes emails 📧", { duration: 5000 });
         navigate("/vendor/dashboard");
       } else {
         setError(result.error || "Erreur");
@@ -146,7 +150,7 @@ export default function Register() {
                     <Store size={32} className="text-[#FF6B00] group-hover:text-white" />
                   </div>
                   <h3 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 700 }} className="text-lg text-white">Vendeur</h3>
-                  <p className="text-[#888] text-xs mt-2">Vendre des produits sur Oresto</p>
+                  <p className="text-[#888] text-xs mt-2">Vendre vos plats et gérer votre restaurant</p>
                 </button>
               </div>
             )}

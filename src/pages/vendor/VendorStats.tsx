@@ -43,7 +43,7 @@ export default function VendorStats() {
     { label: "Total commandes", value: (stats.totalOrders || 0).toLocaleString() },
     { label: "Total revenus", value: `${(stats.totalRevenue || 0).toLocaleString()} FCFA` },
     { label: "Panier moyen", value: `${(stats.avgOrder || 0).toLocaleString()} FCFA` },
-    { label: "Note moyenne", value: vendorProfile?.rating?.toFixed(1) || "4.8" },
+    { label: "Note moyenne", value: vendorProfile?.rating ? vendorProfile.rating.toFixed(1) : "—" },
   ];
 
   return (

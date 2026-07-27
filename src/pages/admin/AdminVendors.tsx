@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase";
-import { ref, onValue } from "firebase/database";
+import { ref, onValue, update } from "firebase/database";
 import { VendorProfile } from "@/data/mockData";
+import { toast } from "sonner";
 
 export default function AdminVendors() {
   const [vendors, setVendors] = useState<VendorProfile[]>([]);
@@ -13,7 +14,7 @@ export default function AdminVendors() {
     const unsub = onValue(vendorsRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        setVendors(Object.values(data) as VendorProfile[]);
+        setVendors(Object.entries(data).map(([id, v]: [string, any]) => ({ ...v, id })) as VendorProfile[]);
       } else {
         setVendors([]);
       }
@@ -21,6 +22,16 @@ export default function AdminVendors() {
     });
     return () => unsub();
   }, []);
+
+  const setStatus = async (id: string, status: string) => {
+    if (!db) return;
+    try {
+      await update(ref(db, `vendors/${id}`), { status });
+      toast.success("Statut mis à jour");
+    } catch {
+      toast.error("Erreur de mise à jour");
+    }
+  };
 
   if (isLoading) {
     return <div className="p-8 text-center text-muted-foreground font-body">Chargement des vendeurs...</div>;
@@ -57,6 +68,7 @@ export default function AdminVendors() {
                 <th className="text-left p-3 font-sub text-muted-foreground">Ville</th>
                 <th className="text-left p-3 font-sub text-muted-foreground">Plan</th>
                 <th className="text-left p-3 font-sub text-muted-foreground">Statut</th>
+                <th className="text-left p-3 font-sub text-muted-foreground">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -74,6 +86,20 @@ export default function AdminVendors() {
                     }`}>
                       {s.status === "active" ? "🟢 Actif" : s.status === "pending" ? "🟡 En attente" : "🔴 Suspendu"}
                     </span>
+                  </td>
+                  <td className="p-3">
+                    <div className="flex gap-2">
+                      {s.status !== "active" && (
+                        <button onClick={() => setStatus(s.id, "active")} className="px-3 py-1 rounded-lg bg-green-100 text-green-700 text-[10px] font-sub font-bold hover:bg-green-200 transition-colors">
+                          {s.status === "pending" ? "Approuver" : "Réactiver"}
+                        </button>
+                      )}
+                      {s.status !== "suspended" && (
+                        <button onClick={() => setStatus(s.id, "suspended")} className="px-3 py-1 rounded-lg bg-destructive/10 text-destructive text-[10px] font-sub font-bold hover:bg-destructive/20 transition-colors">
+                          Suspendre
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

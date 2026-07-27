@@ -9,7 +9,8 @@ import { Search, MapPin, Heart, Star, Clock, Utensils, Sparkles, ChevronRight, Z
 import { motion, AnimatePresence } from "framer-motion";
 
 function RestaurantCard({ restaurant, featured = false }: { restaurant: VendorProfile; featured?: boolean }) {
-  const [isFav, setIsFav] = useState(false);
+  const { favorites, toggleFavorite } = useClient();
+  const isFav = favorites.includes(restaurant.id);
 
   return (
     <motion.div
@@ -58,7 +59,7 @@ function RestaurantCard({ restaurant, featured = false }: { restaurant: VendorPr
         </div>
       </Link>
       <button
-        onClick={() => setIsFav(!isFav)}
+        onClick={() => toggleFavorite(restaurant.id)}
         className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-primary transition-all shadow-lg active:scale-90"
       >
         <Heart size={16} className={isFav ? "fill-primary text-primary" : ""} />
@@ -301,7 +302,7 @@ export default function ClientHome() {
         <section className="space-y-6">
           <div className="px-2 space-y-1">
             <h2 className="text-2xl font-black uppercase tracking-tighter leading-none">Les <span className="text-primary">Populaires</span></h2>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Tops commandés en ce moment</p>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Les plus commandés du moment</p>
           </div>
           <div className="flex gap-5 overflow-x-auto pb-4 scrollbar-hide -mx-6 px-6">
             {displayedRestaurants.slice().reverse().map(r => <RestaurantCard key={r.id} restaurant={r} featured />)}

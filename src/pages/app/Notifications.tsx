@@ -1,41 +1,43 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, ArrowLeft, Check, Trash2, Clock, MessageCircle, ShoppingBag, Star } from "lucide-react";
+import { Bell, ArrowLeft, Check, Clock, MessageCircle, ShoppingBag, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useClient } from "@/contexts/ClientContext";
 
-const mockNotifications = [
-  { id: 1, title: "Commande confirmée", message: "Votre commande chez 'Burger King' est en préparation.", time: "Il y a 2 min", type: "order", read: false },
-  { id: 2, title: "Livreur en route", message: "Moussa est en chemin avec votre délicieux repas !", time: "Il y a 15 min", type: "delivery", read: false },
-  { id: 3, title: "Points de fidélité", message: "Félicitations ! Vous avez gagné 50 points Oresto.", time: "Hier", type: "loyalty", read: true },
-  { id: 4, title: "Promotion exclusive", message: "-20% sur tout le menu chez 'Pizza Hut' aujourd'hui.", time: "Il y a 2 jours", type: "promo", read: true },
-];
+const timeAgo = (iso?: string) => {
+  if (!iso) return "";
+  const ts = new Date(iso).getTime();
+  if (isNaN(ts)) return "";
+  const min = Math.floor((Date.now() - ts) / 60000);
+  if (min < 1) return "À l'instant";
+  if (min < 60) return `Il y a ${min} min`;
+  const h = Math.floor(min / 60);
+  if (h < 24) return `Il y a ${h} h`;
+  const j = Math.floor(h / 24);
+  if (j === 1) return "Hier";
+  return `Il y a ${j} j`;
+};
+
+const getTypeIcon = (type: string) => {
+  switch (type) {
+    case "order": return <ShoppingBag size={18} />;
+    case "delivery": return <Clock size={18} />;
+    case "loyalty": return <Star size={18} />;
+    case "promo":
+    case "discovery": return <MessageCircle size={18} />;
+    default: return <Bell size={18} />;
+  }
+};
 
 export default function Notifications() {
   const navigate = useNavigate();
-  const { markAllAsRead } = useClient();
-  const [notifications, setNotifications] = useState(mockNotifications);
-
-  const deleteNotification = (id: number) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
-  };
-
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case "order": return <ShoppingBag size={18} />;
-      case "delivery": return <Clock size={18} />;
-      case "loyalty": return <Star size={18} />;
-      case "promo": return <MessageCircle size={18} />;
-      default: return <Bell size={18} />;
-    }
-  };
+  const { notifications, markAsRead, markAllAsRead } = useClient();
 
   return (
     <div className="py-8 space-y-8 pb-40">
       {/* Header */}
       <div className="flex items-center justify-between px-2">
         <div className="flex items-center gap-6">
-          <button 
+          <button
             onClick={() => navigate(-1)}
             className="w-12 h-12 rounded-2xl bg-white border border-gray-100 flex items-center justify-center shadow-sm active:scale-90 transition-all"
           >
@@ -46,7 +48,7 @@ export default function Notifications() {
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Restez informé de vos commandes</p>
           </div>
         </div>
-        <button 
+        <button
           onClick={markAllAsRead}
           className="w-10 h-10 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400 hover:text-primary transition-all"
           title="Tout marquer comme lu"
@@ -59,7 +61,7 @@ export default function Notifications() {
       <div className="px-2 space-y-4">
         <AnimatePresence mode="popLayout">
           {notifications.length === 0 ? (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }}
               className="py-20 text-center space-y-4"
             >
@@ -77,38 +79,31 @@ export default function Notifications() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
                 transition={{ delay: i * 0.05 }}
+                onClick={() => !n.is_read && markAsRead(n.id)}
                 className={`group relative p-6 rounded-[32px] border transition-all ${
-                  n.read ? "bg-white border-gray-50" : "bg-white border-primary/20 shadow-lg shadow-primary/5"
+                  n.is_read ? "bg-white border-gray-50" : "bg-white border-primary/20 shadow-lg shadow-primary/5 cursor-pointer"
                 }`}
               >
                 <div className="flex gap-4">
                   <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 ${
-                    n.read ? "bg-gray-50 text-gray-400" : "bg-primary/10 text-primary"
+                    n.is_read ? "bg-gray-50 text-gray-400" : "bg-primary/10 text-primary"
                   }`}>
                     {getTypeIcon(n.type)}
                   </div>
                   <div className="flex-1 space-y-1">
-                    <div className="flex justify-between items-start">
-                      <h3 className={`text-xs font-black uppercase tracking-tight ${n.read ? "text-gray-600" : "text-black"}`}>
+                    <div className="flex justify-between items-start gap-2">
+                      <h3 className={`text-xs font-black uppercase tracking-tight ${n.is_read ? "text-gray-600" : "text-black"}`}>
                         {n.title}
                       </h3>
-                      <span className="text-[9px] font-bold text-gray-400 uppercase">{n.time}</span>
+                      <span className="text-[9px] font-bold text-gray-400 uppercase whitespace-nowrap">{timeAgo(n.created_at)}</span>
                     </div>
                     <p className="text-[10px] font-medium text-gray-500 leading-relaxed">
-                      {n.message}
+                      {n.body}
                     </p>
                   </div>
                 </div>
-                
-                {/* Delete button on hover */}
-                <button 
-                  onClick={() => deleteNotification(n.id)}
-                  className="absolute top-4 right-4 w-8 h-8 rounded-xl bg-red-50 text-red-500 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center"
-                >
-                  <Trash2 size={14} />
-                </button>
 
-                {!n.read && (
+                {!n.is_read && (
                   <div className="absolute top-3 left-3 w-2 h-2 rounded-full bg-primary" />
                 )}
               </motion.div>

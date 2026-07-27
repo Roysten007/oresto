@@ -10,6 +10,10 @@ interface ClientContextType {
   city: string | null;
   updateLocation: (lat: number, lng: number, city?: string) => Promise<void>;
   updateCity: (city: string) => Promise<void>;
+  addresses: { id: string; label: string; address: string; lat: number; lng: number }[];
+  addAddress: (addr: { label: string; address: string; lat: number; lng: number }) => Promise<void>;
+  language: string;
+  updateLanguage: (lang: string) => Promise<void>;
   onboardingCompleted: boolean;
   completeOnboarding: () => void;
   favorites: string[];

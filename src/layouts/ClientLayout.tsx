@@ -154,12 +154,6 @@ export default function ClientLayout() {
                             className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary"
                           />
                         )}
-                      {/* Cart badge on orders, unread badge on messages */}
-                        {item.path === "/app/orders" && totalItems > 0 && !active && (
-                          <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-white text-[8px] font-black rounded-full flex items-center justify-center">
-                            {totalItems}
-                          </span>
-                        )}
                       </motion.div>
                       <span
                         className={`text-[8px] font-black uppercase tracking-wider transition-all ${

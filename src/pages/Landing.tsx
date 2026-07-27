@@ -77,8 +77,8 @@ export default function Landing() {
           </FadeIn>
 
           <FadeIn delay={0.3} className="max-w-3xl mx-auto mb-16">
-            <p className="text-xl md:text-2xl text-muted-foreground font-body leading-relaxed italic opacity-80">
-              Oresto Connect est bien plus qu'un site : c'est une infrastructure complète (PaaS) avec messagerie, chatbot IA et système de fidélité pour dominer votre marché local.
+            <p className="text-xl md:text-2xl text-muted-foreground font-body leading-relaxed">
+              Créez votre application de commande en ligne, encaissez par Mobile Money, fidélisez vos clients et laissez l'IA gérer le quotidien. Tout ce qu'il faut pour vendre plus — au même endroit.
             </p>
           </FadeIn>
 
@@ -106,9 +106,9 @@ export default function Landing() {
           </FadeIn>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { title: "Site Factory", icon: Rocket, desc: "Générez votre application web de vente en 12 minutes. Interface premium, catalogue dynamique, zéro code.", color: "bg-blue-500" },
-              { title: "IZA AI Director", icon: Bot, desc: "Intelligence artificielle intégrée : analyse des ventes, gestion du catalogue, assistance à la décision en temps réel.", color: "bg-primary" },
-              { title: "Écosystème Local", icon: Globe, desc: "Adapté à l'Afrique de l'Ouest : Mobile Money, WhatsApp, livraison de proximité, paiement cash.", color: "bg-emerald-500" },
+              { title: "Votre app de vente", icon: Rocket, desc: "Votre application de commande en ligne, prête en 12 minutes. Design professionnel, catalogue dynamique, aucune ligne de code.", color: "bg-blue-500" },
+              { title: "IZA, votre IA", icon: Bot, desc: "Une intelligence artificielle intégrée qui analyse vos ventes, gère votre catalogue et vous conseille en temps réel.", color: "bg-primary" },
+              { title: "Pensé pour chez vous", icon: Globe, desc: "Adapté à l'Afrique de l'Ouest : Mobile Money, WhatsApp, livraison de proximité et paiement en espèces.", color: "bg-emerald-500" },
             ].map((p, i) => (
               <FadeIn key={i} delay={i * 0.1} className="h-full">
                 <div className="h-full p-8 rounded-[32px] bg-gray-50/50 border border-gray-100 hover:bg-white hover:shadow-xl transition-all">
@@ -129,7 +129,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto">
           <FadeIn className="text-center mb-16">
             <p className="font-sub text-[11px] font-black uppercase tracking-[0.4em] text-primary mb-3">Expérience Client</p>
-            <h2 className="font-heading text-3xl md:text-5xl font-black uppercase tracking-tighter">Vos clients adoreent l'expérience.</h2>
+            <h2 className="font-heading text-3xl md:text-5xl font-black uppercase tracking-tighter">Vos clients adorent l'expérience.</h2>
             <p className="text-lg text-muted-foreground mt-4 max-w-2xl mx-auto italic">
               Oresto Connect ne se limite pas aux commerçants. L'application client est pensée pour être fluide, engageante et fidélisante.
             </p>

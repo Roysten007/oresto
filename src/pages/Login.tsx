@@ -83,7 +83,7 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-xs font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Email / Téléphone</label>
+              <label className="block text-xs font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Email</label>
               <input 
                 type="email" 
                 value={email} 
@@ -97,7 +97,7 @@ export default function Login() {
             <div>
               <div className="flex justify-between items-center mb-2 px-1">
                 <label className="text-xs font-bold text-[#0A0A0A] uppercase tracking-widest">Mot de passe</label>
-                <Link to="/forgot-password" size="sm" className="text-xs font-semibold text-[#FF6B00] hover:underline">Oublié ?</Link>
+                <Link to="/forgot-password" className="text-xs font-semibold text-[#FF6B00] hover:underline">Oublié ?</Link>
               </div>
               <div className="relative">
                 <input 
@@ -155,19 +155,21 @@ export default function Login() {
             </button>
           </div>
 
-          <div className="mt-12 p-6 rounded-3xl bg-[#F8F8F8] border border-[#EEEEEE]">
-            <p className="text-[10px] font-bold text-[#BBB] uppercase tracking-widest mb-4">Accès rapides (Démo)</p>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center text-xs">
-                <span className="text-[#777]">Client: <b className="text-[#0A0A0A]">aminat@test.com</b></span>
-                <span className="text-[#BBB]">password</span>
-              </div>
-              <div className="flex justify-between items-center text-xs">
-                <span className="text-[#777]">Vendeur: <b className="text-[#0A0A0A]">kofi@test.com</b></span>
-                <span className="text-[#BBB]">password</span>
+          {import.meta.env.DEV && (
+            <div className="mt-12 p-6 rounded-3xl bg-[#F8F8F8] border border-[#EEEEEE]">
+              <p className="text-[10px] font-bold text-[#BBB] uppercase tracking-widest mb-4">Accès rapides (Démo · dev uniquement)</p>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-[#777]">Client: <b className="text-[#0A0A0A]">aminat@test.com</b></span>
+                  <span className="text-[#BBB]">password</span>
+                </div>
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-[#777]">Vendeur: <b className="text-[#0A0A0A]">kofi@test.com</b></span>
+                  <span className="text-[#BBB]">password</span>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 

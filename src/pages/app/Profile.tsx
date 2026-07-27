@@ -30,7 +30,7 @@ import { sendPasswordResetEmail, getAuth } from "firebase/auth";
 
 export default function Profile() {
   const { user, logout } = useAuth();
-  const { notifications, loyaltyPoints, language, updateLanguage } = useClient();
+  const { loyaltyPoints, language, updateLanguage, unreadCount } = useClient();
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -76,8 +76,6 @@ export default function Profile() {
       toast.error("Erreur d'envoi. Vérifiez votre email.");
     }
   };
-
-  const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
     <div className="py-8 space-y-10 pb-40 px-4">

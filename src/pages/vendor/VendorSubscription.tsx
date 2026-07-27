@@ -28,6 +28,11 @@ export default function VendorSubscription() {
               ))}
             </ul>
             <button disabled={plan.id === currentPlan}
+              onClick={() => {
+                const num = (import.meta.env.VITE_WHATSAPP_PHONE || "+22946305190").replace(/\D/g, "");
+                const msg = encodeURIComponent(`Bonjour, je souhaite passer à l'abonnement ${plan.name} (${plan.price} FCFA/mois) pour ma boutique Oresto.`);
+                window.open(`https://wa.me/${num}?text=${msg}`, "_blank");
+              }}
               className={`mt-4 w-full py-2.5 rounded-full font-sub text-sm btn-hover ${plan.id === currentPlan ? "bg-muted text-muted-foreground cursor-not-allowed" : "bg-primary text-primary-foreground"}`}>
               {plan.id === currentPlan ? "Plan actuel" : "Choisir"}
             </button>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
 import { db } from "@/lib/firebase";
 import { ref, onValue } from "firebase/database";
@@ -6,6 +6,51 @@ import { VendorProfile } from "@/data/mockData";
 import { useClient } from "@/contexts/ClientContext";
 import { Search, Star, Clock, Utensils, MapPin, List, Map as MapIcon, ChevronDown, SlidersHorizontal, Heart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+
+const pinIcon = L.divIcon({
+  className: "oresto-map-pin",
+  html: '<div style="width:24px;height:24px;background:#FF6B00;border:3px solid white;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 6px rgba(0,0,0,.35)"></div>',
+  iconSize: [24, 24],
+  iconAnchor: [12, 24],
+  popupAnchor: [0, -22],
+});
+
+function RestaurantsMap({ restaurants, center }: { restaurants: any[]; center: [number, number] }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<L.Map | null>(null);
+  const layerRef = useRef<L.LayerGroup | null>(null);
+
+  useEffect(() => {
+    if (!containerRef.current || mapRef.current) return;
+    const map = L.map(containerRef.current).setView(center, 12);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "&copy; OpenStreetMap",
+    }).addTo(map);
+    layerRef.current = L.layerGroup().addTo(map);
+    mapRef.current = map;
+    setTimeout(() => map.invalidateSize(), 120);
+    return () => { map.remove(); mapRef.current = null; layerRef.current = null; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const layer = layerRef.current;
+    if (!layer) return;
+    layer.clearLayers();
+    restaurants.forEach((r) => {
+      if (!r.lat || !r.lng) return;
+      const marker = L.marker([r.lat, r.lng], { icon: pinIcon });
+      marker.bindPopup(
+        `<div style="text-align:center"><strong>${r.name}</strong><br/><span style="font-size:11px;color:#666">${r.neighborhood || ""}</span><br/><a href="/r/${r.slug}" style="color:#FF6B00;font-weight:700;font-size:11px">Voir le menu →</a></div>`
+      );
+      layer.addLayer(marker);
+    });
+  }, [restaurants]);
+
+  return <div ref={containerRef} className="w-full h-full" />;
+}
 
 const FILTERS = [
   { id: "all", label: "Tous" },
@@ -17,7 +62,7 @@ const FILTERS = [
 ];
 
 export default function Decouvrir() {
-  const { location } = useClient();
+  const { location, favorites, toggleFavorite } = useClient();
   const [restaurants, setRestaurants] = useState<VendorProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -50,7 +95,7 @@ export default function Decouvrir() {
         list = list.map(r => {
           const vLat = r.location?.lat || (6.36536 + (r.id.length % 10) * 0.01);
           const vLng = r.location?.lng || (2.41833 + (r.id.length % 5) * 0.01);
-          return { ...r, distance: getDistance(refLat, refLng, vLat, vLng) };
+          return { ...r, distance: getDistance(refLat, refLng, vLat, vLng), lat: vLat, lng: vLng };
         });
         
         // Sort by distance by default
@@ -232,8 +277,11 @@ export default function Decouvrir() {
                         <button className="flex-1 py-4 rounded-2xl bg-black text-white font-black text-[10px] uppercase tracking-widest hover:bg-primary transition-colors">
                           Commander
                         </button>
-                        <button className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400 hover:text-primary transition-all">
-                          <Heart size={20} />
+                        <button
+                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleFavorite(shop.id); }}
+                          className={`w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center transition-all ${favorites.includes(shop.id) ? "text-primary" : "text-gray-400 hover:text-primary"}`}
+                        >
+                          <Heart size={20} className={favorites.includes(shop.id) ? "fill-primary" : ""} />
                         </button>
                       </div>
                     </div>
@@ -243,25 +291,15 @@ export default function Decouvrir() {
             )}
           </motion.div>
         ) : (
-          <motion.div 
+          <motion.div
             key="map"
             initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-            className="relative h-[60vh] bg-gray-100 rounded-[48px] overflow-hidden flex flex-col items-center justify-center border-2 border-dashed border-gray-200"
+            className="relative h-[60vh] rounded-[48px] overflow-hidden border border-gray-100 shadow-sm"
           >
-            <MapPin size={48} className="text-primary mb-4 animate-bounce" />
-            <p className="font-black text-xs uppercase tracking-widest text-gray-400">Carte interactive</p>
-            <p className="text-[10px] text-gray-300 mt-2 font-bold">(Simulation Leaflet.js)</p>
-            
-            {/* Simulation de pins */}
-            {filteredRestaurants.slice(0, 5).map((r, i) => (
-              <div 
-                key={r.id}
-                className="absolute w-8 h-8 rounded-full border-4 border-white bg-primary shadow-lg overflow-hidden"
-                style={{ top: `${20 + i * 15}%`, left: `${30 + i * 10}%` }}
-              >
-                <img src={r.logo_url} className="w-full h-full object-cover" alt="" />
-              </div>
-            ))}
+            <RestaurantsMap
+              restaurants={filteredRestaurants as any[]}
+              center={[location?.lat || 6.3703, location?.lng || 2.3912]}
+            />
           </motion.div>
         )}
       </AnimatePresence>

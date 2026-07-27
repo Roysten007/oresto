@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -21,7 +21,6 @@ import NotFound from "./pages/NotFound";
 
 import ClientLayout from "./layouts/ClientLayout";
 import ClientHome from "./pages/app/ClientHome";
-import ClientSearch from "./pages/app/ClientSearch";
 import ShopDetail from "./pages/app/ShopDetail";
 import Cart from "./pages/app/Cart";
 import OrderTracking from "./pages/app/OrderTracking";
@@ -89,7 +88,7 @@ const App = () => (
                     <Route path="/app" element={<PrivateRoute><ClientLayout /></PrivateRoute>}>
                       <Route path="home" element={<ClientHome />} />
                       <Route path="decouvrir" element={<Decouvrir />} />
-                      <Route path="search" element={<ClientSearch />} />
+                      <Route path="search" element={<Navigate to="/app/decouvrir" replace />} />
                       <Route path="shop/:id" element={<ShopDetail />} />
                       <Route path="cart" element={<Cart />} />
                       <Route path="order/:id" element={<OrderTracking />} />

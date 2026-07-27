@@ -60,8 +60,8 @@ export default function OrdersList() {
     if (filter !== "all" && filter !== "active" && o.status !== filter) return false;
 
     // Time
-    if (timeFilter !== "all" && o.createdAt) {
-      const orderDate = new Date(o.createdAt);
+    if (timeFilter !== "all" && o.date) {
+      const orderDate = new Date(o.date);
       const now = new Date();
       const diffTime = Math.abs(now.getTime() - orderDate.getTime());
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));

@@ -6,7 +6,8 @@ import {
   createUserWithEmailAndPassword, 
   signOut,
   onAuthStateChanged,
-  signInAnonymously
+  signInAnonymously,
+  sendEmailVerification
 } from "firebase/auth";
 import { ref, get, set, child, onValue } from "firebase/database";
 
@@ -311,6 +312,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // 1. Créer le compte Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(auth, data.email!, data.password);
       const uid = userCredential.user.uid;
+
+      // 1b. Envoyer l'email de vérification
+      try {
+        await sendEmailVerification(userCredential.user);
+        console.log("Email de vérification envoyé à", data.email);
+      } catch (emailErr) {
+        console.error("Erreur envoi email vérification:", emailErr);
+        // On ne bloque pas l'inscription si l'email échoue
+      }
 
       // 2. Préparer les données
       let vendorId = data.vendorId || (data.role === "vendor" ? `v_${uid}` : null);

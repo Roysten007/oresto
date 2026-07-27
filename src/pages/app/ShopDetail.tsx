@@ -20,7 +20,7 @@ import {
   ChevronLeft
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { VendorProfile, Product, Review, mockReviews } from "@/data/mockData";
+import { VendorProfile, Product } from "@/data/mockData";
 import { toast } from "sonner";
 import { useCart } from "@/contexts/CartContext";
 import { useClient } from "@/contexts/ClientContext";
@@ -33,6 +33,7 @@ export default function ShopDetail() {
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState("Tous");
   const [activeTab, setActiveTab] = useState<"menu" | "avis" | "infos">("menu");
+  const [reviews, setReviews] = useState<any[]>([]);
 
   const { addToCart, totalItems, totalPrice } = useCart();
   const { favorites, toggleFavorite } = useClient();
@@ -117,7 +118,20 @@ export default function ShopDetail() {
   }, [id]);
 
   const isFavorite = vendor ? favorites.includes(vendor.id) : false;
-  const reviews = useMemo(() => mockReviews.filter(r => r.shopId === vendor?.id), [vendor]);
+
+  // Charge les vrais avis publics du restaurant
+  useEffect(() => {
+    if (!vendor?.id || !db) { setReviews([]); return; }
+    get(ref(db, "reviews")).then(snap => {
+      const data = snap.val();
+      if (!data) { setReviews([]); return; }
+      const list = Object.entries(data)
+        .map(([id, v]: [string, any]) => ({ id, ...v }))
+        .filter((r: any) => r.vendorId === vendor.id && r.isPublic !== false)
+        .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      setReviews(list);
+    }).catch(() => setReviews([]));
+  }, [vendor?.id]);
 
   const categories = useMemo(() => {
     const cats = new Set(products.map(p => p.category?.trim()).filter(Boolean));
@@ -198,7 +212,18 @@ export default function ShopDetail() {
             <ChevronLeft size={20} />
           </button>
           <div className="flex gap-2">
-            <button className="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/20 active:scale-90 transition-all">
+            <button
+              onClick={async () => {
+                const url = window.location.href;
+                if (navigator.share) {
+                  try { await navigator.share({ title: vendor.name, text: vendor.description, url }); } catch { /* annulé */ }
+                } else {
+                  navigator.clipboard.writeText(url);
+                  toast.success("Lien copié !");
+                }
+              }}
+              className="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/20 active:scale-90 transition-all"
+            >
               <Share2 size={18} />
             </button>
             <button 
@@ -381,14 +406,14 @@ export default function ShopDetail() {
                 reviews.map(r => (
                   <div key={r.id} className="p-6 rounded-[32px] bg-gray-50 space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="font-black text-[10px] uppercase tracking-widest">{r.userName}</span>
+                      <span className="font-black text-[10px] uppercase tracking-widest">{r.clientName || "Client"}</span>
                       <div className="flex gap-0.5">
                         {Array.from({ length: 5 }).map((_, i) => (
-                          <Star key={i} size={10} className={i < r.rating ? "fill-amber-400 text-amber-400" : "text-gray-200"} />
+                          <Star key={i} size={10} className={i < Math.round(r.average || 0) ? "fill-amber-400 text-amber-400" : "text-gray-200"} />
                         ))}
                       </div>
                     </div>
-                    <p className="text-xs text-gray-500 italic leading-relaxed">"{r.comment}"</p>
+                    {r.comment && <p className="text-xs text-gray-500 italic leading-relaxed">"{r.comment}"</p>}
                   </div>
                 ))
               )}
@@ -400,10 +425,23 @@ export default function ShopDetail() {
                 <p className="text-sm font-medium text-gray-600 leading-relaxed">{vendor.description || "Aucune description disponible pour ce restaurant."}</p>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                 <button className="flex items-center justify-center gap-3 py-5 rounded-[28px] bg-emerald-50 text-emerald-600 font-black text-[10px] uppercase tracking-widest">
+                 <button
+                   onClick={() => {
+                     if (vendor.phone) window.location.href = `tel:${vendor.phone}`;
+                     else toast.error("Numéro de téléphone non disponible");
+                   }}
+                   className="flex items-center justify-center gap-3 py-5 rounded-[28px] bg-emerald-50 text-emerald-600 font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all"
+                 >
                    <Phone size={16} /> Appeler
                  </button>
-                 <button className="flex items-center justify-center gap-3 py-5 rounded-[28px] bg-blue-50 text-blue-600 font-black text-[10px] uppercase tracking-widest">
+                 <button
+                   onClick={() => {
+                     const wa = (vendor.whatsapp || vendor.phone || "").replace(/\s/g, "");
+                     if (wa) window.open(`https://wa.me/${wa}`, "_blank");
+                     else toast.error("WhatsApp non disponible");
+                   }}
+                   className="flex items-center justify-center gap-3 py-5 rounded-[28px] bg-blue-50 text-blue-600 font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all"
+                 >
                    <MessageCircle size={16} /> WhatsApp
                  </button>
               </div>

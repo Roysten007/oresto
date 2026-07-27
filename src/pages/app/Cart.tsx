@@ -46,6 +46,10 @@ export default function Cart() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
   const [vendorModes, setVendorModes] = useState<string[]>(["Livraison", "À Emporter", "Sur Place"]);
+  const [promoCode, setPromoCode] = useState("");
+  const [promoDiscount, setPromoDiscount] = useState(0);
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [promoError, setPromoError] = useState("");
   const navigate = useNavigate();
 
   const handleLocateMe = () => {
@@ -101,10 +105,35 @@ export default function Cart() {
     });
   }, [restaurantId]);
 
+  const handleApplyPromo = async () => {
+    if (!promoCode.trim() || !db || !restaurantId) return;
+    setPromoLoading(true);
+    setPromoError("");
+    setPromoDiscount(0);
+    try {
+      const snap = await get(ref(db, `vendors/${restaurantId}/promos/${promoCode.trim().toUpperCase()}`));
+      if (snap.exists()) {
+        const data = snap.val();
+        const discount = data.discount || 0;
+        if (discount > 0) {
+          setPromoDiscount(discount);
+          toast.success(`Code promo appliqué ! -${discount} FCFA`);
+        } else {
+          setPromoError("Ce code promo n'est plus valide");
+        }
+      } else {
+        setPromoError("Code promo introuvable");
+      }
+    } catch (err) {
+      setPromoError("Erreur lors de la vérification du code");
+    }
+    setPromoLoading(false);
+  };
+
   // Calcul dynamique de la livraison
   const distance = deliveryMode === "delivery" ? estimateDistance(address || "default") : 0;
   const deliveryFee = deliveryMode === "delivery" ? Math.round(distance * RATE_PER_KM) : 0;
-  const finalTotal = totalPrice + deliveryFee;
+  const finalTotal = Math.max(0, totalPrice + deliveryFee - promoDiscount);
 
   const handleCheckout = async () => {
     if (!user) {
@@ -218,7 +247,7 @@ export default function Cart() {
               exit={{ opacity: 0, scale: 0.8 }}
               className="flex items-center gap-4 p-4 rounded-[32px] bg-white border border-gray-50 shadow-sm"
             >
-              <div className="w-18 h-18 w-[72px] h-[72px] rounded-[24px] overflow-hidden bg-gray-50 flex-shrink-0">
+              <div className="w-[72px] h-[72px] rounded-[24px] overflow-hidden bg-gray-50 flex-shrink-0">
                 <img src={item.product.image} alt={item.product.name} className="w-full h-full object-cover" />
               </div>
               <div className="flex-1 min-w-0">
@@ -331,6 +360,32 @@ export default function Cart() {
         </div>
       </div>
 
+      {/* Promo Code */}
+      <div className="space-y-3">
+        <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 px-1">Code promo</h2>
+        <div className="flex items-center gap-3 p-4 rounded-[28px] bg-white border border-gray-50 shadow-sm">
+          <input
+            value={promoCode}
+            onChange={e => { setPromoCode(e.target.value); setPromoDiscount(0); setPromoError(""); }}
+            placeholder="ex: PROMO20"
+            className="flex-1 text-sm font-bold bg-transparent outline-none uppercase placeholder:normal-case placeholder:font-normal placeholder:text-gray-300"
+          />
+          <button
+            onClick={handleApplyPromo}
+            disabled={promoLoading || !promoCode.trim()}
+            className="px-5 py-2.5 rounded-full bg-black text-white text-[10px] font-black uppercase tracking-widest hover:bg-primary transition-all disabled:opacity-40"
+          >
+            {promoLoading ? "..." : "Appliquer"}
+          </button>
+        </div>
+        {promoDiscount > 0 && (
+          <p className="px-2 text-[10px] font-bold text-emerald-600 uppercase tracking-widest">✅ Code appliqué : -{promoDiscount} FCFA</p>
+        )}
+        {promoError && (
+          <p className="px-2 text-[10px] font-bold text-red-500 uppercase tracking-widest">{promoError}</p>
+        )}
+      </div>
+
       {/* Summary */}
       <div className="p-6 rounded-[40px] bg-white border border-gray-50 shadow-xl space-y-4">
         <div className="space-y-3">
@@ -344,6 +399,12 @@ export default function Cart() {
               {deliveryMode === "pickup" ? "GRATUIT" : `${deliveryFee.toLocaleString()} F`}
             </span>
           </div>
+          {promoDiscount > 0 && (
+            <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-emerald-600">
+              <span>🎉 Code promo</span>
+              <span>-{promoDiscount.toLocaleString()} F</span>
+            </div>
+          )}
         </div>
         <div className="pt-4 border-t border-gray-100 flex justify-between items-center">
           <div className="space-y-0.5">

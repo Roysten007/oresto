@@ -22,7 +22,53 @@ export default function VendorCatalogue() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [showAddModal, setShowAddModal] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const emptyForm = { name: "", price: "", category: "", description: "", image: "" };
+  const [form, setForm] = useState(emptyForm);
+
+  const openAdd = () => { setEditingId(null); setForm(emptyForm); setShowModal(true); };
+  const openEdit = (p: Product) => {
+    setEditingId(p.id);
+    setForm({
+      name: p.name || "",
+      price: String(p.price ?? ""),
+      category: p.category || "",
+      description: p.description || "",
+      image: p.image || "",
+    });
+    setShowModal(true);
+  };
+
+  const handleSave = async () => {
+    if (!form.name.trim() || !form.price) { toast.error("Nom et prix obligatoires"); return; }
+    const price = Number(form.price);
+    if (isNaN(price) || price < 0) { toast.error("Prix invalide"); return; }
+    setSaving(true);
+    try {
+      const data = {
+        name: form.name.trim(),
+        price,
+        category: form.category.trim() || "Plats",
+        description: form.description.trim(),
+        image: form.image.trim(),
+      };
+      if (editingId) {
+        await update(ref(db, `products/${editingId}`), data);
+        toast.success("Plat mis à jour");
+      } else {
+        const newRef = push(ref(db, "products"));
+        await set(newRef, { ...data, vendorId: user?.vendorId, available: true });
+        toast.success("Plat ajouté");
+      }
+      setShowModal(false);
+    } catch {
+      toast.error("Erreur lors de l'enregistrement");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   // Real-time products from Firebase
   useEffect(() => {
@@ -75,8 +121,8 @@ export default function VendorCatalogue() {
           <h1 className="font-heading text-3xl font-black text-foreground tracking-tight">Carte du <span className="text-primary">Restaurant</span></h1>
           <p className="font-sub text-sm text-muted-foreground mt-1">Gérez vos plats et menus digitaux en temps réel</p>
         </div>
-        <button 
-          onClick={() => setShowAddModal(true)}
+        <button
+          onClick={openAdd}
           className="flex items-center justify-center gap-2 px-6 py-4 rounded-3xl bg-primary text-primary-foreground font-black text-sm shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
         >
           <Plus size={20} /> AJOUTER UN PLAT
@@ -135,7 +181,10 @@ export default function VendorCatalogue() {
                     </span>
                   </div>
                   <div className="absolute top-4 right-4 flex gap-2">
-                    <button className="p-2 rounded-xl bg-white/90 backdrop-blur-sm text-foreground hover:text-primary transition-colors">
+                    <button
+                      onClick={() => openEdit(p)}
+                      className="p-2 rounded-xl bg-white/90 backdrop-blur-sm text-foreground hover:text-primary transition-colors"
+                    >
                       <Pencil size={14} />
                     </button>
                     <button 
@@ -178,6 +227,58 @@ export default function VendorCatalogue() {
                 </div>
               </div>
             ))}
+        </div>
+      )}
+
+      {/* Add / Edit Product Modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowModal(false)} />
+          <div className="relative z-10 bg-card w-full max-w-lg rounded-[32px] p-6 sm:p-8 space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between">
+              <h3 className="font-heading text-xl font-black uppercase tracking-tight">{editingId ? "Modifier le plat" : "Nouveau plat"}</h3>
+              <button onClick={() => setShowModal(false)} className="w-10 h-10 rounded-2xl bg-muted flex items-center justify-center"><X size={18} /></button>
+            </div>
+
+            {form.image && (
+              <div className="h-40 rounded-2xl overflow-hidden bg-muted">
+                <img src={form.image} alt="" className="w-full h-full object-cover" />
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Nom du plat *</label>
+                <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="w-full mt-1 px-4 py-3 rounded-2xl border border-border bg-background outline-none focus:ring-2 focus:ring-primary text-sm font-medium" placeholder="Ex: Poulet braisé" />
+              </div>
+              <div>
+                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Prix (FCFA) *</label>
+                <input type="number" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} className="w-full mt-1 px-4 py-3 rounded-2xl border border-border bg-background outline-none focus:ring-2 focus:ring-primary text-sm font-medium" placeholder="2500" />
+              </div>
+              <div>
+                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Catégorie</label>
+                <input value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} list="cat-list" className="w-full mt-1 px-4 py-3 rounded-2xl border border-border bg-background outline-none focus:ring-2 focus:ring-primary text-sm font-medium" placeholder="Plats" />
+                <datalist id="cat-list">
+                  {[...new Set(products.map(p => p.category).filter(Boolean))].map(c => <option key={c} value={c} />)}
+                </datalist>
+              </div>
+              <div className="col-span-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Description</label>
+                <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={2} className="w-full mt-1 px-4 py-3 rounded-2xl border border-border bg-background outline-none focus:ring-2 focus:ring-primary text-sm font-medium resize-none" placeholder="Ingrédients, accompagnement..." />
+              </div>
+              <div className="col-span-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Image (URL)</label>
+                <input value={form.image} onChange={e => setForm({ ...form, image: e.target.value })} className="w-full mt-1 px-4 py-3 rounded-2xl border border-border bg-background outline-none focus:ring-2 focus:ring-primary text-sm font-medium" placeholder="https://..." />
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <button onClick={() => setShowModal(false)} className="flex-1 py-3 rounded-2xl bg-muted text-foreground font-black text-xs uppercase tracking-widest">Annuler</button>
+              <button onClick={handleSave} disabled={saving} className="flex-[2] py-3 rounded-2xl bg-primary text-primary-foreground font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 disabled:opacity-50">
+                {saving ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <><Check size={14} /> {editingId ? "Enregistrer" : "Ajouter"}</>}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

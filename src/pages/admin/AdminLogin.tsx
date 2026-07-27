@@ -10,12 +10,20 @@ export default function AdminLogin() {
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = adminLogin(email, password);
-    if (result.success) navigate("/oresto-admin/dashboard");
-    else setError(result.error || "Erreur");
+    if (loading) return;
+    setLoading(true);
+    setError("");
+    const result = await adminLogin(email, password);
+    if (result.success) {
+      navigate("/oresto-admin/dashboard");
+    } else {
+      setError(result.error || "Erreur");
+      setLoading(false);
+    }
   };
 
   return (
@@ -36,8 +44,8 @@ export default function AdminLogin() {
               {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
-          <button type="submit" className="w-full py-3 rounded-full bg-primary text-primary-foreground font-sub font-semibold btn-hover">
-            Accéder au panel
+          <button type="submit" disabled={loading} className="w-full py-3 rounded-full bg-primary text-primary-foreground font-sub font-semibold btn-hover disabled:opacity-50">
+            {loading ? "Connexion..." : "Accéder au panel"}
           </button>
         </form>
       </div>

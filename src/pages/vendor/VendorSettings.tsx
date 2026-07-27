@@ -56,6 +56,8 @@ export default function VendorSettings() {
     wallet: true
   });
 
+  const [deliveryData, setDeliveryData] = useState({ radius: "5", fee: "500", time: "30" });
+
   useEffect(() => {
     if (vendorProfile) {
       setShopData({
@@ -79,6 +81,11 @@ export default function VendorSettings() {
           wallet: vendorProfile.payment_methods.includes("wallet")
         });
       }
+      setDeliveryData({
+        radius: String((vendorProfile as any).delivery_radius ?? "5"),
+        fee: String((vendorProfile as any).delivery_fee ?? "500"),
+        time: String((vendorProfile as any).avg_delivery_time ?? "30"),
+      });
     }
   }, [vendorProfile]);
 
@@ -233,14 +240,16 @@ export default function VendorSettings() {
               <h3 className="font-heading text-xl font-bold text-foreground">Configuration Logistique</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {[
-                  { label: "Rayon de livraison (km)", value: "5.0", key: "deliveryRadius" },
-                  { label: "Frais de base (FCFA)", value: "500", key: "baseDeliveryFee" },
-                  { label: "Temps moyen (min)", value: "30", key: "avgDeliveryTime" },
+                  { label: "Rayon de livraison (km)", key: "radius" },
+                  { label: "Frais de base (FCFA)", key: "fee" },
+                  { label: "Temps moyen (min)", key: "time" },
                 ].map((f) => (
                   <div key={f.key} className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-2">{f.label}</label>
-                    <input 
-                      defaultValue={f.value}
+                    <input
+                      type="number"
+                      value={(deliveryData as any)[f.key]}
+                      onChange={(e) => setDeliveryData({ ...deliveryData, [f.key]: e.target.value })}
                       className="w-full p-4 rounded-2xl bg-muted/20 border border-border focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
@@ -252,8 +261,12 @@ export default function VendorSettings() {
                   Configurez vos livreurs dans la section dédiée pour activer l'assignation intelligente.
                 </p>
               </div>
-              <button 
-                onClick={() => saveSection("Logistique", { delivery_config: { radius: 5, fee: 500 } })}
+              <button
+                onClick={() => saveSection("Logistique", {
+                  delivery_radius: Number(deliveryData.radius) || 0,
+                  delivery_fee: Number(deliveryData.fee) || 0,
+                  avg_delivery_time: Number(deliveryData.time) || 0,
+                })}
                 className="w-full md:w-auto px-10 py-5 rounded-[24px] bg-primary text-white font-sub text-[11px] font-black uppercase tracking-widest shadow-xl"
               >
                 Sauvegarder la logistique
@@ -370,8 +383,28 @@ export default function VendorSettings() {
                   <h3 className="font-heading font-bold text-red-500">Zone de Danger</h3>
                   <p className="text-xs text-red-600/70 italic">La désactivation de la boutique rendra vos produits invisibles aux clients.</p>
                   <div className="flex flex-wrap gap-4 pt-2">
-                    <button className="px-6 py-3 rounded-xl border border-red-500 text-red-500 font-sub text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all">Désactiver la boutique</button>
-                    <button className="px-6 py-3 rounded-xl bg-red-500 text-white font-sub text-[10px] font-black uppercase tracking-widest shadow-lg shadow-red-500/20">Supprimer définitivement</button>
+                    <button
+                      onClick={() => {
+                        const published = vendorProfile?.is_published !== false;
+                        if (!window.confirm(published ? "Désactiver votre boutique ? Vos produits ne seront plus visibles par les clients." : "Réactiver votre boutique ?")) return;
+                        saveSection(published ? "Boutique désactivée" : "Boutique réactivée", { is_published: !published, open: !published });
+                      }}
+                      className="px-6 py-3 rounded-xl border border-red-500 text-red-500 font-sub text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all"
+                    >
+                      {vendorProfile?.is_published === false ? "Réactiver la boutique" : "Désactiver la boutique"}
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (!window.confirm("Demander la suppression définitive de votre boutique ? Cette action est irréversible.")) return;
+                        const num = (import.meta.env.VITE_WHATSAPP_PHONE || "+22946305190").replace(/\D/g, "");
+                        const msg = encodeURIComponent(`Bonjour, je souhaite supprimer définitivement ma boutique Oresto (${vendorProfile?.name || ""}).`);
+                        window.open(`https://wa.me/${num}?text=${msg}`, "_blank");
+                        toast.success("Votre demande a été ouverte sur WhatsApp.");
+                      }}
+                      className="px-6 py-3 rounded-xl bg-red-500 text-white font-sub text-[10px] font-black uppercase tracking-widest shadow-lg shadow-red-500/20"
+                    >
+                      Supprimer définitivement
+                    </button>
                   </div>
                </div>
             </div>

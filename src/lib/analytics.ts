@@ -10,7 +10,7 @@ export function trackPageView(path: string, title?: string) {
     page_path: path,
     page_title: title || document.title,
   });
-}
+}      
 
 /**
  * Track a custom event (Purchase, Add to Cart, etc.)

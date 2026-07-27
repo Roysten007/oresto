@@ -1,6 +1,16 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { Product } from "@/data/mockData";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
 interface CartItem {
   product: Product;
@@ -23,6 +33,7 @@ const CartContext = createContext<CartContextType | null>(null);
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [restaurantId, setRestaurantId] = useState<string | null>(null);
+  const [pendingSwitch, setPendingSwitch] = useState<Product | null>(null);
 
   // Persistence
   useEffect(() => {
@@ -44,14 +55,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addToCart = (product: Product) => {
     if (restaurantId && restaurantId !== product.vendorId) {
-      // Le client essaie d'ajouter un produit d'un autre resto
-      // On pourrait afficher une modal ici, mais pour l'instant on prévient
-      const confirmClear = window.confirm("Votre panier contient déjà des produits d'un autre restaurant. Voulez-vous vider votre panier pour commander ici ?");
-      if (confirmClear) {
-        setItems([{ product, quantity: 1 }]);
-        setRestaurantId(product.vendorId);
-        toast.success(`${product.name} ajouté au nouveau panier`);
-      }
+      setPendingSwitch(product);
       return;
     }
 
@@ -86,6 +90,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
     ));
   };
 
+  const handleSwitchConfirm = () => {
+    if (!pendingSwitch) return;
+    setItems([{ product: pendingSwitch, quantity: 1 }]);
+    setRestaurantId(pendingSwitch.vendorId);
+    toast.success(`${pendingSwitch.name} ajouté au nouveau panier`);
+    setPendingSwitch(null);
+  };
+
   const clearCart = () => {
     setItems([]);
     setRestaurantId(null);
@@ -106,6 +118,28 @@ export function CartProvider({ children }: { children: ReactNode }) {
       restaurantId
     }}>
       {children}
+      <AlertDialog open={!!pendingSwitch} onOpenChange={(open) => !open && setPendingSwitch(null)}>
+        <AlertDialogContent className="rounded-3xl max-w-sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-black text-lg uppercase tracking-tight">
+              🏪 Changer de restaurant ?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-[11px] font-bold text-gray-500 leading-relaxed">
+              Ton panier contient déjà des articles d'un autre restaurant.
+              <br /><br />
+              Veux-tu vider ton panier pour ajouter <strong className="text-black">{pendingSwitch?.name}</strong> à la place ?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-row gap-2">
+            <AlertDialogCancel className="rounded-full text-[10px] font-black uppercase tracking-widest px-6">
+              Non, merci
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleSwitchConfirm} className="rounded-full bg-black text-white text-[10px] font-black uppercase tracking-widest px-6 hover:bg-primary">
+              Oui, vider le panier
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </CartContext.Provider>
   );
 }

@@ -51,7 +51,13 @@ export default function Onboarding() {
   };
 
   const handleSelectCity = async (city: string) => {
-    await updateCity(city);
+    // On avance même si l'écriture échoue (réseau/droits) — la ville est déjà
+    // appliquée localement par updateCity, on ne doit pas piéger l'utilisateur.
+    try {
+      await updateCity(city);
+    } catch (e) {
+      console.error("Erreur sauvegarde ville:", e);
+    }
     setStep(2);
   };
 

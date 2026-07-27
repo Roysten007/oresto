@@ -1,89 +1,106 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+import { auth, db } from "@/lib/firebase";
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
+import { ref, get } from "firebase/database";
+
+/**
+ * Authentification admin sécurisée.
+ * - Aucun identifiant en dur dans le bundle.
+ * - Connexion via Firebase Auth, puis vérification d'un nœud `admins/{uid}`
+ *   protégé par les règles de sécurité Firebase.
+ * - La session repose sur le jeton Firebase (non falsifiable), plus de base64 maison.
+ */
 
 interface AdminState {
   isAdminAuthenticated: boolean;
   adminEmail: string | null;
+  isAdminLoading: boolean;
 }
 
 interface AdminContextType extends AdminState {
-  adminLogin: (email: string, password: string) => { success: boolean; error?: string };
-  adminLogout: () => void;
+  adminLogin: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  adminLogout: () => Promise<void>;
   adminFailedAttempts: number;
   adminLockedUntil: number | null;
 }
 
 const AdminContext = createContext<AdminContextType | null>(null);
 
-const ADMIN_EMAIL = "roystendesign@gmail.com";
-const ADMIN_PASSWORD = "creativecode@gmail.com";
-const ADMIN_SESSION = 15 * 60 * 1000;
 const LOCKOUT_DURATION = 15 * 60 * 1000;
 const MAX_ATTEMPTS = 5;
 
+async function checkIsAdmin(uid: string): Promise<boolean> {
+  if (!db) return false;
+  try {
+    const snap = await get(ref(db, `admins/${uid}`));
+    return snap.exists() && snap.val() !== false;
+  } catch {
+    return false;
+  }
+}
+
 export function AdminProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<AdminState>({ isAdminAuthenticated: false, adminEmail: null });
+  const [state, setState] = useState<AdminState>({
+    isAdminAuthenticated: false,
+    adminEmail: null,
+    isAdminLoading: true,
+  });
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
-  const [lastActivity, setLastActivity] = useState(Date.now());
 
+  // Restaure la session admin via Firebase Auth
   useEffect(() => {
-    const token = localStorage.getItem("oresto_admin_token");
-    if (token) {
-      try {
-        const data = JSON.parse(atob(token));
-        if (data.exp > Date.now()) {
-          setState({ isAdminAuthenticated: true, adminEmail: data.email });
-        } else {
-          localStorage.removeItem("oresto_admin_token");
-        }
-      } catch { localStorage.removeItem("oresto_admin_token"); }
+    if (!auth) {
+      setState(s => ({ ...s, isAdminLoading: false }));
+      return;
     }
+    const unsub = onAuthStateChanged(auth, async (fbUser) => {
+      if (fbUser && (await checkIsAdmin(fbUser.uid))) {
+        setState({ isAdminAuthenticated: true, adminEmail: fbUser.email, isAdminLoading: false });
+      } else {
+        setState({ isAdminAuthenticated: false, adminEmail: null, isAdminLoading: false });
+      }
+    });
+    return () => unsub();
   }, []);
 
+  // Déblocage automatique après expiration du lockout
   useEffect(() => {
-    if (!state.isAdminAuthenticated) return;
-    const resetActivity = () => setLastActivity(Date.now());
-    const events = ["mousedown", "keydown", "scroll", "touchstart"];
-    events.forEach(e => window.addEventListener(e, resetActivity));
-    return () => events.forEach(e => window.removeEventListener(e, resetActivity));
-  }, [state.isAdminAuthenticated]);
+    if (lockedUntil && Date.now() >= lockedUntil) {
+      setLockedUntil(null);
+      setFailedAttempts(0);
+    }
+  }, [lockedUntil]);
 
-  useEffect(() => {
-    if (!state.isAdminAuthenticated) return;
-    const interval = setInterval(() => {
-      if (Date.now() - lastActivity >= ADMIN_SESSION) {
-        adminLogout();
-      }
-    }, 10000);
-    return () => clearInterval(interval);
-  }, [state.isAdminAuthenticated, lastActivity]);
-
-  const adminLogin = useCallback((email: string, password: string) => {
+  const adminLogin = useCallback(async (email: string, password: string) => {
+    if (!auth || !db) return { success: false, error: "Service d'authentification indisponible." };
     if (lockedUntil && Date.now() < lockedUntil) {
       return { success: false, error: "Compte bloqué. Réessayez dans 15 minutes." };
     }
-    const emailMatch = email.trim().toLowerCase() === ADMIN_EMAIL.trim().toLowerCase();
-    const pwMatch = password === ADMIN_PASSWORD;
-    if (emailMatch && pwMatch) {
-      const token = btoa(JSON.stringify({ email, exp: Date.now() + ADMIN_SESSION }));
-      localStorage.setItem("oresto_admin_token", token);
-      setState({ isAdminAuthenticated: true, adminEmail: email });
+    try {
+      const cred = await signInWithEmailAndPassword(auth, email.trim().toLowerCase(), password);
+      const isAdmin = await checkIsAdmin(cred.user.uid);
+      if (!isAdmin) {
+        await signOut(auth);
+        return { success: false, error: "Ce compte n'a pas les droits administrateur." };
+      }
+      setState({ isAdminAuthenticated: true, adminEmail: cred.user.email, isAdminLoading: false });
       setFailedAttempts(0);
-      setLastActivity(Date.now());
       return { success: true };
+    } catch (err) {
+      const newAttempts = failedAttempts + 1;
+      setFailedAttempts(newAttempts);
+      if (newAttempts >= MAX_ATTEMPTS) {
+        setLockedUntil(Date.now() + LOCKOUT_DURATION);
+        return { success: false, error: "Trop de tentatives. Compte bloqué pendant 15 minutes." };
+      }
+      return { success: false, error: "Identifiants incorrects." };
     }
-    const newAttempts = failedAttempts + 1;
-    setFailedAttempts(newAttempts);
-    if (newAttempts >= MAX_ATTEMPTS) {
-      setLockedUntil(Date.now() + LOCKOUT_DURATION);
-      return { success: false, error: "Compte bloqué pendant 15 minutes." };
-    }
-    return { success: false, error: "Identifiants incorrects." };
   }, [failedAttempts, lockedUntil]);
 
-  const adminLogout = useCallback(() => {
-    localStorage.removeItem("oresto_admin_token");
-    setState({ isAdminAuthenticated: false, adminEmail: null });
+  const adminLogout = useCallback(async () => {
+    if (auth) await signOut(auth);
+    setState({ isAdminAuthenticated: false, adminEmail: null, isAdminLoading: false });
   }, []);
 
   return (

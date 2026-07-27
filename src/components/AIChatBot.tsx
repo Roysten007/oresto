@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { MessageSquare, Send, X, Bot, Loader2, Sparkles, ChevronDown, Mic, Volume2, Activity } from "lucide-react";
-import { askGemini } from "@/lib/gemini";
+import { askIZA } from "@/lib/iza";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -42,6 +42,13 @@ export default function AIChatBot() {
       };
       recognitionRef.current.onerror = () => setIsListening(false);
     }
+  }, []);
+
+  // Ouverture programmatique depuis d'autres écrans (ex: Centre d'aide)
+  useEffect(() => {
+    const open = () => setIsOpen(true);
+    window.addEventListener("oresto:open-iza", open);
+    return () => window.removeEventListener("oresto:open-iza", open);
   }, []);
 
   useEffect(() => {
@@ -137,27 +144,43 @@ export default function AIChatBot() {
     if (!text || isLoading) return;
     setInput("");
 
+    // Historique envoyé à IZA (avant d'ajouter le message courant)
+    const history = messages.map(m => ({ role: m.role, content: m.content }));
+
     const userMsg: Message = { role: "user", content: text, timestamp: new Date().toISOString() };
     setMessages(prev => [...prev, userMsg]);
     setIsLoading(true);
 
     try {
-      const maintenanceMsg: Message = {
+      const context = await buildContext();
+      const { text: replyText, functionCalls } = await askIZA(text, history, context);
+
+      let finalContent = replyText;
+      if (functionCalls && functionCalls.length > 0) {
+        const results = await executeTools(functionCalls);
+        const resultsText = results.join("\n");
+        finalContent = replyText ? `${replyText}\n\n${resultsText}` : resultsText;
+      }
+      if (!finalContent) {
+        finalContent = "Désolé, je n'ai pas pu générer de réponse. Réessayez.";
+      }
+
+      const assistantMsg: Message = {
         role: "assistant",
-        content: "Désolé, pour des raisons de maintenance, l'IA est indisponible pour le moment. Nous travaillons à son rétablissement rapide. Merci de votre compréhension.",
+        content: finalContent,
         timestamp: new Date().toISOString(),
       };
-      
-      // Simulate a small delay for "realism"
-      setTimeout(() => {
-        setMessages(prev => [...prev, maintenanceMsg]);
-        setIsLoading(false);
-      }, 800);
-      
+      setMessages(prev => [...prev, assistantMsg]);
     } catch (error: any) {
-      setIsLoading(false);
+      const errMsg: Message = {
+        role: "assistant",
+        content: `⚠️ ${error?.message || "Une erreur est survenue. Réessayez."}`,
+        timestamp: new Date().toISOString(),
+      };
+      setMessages(prev => [...prev, errMsg]);
+      toast.error(error?.message || "Erreur IZA");
     } finally {
-      // Handled in setTimeout
+      setIsLoading(false);
     }
   };
 
@@ -172,9 +195,7 @@ export default function AIChatBot() {
     return text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/\n/g, "<br/>");
   };
 
-  // Only show for authenticated users
-  if (!user) return null;
-
+  // Show for all users — guest or authenticated
   return (
     <div className="fixed bottom-24 right-4 z-[9990] flex flex-col items-end gap-3 md:bottom-6 md:right-6">
       {/* Chat Window */}

@@ -77,7 +77,7 @@ export default function VendorDashboard() {
     {
       label: "Chiffre d'Affaires (7j)",
       value: `${weeklyRevenue.toLocaleString()} FCFA`,
-      trend: "+12.5%",
+      trend: "7 jours",
       icon: DollarSign,
       color: "text-emerald-500",
       bg: "bg-emerald-500/10"
@@ -100,7 +100,7 @@ export default function VendorDashboard() {
     },
     {
       label: "Satisfaction",
-      value: vendorProfile?.rating ? `${vendorProfile.rating}/5` : "4.8/5",
+      value: vendorProfile?.rating ? `${vendorProfile.rating}/5` : "—",
       trend: "Stable",
       icon: Activity,
       color: "text-purple-500",

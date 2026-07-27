@@ -17,20 +17,35 @@ export default function AdminDashboard() {
     planDistribution: { starter: 0, pro: 0, premium: 0 }
   });
   const [growthData, setGrowthData] = useState<{ month: string; vendeurs: number; clients: number }[]>([]);
+  const [revenueData, setRevenueData] = useState<{ month: string; revenus: number }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!db) { setIsLoading(false); return; }
 
-    let vendorCount = 0;
-    let clientCount = 0;
-
     const unsubUsers = onValue(ref(db, 'users'), (snapshot) => {
       const data = snapshot.val();
       if (data) {
         const users = Object.values(data) as User[];
-        clientCount = users.filter((u: User) => u.role === 'client').length;
+        const clientCount = users.filter((u: User) => u.role === 'client').length;
         setStats(prev => ({ ...prev, totalClients: clientCount }));
+
+        // Build growth data from actual user creation dates
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+        const growth = MONTHS.slice(0, currentMonth + 1).map((month, i) => {
+          const monthUsers = users.filter((u: any) => {
+            const d = u.createdAt ? new Date(u.createdAt) : null;
+            return d && d.getMonth() === i && d.getFullYear() === currentYear;
+          });
+          return {
+            month,
+            vendeurs: monthUsers.filter((u: any) => u.role === 'vendor').length,
+            clients: monthUsers.filter((u: any) => u.role === 'client').length,
+          };
+        });
+        setGrowthData(growth);
       }
     });
 
@@ -38,41 +53,57 @@ export default function AdminDashboard() {
       const data = snapshot.val();
       if (data) {
         const vendors = Object.values(data) as VendorProfile[];
-        vendorCount = vendors.length;
         let starter = 0, pro = 0, premium = 0;
         vendors.forEach(v => {
           if (v.plan === 'starter') starter++;
           else if (v.plan === 'pro') pro++;
           else if (v.plan === 'premium') premium++;
         });
-
-        const currentMonth = new Date().getMonth();
-        const growth = MONTHS.slice(0, currentMonth + 1).map((month, i) => {
-          const factor = (i + 1) / (currentMonth + 1);
-          return {
-            month,
-            vendeurs: Math.round(vendorCount * factor),
-            clients: Math.round(clientCount * factor),
-          };
-        });
-        setGrowthData(growth);
-
         setStats(prev => ({
           ...prev,
-          activeVendors: vendorCount,
+          activeVendors: vendors.length,
           planDistribution: { starter, pro, premium }
         }));
       }
       setIsLoading(false);
     });
 
-    return () => { unsubUsers(); unsubVendors(); };
-  }, []);
+    const unsubOrders = onValue(ref(db, 'orders'), (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const allOrders = Object.values(data) as any[];
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+        const monthStart = new Date(currentYear, currentMonth, 1).getTime();
+        
+        // Current month stats
+        const monthOrders = allOrders.filter(
+          o => o.status !== 'cancelled' && o.date && new Date(o.date).getTime() >= monthStart
+        );
+        const revenue = monthOrders.reduce((s, o) => s + (o.total || 0), 0);
+        setStats(prev => ({ ...prev, ordersThisMonth: monthOrders.length, revenueThisMonth: revenue }));
 
-  const revenueData = MONTHS.slice(0, new Date().getMonth() + 1).map((month, i) => ({
-    month,
-    revenus: (i + 1) * 15000 + i * 3000
-  }));
+        // Build real revenue data by month from all orders
+        const monthlyRevenue: Record<number, number> = {};
+        for (let i = 0; i <= currentMonth; i++) monthlyRevenue[i] = 0;
+        allOrders.forEach(o => {
+          if (o.status !== 'cancelled' && o.date) {
+            const d = new Date(o.date);
+            if (d.getFullYear() === currentYear && d.getMonth() <= currentMonth) {
+              monthlyRevenue[d.getMonth()] = (monthlyRevenue[d.getMonth()] || 0) + (o.total || 0);
+            }
+          }
+        });
+        setRevenueData(MONTHS.slice(0, currentMonth + 1).map((month, i) => ({
+          month,
+          revenus: monthlyRevenue[i] || 0,
+        })));
+      }
+    });
+
+    return () => { unsubUsers(); unsubVendors(); unsubOrders(); };
+  }, []);
 
   const planData = [
     { name: "Starter", value: stats.planDistribution.starter },

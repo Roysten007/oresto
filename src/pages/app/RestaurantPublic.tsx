@@ -144,14 +144,8 @@ export default function RestaurantPublic() {
         }
 
         // 3. Scan all (fallback)
-        console.log("Not found by ID/Slug/Map, scanning names...");
         const allSnap = await get(vendorsRef);
         const all = allSnap.val();
-        
-        if (slug === "debug") {
-           console.log("DEBUG: All vendors in DB:", all);
-           toast.info(`Vendeurs trouvés: ${Object.keys(all || {}).length}`);
-        }
 
         if (all) {
           const foundKey = Object.keys(all).find(k => 
@@ -287,17 +281,19 @@ export default function RestaurantPublic() {
         </p>
         <Link to="/" className="px-8 py-4 bg-black text-white rounded-full font-sub text-xs font-black uppercase tracking-widest mb-10">Retour à l'accueil</Link>
         
-        {/* Debug Info for the user to report */}
-        <div className="mt-20 p-4 rounded-xl bg-gray-50 border border-gray-100 text-[10px] font-mono text-gray-400 text-left max-w-xs mx-auto space-y-1">
-          <p>Debug Diagnostics:</p>
-          <p>Auth Status: {user ? "Logged In" : "Guest"}</p>
-          <p>User ID: {user?.id || "N/A"}</p>
-          <p>User VendorID: {user?.vendorId || "N/A"}</p>
-          <p>Target VendorID: {vendor?.id || "N/A"}</p>
-          <p>Target Vendor Owner: {vendor?.userId || "N/A"}</p>
-          <p>Is Published (Val): {String(vendor?.is_published)}</p>
-          <p>Is Owner (Calc): {String(isOwner)}</p>
-        </div>
+        {/* Debug Info — dev uniquement */}
+        {import.meta.env.DEV && (
+          <div className="mt-20 p-4 rounded-xl bg-gray-50 border border-gray-100 text-[10px] font-mono text-gray-400 text-left max-w-xs mx-auto space-y-1">
+            <p>Debug Diagnostics:</p>
+            <p>Auth Status: {user ? "Logged In" : "Guest"}</p>
+            <p>User ID: {user?.id || "N/A"}</p>
+            <p>User VendorID: {user?.vendorId || "N/A"}</p>
+            <p>Target VendorID: {vendor?.id || "N/A"}</p>
+            <p>Target Vendor Owner: {vendor?.userId || "N/A"}</p>
+            <p>Is Published (Val): {String(vendor?.is_published)}</p>
+            <p>Is Owner (Calc): {String(isOwner)}</p>
+          </div>
+        )}
       </div>
     );
   }
