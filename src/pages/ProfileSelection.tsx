@@ -1,23 +1,9 @@
-import { useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Zap, Utensils, ArrowRight, Building2, Compass } from "lucide-react";
 
 export default function ProfileSelection() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-
-  useEffect(() => {
-    // Si l'utilisateur clique "Changer de profil" (?select=true), on ne redirige pas automatiquement
-    if (searchParams.get("select") === "true") return;
-
-    const choice = localStorage.getItem("oresto_profile_choice");
-    if (choice === "client") {
-      navigate("/decouvrir", { replace: true });
-    } else if (choice === "pro") {
-      navigate("/pro", { replace: true });
-    }
-  }, [navigate, searchParams]);
 
   const selectProfile = (type: "client" | "pro") => {
     localStorage.setItem("oresto_profile_choice", type);
