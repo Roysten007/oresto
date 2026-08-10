@@ -1,56 +1,84 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Eye, EyeOff, User, Store, ArrowRight, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { Eye, EyeOff, ArrowRight, ArrowLeft, CheckCircle2, Store, User } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Register() {
   const { register } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  const roleParam = searchParams.get("role");
+  const initialRole: "client" | "vendor" = roleParam === "vendor" ? "vendor" : "client";
+
+  const [role, setRole] = useState<"client" | "vendor">(initialRole);
   const [step, setStep] = useState(1);
-  const [role, setRole] = useState<"client" | "vendor">("client");
   const [form, setForm] = useState({ firstName: "", name: "", phone: "", email: "", password: "", confirmPassword: "" });
   const [vendorForm, setVendorForm] = useState({ shopName: "", category: "Restaurants", city: "", neighborhood: "", shopPhone: "", subscriptionPlan: "pro" as "starter" | "pro" });
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const totalSteps = role === "vendor" ? 3 : 2;
+  useEffect(() => {
+    if (roleParam === "vendor") setRole("vendor");
+    else if (roleParam === "client") setRole("client");
+  }, [roleParam]);
+
+  const totalSteps = role === "vendor" ? 2 : 1;
 
   const handleNext = async () => {
     setError("");
-    if (step === 1) { setStep(2); return; }
-    if (step === 2) {
-      if (!form.firstName || !form.name || !form.email || !form.password) { setError("Veuillez remplir tous les champs obligatoires."); return; }
-      if (form.password !== form.confirmPassword) { setError("Les mots de passe ne correspondent pas."); return; }
-
+    if (step === 1) {
+      if (!form.firstName || !form.name || !form.email || !form.password) {
+        setError("Veuillez remplir tous les champs obligatoires.");
+        return;
+      }
+      if (form.password !== form.confirmPassword) {
+        setError("Les mots de passe ne correspondent pas.");
+        return;
+      }
       if (form.password.length < 6) {
         setError("Le mot de passe doit contenir au moins 6 caractères.");
         return;
       }
 
-      if (role === "vendor") { setStep(3); return; }
+      if (role === "vendor") {
+        setStep(2);
+        return;
+      }
       
+      // Inscription Client directe
       setLoading(true);
-      const result = await register({ ...form, role });
+      const result = await register({ ...form, role: "client" });
       if (result.success) {
         toast.success("Compte créé avec succès ! Bienvenue 🚀", { duration: 4000 });
         navigate("/app/home", { replace: true });
       } else { 
-        setError(result.error || "Erreur"); 
+        setError(result.error || "Erreur lors de l'inscription"); 
         setLoading(false); 
       }
       return;
     }
-    if (step === 3) {
-      if (!vendorForm.shopName || !vendorForm.city) { setError("Veuillez renseigner au moins le nom et la ville de votre restaurant."); return; }
+
+    if (step === 2 && role === "vendor") {
+      if (!vendorForm.shopName || !vendorForm.city) {
+        setError("Veuillez renseigner au moins le nom et la ville de votre établissement.");
+        return;
+      }
       setLoading(true);
-      const result = await register({ ...form, ...vendorForm, role, category: "Restaurants", vendorId: `v${Date.now()}` });
+      const result = await register({
+        ...form,
+        ...vendorForm,
+        role: "vendor",
+        category: "Restaurants",
+        vendorId: `v${Date.now()}`
+      });
       if (result.success) {
         toast.success("Boutique créée avec succès ! Bienvenue 🚀", { duration: 4000 });
         navigate("/vendor/dashboard", { replace: true });
       } else {
-        setError(result.error || "Erreur");
+        setError(result.error || "Erreur lors de la création du compte vendeur");
         setLoading(false);
       }
     }
@@ -76,14 +104,16 @@ export default function Register() {
             L'aventure<br />commence ici.
           </h1>
           <p className="text-[#888] text-lg leading-relaxed">
-            Rejoignez la plus grande communauté de commerce local en Afrique de l'Ouest.
+            {role === "vendor" 
+              ? "Rejoignez les meilleurs commerçants et développez votre activité sur Oresto Pro."
+              : "Rejoignez la plus grande communauté de commerce local en Afrique de l'Ouest."}
           </p>
         </div>
 
         <div className="relative z-10 space-y-6">
           {[
             { t: "Rapide", d: "Créez votre profil en 2 min" },
-            { t: "Gratuit", d: "Sans frais d'inscription" },
+            { t: "Gratuit", d: role === "vendor" ? "Essai offert jusqu'au 1er Oct. 2026" : "Sans frais d'inscription" },
             { t: "Sécurisé", d: "Paiements MoMo garantis" }
           ].map((item, i) => (
             <div key={i} className="flex items-center gap-4">
@@ -107,13 +137,43 @@ export default function Register() {
             </span>
           </Link>
         </div>
+
         <div className="w-full max-w-lg">
-          {/* Progress Bar */}
-          <div className="flex gap-2 mb-12">
-            {Array.from({ length: totalSteps }).map((_, i) => (
-              <div key={i} className={`flex-1 h-1.5 rounded-full transition-all duration-500 ${i < step ? "bg-[#FF6B00]" : "bg-[#EEEEEE]"}`} />
-            ))}
+          {/* Header Switch role badge */}
+          <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-100">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-50 border border-orange-200 text-primary text-xs font-black uppercase tracking-wider">
+              {role === "vendor" ? (
+                <>
+                  <Store size={14} /> Espace Vendeur Pro
+                </>
+              ) : (
+                <>
+                  <User size={14} /> Compte Client
+                </>
+              )}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setRole(role === "vendor" ? "client" : "vendor");
+                setStep(1);
+                setError("");
+              }}
+              className="text-xs font-bold text-gray-500 hover:text-primary transition-colors underline"
+            >
+              Basculer en {role === "vendor" ? "Compte Client" : "Compte Vendeur"}
+            </button>
           </div>
+
+          {/* Progress Bar (if 2 steps) */}
+          {totalSteps > 1 && (
+            <div className="flex gap-2 mb-8">
+              {Array.from({ length: totalSteps }).map((_, i) => (
+                <div key={i} className={`flex-1 h-1.5 rounded-full transition-all duration-500 ${i < step ? "bg-[#FF6B00]" : "bg-[#EEEEEE]"}`} />
+              ))}
+            </div>
+          )}
 
           {error && (
             <div className="mb-8 p-4 rounded-2xl bg-red-50 border border-red-100 text-red-600 text-sm font-medium animate-in fade-in duration-300">
@@ -121,57 +181,36 @@ export default function Register() {
             </div>
           )}
 
-          <div className="mb-10 text-center lg:text-left">
+          <div className="mb-8 text-center lg:text-left">
             <h2 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800 }} className="text-3xl text-[#0A0A0A] mb-2">
-              {step === 1 ? "Quel est votre profil ?" : step === 2 ? "Vos informations" : "Votre restaurant"}
+              {step === 1 ? "Vos informations personnelles" : "Votre établissement"}
             </h2>
-            <p className="text-[#777]">Étape {step} sur {totalSteps}</p>
+            <p className="text-[#777]">
+              {totalSteps > 1 ? `Étape ${step} sur ${totalSteps}` : "Création de votre compte rapide"}
+            </p>
           </div>
 
-          <div className="space-y-8">
+          <div className="space-y-6">
+            {/* Step 1: Personal Info */}
             {step === 1 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <button 
-                  onClick={() => { setRole("client"); setStep(2); }}
-                  className="group p-8 rounded-3xl border-2 border-[#EEEEEE] text-center hover:border-[#FF6B00] hover:bg-[#FFF3E8] transition-all"
-                >
-                  <div className="w-16 h-16 rounded-2xl bg-[#F8F8F8] flex items-center justify-center mb-6 mx-auto group-hover:bg-[#FF6B00] transition-colors">
-                    <User size={32} className="text-[#0A0A0A] group-hover:text-white" />
-                  </div>
-                  <h3 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 700 }} className="text-lg text-[#0A0A0A]">Client</h3>
-                  <p className="text-[#777] text-xs mt-2">Commander et se faire livrer</p>
-                </button>
-                <button 
-                  onClick={() => { setRole("vendor"); setStep(2); }}
-                  className="group p-8 rounded-3xl bg-[#0A0A0A] text-center border-2 border-[#0A0A0A] hover:bg-[#151515] transition-all"
-                >
-                  <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mb-6 mx-auto group-hover:bg-[#FF6B00] transition-colors">
-                    <Store size={32} className="text-[#FF6B00] group-hover:text-white" />
-                  </div>
-                  <h3 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 700 }} className="text-lg text-white">Vendeur</h3>
-                  <p className="text-[#888] text-xs mt-2">Vendre vos plats et gérer votre restaurant</p>
-                </button>
-              </div>
-            )}
-
-            {step === 2 && (
-              <div className="space-y-5 animate-in slide-in-from-right-10 duration-500">
+              <div className="space-y-5 animate-in fade-in duration-300">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Prénom</label>
+                    <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Prénom *</label>
                     <input 
                       value={form.firstName} onChange={e => updateForm("firstName", e.target.value)} required
                       className="w-full px-5 py-4 rounded-2xl border border-[#EEEEEE] bg-white text-[#0A0A0A] focus:border-[#FF6B00] focus:ring-1 focus:ring-[#FF6B00] outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Nom</label>
+                    <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Nom *</label>
                     <input 
                       value={form.name} onChange={e => updateForm("name", e.target.value)} required
                       className="w-full px-5 py-4 rounded-2xl border border-[#EEEEEE] bg-white text-[#0A0A0A] focus:border-[#FF6B00] focus:ring-1 focus:ring-[#FF6B00] outline-none"
                     />
                   </div>
                 </div>
+
                 <div>
                   <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Téléphone</label>
                   <input 
@@ -179,15 +218,17 @@ export default function Register() {
                     className="w-full px-5 py-4 rounded-2xl border border-[#EEEEEE] bg-white text-[#0A0A0A] focus:border-[#FF6B00] focus:ring-1 focus:ring-[#FF6B00] outline-none" placeholder="+229 97 00 00 00"
                   />
                 </div>
+
                 <div>
-                  <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Email</label>
+                  <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Adresse Email *</label>
                   <input 
                     type="email" value={form.email} onChange={e => updateForm("email", e.target.value)} required
                     className="w-full px-5 py-4 rounded-2xl border border-[#EEEEEE] bg-white text-[#0A0A0A] focus:border-[#FF6B00] focus:ring-1 focus:ring-[#FF6B00] outline-none"
                   />
                 </div>
+
                 <div>
-                  <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Mot de passe</label>
+                  <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Mot de passe *</label>
                   <div className="relative">
                     <input 
                       type={showPw ? "text" : "password"} value={form.password} onChange={e => updateForm("password", e.target.value)} required
@@ -198,8 +239,9 @@ export default function Register() {
                     </button>
                   </div>
                 </div>
+
                 <div>
-                  <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Confirmer le mot de passe</label>
+                  <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Confirmer le mot de passe *</label>
                   <input 
                     type="password" value={form.confirmPassword} onChange={e => updateForm("confirmPassword", e.target.value)} required
                     className="w-full px-5 py-4 rounded-2xl border border-[#EEEEEE] bg-white text-[#0A0A0A] focus:border-[#FF6B00] focus:ring-1 focus:ring-[#FF6B00] outline-none"
@@ -208,28 +250,21 @@ export default function Register() {
               </div>
             )}
 
-            {step === 3 && (
+            {/* Step 2: Vendor Shop Info */}
+            {step === 2 && role === "vendor" && (
               <div className="space-y-5 animate-in slide-in-from-right-10 duration-500">
                 <div>
-                  <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Nom du restaurant</label>
+                  <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Nom du restaurant / établissement *</label>
                   <input 
                     value={vendorForm.shopName} onChange={e => setVendorForm(p => ({ ...p, shopName: e.target.value }))}
-                    placeholder="Ex: Le Béninois, Chez Maman..."
+                    placeholder="Ex: Le Béninois, Chez Maman, Hôtel la Résidence..."
                     className="w-full px-5 py-4 rounded-2xl border border-[#EEEEEE] bg-white text-[#0A0A0A] focus:border-[#FF6B00] focus:ring-1 focus:ring-[#FF6B00] outline-none"
                   />
                 </div>
-                {/* Catégorie fixe : Restaurants */}
-                <div>
-                  <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Catégorie</label>
-                  <div className="w-full px-5 py-4 rounded-2xl border border-[#EEEEEE] bg-[#FAFAFA] flex items-center gap-3">
-                    <span className="text-xl">🍽️</span>
-                    <span className="font-bold text-[#0A0A0A]">Restaurants</span>
-                    <span className="ml-auto text-[9px] font-black uppercase tracking-widest text-[#FF6B00] bg-[#FFF3E8] px-2 py-1 rounded-full">Catégorie unique</span>
-                  </div>
-                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Ville</label>
+                    <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Ville *</label>
                     <input 
                       value={vendorForm.city} onChange={e => setVendorForm(p => ({ ...p, city: e.target.value }))}
                       placeholder="Ex: Cotonou"
@@ -245,8 +280,9 @@ export default function Register() {
                     />
                   </div>
                 </div>
+
                 <div>
-                  <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Téléphone du restaurant</label>
+                  <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Téléphone de l'établissement</label>
                   <input 
                     value={vendorForm.shopPhone} onChange={e => setVendorForm(p => ({ ...p, shopPhone: e.target.value }))}
                     placeholder="+229 97 00 00 00"
@@ -282,34 +318,32 @@ export default function Register() {
               </div>
             )}
 
-            {step > 1 && (
-              <div className="flex gap-4 pt-10">
+            <div className="flex gap-4 pt-6">
+              {step > 1 && (
                 <button 
+                  type="button"
                   onClick={() => { setStep(step - 1); setError(""); }}
                   className="flex-1 py-5 rounded-full border-2 border-[#EEEEEE] text-[#0A0A0A] font-bold flex items-center justify-center gap-2 hover:bg-[#F8F8F8] transition-all"
                 >
                   <ArrowLeft size={18} /> Retour
                 </button>
-                <button 
-                  onClick={handleNext}
-                  disabled={loading}
-                  className="flex-[2] py-5 rounded-full bg-[#0A0A0A] text-white font-bold flex items-center justify-center gap-2 hover:bg-[#FF6B00] transition-all transform active:scale-95 disabled:opacity-50"
-                >
-                  {loading ? "Création..." : step === totalSteps ? "Créer mon compte" : "Suivant"} <ArrowRight size={18} />
-                </button>
-              </div>
-            )}
+              )}
+              <button 
+                type="button"
+                onClick={handleNext}
+                disabled={loading}
+                className="flex-1 py-5 rounded-full bg-[#0A0A0A] text-white font-bold flex items-center justify-center gap-2 hover:bg-[#FF6B00] transition-all transform active:scale-95 disabled:opacity-50"
+              >
+                {loading ? "Création..." : (step === totalSteps ? (role === "vendor" ? "Créer ma boutique Vendeur" : "Créer mon compte Client") : "Suivant")} <ArrowRight size={18} />
+              </button>
+            </div>
           </div>
 
-          <p className="mt-12 text-center text-[#777] font-medium">
+          <p className="mt-10 text-center text-[#777] font-medium text-sm">
             Déjà un compte ? <Link to="/login" className="text-[#FF6B00] font-bold hover:underline">Se connecter</Link>
           </p>
         </div>
       </div>
-
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@800&family=Outfit:wght@400;500;600;700&display=swap');
-      `}</style>
     </div>
   );
 }

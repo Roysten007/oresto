@@ -61,7 +61,7 @@ export default function ProLanding() {
               <RefreshCw size={11} /> Profil
             </Link>
             <Link to="/login" className="px-3 sm:px-4 py-2 rounded-full font-sub text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors">Connexion</Link>
-            <Link to="/register" className="px-4 py-2 sm:px-6 sm:py-2.5 bg-primary text-white rounded-full font-sub text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_10px_30px_rgba(234,88,12,0.3)]">Essayer</Link>
+            <Link to="/register?role=vendor" className="px-4 py-2 sm:px-6 sm:py-2.5 bg-primary text-white rounded-full font-sub text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_10px_30px_rgba(234,88,12,0.3)]">Essayer</Link>
           </div>
         </div>
       </motion.nav>
@@ -100,7 +100,7 @@ export default function ProLanding() {
           </FadeIn>
 
           <FadeIn delay={0.4} className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
-            <Link to="/register" className="group w-full sm:w-auto px-8 py-4 sm:px-10 sm:py-5 bg-primary text-white rounded-full font-sub text-xs sm:text-sm font-black uppercase tracking-widest flex items-center justify-center gap-3 shadow-[0_20px_50px_rgba(234,88,12,0.2)] hover:scale-105 transition-all">
+            <Link to="/register?role=vendor" className="group w-full sm:w-auto px-8 py-4 sm:px-10 sm:py-5 bg-primary text-white rounded-full font-sub text-xs sm:text-sm font-black uppercase tracking-widest flex items-center justify-center gap-3 shadow-[0_20px_50px_rgba(234,88,12,0.2)] hover:scale-105 transition-all">
               Démarrer mon établissement <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
             </Link>
             <div className="flex items-center gap-3 px-6 py-4 rounded-full bg-white border border-gray-100 shadow-sm font-sub text-[10px] font-black uppercase tracking-widest text-muted-foreground">
@@ -337,7 +337,7 @@ export default function ProLanding() {
                 </div>
 
                 <div className="pt-8 mt-6 border-t border-gray-100">
-                  <Link to="/register" className="block w-full py-4 rounded-full bg-black text-white text-center font-sub text-xs font-black uppercase tracking-widest hover:bg-gray-800 transition-all shadow-md">
+                  <Link to="/register?role=vendor" className="block w-full py-4 rounded-full bg-black text-white text-center font-sub text-xs font-black uppercase tracking-widest hover:bg-gray-800 transition-all shadow-md">
                     Choisir Starter
                   </Link>
                 </div>
@@ -380,7 +380,7 @@ export default function ProLanding() {
                 </div>
 
                 <div className="pt-8 mt-6 border-t border-white/10 relative z-10">
-                  <Link to="/register" className="block w-full py-4 rounded-full bg-primary text-white text-center font-sub text-xs font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_10px_30px_rgba(234,88,12,0.4)]">
+                  <Link to="/register?role=vendor" className="block w-full py-4 rounded-full bg-primary text-white text-center font-sub text-xs font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_10px_30px_rgba(234,88,12,0.4)]">
                     Démarrer avec Pro
                   </Link>
                 </div>
@@ -424,7 +424,7 @@ export default function ProLanding() {
               <h2 className="font-heading text-4xl md:text-7xl font-[900] leading-none uppercase tracking-tighter mb-8 italic">
                 Prêt à <br/><span className="text-primary">Démarrer ?</span>
               </h2>
-              <Link to="/register" className="inline-flex items-center gap-4 px-8 py-4 sm:px-12 sm:py-5 bg-white text-black rounded-full font-sub text-[10px] sm:text-sm font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_20px_60px_rgba(255,255,255,0.1)]">
+              <Link to="/register?role=vendor" className="inline-flex items-center gap-4 px-8 py-4 sm:px-12 sm:py-5 bg-white text-black rounded-full font-sub text-[10px] sm:text-sm font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_20px_60px_rgba(255,255,255,0.1)]">
                 Essayer gratuitement <ChevronRight size={18} />
               </Link>
             </FadeIn>
@@ -448,7 +448,7 @@ export default function ProLanding() {
                 <h3 className="text-[10px] font-black uppercase tracking-widest text-white/40">Navigation</h3>
                 <ul className="space-y-3 text-[11px] font-black uppercase tracking-widest">
                   <li><Link to="/login" className="hover:text-primary transition-colors">Connexion</Link></li>
-                  <li><Link to="/register" className="hover:text-primary transition-colors">Inscription</Link></li>
+                  <li><Link to="/register?role=vendor" className="hover:text-primary transition-colors">Inscription</Link></li>
                   <li><Link to="/?select=true" className="text-primary hover:underline flex items-center gap-1"><RefreshCw size={11} /> Changer de profil</Link></li>
                 </ul>
               </div>

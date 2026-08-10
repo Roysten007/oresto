@@ -57,7 +57,7 @@ export default function ClientLanding() {
               <RefreshCw size={11} /> Profil
             </Link>
             <Link to="/login" className="px-3 sm:px-4 py-2 rounded-full font-sub text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors">Connexion</Link>
-            <Link to="/register" className="px-4 py-2 sm:px-6 sm:py-2.5 bg-primary text-white rounded-full font-sub text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_10px_30px_rgba(234,88,12,0.3)]">S'inscrire</Link>
+            <Link to="/register?role=client" className="px-4 py-2 sm:px-6 sm:py-2.5 bg-primary text-white rounded-full font-sub text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_10px_30px_rgba(234,88,12,0.3)]">S'inscrire</Link>
           </div>
         </div>
       </motion.nav>
@@ -88,7 +88,7 @@ export default function ClientLanding() {
             <Link to="/app/decouvrir" className="group w-full sm:w-auto px-8 py-4 sm:px-10 sm:py-5 bg-primary text-white rounded-full font-sub text-xs sm:text-sm font-black uppercase tracking-widest flex items-center justify-center gap-3 shadow-[0_20px_50px_rgba(234,88,12,0.3)] hover:scale-105 transition-all">
               <Search size={18} /> Découvrir près de moi
             </Link>
-            <Link to="/register" className="w-full sm:w-auto px-8 py-4 sm:px-10 sm:py-5 rounded-full bg-black text-white font-sub text-xs sm:text-sm font-black uppercase tracking-widest hover:bg-gray-800 transition-all shadow-md">
+            <Link to="/register?role=client" className="w-full sm:w-auto px-8 py-4 sm:px-10 sm:py-5 rounded-full bg-black text-white font-sub text-xs sm:text-sm font-black uppercase tracking-widest hover:bg-gray-800 transition-all shadow-md">
               Créer mon compte
             </Link>
           </FadeIn>
@@ -275,7 +275,7 @@ export default function ClientLanding() {
               Rejoignez des milliers de clients et profitez du meilleur du commerce local au Bénin.
             </p>
             <div className="pt-8">
-              <Link to="/register" className="inline-flex items-center gap-3 px-10 py-5 bg-primary text-white rounded-full font-sub text-xs sm:text-sm font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_20px_50px_rgba(234,88,12,0.3)]">
+              <Link to="/register?role=client" className="inline-flex items-center gap-3 px-10 py-5 bg-primary text-white rounded-full font-sub text-xs sm:text-sm font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_20px_50px_rgba(234,88,12,0.3)]">
                 Créer mon compte gratuitement <ChevronRight size={18} />
               </Link>
             </div>
@@ -295,7 +295,7 @@ export default function ClientLanding() {
               <RefreshCw size={10} /> Changer de profil
             </Link>
             <Link to="/login" className="hover:text-white transition-colors">Connexion</Link>
-            <Link to="/register" className="hover:text-white transition-colors">Inscription</Link>
+            <Link to="/register?role=client" className="hover:text-white transition-colors">Inscription</Link>
           </div>
 
           <p className="text-[10px] font-bold uppercase tracking-widest">© 2026 Oresto • Tous droits réservés</p>
