@@ -24,9 +24,8 @@ export default function Register() {
       if (!form.firstName || !form.name || !form.email || !form.password) { setError("Veuillez remplir tous les champs obligatoires."); return; }
       if (form.password !== form.confirmPassword) { setError("Les mots de passe ne correspondent pas."); return; }
 
-      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-      if (!passwordRegex.test(form.password)) {
-        setError("Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.");
+      if (form.password.length < 6) {
+        setError("Le mot de passe doit contenir au moins 6 caractères.");
         return;
       }
 

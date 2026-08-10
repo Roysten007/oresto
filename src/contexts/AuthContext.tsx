@@ -342,8 +342,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         neighborhood: data.neighborhood || "",
       };
 
-      // 3. Sauvegarder l'utilisateur dans Realtime Database
-      await set(ref(db, `users/${uid}`), newUser);
+      // 3. Sauvegarder dans Realtime Database (Écriture atomique pour éviter les race conditions de onValue)
+      const dbUpdates: Record<string, any> = {
+        [`users/${uid}`]: newUser,
+      };
 
       let createdVendorProfile: VendorProfile | null = null;
 
@@ -381,13 +383,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           open: false,
           deliveryTime: "30-45 min"
         };
-        await set(ref(db, `vendors/${vendorId}`), createdVendorProfile);
+        dbUpdates[`vendors/${vendorId}`] = createdVendorProfile;
+      }
 
+      await update(ref(db), dbUpdates);
+
+      if (data.role === "vendor" && vendorId && createdVendorProfile) {
         // Envoyer la notification de bienvenue essai gratuit
         try {
           await dispatchVendorNotification(db, vendorId, "welcome_trial", {
-            plan: selectedPlan,
-            trialEndsAt,
+            plan: createdVendorProfile.subscriptionPlan,
+            trialEndsAt: createdVendorProfile.trialEndsAt,
             phone: createdVendorProfile.phone,
             email: data.email,
           });
@@ -408,11 +414,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       return { success: true, role: newUser.role, uid };
     } catch (error: any) {
-      console.error(error);
-      if (error.code === 'auth/email-already-in-use') {
-        return { success: false, error: "Cet email est déjà utilisé." };
-      }
-      return { success: false, error: "Une erreur est survenue lors de l'inscription." };
+      console.error("Erreur inscription Firebase:", error);
+      let errMsg = "Une erreur est survenue lors de l'inscription.";
+      if (error.code === 'auth/email-already-in-use') errMsg = "Cet email est déjà utilisé par un autre compte.";
+      else if (error.code === 'auth/weak-password') errMsg = "Le mot de passe doit faire au moins 6 caractères.";
+      else if (error.code === 'auth/invalid-email') errMsg = "L'adresse email saisie est invalide.";
+      else if (error.message) errMsg = error.message;
+
+      return { success: false, error: errMsg };
     }
   }, []);
 
