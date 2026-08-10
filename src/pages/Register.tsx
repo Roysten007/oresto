@@ -35,8 +35,8 @@ export default function Register() {
       setLoading(true);
       const result = await register({ ...form, role });
       if (result.success) {
-        toast.success("Compte créé ! Vérifie tes emails 📧", { duration: 5000 });
-        navigate("/app/home");
+        toast.success("Compte créé avec succès ! Bienvenue 🚀", { duration: 4000 });
+        navigate("/app/home", { replace: true });
       } else { 
         setError(result.error || "Erreur"); 
         setLoading(false); 
@@ -48,8 +48,8 @@ export default function Register() {
       setLoading(true);
       const result = await register({ ...form, ...vendorForm, role, category: "Restaurants", vendorId: `v${Date.now()}` });
       if (result.success) {
-        toast.success("Boutique créée ! Vérifie tes emails 📧", { duration: 5000 });
-        navigate("/vendor/dashboard");
+        toast.success("Boutique créée avec succès ! Bienvenue 🚀", { duration: 4000 });
+        navigate("/vendor/dashboard", { replace: true });
       } else {
         setError(result.error || "Erreur");
         setLoading(false);

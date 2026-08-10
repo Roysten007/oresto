@@ -345,12 +345,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // 3. Sauvegarder l'utilisateur dans Realtime Database
       await set(ref(db, `users/${uid}`), newUser);
 
+      let createdVendorProfile: VendorProfile | null = null;
+
       // 4. Si c'est un vendeur, on crée aussi un profil vendeur
       if (data.role === "vendor" && vendorId) {
         const { trialStartedAt, trialEndsAt } = calculateTrialDates();
         const selectedPlan = data.subscriptionPlan === "pro" ? "pro" : "starter";
 
-        const newVendorProfile: VendorProfile = {
+        createdVendorProfile = {
           id: vendorId,
           userId: uid,
           name: data.shopName || `${data.firstName} Store`,
@@ -379,14 +381,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           open: false,
           deliveryTime: "30-45 min"
         };
-        await set(ref(db, `vendors/${vendorId}`), newVendorProfile);
+        await set(ref(db, `vendors/${vendorId}`), createdVendorProfile);
 
         // Envoyer la notification de bienvenue essai gratuit
         try {
           await dispatchVendorNotification(db, vendorId, "welcome_trial", {
             plan: selectedPlan,
             trialEndsAt,
-            phone: newVendorProfile.phone,
+            phone: createdVendorProfile.phone,
             email: data.email,
           });
         } catch (nErr) {
@@ -399,7 +401,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setState({
         user: newUser,
         role: newUser.role,
-        vendorProfile: null, // Will be fetched by onValue listener starting up
+        vendorProfile: createdVendorProfile,
         isAuthenticated: true,
         isLoading: false
       });
