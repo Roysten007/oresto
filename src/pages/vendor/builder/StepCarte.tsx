@@ -94,7 +94,7 @@ export default function StepCarte({ products, vendorId, onSave, onDelete, catego
 
       {products.length === 0 && (
         <div className="py-20 border-2 border-dashed border-gray-200 rounded-3xl flex flex-col items-center gap-4 text-gray-400">
-          <div className="text-5xl">{isHotel ? "🏨" : "🍽️"}</div>
+          <i className={`fa-solid ${isHotel ? "fa-hotel" : "fa-utensils"} text-5xl text-primary/40`}></i>
           <p className="font-bold">{isHotel ? "Aucune chambre enregistrée" : "Votre carte est vide"}</p>
           <p className="text-sm">Cliquez sur "{isHotel ? "Nouvelle chambre" : "Nouveau plat"}" pour commencer</p>
         </div>
@@ -107,7 +107,7 @@ export default function StepCarte({ products, vendorId, onSave, onDelete, catego
             {items.map(p => (
               <div key={p.id} className="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition-all">
                 <div className="h-40 bg-gray-100 relative overflow-hidden">
-                  {p.image ? <img src={p.image} className="w-full h-full object-cover" alt={p.name} /> : <div className="absolute inset-0 flex items-center justify-center text-gray-300 text-4xl">{isHotel ? "🛌" : "🍴"}</div>}
+                  {p.image ? <img src={p.image} className="w-full h-full object-cover" alt={p.name} /> : <div className="absolute inset-0 flex items-center justify-center text-gray-300 text-3xl"><i className={`fa-solid ${isHotel ? "fa-bed" : "fa-utensils"}`}></i></div>}
                   <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button onClick={() => setEditing(p)} className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-md hover:bg-black hover:text-white transition-colors"><Settings size={13} /></button>
                     <button onClick={() => { if(confirm(isHotel ? "Supprimer cette chambre ?" : "Supprimer ce plat ?")) onDelete(p.id); }} className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-md text-red-500 hover:bg-red-500 hover:text-white transition-colors"><Trash2 size={13} /></button>

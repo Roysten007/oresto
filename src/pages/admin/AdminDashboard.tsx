@@ -112,12 +112,12 @@ export default function AdminDashboard() {
   ];
 
   const kpis = [
-    { icon: "🏪", label: "Vendeurs", value: stats.activeVendors },
-    { icon: "👥", label: "Clients", value: stats.totalClients },
-    { icon: "💰", label: "Revenus (FCFA)", value: stats.revenueThisMonth.toLocaleString() },
-    { icon: "📦", label: "Commandes", value: stats.ordersThisMonth },
-    { icon: "⭐", label: "Note moy.", value: "—" },
-    { icon: "🌍", label: "Pays", value: stats.activeCountries },
+    { icon: <i className="fa-solid fa-store text-primary text-2xl"></i>, label: "Vendeurs", value: stats.activeVendors },
+    { icon: <i className="fa-solid fa-users text-primary text-2xl"></i>, label: "Clients", value: stats.totalClients },
+    { icon: <i className="fa-solid fa-wallet text-primary text-2xl"></i>, label: "Revenus (FCFA)", value: stats.revenueThisMonth.toLocaleString() },
+    { icon: <i className="fa-solid fa-box-open text-primary text-2xl"></i>, label: "Commandes", value: stats.ordersThisMonth },
+    { icon: <i className="fa-solid fa-star text-primary text-2xl"></i>, label: "Note moy.", value: "—" },
+    { icon: <i className="fa-solid fa-earth-africa text-primary text-2xl"></i>, label: "Pays", value: stats.activeCountries },
   ];
 
   if (isLoading) {
@@ -136,9 +136,9 @@ export default function AdminDashboard() {
       {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {kpis.map((k, i) => (
-          <div key={i} className="p-4 rounded-2xl bg-card border-l-4 border-l-primary border border-border shadow-sm">
-            <span className="text-2xl">{k.icon}</span>
-            <p className="font-heading text-xl font-bold text-foreground mt-2">{k.value}</p>
+          <div key={i} className="p-5 rounded-[24px] bg-card border-l-4 border-l-primary border border-border shadow-sm hover:shadow-md transition-all">
+            <div>{k.icon}</div>
+            <p className="font-heading text-xl font-bold text-foreground mt-3">{k.value}</p>
             <p className="font-sub text-xs text-muted-foreground">{k.label}</p>
           </div>
         ))}
@@ -147,8 +147,10 @@ export default function AdminDashboard() {
       {/* Charts Row */}
       <div className="grid md:grid-cols-3 gap-4">
         {/* Line Chart — Growth */}
-        <div className="p-4 rounded-2xl bg-card border border-border md:col-span-2">
-          <h3 className="font-heading font-semibold text-foreground mb-4">📈 Croissance des inscriptions</h3>
+        <div className="p-5 rounded-[24px] bg-card border border-border md:col-span-2">
+          <h3 className="font-heading font-semibold text-foreground mb-4 flex items-center gap-2">
+            <i className="fa-solid fa-chart-line text-primary"></i> Croissance des inscriptions
+          </h3>
           <ResponsiveContainer width="100%" height={200}>
             <LineChart data={growthData.length > 0 ? growthData : [{ month: "—", vendeurs: 0, clients: 0 }]}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -162,8 +164,10 @@ export default function AdminDashboard() {
         </div>
 
         {/* Pie Chart — Plans */}
-        <div className="p-4 rounded-2xl bg-card border border-border">
-          <h3 className="font-heading font-semibold text-foreground mb-4">Abonnements</h3>
+        <div className="p-5 rounded-[24px] bg-card border border-border">
+          <h3 className="font-heading font-semibold text-foreground mb-4 flex items-center gap-2">
+            <i className="fa-solid fa-crown text-primary"></i> Abonnements
+          </h3>
           {stats.activeVendors > 0 ? (
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
@@ -181,8 +185,10 @@ export default function AdminDashboard() {
       </div>
 
       {/* Bar Chart — Revenue */}
-      <div className="p-4 rounded-2xl bg-card border border-border">
-        <h3 className="font-heading font-semibold text-foreground mb-4">💰 Revenus mensuels estimés (FCFA)</h3>
+      <div className="p-5 rounded-[24px] bg-card border border-border">
+        <h3 className="font-heading font-semibold text-foreground mb-4 flex items-center gap-2">
+          <i className="fa-solid fa-[#FF6A00] fa-sack-dollar text-primary"></i> Revenus mensuels estimés (FCFA)
+        </h3>
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={revenueData}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />

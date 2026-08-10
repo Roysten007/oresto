@@ -119,9 +119,9 @@ export default function AdminNotifications() {
               onChange={e => setForm(f => ({ ...f, type: e.target.value as any }))}
               className="px-4 py-2.5 rounded-xl border border-border bg-background font-body text-sm focus:ring-2 focus:ring-primary outline-none"
             >
-              <option value="info">ℹ️ Information</option>
-              <option value="warning">⚠️ Avertissement</option>
-              <option value="success">✅ Succès</option>
+              <option value="info">Information</option>
+              <option value="warning">Avertissement</option>
+              <option value="success">Succès</option>
             </select>
           </div>
 
@@ -135,7 +135,9 @@ export default function AdminNotifications() {
           </button>
 
           {success && (
-            <p className="mt-6 text-green-600 font-sub text-sm font-medium">✅ Notification envoyée !</p>
+            <p className="mt-6 text-green-600 font-sub text-sm font-medium flex items-center gap-1.5">
+              <i className="fa-solid fa-circle-check text-green-500"></i> Notification envoyée !
+            </p>
           )}
         </div>
       </div>
@@ -147,7 +149,7 @@ export default function AdminNotifications() {
           <div className="text-center py-8 text-muted-foreground font-body text-sm">Chargement...</div>
         ) : notifications.length === 0 ? (
           <div className="text-center py-16 rounded-2xl bg-card border border-border">
-            <Bell size={40} className="mx-auto mb-4 text-muted-foreground" />
+            <i className="fa-solid fa-bell text-5xl text-primary/40 mb-4 block"></i>
             <p className="font-heading text-lg font-semibold text-foreground">Aucune notification envoyée</p>
           </div>
         ) : (

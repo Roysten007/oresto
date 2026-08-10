@@ -54,7 +54,7 @@ export default function AdminVendors() {
       </div>
       {vendors.length === 0 ? (
         <div className="text-center py-16 rounded-2xl bg-card border border-border">
-          <span className="text-4xl block mb-4">🏪</span>
+          <i className="fa-solid fa-store text-5xl text-primary/40 mb-4 block"></i>
           <p className="font-heading text-lg font-semibold text-foreground">Aucun vendeur inscrit</p>
           <p className="font-body text-sm text-muted-foreground mt-1">Les vendeurs apparaîtront ici une fois inscrits</p>
         </div>

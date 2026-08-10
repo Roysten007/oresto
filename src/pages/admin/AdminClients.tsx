@@ -32,7 +32,7 @@ export default function AdminClients() {
       <h1 className="font-heading text-2xl font-bold text-foreground">Gestion des clients</h1>
       {clients.length === 0 ? (
         <div className="text-center py-16 rounded-2xl bg-card border border-border">
-          <span className="text-4xl block mb-4">👥</span>
+          <i className="fa-solid fa-users text-5xl text-primary/40 mb-4 block"></i>
           <p className="font-heading text-lg font-semibold text-foreground">Aucun client inscrit</p>
           <p className="font-body text-sm text-muted-foreground mt-1">Les clients apparaîtront ici une fois inscrits</p>
         </div>
