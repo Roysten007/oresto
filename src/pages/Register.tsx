@@ -10,7 +10,7 @@ export default function Register() {
   const [step, setStep] = useState(1);
   const [role, setRole] = useState<"client" | "vendor">("client");
   const [form, setForm] = useState({ firstName: "", name: "", phone: "", email: "", password: "", confirmPassword: "" });
-  const [vendorForm, setVendorForm] = useState({ shopName: "", category: "Restaurants", city: "", neighborhood: "", shopPhone: "" });
+  const [vendorForm, setVendorForm] = useState({ shopName: "", category: "Restaurants", city: "", neighborhood: "", shopPhone: "", subscriptionPlan: "pro" as "starter" | "pro" });
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -253,6 +253,32 @@ export default function Register() {
                     placeholder="+229 97 00 00 00"
                     className="w-full px-5 py-4 rounded-2xl border border-[#EEEEEE] bg-white text-[#0A0A0A] focus:border-[#FF6B00] focus:ring-1 focus:ring-[#FF6B00] outline-none"
                   />
+                </div>
+
+                {/* Formule d'abonnement */}
+                <div>
+                  <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Formule d'abonnement (Gratuit jusqu'à la fin de l'essai)</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setVendorForm(p => ({ ...p, subscriptionPlan: "starter" }))}
+                      className={`p-4 rounded-2xl border-2 text-left transition-all ${vendorForm.subscriptionPlan === "starter" ? "border-[#FF6B00] bg-[#FFF3E8]" : "border-[#EEEEEE] bg-white"}`}
+                    >
+                      <span className="font-bold text-xs block text-[#0A0A0A]">Starter</span>
+                      <span className="font-black text-sm text-[#FF6B00] block">3 000 F/mois</span>
+                      <span className="text-[10px] text-[#777] block mt-1">2% comm • Site Factory</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setVendorForm(p => ({ ...p, subscriptionPlan: "pro" }))}
+                      className={`p-4 rounded-2xl border-2 text-left transition-all relative ${vendorForm.subscriptionPlan === "pro" ? "border-[#FF6B00] bg-[#FFF3E8]" : "border-[#EEEEEE] bg-white"}`}
+                    >
+                      <span className="absolute -top-2.5 right-2 text-[8px] font-black uppercase tracking-widest text-white bg-[#FF6B00] px-2 py-0.5 rounded-full">Recommandé</span>
+                      <span className="font-bold text-xs block text-[#0A0A0A]">Pro</span>
+                      <span className="font-black text-sm text-[#FF6B00] block">5 000 F/mois</span>
+                      <span className="text-[10px] text-[#777] block mt-1">0% comm • IZA AI</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             )}

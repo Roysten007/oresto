@@ -180,7 +180,13 @@ export default function RestaurantPublic() {
   }, [slug, user]);
 
 
+  const isRestricted = vendor?.subscriptionStatus === "restricted";
+
   const handleAddToCart = (product: Product) => {
+    if (isRestricted) {
+      toast.warning("Les commandes et réservations sont temporairement indisponibles pour cet établissement.");
+      return;
+    }
     addToGlobalCart(product);
   };
 
@@ -358,6 +364,13 @@ export default function RestaurantPublic() {
       {!vendor.is_published && isOwner && (
         <div className="bg-amber-500 text-white py-2 px-6 text-[10px] font-black uppercase tracking-[0.2em] text-center sticky top-0 z-[100] shadow-lg">
           Mode Aperçu — Votre site n'est pas encore public. Seul vous pouvez le voir.
+        </div>
+      )}
+
+      {/* Restricted Account Banner */}
+      {isRestricted && (
+        <div className="bg-[#111111] text-amber-400 py-3 px-6 text-xs font-black uppercase tracking-widest text-center sticky top-0 z-[100] shadow-md flex items-center justify-center gap-2 border-b border-amber-500/20">
+          <AlertTriangle size={16} /> Commandes & réservations temporairement indisponibles
         </div>
       )}
 

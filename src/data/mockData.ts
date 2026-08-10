@@ -46,6 +46,27 @@ export interface VendorProfile {
   createdAt?: string;
   joinedDate?: string;
   status: "active" | "pending" | "suspended" | "inactive";
+  trialStartedAt?: number;
+  trialEndsAt?: number;
+  subscriptionPlan?: "starter" | "pro";
+  subscriptionStatus?: "trial" | "active" | "pending_payment" | "restricted";
+  nextBillingDate?: number;
+  pendingInvoice?: {
+    id: string;
+    plan: "starter" | "pro";
+    amount: number;
+    paymentUrl: string;
+    createdAt: number;
+    expiresAt: number;
+  } | null;
+  paymentHistory?: Array<{
+    id: string;
+    plan: string;
+    amount: number;
+    date: string;
+    status: "paid" | "failed";
+    method: string;
+  }>;
   theme?: VendorTheme;
   socials?: {
     instagram?: string;

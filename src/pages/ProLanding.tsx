@@ -24,6 +24,8 @@ export default function ProLanding() {
   const navBg = useTransform(scrollY, [0, 50], ["rgba(255, 255, 255, 0)", "rgba(255, 255, 255, 0.95)"]);
   const navBorder = useTransform(scrollY, [0, 50], ["transparent", "rgba(0, 0, 0, 0.05)"]);
 
+  const isBeforeOct12026 = Date.now() < Date.UTC(2026, 9, 1);
+
   return (
     <div className="min-h-screen w-full bg-white text-foreground selection:bg-primary selection:text-white font-body overflow-x-hidden">
 
@@ -67,6 +69,14 @@ export default function ProLanding() {
       {/* ─── Hero Pro ─── */}
       <section className="relative pt-40 pb-20 md:pt-48 md:pb-28 px-6">
         <motion.div className="max-w-5xl mx-auto text-center relative z-10">
+          {isBeforeOct12026 && (
+            <FadeIn delay={0.05}>
+              <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-orange-50 border border-orange-200 text-primary text-xs font-black uppercase tracking-widest mb-6 shadow-sm">
+                <Zap size={14} fill="currentColor" /> 🎉 Offre de lancement : gratuit jusqu'au 1er octobre 2026
+              </div>
+            </FadeIn>
+          )}
+
           <FadeIn delay={0.1}>
             <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white border border-gray-100 shadow-sm mb-8">
               <span className="px-2 py-0.5 rounded-md bg-primary text-white font-black text-[8px] uppercase tracking-widest flex items-center gap-1">

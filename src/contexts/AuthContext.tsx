@@ -10,6 +10,8 @@ import {
   sendEmailVerification
 } from "firebase/auth";
 import { ref, get, set, child, onValue } from "firebase/database";
+import { calculateTrialDates } from "@/services/subscriptionService";
+import { dispatchVendorNotification } from "@/services/notificationService";
 
 interface AuthState {
   user: User | null;
@@ -345,6 +347,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // 4. Si c'est un vendeur, on crée aussi un profil vendeur
       if (data.role === "vendor" && vendorId) {
+        const { trialStartedAt, trialEndsAt } = calculateTrialDates();
+        const selectedPlan = data.subscriptionPlan === "pro" ? "pro" : "starter";
+
         const newVendorProfile: VendorProfile = {
           id: vendorId,
           userId: uid,
@@ -362,12 +367,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           neighborhood: data.neighborhood || "",
           status: "pending",
           joinedDate: new Date().toISOString().split("T")[0],
-          plan: "starter",
+          plan: selectedPlan,
+          subscriptionPlan: selectedPlan,
+          subscriptionStatus: "trial",
+          trialStartedAt,
+          trialEndsAt,
+          nextBillingDate: trialEndsAt,
+          pendingInvoice: null,
+          paymentHistory: [],
           verified: false,
           open: false,
           deliveryTime: "30-45 min"
         };
         await set(ref(db, `vendors/${vendorId}`), newVendorProfile);
+
+        // Envoyer la notification de bienvenue essai gratuit
+        try {
+          await dispatchVendorNotification(db, vendorId, "welcome_trial", {
+            plan: selectedPlan,
+            trialEndsAt,
+            phone: newVendorProfile.phone,
+            email: data.email,
+          });
+        } catch (nErr) {
+          console.warn("Erreur envoi notification bienvenue:", nErr);
+        }
       }
 
       setLastActivity(Date.now());
