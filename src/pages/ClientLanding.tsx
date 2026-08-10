@@ -151,16 +151,19 @@ export default function ClientLanding() {
       {/* ─── Pensé pour chez vous ─── */}
       <section id="terrain" className="py-20 px-6 bg-gray-50/50">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <FadeIn className="space-y-6">
-              <p className="font-sub text-[11px] font-black uppercase tracking-[0.4em] text-primary">Ancrage Local</p>
-              <h2 className="font-heading text-3xl md:text-5xl font-[900] leading-[0.95] uppercase tracking-tighter">
-                Pensé pour <span className="text-primary italic block">chez vous.</span>
-              </h2>
-              <p className="text-base md:text-lg text-muted-foreground leading-relaxed italic">
-                Oresto s'adapte à vos habitudes quotidiennes au Bénin et en Afrique de l'Ouest : paiements Mobile Money rapides, intégration WhatsApp et livraisons de proximité.
-              </p>
-              <div className="grid grid-cols-2 gap-4 pt-2">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-stretch">
+            <FadeIn className="space-y-6 flex flex-col justify-between">
+              <div>
+                <p className="font-sub text-[11px] font-black uppercase tracking-[0.4em] text-primary mb-2">Ancrage Local</p>
+                <h2 className="font-heading text-3xl md:text-5xl font-[900] leading-[0.95] uppercase tracking-tighter mb-4">
+                  Pensé pour <span className="text-primary italic block">chez vous.</span>
+                </h2>
+                <p className="text-base md:text-lg text-muted-foreground leading-relaxed italic">
+                  Oresto s'adapte à vos habitudes quotidiennes au Bénin et en Afrique de l'Ouest : paiements Mobile Money rapides, intégration WhatsApp et livraisons de proximité.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 pt-4">
                 <div className="flex items-center gap-3 p-4 rounded-2xl bg-white border border-gray-200 shadow-sm">
                   <Smartphone className="text-primary flex-shrink-0" size={20} />
                   <span className="text-xs font-black uppercase tracking-widest">Mobile Money</span>
@@ -180,16 +183,18 @@ export default function ClientLanding() {
               </div>
             </FadeIn>
 
-            <FadeIn delay={0.2} className="h-full">
-              <div className="p-10 rounded-[36px] bg-black text-white space-y-6 shadow-2xl relative overflow-hidden">
-                <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-white">
-                  <Zap size={24} fill="currentColor" />
+            <FadeIn delay={0.2} className="flex">
+              <div className="p-8 md:p-10 rounded-[36px] bg-black text-white shadow-2xl relative overflow-hidden flex flex-col justify-between w-full">
+                <div className="space-y-6">
+                  <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-white shadow-md">
+                    <Zap size={24} fill="currentColor" />
+                  </div>
+                  <h3 className="font-heading text-2xl md:text-3xl font-black uppercase tracking-tighter">Commandez & Réservez en toute simplicité</h3>
+                  <p className="text-white/70 text-sm md:text-base leading-relaxed italic">
+                    Aucun parcours complexe. Choisissez votre lieu préféré, réservez ou commandez, et payez avec MTN MoMo ou Moov Money en toute sécurité.
+                  </p>
                 </div>
-                <h3 className="font-heading text-2xl font-black uppercase tracking-tighter">Commandez & Réservez en toute simplicité</h3>
-                <p className="text-white/60 text-sm leading-relaxed italic">
-                  Aucun parcours complexe. Choisissez votre lieu préféré, réservez ou commandez, et payez avec MTN MoMo ou Moov Money en toute sécurité.
-                </p>
-                <div className="pt-4 border-t border-white/10 flex items-center gap-2 text-xs font-sub font-black uppercase tracking-widest text-primary">
+                <div className="pt-6 mt-6 border-t border-white/10 flex items-center gap-2 text-xs font-sub font-black uppercase tracking-widest text-primary">
                   <CheckCircle2 size={16} /> Confirmation instantanée
                 </div>
               </div>
@@ -209,19 +214,23 @@ export default function ClientLanding() {
             </p>
           </FadeIn>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
             {[
               { icon: Star, title: "1 pt / 100 FCFA", desc: "Gagnez 1 point automatiquement pour chaque tranche de 100 FCFA dépensée sur vos établissements favoris." },
               { icon: Truck, title: "+5 pts Bonus Livraison", desc: "Chaque livraison effectuée via Oresto vous crédite immédiatement de 5 points de fidélité supplémentaires." },
               { icon: Zap, title: "Récompenses Automatiques", desc: "Convertissez directement vos points en réductions ou plats offerts lors de vos prochaines visites." },
             ].map((f, i) => (
-              <FadeIn key={i} delay={i * 0.1}>
-                <div className="p-8 rounded-[32px] bg-white border border-gray-100 shadow-sm space-y-4 hover:shadow-lg transition-all text-center">
-                  <div className="w-12 h-12 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center mx-auto shadow-sm">
-                    <f.icon size={22} />
+              <FadeIn key={i} delay={i * 0.1} className="h-full flex flex-col">
+                <div className="p-8 rounded-[32px] bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all text-center flex flex-col justify-between h-full space-y-4">
+                  <div className="space-y-4">
+                    <div className="w-12 h-12 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center mx-auto shadow-sm">
+                      <f.icon size={22} />
+                    </div>
+                    <div className="min-h-[52px] flex items-center justify-center">
+                      <h4 className="font-heading font-black text-lg uppercase tracking-tighter leading-snug">{f.title}</h4>
+                    </div>
                   </div>
-                  <h4 className="font-heading font-black text-lg uppercase tracking-tighter">{f.title}</h4>
-                  <p className="text-xs text-muted-foreground leading-relaxed italic">{f.desc}</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed italic flex-1 flex items-center justify-center">{f.desc}</p>
                 </div>
               </FadeIn>
             ))}
