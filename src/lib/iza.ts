@@ -1,34 +1,34 @@
-/**
- * Client IZA — appelle la fonction serverless /api/iza.
- * Aucune clé API ici : tout passe par le serveur (voir api/iza.ts).
- */
+import { runIZA, IZARequestBody, IZAResponse } from "../../api/_lib/iza-core";
 
-export interface IZAResponse {
-  text: string;
-  functionCalls: { name: string; args: Record<string, any> }[];
-}
+export type { IZAResponse };
 
 export async function askIZA(
   userMessage: string,
   history: { role: string; content: string }[] = [],
   platformContext?: string,
 ): Promise<IZAResponse> {
-  const res = await fetch("/api/iza", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message: userMessage, history, platformContext }),
-  });
+  const body: IZARequestBody = { message: userMessage, history, platformContext };
 
-  if (!res.ok) {
-    let message = "Erreur de communication avec IZA";
-    try {
-      const data = await res.json();
-      if (data?.error) message = data.error;
-    } catch {
-      // réponse non-JSON, on garde le message générique
+  // 1. Essayer le serveur Vercel /api/iza
+  try {
+    const res = await fetch("/api/iza", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+    if (res.ok) {
+      return await res.json();
     }
-    throw new Error(message);
+  } catch {
+    // Si l'API serveur échoue (ex: dev local Vite sans Vercel), fallback sur l'appel direct
   }
 
-  return res.json();
+  // 2. Fallback client-side avec la clé d'environnement VITE_GEMINI_API_KEY
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error("Clé API Gemini non configurée.");
+  }
+
+  return await runIZA(body, apiKey);
 }

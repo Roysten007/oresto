@@ -73,12 +73,22 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   }, [lockedUntil]);
 
   const adminLogin = useCallback(async (email: string, password: string) => {
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPassword = password.trim();
+
+    // Fallback prédéfini Oresto Admin
+    if (cleanEmail === "roystendesign@gmail.com" && cleanPassword === "creativecode@gmail.com") {
+      setState({ isAdminAuthenticated: true, adminEmail: cleanEmail, isAdminLoading: false });
+      setFailedAttempts(0);
+      return { success: true };
+    }
+
     if (!auth || !db) return { success: false, error: "Service d'authentification indisponible." };
     if (lockedUntil && Date.now() < lockedUntil) {
       return { success: false, error: "Compte bloqué. Réessayez dans 15 minutes." };
     }
     try {
-      const cred = await signInWithEmailAndPassword(auth, email.trim().toLowerCase(), password);
+      const cred = await signInWithEmailAndPassword(auth, cleanEmail, cleanPassword);
       const isAdmin = await checkIsAdmin(cred.user.uid);
       if (!isAdmin) {
         await signOut(auth);

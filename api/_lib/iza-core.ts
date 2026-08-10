@@ -127,7 +127,7 @@ RÈGLES DE COMPORTEMENT :
 - Quand tu utilises un outil (function call), ne génère PAS de texte en plus — le système confirmera l'action
 - Si tu ne peux pas faire quelque chose, dis-le clairement`;
 
-const MODEL = "gemini-2.5-flash";
+const MODEL = "gemini-1.5-flash";
 
 export async function runIZA(body: IZARequestBody, apiKey: string): Promise<IZAResponse> {
   const { message, history = [], platformContext } = body || ({} as IZARequestBody);
