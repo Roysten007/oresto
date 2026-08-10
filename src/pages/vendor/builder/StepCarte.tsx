@@ -10,11 +10,22 @@ interface Props {
   vendorId: string;
   onSave: (product: Partial<Product>) => Promise<void>;
   onDelete: (id: string) => void;
+  category?: string;
 }
 
-const CATEGORIES = ["Entrées", "Plats", "Desserts", "Boissons", "Spécialités"];
+const DISH_CATEGORIES = ["Entrées", "Plats", "Desserts", "Boissons", "Spécialités"];
+const ROOM_CATEGORIES = ["Standard", "Deluxe", "Suite", "Bungalow", "Dortoir"];
 
-export default function StepCarte({ products, vendorId, onSave, onDelete }: Props) {
+export default function StepCarte({ products, vendorId, onSave, onDelete, category }: Props) {
+  const isHotel = Boolean(
+    category && (
+      category.toLowerCase().includes("hôtel") || 
+      category.toLowerCase().includes("hotel") || 
+      category.toLowerCase().includes("auberge")
+    )
+  );
+
+  const defaultCategories = isHotel ? ROOM_CATEGORIES : DISH_CATEGORIES;
   const [editing, setEditing] = useState<Partial<Product> | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -47,13 +58,16 @@ export default function StepCarte({ products, vendorId, onSave, onDelete }: Prop
   };
 
   const handleSave = async () => {
-    if (!editing?.name || !editing?.price) { toast.error("Nom et prix requis"); return; }
+    if (!editing?.name || !editing?.price) { 
+      toast.error(isHotel ? "Nom de chambre et prix par nuit requis" : "Nom et prix requis"); 
+      return; 
+    }
     setSaving(true);
     try { await onSave(editing); setEditing(null); }
     finally { setSaving(false); }
   };
 
-  const allCategories = Array.from(new Set([...CATEGORIES, ...products.map(p => p.category)])).filter(Boolean);
+  const allCategories = Array.from(new Set([...defaultCategories, ...products.map(p => p.category)])).filter(Boolean);
   const categorizedProducts = allCategories.map(cat => ({
     cat,
     items: products.filter(p => p.category === cat)
@@ -65,22 +79,24 @@ export default function StepCarte({ products, vendorId, onSave, onDelete }: Prop
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">La Carte</h2>
-          <p className="text-sm text-gray-500 mt-1">{products.length} plat{products.length !== 1 ? 's' : ''} enregistré{products.length !== 1 ? 's' : ''}</p>
+          <h2 className="text-2xl font-bold">{isHotel ? "Mes Chambres" : "La Carte"}</h2>
+          <p className="text-sm text-gray-500 mt-1">
+            {products.length} {isHotel ? `chambre${products.length !== 1 ? 's' : ''}` : `plat${products.length !== 1 ? 's' : ''}`} enregistré{products.length !== 1 ? 's' : ''}
+          </p>
         </div>
         <button
-          onClick={() => setEditing({ name: "", price: 0, category: "Plats", image: "", description: "" })}
+          onClick={() => setEditing({ name: "", price: 0, category: isHotel ? "Standard" : "Plats", image: "", description: "" })}
           className="flex items-center gap-2 px-6 py-3 bg-black text-white rounded-full font-bold text-sm hover:bg-gray-800 transition-colors shadow-lg"
         >
-          <Plus size={18} /> Nouveau plat
+          <Plus size={18} /> {isHotel ? "Nouvelle chambre" : "Nouveau plat"}
         </button>
       </div>
 
       {products.length === 0 && (
         <div className="py-20 border-2 border-dashed border-gray-200 rounded-3xl flex flex-col items-center gap-4 text-gray-400">
-          <div className="text-5xl">🍽️</div>
-          <p className="font-bold">Votre carte est vide</p>
-          <p className="text-sm">Cliquez sur "Nouveau plat" pour commencer</p>
+          <div className="text-5xl">{isHotel ? "🏨" : "🍽️"}</div>
+          <p className="font-bold">{isHotel ? "Aucune chambre enregistrée" : "Votre carte est vide"}</p>
+          <p className="text-sm">Cliquez sur "{isHotel ? "Nouvelle chambre" : "Nouveau plat"}" pour commencer</p>
         </div>
       )}
 
@@ -91,16 +107,16 @@ export default function StepCarte({ products, vendorId, onSave, onDelete }: Prop
             {items.map(p => (
               <div key={p.id} className="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition-all">
                 <div className="h-40 bg-gray-100 relative overflow-hidden">
-                  {p.image ? <img src={p.image} className="w-full h-full object-cover" alt={p.name} /> : <div className="absolute inset-0 flex items-center justify-center text-gray-300 text-4xl">🍴</div>}
+                  {p.image ? <img src={p.image} className="w-full h-full object-cover" alt={p.name} /> : <div className="absolute inset-0 flex items-center justify-center text-gray-300 text-4xl">{isHotel ? "🛌" : "🍴"}</div>}
                   <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button onClick={() => setEditing(p)} className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-md hover:bg-black hover:text-white transition-colors"><Settings size={13} /></button>
-                    <button onClick={() => { if(confirm("Supprimer ce plat ?")) onDelete(p.id); }} className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-md text-red-500 hover:bg-red-500 hover:text-white transition-colors"><Trash2 size={13} /></button>
+                    <button onClick={() => { if(confirm(isHotel ? "Supprimer cette chambre ?" : "Supprimer ce plat ?")) onDelete(p.id); }} className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-md text-red-500 hover:bg-red-500 hover:text-white transition-colors"><Trash2 size={13} /></button>
                   </div>
                 </div>
                 <div className="p-4">
                   <p className="font-bold text-sm">{p.name}</p>
                   <p className="text-gray-400 text-xs mt-0.5 line-clamp-1">{p.description}</p>
-                  <p className="font-black text-lg mt-2">{Number(p.price).toLocaleString()} F</p>
+                  <p className="font-black text-lg mt-2">{Number(p.price).toLocaleString()} F {isHotel ? "/ nuit" : ""}</p>
                 </div>
               </div>
             ))}
@@ -115,7 +131,7 @@ export default function StepCarte({ products, vendorId, onSave, onDelete }: Prop
             {ungrouped.map(p => (
               <div key={p.id} className="group bg-white rounded-2xl border border-gray-100 overflow-hidden">
                 <div className="h-36 bg-gray-100">{p.image && <img src={p.image} className="w-full h-full object-cover" />}</div>
-                <div className="p-4"><p className="font-bold text-sm">{p.name}</p><p className="font-black">{Number(p.price).toLocaleString()} F</p></div>
+                <div className="p-4"><p className="font-bold text-sm">{p.name}</p><p className="font-black">{Number(p.price).toLocaleString()} F {isHotel ? "/ nuit" : ""}</p></div>
               </div>
             ))}
           </div>
@@ -128,7 +144,9 @@ export default function StepCarte({ products, vendorId, onSave, onDelete }: Prop
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setEditing(null)} />
           <div className="relative bg-white w-full sm:max-w-lg rounded-t-[32px] sm:rounded-[32px] overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
             <div className="flex items-center justify-between p-6 border-b">
-              <h3 className="font-black text-lg">{editing.id ? "Modifier le plat" : "Nouveau plat"}</h3>
+              <h3 className="font-black text-lg">
+                {editing.id ? (isHotel ? "Modifier la chambre" : "Modifier le plat") : (isHotel ? "Nouvelle chambre" : "Nouveau plat")}
+              </h3>
               <button onClick={() => setEditing(null)} className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200"><X size={18} /></button>
             </div>
 
@@ -137,7 +155,7 @@ export default function StepCarte({ products, vendorId, onSave, onDelete }: Prop
               <div className="relative aspect-video rounded-2xl bg-gray-100 overflow-hidden cursor-pointer group">
                 {editing.image
                   ? <img src={editing.image} className="w-full h-full object-cover" alt="" />
-                  : <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400 gap-2"><Camera size={32} /><span className="text-xs font-bold uppercase">Photo du plat</span></div>
+                  : <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400 gap-2"><Camera size={32} /><span className="text-xs font-bold uppercase">{isHotel ? "Photo de la chambre" : "Photo du plat"}</span></div>
                 }
                 {uploading && <div className="absolute bottom-2 right-2 bg-black/70 text-white text-[9px] font-bold uppercase px-3 py-1 rounded-full flex items-center gap-1.5"><div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" /> Sauvegarde...</div>}
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-bold text-sm">Changer la photo</div>
@@ -145,19 +163,23 @@ export default function StepCarte({ products, vendorId, onSave, onDelete }: Prop
               </div>
 
               <div>
-                <label className="text-xs font-bold uppercase tracking-widest text-gray-400 block mb-2">Nom du plat *</label>
+                <label className="text-xs font-bold uppercase tracking-widest text-gray-400 block mb-2">
+                  {isHotel ? "Nom / Numéro de la chambre *" : "Nom du plat *"}
+                </label>
                 <input
                   type="text"
                   value={editing.name || ""}
                   onChange={e => setEditing({ ...editing, name: e.target.value })}
                   className="w-full px-4 py-3 rounded-xl bg-gray-100 font-bold text-base outline-none focus:ring-2 focus:ring-black"
-                  placeholder="Ex: Poulet Braisé"
+                  placeholder={isHotel ? "Ex: Suite Royale 201" : "Ex: Poulet Braisé"}
                   autoFocus
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold uppercase tracking-widest text-gray-400 block mb-2">Prix (FCFA) *</label>
+                <label className="text-xs font-bold uppercase tracking-widest text-gray-400 block mb-2">
+                  {isHotel ? "Prix par nuit (FCFA) *" : "Prix (FCFA) *"}
+                </label>
                 <input
                   type="number"
                   value={editing.price || ""}
@@ -172,7 +194,7 @@ export default function StepCarte({ products, vendorId, onSave, onDelete }: Prop
                 <label className="text-xs font-bold uppercase tracking-widest text-gray-400 block mb-2">Catégorie</label>
                 <div className="flex flex-col gap-3">
                   <div className="flex flex-wrap gap-2">
-                    {Array.from(new Set([...CATEGORIES, ...products.map(p => p.category)])).filter(Boolean).map(c => (
+                    {Array.from(new Set([...defaultCategories, ...products.map(p => p.category)])).filter(Boolean).map(c => (
                       <button key={c} type="button" onClick={() => setEditing({ ...editing, category: c })} className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${editing.category === c ? "bg-black text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>{c}</button>
                     ))}
                   </div>
@@ -181,18 +203,20 @@ export default function StepCarte({ products, vendorId, onSave, onDelete }: Prop
                     value={editing.category || ""}
                     onChange={e => setEditing({ ...editing, category: e.target.value })}
                     className="w-full px-4 py-3 rounded-xl bg-gray-100 font-bold text-sm outline-none focus:ring-2 focus:ring-black"
-                    placeholder="Ou tapez une nouvelle catégorie (ex: Boissons fraîches)..."
+                    placeholder={isHotel ? "Ex: Vue sur mer, Bungalow VIP..." : "Ou tapez une nouvelle catégorie (ex: Boissons fraîches)..."}
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-bold uppercase tracking-widest text-gray-400 block mb-2">Description</label>
+                <label className="text-xs font-bold uppercase tracking-widest text-gray-400 block mb-2">
+                  {isHotel ? "Description & Équipements" : "Description"}
+                </label>
                 <textarea
                   value={editing.description || ""}
                   onChange={e => setEditing({ ...editing, description: e.target.value })}
                   className="w-full px-4 py-3 rounded-xl bg-gray-100 text-sm outline-none focus:ring-2 focus:ring-black resize-none h-20"
-                  placeholder="Ingrédients, préparation..."
+                  placeholder={isHotel ? "Lit King size, Climatisation, Wifi, Balcon, Petit-déjeuner inclus..." : "Ingrédients, préparation..."}
                 />
               </div>
             </div>

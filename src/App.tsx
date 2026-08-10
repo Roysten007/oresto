@@ -12,7 +12,9 @@ import PrivateRoute from "@/components/PrivateRoute";
 import AdminRoute from "@/components/AdminRoute";
 import AIChatBot from "@/components/AIChatBot";
 
-import Landing from "./pages/Landing";
+import ProfileSelection from "./pages/ProfileSelection";
+import ClientLanding from "./pages/ClientLanding";
+import ProLanding from "./pages/ProLanding";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -75,7 +77,9 @@ const App = () => (
                 <BrowserRouter>
                   <AIChatBot />
                   <Routes>
-                    <Route path="/" element={<Landing />} />
+                    <Route path="/" element={<ProfileSelection />} />
+                    <Route path="/decouvrir" element={<ClientLanding />} />
+                    <Route path="/pro" element={<ProLanding />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />

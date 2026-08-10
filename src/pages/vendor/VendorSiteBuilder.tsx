@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { db, storage } from "@/lib/firebase";
 import { ref, update, onValue, set, push, query, orderByChild, equalTo, get } from "firebase/database";
 import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
-import { Globe, Utensils, Calendar, Settings, Palette, Rocket, ChevronLeft, ChevronRight, ChefHat } from "lucide-react";
+import { Globe, Utensils, Calendar, Settings, Palette, Rocket, ChevronLeft, ChevronRight, ChefHat, Building } from "lucide-react";
 import { toast } from "sonner";
 import { VendorProfile, Product } from "@/data/mockData";
 import StepIdentite from "./builder/StepIdentite";
@@ -13,14 +13,11 @@ import StepVentes from "./builder/StepVentes";
 import StepDesign from "./builder/StepDesign";
 import StepLancement from "./builder/StepLancement";
 
-const STEPS = [
-  { id: 1, title: "Identité", icon: Globe },
-  { id: 2, title: "La Carte", icon: Utensils },
-  { id: 3, title: "Menus", icon: Calendar },
-  { id: 4, title: "Ventes", icon: Settings },
-  { id: 5, title: "Design", icon: Palette },
-  { id: 6, title: "Lancement", icon: Rocket },
-];
+const isHotelCategory = (cat?: string) => {
+  if (!cat) return false;
+  const c = cat.toLowerCase();
+  return c.includes("hôtel") || c.includes("hotel") || c.includes("auberge");
+};
 
 export default function VendorSiteBuilder() {
   const { vendorProfile } = useAuth();
@@ -39,6 +36,17 @@ export default function VendorSiteBuilder() {
     social_links: { instagram: "", facebook: "", tiktok: "" },
     payment_methods: ["Espèces"], ordering_modes: [], is_published: false,
   });
+
+  const isHotel = isHotelCategory(formData.category || vendorProfile?.category);
+
+  const steps = [
+    { id: 1, title: "Identité", icon: Globe },
+    { id: 2, title: isHotel ? "Mes Chambres" : "La Carte", icon: isHotel ? Building : Utensils },
+    { id: 3, title: "Menus", icon: Calendar },
+    { id: 4, title: "Ventes", icon: Settings },
+    { id: 5, title: "Design", icon: Palette },
+    { id: 6, title: "Lancement", icon: Rocket },
+  ];
 
   useEffect(() => {
     if (!vendorProfile || !db) return;
@@ -78,30 +86,25 @@ export default function VendorSiteBuilder() {
     if (!file) return;
     const key = type === 'logo' ? 'logo_url' : 'cover_url';
 
-    // 1. Instant local preview + update formData immediately
     const reader = new FileReader();
     reader.onloadend = () => {
       const base64 = reader.result as string;
       if (type === 'logo') setLocalLogo(base64);
       else setLocalCover(base64);
-      // Update formData so checklist detects the image right away
       setFormData(prev => ({ ...prev, [key]: base64 }));
     };
     reader.readAsDataURL(file);
 
-    // 2. Try Firebase Storage upload in background (optional)
     if (!storage || !vendorProfile || !db) return;
     try {
       const sRef = storageRef(storage, `vendors/${vendorProfile.id}/${type}_${Date.now()}`);
       await uploadBytes(sRef, file);
       const url = await getDownloadURL(sRef);
-      // Replace base64 with permanent URL
       setFormData(prev => ({ ...prev, [key]: url }));
       await update(ref(db, `vendors/${vendorProfile.id}`), { [key]: url });
       toast.success("Image mise à jour");
     } catch (err) {
       console.warn("Firebase Storage upload échoué, base64 conservé:", err);
-      // Save the base64 to DB as fallback
       if (db && vendorProfile) {
         try {
           const base64 = type === 'logo' ? localLogo : localCover;
@@ -116,17 +119,17 @@ export default function VendorSiteBuilder() {
     const data = { ...product, vendorId: vendorProfile.id, available: true, price: Number(product.price) };
     if (product.id) {
       await update(ref(db, `products/${product.id}`), data);
-      toast.success("Plat mis à jour");
+      toast.success(isHotel ? "Chambre mise à jour" : "Plat mis à jour");
     } else {
       await set(push(ref(db, 'products')), data);
-      toast.success("Plat ajouté !");
+      toast.success(isHotel ? "Chambre ajoutée !" : "Plat ajouté !");
     }
   };
 
   const deleteProduct = (id: string) => {
     if (!db) return;
     set(ref(db, `products/${id}`), null);
-    toast.success("Plat supprimé");
+    toast.success(isHotel ? "Chambre supprimée" : "Plat supprimé");
   };
 
   const saveChanges = async (publish = false) => {
@@ -137,7 +140,6 @@ export default function VendorSiteBuilder() {
       if (publish) updates.is_published = true;
       await update(ref(db, `vendors/${vendorProfile.id}`), updates);
       
-      // Save slug mapping for fast lookup
       if (formData.slug) {
         await update(ref(db, `slugs/${formData.slug.toLowerCase()}`), { 
           vendorId: vendorProfile.id 
@@ -156,7 +158,7 @@ export default function VendorSiteBuilder() {
   const renderStep = () => {
     switch (currentStep) {
       case 1: return <StepIdentite formData={formData} setFormData={setFormData} localLogo={localLogo} localCover={localCover} checkingSlug={checkingSlug} handleSlugChange={handleSlugChange} handleFileUpload={handleFileUpload} />;
-      case 2: return <StepCarte products={products} vendorId={vendorProfile?.id || ""} onSave={saveProduct} onDelete={deleteProduct} />;
+      case 2: return <StepCarte products={products} vendorId={vendorProfile?.id || ""} onSave={saveProduct} onDelete={deleteProduct} category={formData.category || vendorProfile?.category} />;
       case 3: return <StepMenus formData={formData} setFormData={setFormData} products={products} vendorId={vendorProfile?.id || ""} />;
       case 4: return <StepVentes formData={formData} setFormData={setFormData} />;
       case 5: return <StepDesign formData={formData} setFormData={setFormData} localLogo={localLogo} localCover={localCover} />;
@@ -193,7 +195,7 @@ export default function VendorSiteBuilder() {
       {/* Step Navigation */}
       <div className="bg-white border-b border-gray-100 px-6 md:px-10 overflow-x-auto">
         <div className="flex items-center max-w-5xl mx-auto">
-          {STEPS.map((step, i) => {
+          {steps.map((step, i) => {
             const Icon = step.icon;
             const active = currentStep === step.id;
             const done = currentStep > step.id;
@@ -233,7 +235,7 @@ export default function VendorSiteBuilder() {
               </button>
 
               <div className="flex gap-1.5">
-                {STEPS.map(s => (
+                {steps.map(s => (
                   <button key={s.id} onClick={() => setCurrentStep(s.id)} className={`h-1.5 rounded-full transition-all ${currentStep === s.id ? "bg-black w-8" : currentStep > s.id ? "bg-green-500 w-3" : "bg-gray-200 w-3"}`} />
                 ))}
               </div>
