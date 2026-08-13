@@ -15,7 +15,7 @@ interface Message {
 
 const INITIAL_MESSAGE: Message = {
   role: "assistant",
-  content: "Bonjour ! Je suis **IZA**, l'assistant IA d'Oresto. ⚡\n\nJe peux vous aider à :\n- 🍽️ Trouver un restaurant\n- 📦 Suivre une commande\n- 💡 Conseils pour restaurateurs\n- 📊 Analyser vos performances\n\nQue puis-je faire pour vous ?",
+  content: "Bonjour ! Je suis **IZA**, votre assistante IA. ⚡\n\nJe peux vous aider à :\n- 📊 Analyser vos performances\n- 🍽️ Gérer votre menu et vos produits\n- 📦 Suivre vos commandes\n- 🌐 Configurer votre site\n\nQue puis-je faire pour vous ?",
   timestamp: new Date().toISOString(),
 };
 
@@ -69,18 +69,7 @@ export default function AIChatBot() {
           const data = snap.val();
           contextStr += `\n\n=== CONTEXTE SÉCURISÉ ===\n`;
 
-          if (user?.role === "client" || !user) {
-            // Pour les clients: Uniquement la liste publique des restos et les produits disponibles
-            const publicVendors = Object.entries(data.vendors || {}).map(([id, v]: any) => ({
-              id, name: v.name, description: v.description, isOpen: v.isOpen, rating: v.rating
-            }));
-            const publicProducts = Object.entries(data.products || {}).filter(([_, p]: any) => p.available).map(([id, p]: any) => ({
-              id, name: p.name, price: p.price, vendorId: p.vendorId, category: p.category
-            }));
-            contextStr += `RESTAURANTS PUBLICS: ${JSON.stringify(publicVendors).substring(0, 1000)}\n`;
-            contextStr += `PRODUITS ACTIFS: ${JSON.stringify(publicProducts).substring(0, 1500)}\n`;
-          } 
-          else if (user?.role === "vendor" && user.vendorId) {
+          if (user?.role === "vendor" && user.vendorId) {
             // Pour un vendeur: Uniquement SES produits, SES commandes, et SON profil
             const myVendor = data.vendors?.[user.vendorId] || {};
             const myProducts = Object.entries(data.products || {}).filter(([_, p]: any) => p.vendorId === user.vendorId).map(([id, p]: any) => ({ id, ...p }));
@@ -288,9 +277,10 @@ export default function AIChatBot() {
             {messages.length <= 1 && !isLoading && (
               <div className="px-4 pb-2 flex gap-2 overflow-x-auto scrollbar-hide flex-shrink-0">
                 {[
+                  "Voir mes commandes",
                   "Analyser mes ventes",
-                  "Conseils pour mon menu",
-                  "Comment suivre ma commande ?",
+                  "Gérer mon menu",
+                  "Aide site web",
                 ].map(prompt => (
                   <button
                     key={prompt}

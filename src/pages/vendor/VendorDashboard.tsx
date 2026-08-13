@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useOrders } from "@/contexts/OrderContext";
 import { useNavigate } from "react-router-dom";
 import { db } from "@/lib/firebase";
+import { ref, onValue } from "firebase/database";
+import { Order } from "@/data/mockData";
 import {
   TrendingUp,
   Users,
@@ -43,8 +44,33 @@ import {
 
 export default function VendorDashboard() {
   const { vendorProfile, user } = useAuth();
-  const { orders, isLoading } = useOrders();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+
+  const vendorId = vendorProfile?.id || user?.vendorId;
+
+  useEffect(() => {
+    if (!db || !vendorId) {
+      setIsLoading(false);
+      return;
+    }
+    const ordersRef = ref(db, "orders");
+    const unsub = onValue(ordersRef, snap => {
+      const data = snap.val();
+      if (data) {
+        const list = Object.entries(data)
+          .map(([id, val]: [string, any]) => ({ id, ...val } as Order))
+          .filter(o => o.vendorId === vendorId)
+          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        setOrders(list);
+      } else {
+        setOrders([]);
+      }
+      setIsLoading(false);
+    });
+    return () => unsub();
+  }, [vendorId]);
 
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showPlanModal, setShowPlanModal] = useState(false);

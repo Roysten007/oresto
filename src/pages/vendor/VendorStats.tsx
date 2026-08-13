@@ -1,11 +1,32 @@
-import { useOrders } from "@/contexts/OrderContext";
+import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useMemo } from "react";
+import { db } from "@/lib/firebase";
+import { ref, onValue } from "firebase/database";
+import { Order } from "@/data/mockData";
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 export default function VendorStats() {
-  const { orders } = useOrders();
-  const { vendorProfile } = useAuth();
+  const { vendorProfile, user } = useAuth();
+  const [orders, setOrders] = useState<Order[]>([]);
+
+  const vendorId = vendorProfile?.id || user?.vendorId;
+
+  useEffect(() => {
+    if (!db || !vendorId) return;
+    const ordersRef = ref(db, "orders");
+    const unsub = onValue(ordersRef, snap => {
+      const data = snap.val();
+      if (data) {
+        const list = Object.entries(data)
+          .map(([id, val]: [string, any]) => ({ id, ...val } as Order))
+          .filter(o => o.vendorId === vendorId);
+        setOrders(list);
+      } else {
+        setOrders([]);
+      }
+    });
+    return () => unsub();
+  }, [vendorId]);
 
   const validOrders = useMemo(() => orders.filter(o => o.status !== "cancelled"), [orders]);
 

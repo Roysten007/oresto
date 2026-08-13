@@ -1,11 +1,15 @@
-import { useState } from "react";
-import { useOrders } from "@/contexts/OrderContext";
+import { useState, useEffect } from "react";
+import { db } from "@/lib/firebase";
+import { ref, onValue, update } from "firebase/database";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 import { Order } from "@/data/mockData";
-import { Clock, Package, CheckCircle2, Truck, MessageCircle, X, MapPin, ChevronRight } from "lucide-react";
+import { Clock, Package, CheckCircle2, Truck, MessageCircle, X, MapPin, ChevronRight, CreditCard } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import OrderChat from "@/components/OrderChat";
 
 const STATUS_META: Record<string, { label: string; color: string; bg: string; border: string; icon: any }> = {
+  awaiting_payment: { label: "En attente paiement", color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-200", icon: CreditCard },
   pending:   { label: "En attente",    color: "text-orange-600",  bg: "bg-orange-50",  border: "border-orange-200", icon: Clock },
   preparing: { label: "Préparation",   color: "text-blue-600",    bg: "bg-blue-50",    border: "border-blue-200",   icon: Package },
   delivering:{ label: "En route",      color: "text-purple-600",  bg: "bg-purple-50",  border: "border-purple-200", icon: Truck },
@@ -115,8 +119,40 @@ function OrderCard({
 }
 
 export default function VendorOrders() {
-  const { orders, updateOrderStatus, isLoading } = useOrders();
+  const { user } = useAuth();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [chatOrder, setChatOrder] = useState<Order | null>(null);
+
+  useEffect(() => {
+    if (!db || !user?.vendorId) { setIsLoading(false); return; }
+    const ordersRef = ref(db, "orders");
+    const unsub = onValue(ordersRef, snap => {
+      const data = snap.val();
+      if (data) {
+        const list = Object.entries(data)
+          .map(([id, val]: [string, any]) => ({ id, ...val } as Order))
+          .filter(o => o.vendorId === user.vendorId)
+          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        setOrders(list);
+      } else {
+        setOrders([]);
+      }
+      setIsLoading(false);
+    });
+    return () => unsub();
+  }, [user]);
+
+  const updateOrderStatus = async (orderId: string, status: Order["status"]) => {
+    if (!db) return;
+    try {
+      await update(ref(db, `orders/${orderId}`), { status });
+      toast.info(`Commande mise à jour`);
+    } catch (err) {
+      console.error(err);
+      toast.error("Erreur de mise à jour");
+    }
+  };
 
   if (isLoading) return (
     <div className="min-h-[60vh] flex items-center justify-center">
@@ -124,11 +160,19 @@ export default function VendorOrders() {
     </div>
   );
 
+  const awaitingPayment = orders.filter(o => o.status === "awaiting_payment");
   const pending   = orders.filter(o => o.status === "pending");
   const preparing = orders.filter(o => o.status === "preparing" || o.status === "delivering");
   const delivered = orders.filter(o => o.status === "delivered");
 
   const columns = [
+    {
+      emoji: "💳", title: "Attente paiement", orders: awaitingPayment,
+      accent: "border-amber-300 bg-amber-50/50",
+      headerColor: "text-amber-600",
+      actionLabel: "✅ Confirmer paiement",
+      nextStatus: "preparing" as Order["status"],
+    },
     {
       emoji: "⏳", title: "En attente", orders: pending,
       accent: "border-orange-300 bg-orange-50/50",
@@ -171,7 +215,7 @@ export default function VendorOrders() {
       </div>
 
       {/* Kanban columns */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {columns.map(col => (
           <div key={col.title} className={`rounded-[32px] border-2 ${col.accent} p-5 space-y-4`}>
             <div className="flex items-center justify-between">

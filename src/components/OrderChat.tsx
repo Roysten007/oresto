@@ -1,17 +1,20 @@
 import { useState, useEffect, useRef } from "react";
 import { db } from "@/lib/firebase";
 import { ref, onValue, push, set } from "firebase/database";
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useAuth } from "@/contexts/AuthContext";
-import { Send, MessageCircle, ChefHat } from "lucide-react";
+import { Send, MessageCircle, ChefHat, Image as ImageIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Message {
   id: string;
   senderId: string;
   senderName: string;
-  senderRole: "client" | "vendor";
+  senderRole: "client" | "vendor" | "system";
   text: string;
   timestamp: number;
+  type?: "text" | "image" | "system";
+  imageUrl?: string;
 }
 
 interface OrderChatProps {
@@ -27,6 +30,7 @@ export default function OrderChat({ orderId, vendorName, clientName, compact = f
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!db || !orderId) return;
@@ -49,6 +53,36 @@ export default function OrderChat({ orderId, vendorName, clientName, compact = f
     }
   }, [messages, compact]);
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user || !db) return;
+
+    setSending(true);
+    try {
+      const storage = getStorage();
+      const fileRef = storageRef(storage, `order-images/${orderId}/${Date.now()}_${file.name}`);
+      await uploadBytes(fileRef, file);
+      const downloadURL = await getDownloadURL(fileRef);
+
+      const msgsRef = ref(db, `messages/${orderId}`);
+      const newMsg = push(msgsRef);
+      await set(newMsg, {
+        senderId: user.id,
+        senderName: user.firstName || user.name || "Utilisateur",
+        senderRole: user.role,
+        text: "📸 Image envoyée",
+        timestamp: Date.now(),
+        type: "image",
+        imageUrl: downloadURL
+      });
+    } catch (err) {
+      console.error("Error uploading image:", err);
+    } finally {
+      setSending(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
   const sendMessage = async () => {
     if (!text.trim() || !user || !db) return;
     setSending(true);
@@ -60,6 +94,7 @@ export default function OrderChat({ orderId, vendorName, clientName, compact = f
       senderRole: user.role,
       text: text.trim(),
       timestamp: Date.now(),
+      type: "text",
     });
     setText("");
     setSending(false);
@@ -118,7 +153,22 @@ export default function OrderChat({ orderId, vendorName, clientName, compact = f
           </div>
         ) : (
           <AnimatePresence initial={false}>
-            {messages.map(msg => (
+            {messages.map(msg => {
+              if (msg.type === "system") {
+                return (
+                  <motion.div
+                    key={msg.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex justify-center my-4"
+                  >
+                    <div className="bg-gray-100 text-gray-500 text-[10px] font-medium px-4 py-2 rounded-2xl max-w-[85%] text-center whitespace-pre-wrap italic">
+                      {msg.text}
+                    </div>
+                  </motion.div>
+                );
+              }
+              return (
               <motion.div
                 key={msg.id}
                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
@@ -139,14 +189,23 @@ export default function OrderChat({ orderId, vendorName, clientName, compact = f
                         : "bg-white text-black shadow-sm border border-gray-100 rounded-[18px] rounded-bl-[6px]"
                     }`}
                   >
-                    {msg.text}
+                    {msg.type === "image" && msg.imageUrl ? (
+                      <div className="space-y-2">
+                        <a href={msg.imageUrl} target="_blank" rel="noopener noreferrer">
+                          <img src={msg.imageUrl} alt="Image envoyée" className="rounded-xl max-w-full h-auto max-h-48 object-cover cursor-pointer" />
+                        </a>
+                        <p className="text-[10px] opacity-80">{msg.text}</p>
+                      </div>
+                    ) : (
+                      msg.text
+                    )}
                   </div>
                   <span className="text-[8px] text-gray-300 font-bold px-2">
                     {new Date(msg.timestamp).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
                   </span>
                 </div>
               </motion.div>
-            ))}
+            )})}
           </AnimatePresence>
         )}
         <div ref={bottomRef} />
@@ -162,6 +221,21 @@ export default function OrderChat({ orderId, vendorName, clientName, compact = f
             placeholder={`Écrire à ${otherName}...`}
             className="flex-1 bg-transparent text-sm font-medium outline-none placeholder:text-gray-300 placeholder:font-normal"
           />
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            ref={fileInputRef}
+            onChange={handleImageUpload}
+          />
+          <motion.button
+            whileTap={{ scale: 0.85 }}
+            onClick={() => fileInputRef.current?.click()}
+            disabled={sending}
+            className="w-9 h-9 rounded-xl bg-gray-200 text-gray-600 flex items-center justify-center hover:bg-gray-300 transition-colors disabled:opacity-30 flex-shrink-0"
+          >
+            <ImageIcon size={15} />
+          </motion.button>
           <motion.button
             whileTap={{ scale: 0.85 }}
             onClick={sendMessage}

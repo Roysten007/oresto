@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { db } from "@/lib/firebase";
-import { ref, onValue, get, query, orderByChild, equalTo, update } from "firebase/database";
+import { ref, onValue, get, query, orderByChild, equalTo, update, push, set } from "firebase/database";
 import { 
   ShoppingCart, 
   Clock, 
@@ -32,8 +32,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { VendorProfile, Product, Review } from "@/data/mockData";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
-import { useCart } from "@/contexts/CartContext";
 import { Link } from "react-router-dom";
+import OrderChat from "@/components/OrderChat";
 
 export default function RestaurantPublic() {
   const { slug } = useParams();
@@ -46,8 +46,17 @@ export default function RestaurantPublic() {
   const [orderComplete, setOrderComplete] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
 
+  const [cart, setCart] = useState<{product: Product, qty: number}[]>([]);
+  const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+  const totalPrice = cart.reduce((sum, item) => sum + (item.product.price * item.qty), 0);
+
+  const [showOrderForm, setShowOrderForm] = useState(false);
+  const [showOrderChat, setShowOrderChat] = useState(false);
+  const [currentOrderId, setCurrentOrderId] = useState<string | null>(null);
+  const [orderForm, setOrderForm] = useState({ name: "", phone: "", notes: "" });
+  const [placingOrder, setPlacingOrder] = useState(false);
+
   const { user } = useAuth();
-  const { addToCart: addToGlobalCart, totalItems, totalPrice } = useCart();
 
   const [isOwner, setIsOwner] = useState(false);
 
@@ -184,10 +193,17 @@ export default function RestaurantPublic() {
 
   const handleAddToCart = (product: Product) => {
     if (isRestricted) {
-      toast.warning("Les commandes et réservations sont temporairement indisponibles pour cet établissement.");
+      toast.warning("Les commandes sont temporairement indisponibles.");
       return;
     }
-    addToGlobalCart(product);
+    setCart(prev => {
+      const existing = prev.find(item => item.product.id === product.id);
+      if (existing) {
+        return prev.map(item => item.product.id === product.id ? {...item, qty: item.qty + 1} : item);
+      }
+      return [...prev, { product, qty: 1 }];
+    });
+    toast.success(`${product.name} ajouté au panier`);
   };
 
   const handleShare = async () => {
@@ -268,7 +284,7 @@ export default function RestaurantPublic() {
         </div>
         <h1 className="text-3xl font-black uppercase tracking-tighter mb-4">Restaurant introuvable</h1>
         <p className="text-gray-500 max-w-xs mx-auto mb-8 font-medium">Ce restaurant n'existe pas ou le lien est incorrect.</p>
-        <button onClick={() => navigate('/app')} className="px-8 py-4 bg-black text-white rounded-2xl font-black text-xs uppercase tracking-widest">Retour à l'accueil</button>
+        <button onClick={() => navigate('/')} className="px-8 py-4 bg-black text-white rounded-2xl font-black text-xs uppercase tracking-widest">Retour à l'accueil</button>
       </div>
     );
   }
@@ -338,6 +354,18 @@ export default function RestaurantPublic() {
             Retour au constructeur
           </button>
         </div>
+      </div>
+    );
+  }
+
+  if (isRestricted && !isOwner && !loading) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-10 text-center">
+        <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center text-gray-300 mb-6">
+          <Store size={40} />
+        </div>
+        <h1 className="text-3xl font-black uppercase tracking-tighter mb-4">Site temporairement indisponible</h1>
+        <p className="text-gray-500 max-w-xs mx-auto font-medium">Ce restaurant n'est pas disponible pour le moment. Veuillez réessayer plus tard.</p>
       </div>
     );
   }
@@ -630,8 +658,8 @@ export default function RestaurantPublic() {
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className="fixed bottom-6 left-4 right-4 z-[60] flex justify-center"
           >
-            <Link 
-              to="/app/cart" 
+            <button
+              onClick={() => setShowOrderForm(true)}
               className="w-full max-w-md px-6 py-4 bg-black text-white rounded-[32px] shadow-2xl shadow-black/40 flex items-center justify-between gap-4 hover:bg-primary active:scale-95 transition-all border border-white/10 backdrop-blur-md"
             >
               <div className="flex items-center gap-4">
@@ -642,16 +670,154 @@ export default function RestaurantPublic() {
                   </span>
                 </div>
                 <div className="flex flex-col leading-none gap-0.5">
-                  <span className="font-black text-[10px] uppercase tracking-widest opacity-60">Voir mon panier</span>
+                  <span className="font-black text-[10px] uppercase tracking-widest opacity-60">Lancer ma commande</span>
                   <span className="font-black text-lg">{totalPrice.toLocaleString()} F</span>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-black uppercase tracking-widest opacity-60 hidden sm:block">Commander</span>
-                <ChevronRight size={20} className="text-primary" />
-              </div>
-            </Link>
+              <ChevronRight size={20} className="text-primary" />
+            </button>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Order Form Modal */}
+      <AnimatePresence>
+        {showOrderForm && (
+          <>
+            <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} onClick={() => setShowOrderForm(false)} className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[70]" />
+            <motion.div initial={{y:"100%"}} animate={{y:0}} exit={{y:"100%"}} transition={{type:"spring",stiffness:300,damping:32}} className="fixed bottom-0 left-0 right-0 z-[71] bg-white rounded-t-[40px] shadow-2xl max-h-[85vh] overflow-y-auto">
+              <div className="p-6 space-y-6">
+                <div className="w-12 h-1.5 rounded-full bg-gray-200 mx-auto" />
+                <h2 className="text-2xl font-black uppercase tracking-tighter text-center">Finaliser ma <span className="text-primary">commande</span></h2>
+                
+                {/* Cart summary */}
+                <div className="space-y-3 p-4 rounded-3xl bg-gray-50 border border-gray-100">
+                  {cart.map(item => (
+                    <div key={item.product.id} className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 bg-white rounded-xl border border-gray-100 px-1">
+                          <button onClick={() => setCart(prev => prev.map(i => i.product.id === item.product.id ? {...i, qty: Math.max(1, i.qty - 1)} : i))} className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-black"><Minus size={14}/></button>
+                          <span className="text-sm font-black w-6 text-center">{item.qty}</span>
+                          <button onClick={() => setCart(prev => prev.map(i => i.product.id === item.product.id ? {...i, qty: i.qty + 1} : i))} className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-black"><Plus size={14}/></button>
+                        </div>
+                        <span className="text-sm font-bold truncate max-w-[150px]">{item.product.name}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-black text-sm text-primary">{(item.product.price * item.qty).toLocaleString()} F</span>
+                        <button onClick={() => setCart(prev => prev.filter(i => i.product.id !== item.product.id))} className="w-6 h-6 rounded-lg bg-red-50 text-red-400 flex items-center justify-center hover:bg-red-100"><X size={12}/></button>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="flex justify-between pt-3 border-t border-gray-200">
+                    <span className="font-black text-sm uppercase tracking-widest text-gray-500">Total</span>
+                    <span className="font-black text-lg text-primary">{totalPrice.toLocaleString()} F</span>
+                  </div>
+                </div>
+
+                {/* Customer info */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">Votre nom *</label>
+                    <input value={orderForm.name} onChange={e => setOrderForm(p => ({...p, name: e.target.value}))} placeholder="Votre nom complet" className="w-full px-5 py-4 rounded-2xl bg-gray-50 border border-gray-100 text-sm font-medium focus:outline-none focus:border-primary/30 focus:bg-white transition-all" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">Votre téléphone *</label>
+                    <input value={orderForm.phone} onChange={e => setOrderForm(p => ({...p, phone: e.target.value}))} placeholder="+229 XX XX XX XX" type="tel" className="w-full px-5 py-4 rounded-2xl bg-gray-50 border border-gray-100 text-sm font-medium focus:outline-none focus:border-primary/30 focus:bg-white transition-all" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">Notes (optionnel)</label>
+                    <textarea value={orderForm.notes} onChange={e => setOrderForm(p => ({...p, notes: e.target.value}))} placeholder="Instructions spéciales, allergies..." rows={2} className="w-full px-5 py-4 rounded-2xl bg-gray-50 border border-gray-100 text-sm font-medium focus:outline-none focus:border-primary/30 focus:bg-white transition-all resize-none" />
+                  </div>
+                </div>
+
+                {/* Submit */}
+                <button
+                  disabled={!orderForm.name.trim() || !orderForm.phone.trim() || placingOrder}
+                  onClick={async () => {
+                    if (!db || !vendor) return;
+                    setPlacingOrder(true);
+                    try {
+                      const ordersRef = ref(db, "orders");
+                      const newOrderRef = push(ordersRef);
+                      const orderId = newOrderRef.key!;
+                      const orderData = {
+                        id: orderId,
+                        vendorId: vendor.id,
+                        vendorName: vendor.name,
+                        clientId: `guest_${Date.now()}`,
+                        clientName: orderForm.name.trim(),
+                        clientPhone: orderForm.phone.trim(),
+                        items: cart.map(i => ({ name: i.product.name, qty: i.qty, price: i.product.price })),
+                        total: totalPrice,
+                        status: "awaiting_payment",
+                        notes: orderForm.notes.trim(),
+                        date: new Date().toISOString(),
+                      };
+                      await set(newOrderRef, orderData);
+
+                      // Create initial system message in chat
+                      const msgsRef = ref(db, `messages/${orderId}`);
+                      const systemMsgRef = push(msgsRef);
+                      await set(systemMsgRef, {
+                        senderId: "system",
+                        senderName: "Oresto",
+                        senderRole: "system",
+                        text: `🛒 Nouvelle commande de ${orderForm.name} — ${totalPrice.toLocaleString()} F CFA\n\n${cart.map(i => `${i.qty}× ${i.product.name}`).join("\n")}\n\n💬 Indiquez au client comment procéder au paiement.`,
+                        type: "system",
+                        timestamp: Date.now(),
+                      });
+
+                      // Update vendor stats
+                      const vendorOrdersRef = ref(db, `vendors/${vendor.id}/totalOrders`);
+                      const snapshot = await get(vendorOrdersRef);
+                      const currentTotal = snapshot.exists() ? snapshot.val() : 0;
+                      await set(vendorOrdersRef, currentTotal + 1);
+
+                      setCurrentOrderId(orderId);
+                      setShowOrderForm(false);
+                      setShowOrderChat(true);
+                      setCart([]);
+                      toast.success("Commande envoyée ! Discutez avec le restaurant.");
+                    } catch (err) {
+                      console.error(err);
+                      toast.error("Erreur lors de la commande");
+                    } finally {
+                      setPlacingOrder(false);
+                    }
+                  }}
+                  className="w-full py-5 rounded-[20px] bg-black text-white font-black text-xs uppercase tracking-widest disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary transition-all flex items-center justify-center gap-2"
+                >
+                  {placingOrder ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <><Check size={16} /> Envoyer ma commande</>}
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Order Chat Modal — shown after placing order */}
+      <AnimatePresence>
+        {showOrderChat && currentOrderId && (
+          <>
+            <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[70]" />
+            <motion.div initial={{y:"100%"}} animate={{y:0}} exit={{y:"100%"}} transition={{type:"spring",stiffness:300,damping:32}} className="fixed bottom-0 left-0 right-0 z-[71] bg-white rounded-t-[40px] shadow-2xl" style={{height: "85vh"}}>
+              <div className="flex flex-col h-full">
+                <div className="p-6 border-b border-gray-100">
+                  <div className="w-12 h-1.5 rounded-full bg-gray-200 mx-auto mb-4" />
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-xl font-black uppercase tracking-tighter">Commande <span className="text-primary">envoyée !</span></h2>
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Discutez avec {vendor?.name} pour le paiement</p>
+                    </div>
+                    <button onClick={() => { setShowOrderChat(false); setCurrentOrderId(null); }} className="w-10 h-10 rounded-2xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"><X size={18}/></button>
+                  </div>
+                </div>
+                <div className="flex-1 overflow-hidden p-4">
+                  <OrderChat orderId={currentOrderId} vendorName={vendor?.name} clientName={orderForm.name || "Client"} />
+                </div>
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </div>

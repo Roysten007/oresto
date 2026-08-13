@@ -280,26 +280,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [failedAttempts, lockedUntil]);
 
   const loginAsGuest = useCallback(async () => {
-    if (!auth) return { success: false, error: "Auth non initialisé" };
-    try {
-      const cred = await signInAnonymously(auth);
-      if (db) {
-        // Enregistrer le profil invité en base
-        await set(child(ref(db), `users/${cred.user.uid}`), {
-          id: cred.user.uid,
-          role: "client",
-          name: "Invité",
-          firstName: "Client",
-          email: "invite@oresto.app",
-          isGuest: true,
-          created_at: new Date().toISOString()
-        });
-      }
-      return { success: true };
-    } catch (error: any) {
-      console.error("Erreur connexion invité:", error);
-      return { success: false, error: "Impossible de continuer sans compte." };
-    }
+    return { success: false, error: "La connexion invité n'est plus disponible." };
   }, []);
 
   const logout = useCallback(async () => {
@@ -325,7 +306,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       // 2. Préparer les données
-      let vendorId = data.vendorId || (data.role === "vendor" ? `v_${uid}` : null);
+      let vendorId = data.vendorId || `v_${uid}`;
       
       const newUser: User = {
         id: uid,
@@ -333,7 +314,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         firstName: data.firstName || "",
         email: data.email || "",
         password: "", 
-        role: data.role || "client",
+        role: "vendor",
         phone: data.phone || "",
         verificationMethod: data.verificationMethod || "email",
         phoneVerified: false,
@@ -349,8 +330,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       let createdVendorProfile: VendorProfile | null = null;
 
-      // 4. Si c'est un vendeur, on crée aussi un profil vendeur
-      if (data.role === "vendor" && vendorId) {
+      // 4. On crée le profil vendeur
+      if (vendorId) {
         const { trialStartedAt, trialEndsAt } = calculateTrialDates();
         const selectedPlan = data.subscriptionPlan === "pro" ? "pro" : "starter";
 
@@ -388,7 +369,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       await update(ref(db), dbUpdates);
 
-      if (data.role === "vendor" && vendorId && createdVendorProfile) {
+      if (vendorId && createdVendorProfile) {
         // Envoyer la notification de bienvenue essai gratuit
         try {
           await dispatchVendorNotification(db, vendorId, "welcome_trial", {

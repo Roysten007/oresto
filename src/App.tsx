@@ -5,37 +5,15 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AdminProvider } from "@/contexts/AdminContext";
-import { ClientProvider } from "@/contexts/ClientContext";
-import { CartProvider } from "@/contexts/CartContext";
-import { OrderProvider } from "@/contexts/OrderContext";
 import PrivateRoute from "@/components/PrivateRoute";
 import AdminRoute from "@/components/AdminRoute";
-import AIChatBot from "@/components/AIChatBot";
 
-import ProfileSelection from "./pages/ProfileSelection";
-import ClientLanding from "./pages/ClientLanding";
 import ProLanding from "./pages/ProLanding";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import Unauthorized from "./pages/Unauthorized";
 import NotFound from "./pages/NotFound";
-
-import ClientLayout from "./layouts/ClientLayout";
-import ClientHome from "./pages/app/ClientHome";
-import ShopDetail from "./pages/app/ShopDetail";
-import Cart from "./pages/app/Cart";
-import OrderTracking from "./pages/app/OrderTracking";
-import RateOrder from "./pages/app/RateOrder";
-import OrdersList from "./pages/app/OrdersList";
-import Favorites from "./pages/app/Favorites";
-import Profile from "./pages/app/Profile";
-import Notifications from "./pages/app/Notifications";
-import Messages from "./pages/app/Messages";
-import Addresses from "./pages/app/Addresses";
-import Payments from "./pages/app/Payments";
-import HelpCenter from "./pages/app/HelpCenter";
-import Privacy from "./pages/app/Privacy";
 
 import VendorLayout from "./layouts/VendorLayout";
 import VendorDashboard from "./pages/vendor/VendorDashboard";
@@ -59,7 +37,6 @@ import AdminCategories from "./pages/admin/AdminCategories";
 import AdminNotifications from "./pages/admin/AdminNotifications";
 import AdminSettings from "./pages/admin/AdminSettings";
 
-import Decouvrir from "./pages/app/Decouvrir";
 import RestaurantPublic from "./pages/app/RestaurantPublic";
 
 const queryClient = new QueryClient();
@@ -70,77 +47,51 @@ const App = () => (
       <Toaster />
       <Sonner />
       <AuthProvider>
-        <OrderProvider>
-          <AdminProvider>
-            <ClientProvider>
-              <CartProvider>
-                <BrowserRouter>
-                  <AIChatBot />
-                  <Routes>
-                    <Route path="/" element={<ProfileSelection />} />
-                    <Route path="/decouvrir" element={<ClientLanding />} />
-                    <Route path="/pro" element={<ProLanding />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/register" element={<Register />} />
-                    <Route path="/forgot-password" element={<ForgotPassword />} />
-                    <Route path="/unauthorized" element={<Unauthorized />} />
+        <AdminProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<ProLanding />} />
+              <Route path="/pro" element={<Navigate to="/" replace />} />
+              <Route path="/decouvrir" element={<Navigate to="/" replace />} />
+              
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/unauthorized" element={<Unauthorized />} />
 
-                    {/* Public Restaurant Site */}
-                    <Route path="/r/:slug" element={<RestaurantPublic />} />
+              {/* Public Restaurant Site */}
+              <Route path="/r/:slug" element={<RestaurantPublic />} />
 
-                    {/* Client routes */}
-                    <Route path="/app" element={<PrivateRoute><ClientLayout /></PrivateRoute>}>
-                      <Route path="home" element={<ClientHome />} />
-                      <Route path="decouvrir" element={<Decouvrir />} />
-                      <Route path="search" element={<Navigate to="/app/decouvrir" replace />} />
-                      <Route path="shop/:id" element={<ShopDetail />} />
-                      <Route path="cart" element={<Cart />} />
-                      <Route path="order/:id" element={<OrderTracking />} />
-                      <Route path="rate/:orderId" element={<RateOrder />} />
-                      <Route path="orders" element={<OrdersList />} />
-                      <Route path="favorites" element={<Favorites />} />
-                      <Route path="profile" element={<Profile />} />
-                      <Route path="notifications" element={<Notifications />} />
-                      <Route path="messages" element={<Messages />} />
-                      <Route path="addresses" element={<Addresses />} />
-                      <Route path="payments" element={<Payments />} />
-                      <Route path="help" element={<HelpCenter />} />
-                      <Route path="privacy" element={<Privacy />} />
-                    </Route>
+              {/* Vendor routes */}
+              <Route path="/vendor" element={<PrivateRoute requiredRole="vendor"><VendorLayout /></PrivateRoute>}>
+                <Route path="dashboard" element={<VendorDashboard />} />
+                <Route path="site" element={<VendorSiteBuilder />} />
+                <Route path="catalogue" element={<VendorCatalogue />} />
+                <Route path="orders" element={<VendorOrders />} />
+                <Route path="delivery" element={<VendorDelivery />} />
+                <Route path="stats" element={<VendorStats />} />
+                <Route path="subscription" element={<VendorSubscription />} />
+                <Route path="settings" element={<VendorSettings />} />
+              </Route>
 
-                    {/* Vendor routes */}
-                    <Route path="/vendor" element={<PrivateRoute requiredRole="vendor"><VendorLayout /></PrivateRoute>}>
-                      <Route path="dashboard" element={<VendorDashboard />} />
-                      <Route path="site" element={<VendorSiteBuilder />} />
-                      <Route path="catalogue" element={<VendorCatalogue />} />
-                      <Route path="orders" element={<VendorOrders />} />
-                      <Route path="delivery" element={<VendorDelivery />} />
-                      <Route path="stats" element={<VendorStats />} />
-                      <Route path="subscription" element={<VendorSubscription />} />
-                      <Route path="settings" element={<VendorSettings />} />
-                    </Route>
+              {/* Admin routes */}
+              <Route path="/oresto-admin/login" element={<AdminLogin />} />
+              <Route path="/oresto-admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+                <Route path="dashboard" element={<AdminDashboard />} />
+                <Route path="vendors" element={<AdminVendors />} />
+                <Route path="clients" element={<AdminClients />} />
+                <Route path="subscriptions" element={<AdminSubscriptions />} />
+                <Route path="revenues" element={<AdminRevenues />} />
+                <Route path="orders" element={<AdminOrders />} />
+                <Route path="categories" element={<AdminCategories />} />
+                <Route path="notifications" element={<AdminNotifications />} />
+                <Route path="settings" element={<AdminSettings />} />
+              </Route>
 
-                    {/* Admin routes */}
-                    <Route path="/oresto-admin/login" element={<AdminLogin />} />
-                    <Route path="/oresto-admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
-                      <Route path="dashboard" element={<AdminDashboard />} />
-                      <Route path="vendors" element={<AdminVendors />} />
-                      <Route path="clients" element={<AdminClients />} />
-                      <Route path="subscriptions" element={<AdminSubscriptions />} />
-                      <Route path="revenues" element={<AdminRevenues />} />
-                      <Route path="orders" element={<AdminOrders />} />
-                      <Route path="categories" element={<AdminCategories />} />
-                      <Route path="notifications" element={<AdminNotifications />} />
-                      <Route path="settings" element={<AdminSettings />} />
-                    </Route>
-
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </BrowserRouter>
-              </CartProvider>
-            </ClientProvider>
-          </AdminProvider>
-        </OrderProvider>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </AdminProvider>
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>

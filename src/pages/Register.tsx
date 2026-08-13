@@ -1,39 +1,25 @@
-import { useState, useEffect } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Eye, EyeOff, User, Store, ArrowRight, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { Eye, EyeOff, ArrowRight, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Register() {
   const { register } = useAuth();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-
-  const roleParam = searchParams.get("role");
-  const initialRole: "client" | "vendor" = roleParam === "client" ? "client" : "vendor";
 
   const [step, setStep] = useState(1);
-  const [role, setRole] = useState<"client" | "vendor">(initialRole);
   const [form, setForm] = useState({ firstName: "", name: "", phone: "", email: "", password: "", confirmPassword: "" });
   const [vendorForm, setVendorForm] = useState({ shopName: "", category: "Restaurants", city: "", neighborhood: "", shopPhone: "", subscriptionPlan: "pro" as "starter" | "pro" });
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (roleParam === "client") setRole("client");
-    else if (roleParam === "vendor") setRole("vendor");
-  }, [roleParam]);
-
-  const totalSteps = role === "vendor" ? 3 : 2;
+  const totalSteps = 2;
 
   const handleNext = async () => {
     setError("");
-    if (step === 1) { 
-      setStep(2); 
-      return; 
-    }
-    if (step === 2) {
+    if (step === 1) {
       if (!form.firstName || !form.name || !form.email || !form.password) { 
         setError("Veuillez remplir tous les champs obligatoires."); 
         return; 
@@ -48,24 +34,11 @@ export default function Register() {
         return;
       }
 
-      if (role === "vendor") { 
-        setStep(3); 
-        return; 
-      }
-      
-      setLoading(true);
-      const result = await register({ ...form, role });
-      if (result.success) {
-        toast.success("Compte créé avec succès ! Bienvenue 🚀", { duration: 4000 });
-        navigate("/app/home", { replace: true });
-      } else { 
-        setError(result.error || "Erreur lors de la création de compte"); 
-        setLoading(false); 
-      }
-      return;
+      setStep(2); 
+      return; 
     }
 
-    if (step === 3 && role === "vendor") {
+    if (step === 2) {
       if (!vendorForm.shopName || !vendorForm.city) { 
         setError("Veuillez renseigner au moins le nom et la ville de votre restaurant."); 
         return; 
@@ -74,15 +47,15 @@ export default function Register() {
       const result = await register({ 
         ...form, 
         ...vendorForm, 
-        role, 
+        role: "vendor", 
         category: "Restaurants", 
         vendorId: `v${Date.now()}` 
       });
       if (result.success) {
-        toast.success("Boutique créée avec succès ! Bienvenue 🚀", { duration: 4000 });
+        toast.success("Votre établissement a été créé avec succès ! Bienvenue 🚀", { duration: 4000 });
         navigate("/vendor/dashboard", { replace: true });
       } else {
-        setError(result.error || "Erreur lors de la création de boutique");
+        setError(result.error || "Erreur lors de la création de la boutique");
         setLoading(false);
       }
     }
@@ -105,18 +78,18 @@ export default function Register() {
 
         <div className="relative z-10">
           <h1 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800 }} className="text-3xl lg:text-5xl text-white leading-tight mb-6">
-            L'aventure<br />commence ici.
+            Votre empire<br />commence ici.
           </h1>
           <p className="text-[#888] text-lg leading-relaxed">
-            Rejoignez la plus grande communauté de commerce local en Afrique de l'Ouest.
+            Rejoignez la plateforme qui révolutionne la restauration et l'hôtellerie en Afrique de l'Ouest.
           </p>
         </div>
 
         <div className="relative z-10 space-y-6">
           {[
-            { t: "Rapide", d: "Créez votre profil en 2 min" },
-            { t: "Gratuit", d: "Sans frais d'inscription" },
-            { t: "Sécurisé", d: "Paiements MoMo garantis" }
+            { t: "Rapide", d: "Créez votre site en 12 min" },
+            { t: "Complet", d: "Dashboard, Site & Chat inclus" },
+            { t: "Gratuit", d: "Sans frais d'inscription" }
           ].map((item, i) => (
             <div key={i} className="flex items-center gap-4">
               <CheckCircle2 size={24} className="text-[#FF6B00]" />
@@ -156,63 +129,14 @@ export default function Register() {
 
           <div className="mb-10 text-center lg:text-left">
             <h2 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800 }} className="text-3xl text-[#0A0A0A] mb-2">
-              {step === 1 ? "Quel est votre profil ?" : step === 2 ? "Vos informations" : "Votre restaurant"}
+              {step === 1 ? "Vos informations" : "Votre établissement"}
             </h2>
             <p className="text-[#777]">Étape {step} sur {totalSteps}</p>
           </div>
 
           <div className="space-y-8">
-            {/* Étape 1 : Choix de Profil (Client vs Vendeur) */}
+            {/* Étape 1 : Informations personnelles */}
             {step === 1 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <button 
-                  type="button"
-                  onClick={() => { setRole("client"); setStep(2); }}
-                  className={`group p-8 rounded-3xl border-2 text-center transition-all ${
-                    role === "client" 
-                      ? "bg-[#0A0A0A] border-[#0A0A0A]" 
-                      : "border-[#EEEEEE] hover:border-[#FF6B00] hover:bg-[#FFF3E8]"
-                  }`}
-                >
-                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 mx-auto transition-colors ${
-                    role === "client" ? "bg-white/10" : "bg-[#F8F8F8] group-hover:bg-[#FF6B00]"
-                  }`}>
-                    <User size={32} className={role === "client" ? "text-[#FF6B00]" : "text-[#0A0A0A] group-hover:text-white"} />
-                  </div>
-                  <h3 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 700 }} className={`text-lg ${role === "client" ? "text-white" : "text-[#0A0A0A]"}`}>
-                    Client
-                  </h3>
-                  <p className={`text-xs mt-2 ${role === "client" ? "text-[#888]" : "text-[#777]"}`}>
-                    Commander et se faire livrer
-                  </p>
-                </button>
-
-                <button 
-                  type="button"
-                  onClick={() => { setRole("vendor"); setStep(2); }}
-                  className={`group p-8 rounded-3xl text-center border-2 transition-all ${
-                    role === "vendor" 
-                      ? "bg-[#0A0A0A] border-[#0A0A0A] hover:bg-[#151515]" 
-                      : "border-[#EEEEEE] hover:border-[#FF6B00] hover:bg-[#FFF3E8]"
-                  }`}
-                >
-                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 mx-auto transition-colors ${
-                    role === "vendor" ? "bg-white/10" : "bg-[#F8F8F8] group-hover:bg-[#FF6B00]"
-                  }`}>
-                    <Store size={32} className={role === "vendor" ? "text-[#FF6B00]" : "text-[#0A0A0A] group-hover:text-white"} />
-                  </div>
-                  <h3 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 700 }} className={`text-lg ${role === "vendor" ? "text-white" : "text-[#0A0A0A]"}`}>
-                    Vendeur
-                  </h3>
-                  <p className={`text-xs mt-2 ${role === "vendor" ? "text-[#888]" : "text-[#777]"}`}>
-                    Vendre vos plats et gérer votre restaurant
-                  </p>
-                </button>
-              </div>
-            )}
-
-            {/* Étape 2 : Informations personnelles */}
-            {step === 2 && (
               <div className="space-y-5 animate-in slide-in-from-right-10 duration-500">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -238,7 +162,7 @@ export default function Register() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Email</label>
+                  <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Email pro</label>
                   <input 
                     type="email" value={form.email} onChange={e => updateForm("email", e.target.value)} required
                     className="w-full px-5 py-4 rounded-2xl border border-[#EEEEEE] bg-white text-[#0A0A0A] focus:border-[#FF6B00] focus:ring-1 focus:ring-[#FF6B00] outline-none"
@@ -266,11 +190,11 @@ export default function Register() {
               </div>
             )}
 
-            {/* Étape 3 : Informations Vendeur */}
-            {step === 3 && role === "vendor" && (
+            {/* Étape 2 : Informations Vendeur */}
+            {step === 2 && (
               <div className="space-y-5 animate-in slide-in-from-right-10 duration-500">
                 <div>
-                  <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Nom du restaurant</label>
+                  <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Nom de l'établissement</label>
                   <input 
                     value={vendorForm.shopName} onChange={e => setVendorForm(p => ({ ...p, shopName: e.target.value }))}
                     placeholder="Ex: Le Béninois, Chez Maman..."
@@ -282,7 +206,7 @@ export default function Register() {
                   <div className="w-full px-5 py-4 rounded-2xl border border-[#EEEEEE] bg-[#FAFAFA] flex items-center gap-3">
                     <span className="text-xl">🍽️</span>
                     <span className="font-bold text-[#0A0A0A]">Restaurants</span>
-                    <span className="ml-auto text-[9px] font-black uppercase tracking-widest text-[#FF6B00] bg-[#FFF3E8] px-2 py-1 rounded-full">Catégorie unique</span>
+                    <span className="ml-auto text-[9px] font-black uppercase tracking-widest text-[#FF6B00] bg-[#FFF3E8] px-2 py-1 rounded-full">Catégorie par défaut</span>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -304,7 +228,7 @@ export default function Register() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Téléphone du restaurant</label>
+                  <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Téléphone de la réception</label>
                   <input 
                     value={vendorForm.shopPhone} onChange={e => setVendorForm(p => ({ ...p, shopPhone: e.target.value }))}
                     placeholder="+229 97 00 00 00"
@@ -314,7 +238,7 @@ export default function Register() {
 
                 {/* Formule d'abonnement */}
                 <div>
-                  <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Formule d'abonnement (Gratuit jusqu'à la fin de l'essai)</label>
+                  <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Abonnement (Essai gratuit actif)</label>
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
@@ -323,7 +247,7 @@ export default function Register() {
                     >
                       <span className="font-bold text-xs block text-[#0A0A0A]">Starter</span>
                       <span className="font-black text-sm text-[#FF6B00] block">3 000 F/mois</span>
-                      <span className="text-[10px] text-[#777] block mt-1">2% comm • Site Factory</span>
+                      <span className="text-[10px] text-[#777] block mt-1">2% comm • Site inclus</span>
                     </button>
                     <button
                       type="button"
@@ -356,13 +280,13 @@ export default function Register() {
                 disabled={loading}
                 className="flex-1 py-5 rounded-full bg-[#0A0A0A] text-white font-bold flex items-center justify-center gap-2 hover:bg-[#FF6B00] transition-all transform active:scale-95 disabled:opacity-50"
               >
-                {loading ? "Création..." : (step === totalSteps ? (role === "vendor" ? "Créer ma boutique Vendeur" : "Créer mon compte Client") : "Suivant")} <ArrowRight size={18} />
+                {loading ? "Création..." : (step === totalSteps ? "Lancer mon établissement" : "Suivant")} <ArrowRight size={18} />
               </button>
             </div>
           </div>
 
           <p className="mt-12 text-center text-[#777] font-medium">
-            Déjà un compte ? <Link to="/login" className="text-[#FF6B00] font-bold hover:underline">Se connecter</Link>
+            Déjà partenaire ? <Link to="/login" className="text-[#FF6B00] font-bold hover:underline">Se connecter</Link>
           </p>
         </div>
       </div>

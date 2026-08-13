@@ -104,57 +104,6 @@ export interface VendorProfile {
   cuisine_tags?: string[];
 }
 
-export interface UserPreferences {
-  id: string;
-  user_id: string;
-  location_lat?: number;
-  location_lng?: number;
-  city?: string;
-  notifications_enabled: boolean;
-  notification_types: {
-    orders: boolean;
-    promos: boolean;
-    news: boolean;
-    loyalty: boolean;
-  };
-  language: "fr" | "en";
-  addresses: {
-    id: string;
-    label: string; // Domicile, Bureau...
-    address: string;
-    lat: number;
-    lng: number;
-  }[];
-  created_at: string;
-}
-
-export interface Favorite {
-  id: string;
-  user_id: string;
-  restaurant_id: string;
-  created_at: string;
-}
-
-export interface ClientNotification {
-  id: string;
-  user_id: string;
-  type: 'order' | 'promo' | 'discovery' | 'loyalty';
-  title: string;
-  body: string;
-  data?: any;
-  is_read: boolean;
-  created_at: string;
-}
-
-export interface LoyaltyPoints {
-  id: string;
-  user_id: string;
-  restaurant_id: string;
-  order_id: string;
-  points_earned: number;
-  points_balance: number;
-  created_at: string;
-}
 
 export interface Product {
   id: string;
@@ -176,7 +125,7 @@ export interface Order {
   items: { name: string; qty: number; price: number }[];
   total: number;
   deliveryFee: number;
-  status: "pending" | "preparing" | "delivering" | "delivered" | "cancelled";
+  status: "pending" | "awaiting_payment" | "preparing" | "delivering" | "delivered" | "cancelled";
   paymentMethod: string;
   address: string;
   date: string;
@@ -209,7 +158,7 @@ export interface SiteOrder {
   total: number;
   payment_method: string;
   ordering_mode: string;
-  status: 'pending' | 'preparing' | 'ready' | 'delivered' | 'cancelled';
+  status: 'pending' | 'awaiting_payment' | 'preparing' | 'ready' | 'delivered' | 'cancelled';
   notes?: string;
   created_at: string;
 }

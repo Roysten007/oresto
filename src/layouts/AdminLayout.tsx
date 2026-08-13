@@ -17,6 +17,7 @@ import {
   Zap,
   Globe
 } from "lucide-react";
+import AIChatBot from "@/components/AIChatBot";
 
 const navItems = [
   { path: "/oresto-admin/dashboard", icon: LayoutDashboard, label: "Vue générale" },
@@ -113,6 +114,7 @@ export default function AdminLayout() {
           <Outlet />
         </main>
       </div>
+      <AIChatBot />
     </div>
   );
 }

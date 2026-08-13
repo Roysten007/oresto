@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { LayoutDashboard, UtensilsCrossed, ShoppingCart, Truck, BarChart3, CreditCard, Settings, Eye, LogOut, Menu, X, Globe } from "lucide-react";
+import { LayoutDashboard, UtensilsCrossed, ShoppingCart, Truck, BarChart3, CreditCard, Settings, Eye, LogOut, Menu, X, Globe, MessageCircle } from "lucide-react";
+import AIChatBot from "@/components/AIChatBot";
 
 const navItems = [
   { path: "/vendor/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { path: "/vendor/site", icon: Globe, label: "Mon Site" },
   { path: "/vendor/catalogue", icon: UtensilsCrossed, label: "Mon Menu" },
   { path: "/vendor/orders", icon: ShoppingCart, label: "Commandes" },
+  { path: "/vendor/orders", icon: MessageCircle, label: "Conversations" },
   { path: "/vendor/delivery", icon: Truck, label: "Livraison" },
   { path: "/vendor/stats", icon: BarChart3, label: "Statistiques" },
   { path: "/vendor/subscription", icon: CreditCard, label: "Abonnement" },
@@ -82,6 +84,7 @@ export default function VendorLayout() {
           </div>
         </div>
       )}
+      <AIChatBot />
     </div>
   );
 }
