@@ -71,26 +71,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const userRef = ref(db, `users/${firebaseUser.uid}`);
         unsubUser = onValue(userRef, async (userSnap) => {
           if (!userSnap.exists()) {
-            console.log("User profile missing in DB, waiting...");
-            // If it's a fresh registration, the profile might be created in a few ms.
-            // We give it a short window before giving up.
-            setTimeout(() => {
-              if (state.isLoading) {
-                 setState(s => ({ ...s, isLoading: false, isAuthenticated: false }));
-              }
-            }, 2000);
+            console.log("User profile missing in DB, creating default vendor profile...");
+            const defaultVendorId = `v_${firebaseUser.uid}`;
+            const newUser: User = {
+              id: firebaseUser.uid,
+              name: firebaseUser.email?.split("@")[0] || "Restaurateur",
+              email: firebaseUser.email || "",
+              role: "vendor",
+              vendorId: defaultVendorId,
+              created_at: new Date().toISOString()
+            };
+            try {
+              await set(ref(db, `users/${firebaseUser.uid}`), newUser);
+            } catch (e) {
+              console.error("Error creating default user profile:", e);
+            }
+            setState({
+              user: newUser,
+              role: "vendor",
+              vendorProfile: null,
+              isAuthenticated: true,
+              isLoading: false
+            });
             return;
           }
 
           const userData = userSnap.val() as User;
+          const effectiveRole = userData.role === "admin" ? "admin" : "vendor";
+          const effectiveVendorId = userData.vendorId || `v_${firebaseUser.uid}`;
           
-          if (userData.vendorId) {
+          if (effectiveVendorId) {
             if (unsubVendor) unsubVendor();
-            unsubVendor = onValue(ref(db, `vendors/${userData.vendorId}`), (vendorSnap) => {
+            unsubVendor = onValue(ref(db, `vendors/${effectiveVendorId}`), (vendorSnap) => {
               const vendorData = vendorSnap.exists() ? vendorSnap.val() as VendorProfile : null;
               setState({
-                user: userData,
-                role: userData.role as any,
+                user: { ...userData, role: effectiveRole as any, vendorId: effectiveVendorId },
+                role: effectiveRole as any,
                 vendorProfile: vendorData,
                 isAuthenticated: true,
                 isLoading: false
@@ -98,8 +114,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             });
           } else {
             setState({
-              user: userData,
-              role: userData.role as any,
+              user: { ...userData, role: effectiveRole as any },
+              role: effectiveRole as any,
               vendorProfile: null,
               isAuthenticated: true,
               isLoading: false
@@ -162,42 +178,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     if (isDemoAccount) {
       console.log("Demo login triggered for:", cleanEmail);
+      const mockVendorId = "v_mock_" + cleanEmail.split("@")[0];
       const mockUser: User = {
         id: "mock_" + cleanEmail.split("@")[0],
         name: cleanEmail === "kofi@test.com" ? "Kofi Test" : "Aminat Test",
         firstName: cleanEmail === "kofi@test.com" ? "Kofi" : "Aminat",
         email: cleanEmail,
         password: "",
-        role: cleanEmail === "kofi@test.com" ? "vendor" : "client",
+        role: "vendor",
         phone: "+229 00000000",
         city: "Cotonou",
         neighborhood: "Cadjèhoun",
-        vendorId: cleanEmail === "kofi@test.com" ? "v_mock_kofi" : undefined
+        vendorId: mockVendorId
       };
       
-      let mockVendor: VendorProfile | null = null;
-      if (mockUser.vendorId) {
-        mockVendor = {
-          id: mockUser.vendorId,
-          userId: mockUser.id,
-          name: "Kofi's Shop",
-          description: "Boutique de test",
-          category: "Restaurants",
-          status: "active",
-          joinedDate: "2024-01-01",
-          verified: true,
-          open: true
-        } as any;
-      }
+      const mockVendor: VendorProfile = {
+        id: mockVendorId,
+        userId: mockUser.id,
+        name: cleanEmail === "kofi@test.com" ? "Kofi's Restaurant" : "Aminat's Kitchen",
+        description: "Boutique de test Oresto B2B",
+        category: "Restaurants",
+        status: "active",
+        joinedDate: "2024-01-01",
+        plan: "pro",
+        subscriptionPlan: "pro",
+        subscriptionStatus: "trial",
+        verified: true,
+        open: true
+      } as any;
 
       setState({
         user: mockUser,
-        role: mockUser.role as any,
+        role: "vendor",
         vendorProfile: mockVendor,
         isAuthenticated: true,
         isLoading: false
       });
-      return { success: true, role: mockUser.role };
+      return { success: true, role: "vendor" };
     }
 
     if (!auth || !db) {
@@ -216,6 +233,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Fetch user data
       let userSnap = await get(child(ref(db), `users/${uid}`));
+      const defaultVendorId = `v_${uid}`;
       
       if (!userSnap.exists()) {
         console.warn("User profile missing in DB, creating...");
@@ -223,7 +241,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           id: uid,
           name: cleanEmail.split("@")[0],
           email: cleanEmail,
-          role: "client",
+          role: "vendor",
+          vendorId: defaultVendorId,
           created_at: new Date().toISOString()
         };
         try {
@@ -231,29 +250,61 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           userSnap = await get(child(ref(db), `users/${uid}`));
         } catch (dbErr) {
           console.error("Database write error during login:", dbErr);
-          // Still allow login but warn
         }
       }
 
-      const userData = userSnap.exists() ? userSnap.val() as User : { id: uid, email: cleanEmail, role: "client" } as User;
+      const rawUserData = userSnap.exists() ? userSnap.val() as User : { id: uid, email: cleanEmail, role: "vendor" } as User;
+      const role = rawUserData.role === "admin" ? "admin" : "vendor";
+      const vendorId = rawUserData.vendorId || defaultVendorId;
+      
+      const userData: User = {
+        ...rawUserData,
+        role: role as any,
+        vendorId: vendorId
+      };
+
       let vendorData: VendorProfile | null = null;
 
-      if (userData.vendorId) {
+      if (vendorId) {
         try {
-          const vendorSnap = await get(child(ref(db), `vendors/${userData.vendorId}`));
+          const vendorSnap = await get(child(ref(db), `vendors/${vendorId}`));
           if (vendorSnap.exists()) {
             vendorData = vendorSnap.val() as VendorProfile;
+          } else {
+            // Auto-create vendor profile if it doesn't exist yet
+            const { trialStartedAt, trialEndsAt } = calculateTrialDates();
+            vendorData = {
+              id: vendorId,
+              userId: uid,
+              name: userData.name || cleanEmail.split("@")[0],
+              description: "Mon Restaurant",
+              category: "Restaurants",
+              status: "active",
+              joinedDate: new Date().toISOString().split("T")[0],
+              plan: "pro",
+              subscriptionPlan: "pro",
+              subscriptionStatus: "trial",
+              trialStartedAt,
+              trialEndsAt,
+              nextBillingDate: trialEndsAt,
+              verified: true,
+              open: true,
+              deliveryTime: "30-45 min"
+            } as any;
+            try {
+              await set(ref(db, `vendors/${vendorId}`), vendorData);
+            } catch (e) {
+              console.error("Error creating vendor profile fallback:", e);
+            }
           }
         } catch (vErr) {
           console.error("Vendor fetch error:", vErr);
         }
       }
 
-      const role = userData.role;
-
       setState({
         user: userData,
-        role: role,
+        role: role as any,
         vendorProfile: vendorData,
         isAuthenticated: true,
         isLoading: false

@@ -52,8 +52,8 @@ export default function VendorLayout() {
             })}
           </nav>
           <div className="space-y-2 pt-4 border-t border-border">
-            <Link to={`/app/shop/${vendorProfile?.id || "v1"}`} className="flex items-center gap-2 px-3 py-2 text-muted-foreground hover:text-foreground font-sub text-sm">
-              <Eye size={16} /> Voir ma fiche
+            <Link to={`/r/${vendorProfile?.slug || vendorProfile?.id || "demo"}`} target="_blank" className="flex items-center gap-2 px-3 py-2 text-muted-foreground hover:text-foreground font-sub text-sm">
+              <Eye size={16} /> Voir mon site public
             </Link>
             <button onClick={() => { logout(); navigate("/login"); }} className="flex items-center gap-2 px-3 py-2 text-destructive font-sub text-sm w-full">
               <LogOut size={16} /> Déconnexion

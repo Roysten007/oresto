@@ -235,8 +235,10 @@ export default function ProLanding() {
             <FadeIn delay={0.1} className="h-full">
               <div className="bg-white rounded-[36px] border border-gray-200 p-8 sm:p-10 h-full flex flex-col justify-between shadow-sm hover:shadow-xl transition-all">
                 <div className="space-y-6">
-                  <div className="inline-block px-3 py-1 rounded-full bg-gray-100 text-[10px] font-black uppercase tracking-widest text-gray-600">
-                    Starter
+                  <div className="flex items-center justify-between h-7">
+                    <div className="px-3 py-1 rounded-full bg-gray-100 text-[10px] font-black uppercase tracking-widest text-gray-600">
+                      Starter
+                    </div>
                   </div>
                   <div>
                     <div className="flex items-baseline gap-1">
@@ -245,7 +247,7 @@ export default function ProLanding() {
                     </div>
                   </div>
 
-                  <div className="space-y-3 pt-4 border-t border-gray-100 text-sm font-bold">
+                  <div className="space-y-3 pt-4 border-t border-gray-100 text-sm font-bold min-h-[170px]">
                     {[
                       "Site basique",
                       "Dashboard de gestion",
@@ -269,14 +271,15 @@ export default function ProLanding() {
 
             {/* Pro */}
             <FadeIn delay={0.2} className="h-full">
-              <div className="bg-black text-white rounded-[36px] border-2 border-primary p-8 sm:p-10 h-full flex flex-col justify-between shadow-2xl relative overflow-hidden transform md:-translate-y-2">
-                <div className="absolute top-4 right-6 bg-primary text-white font-black text-[9px] uppercase tracking-widest px-3 py-1 rounded-full shadow-lg">
-                  ★ Recommandé
-                </div>
-
-                <div className="space-y-6 relative z-10">
-                  <div className="inline-block px-3 py-1 rounded-full bg-primary/20 text-primary text-[10px] font-black uppercase tracking-widest">
-                    Pro
+              <div className="bg-black text-white rounded-[36px] border-2 border-primary p-8 sm:p-10 h-full flex flex-col justify-between shadow-2xl transition-all">
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between h-7">
+                    <div className="px-3 py-1 rounded-full bg-primary/20 text-primary text-[10px] font-black uppercase tracking-widest">
+                      Pro
+                    </div>
+                    <div className="bg-primary text-white font-black text-[9px] uppercase tracking-widest px-3 py-1 rounded-full shadow-lg">
+                      ★ Recommandé
+                    </div>
                   </div>
                   <div>
                     <div className="flex items-baseline gap-1">
@@ -285,7 +288,7 @@ export default function ProLanding() {
                     </div>
                   </div>
 
-                  <div className="space-y-3 pt-4 border-t border-white/10 text-sm font-bold">
+                  <div className="space-y-3 pt-4 border-t border-white/10 text-sm font-bold min-h-[170px]">
                     {[
                       "Tout de l'offre Starter",
                       "Stats avancées",
@@ -300,7 +303,7 @@ export default function ProLanding() {
                   </div>
                 </div>
 
-                <div className="pt-8 mt-6 border-t border-white/10 relative z-10">
+                <div className="pt-8 mt-6 border-t border-white/10">
                   <Link to="/register?role=vendor" className="block w-full py-4 rounded-full bg-primary text-white text-center font-sub text-xs font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_10px_30px_rgba(234,88,12,0.4)]">
                     Démarrer gratuitement
                   </Link>

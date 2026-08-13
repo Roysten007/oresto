@@ -22,8 +22,8 @@ export default function Login() {
     
     const result = await login(email, password);
     if (result.success) {
-      if (result.role === "vendor") navigate("/vendor/dashboard");
-      else navigate("/app/home");
+      if (result.role === "admin") navigate("/oresto-admin/dashboard");
+      else navigate("/vendor/dashboard");
     } else {
       setError(result.error || "Erreur");
       setLoading(false);
@@ -46,18 +46,18 @@ export default function Login() {
             Ravis de vous<br />revoir parmi nous.
           </h1>
           <p className="text-[#AAAAAA] text-lg max-w-md leading-relaxed">
-            Connectez-vous pour accéder à vos boutiques préférées ou gérer votre commerce en quelques clics.
+            Connectez-vous à votre espace restaurateur pour gérer votre site, vos produits et vos commandes.
           </p>
         </div>
 
         <div className="relative z-10 grid grid-cols-2 gap-8 pt-10 border-t border-white/10 mt-10">
           <div>
             <p className="text-white font-bold text-xl mb-1">2 400+</p>
-            <p className="text-[#666] text-xs uppercase tracking-widest font-semibold">Boutiques</p>
+            <p className="text-[#666] text-xs uppercase tracking-widest font-semibold">Restaurants</p>
           </div>
           <div>
-            <p className="text-white font-bold text-xl mb-1">30 min</p>
-            <p className="text-[#666] text-xs uppercase tracking-widest font-semibold">Moyenne livraison</p>
+            <p className="text-white font-bold text-xl mb-1">12 min</p>
+            <p className="text-[#666] text-xs uppercase tracking-widest font-semibold">Création de site</p>
           </div>
         </div>
       </div>
@@ -71,8 +71,8 @@ export default function Login() {
         </div>
         <div className="w-full max-w-md">
           <div className="mb-10 text-center lg:text-left">
-            <h2 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800 }} className="text-3xl text-[#0A0A0A] mb-2">Connexion</h2>
-            <p className="text-[#777]">Entrez vos identifiants pour continuer</p>
+            <h2 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800 }} className="text-3xl text-[#0A0A0A] mb-2">Connexion Restaurateur</h2>
+            <p className="text-[#777]">Entrez vos identifiants pour accéder à votre espace</p>
           </div>
 
           {error && (
@@ -129,30 +129,8 @@ export default function Login() {
 
           <div className="mt-10 text-center space-y-4">
             <p className="text-[#777] font-medium">
-              Pas encore de compte ? <Link to="/register" className="text-[#FF6B00] font-bold hover:underline">Créer un compte</Link>
+              Pas encore de restaurant enregistré ? <Link to="/register" className="text-[#FF6B00] font-bold hover:underline">Créer mon site</Link>
             </p>
-            <div className="flex items-center justify-center gap-4">
-              <div className="flex-1 h-px bg-[#EEEEEE]" />
-              <span className="text-[#BBB] text-xs font-bold uppercase tracking-widest">OU</span>
-              <div className="flex-1 h-px bg-[#EEEEEE]" />
-            </div>
-            <button
-              type="button"
-              onClick={async () => {
-                if (loading) return;
-                setLoading(true);
-                const res = await loginAsGuest();
-                if (res.success) {
-                  navigate("/app/home");
-                } else {
-                  setError(res.error || "Erreur de connexion invité");
-                  setLoading(false);
-                }
-              }}
-              className="w-full py-4 rounded-2xl border-2 border-[#EEEEEE] text-[#0A0A0A] font-bold text-sm hover:border-[#0A0A0A] hover:bg-[#FAFAFA] transition-all flex items-center justify-center gap-2"
-            >
-              Continuer en tant qu'invité
-            </button>
           </div>
 
           {import.meta.env.DEV && (
@@ -160,11 +138,11 @@ export default function Login() {
               <p className="text-[10px] font-bold text-[#BBB] uppercase tracking-widest mb-4">Accès rapides (Démo · dev uniquement)</p>
               <div className="space-y-3">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="text-[#777]">Client: <b className="text-[#0A0A0A]">aminat@test.com</b></span>
+                  <span className="text-[#777]">Vendeur 1: <b className="text-[#0A0A0A]">kofi@test.com</b></span>
                   <span className="text-[#BBB]">password</span>
                 </div>
                 <div className="flex justify-between items-center text-xs">
-                  <span className="text-[#777]">Vendeur: <b className="text-[#0A0A0A]">kofi@test.com</b></span>
+                  <span className="text-[#777]">Vendeur 2: <b className="text-[#0A0A0A]">aminat@test.com</b></span>
                   <span className="text-[#BBB]">password</span>
                 </div>
               </div>
