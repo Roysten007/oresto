@@ -8,6 +8,7 @@ import { VendorProfile, Product } from "@/data/mockData";
 import StepIdentite from "./builder/StepIdentite";
 import StepCarte from "./builder/StepCarte";
 import StepEcommerceCatalogue from "./builder/StepEcommerceCatalogue";
+import StepEcommercePromos from "./builder/StepEcommercePromos";
 import StepMenus from "./builder/StepMenus";
 import StepVentes from "./builder/StepVentes";
 import StepDesign from "./builder/StepDesign";
@@ -67,9 +68,9 @@ export default function VendorSiteBuilder() {
     },
     { 
       id: 3, 
-      title: isEcommerce ? "Collections" : "Menus", 
-      icon: isEcommerce ? "fa-solid fa-layer-group" : "fa-solid fa-calendar-days", 
-      desc: isEcommerce ? "Rayons et collections en vedette." : "Programmez vos suggestions quotidiennes." 
+      title: isEcommerce ? "Promotions" : "Menus", 
+      icon: isEcommerce ? "fa-solid fa-bullhorn" : "fa-solid fa-calendar-days", 
+      desc: isEcommerce ? "Bandeau d'annonces, livraison offerte et codes promo." : "Programmez vos suggestions quotidiennes." 
     },
     { 
       id: 4, 
@@ -312,7 +313,9 @@ export default function VendorSiteBuilder() {
           ? <StepEcommerceCatalogue products={products} vendorId={vendorProfile?.id || "v_demo"} onSave={saveProduct} onDelete={deleteProduct} />
           : <StepCarte products={products} vendorId={vendorProfile?.id || "v_demo"} onSave={saveProduct} onDelete={deleteProduct} category={formData.category || vendorProfile?.category} />;
       case 3: 
-        return <StepMenus formData={formData} setFormData={setFormData} products={products} vendorId={vendorProfile?.id || "v_demo"} />;
+        return isEcommerce 
+          ? <StepEcommercePromos formData={formData} setFormData={setFormData} />
+          : <StepMenus formData={formData} setFormData={setFormData} products={products} vendorId={vendorProfile?.id || "v_demo"} />;
       case 4: 
         return <StepVentes formData={formData} setFormData={setFormData} />;
       case 5: 
