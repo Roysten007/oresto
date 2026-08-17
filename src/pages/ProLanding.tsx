@@ -212,21 +212,7 @@ export default function ProLanding() {
             </a>
           </FadeIn>
 
-          {/* Social Proof */}
-          <FadeIn delay={0.4} className="flex flex-wrap items-center justify-center gap-6 text-xs text-muted-foreground font-bold pt-6 border-t border-gray-100">
-            <div className="flex items-center gap-2">
-              <i className="fa-solid fa-circle-check text-emerald-500 text-sm"></i>
-              <span>14 jours d'essai 100% gratuit sans carte</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <i className="fa-solid fa-circle-check text-emerald-500 text-sm"></i>
-              <span>0% de commission prélevée sur vos ventes</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <i className="fa-solid fa-circle-check text-emerald-500 text-sm"></i>
-              <span>Paiement direct Mobile Money (MTN & Moov)</span>
-            </div>
-          </FadeIn>
+
         </motion.div>
 
         {/* Ambient Glows */}
