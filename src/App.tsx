@@ -66,7 +66,9 @@ const App = () => (
               <Route path="/vendor" element={<PrivateRoute requiredRole="vendor"><VendorLayout /></PrivateRoute>}>
                 <Route path="dashboard" element={<VendorDashboard />} />
                 <Route path="site" element={<VendorSiteBuilder />} />
+                <Route path="builder" element={<Navigate to="/vendor/site" replace />} />
                 <Route path="catalogue" element={<VendorCatalogue />} />
+                <Route path="menu" element={<Navigate to="/vendor/catalogue" replace />} />
                 <Route path="orders" element={<VendorOrders />} />
                 <Route path="delivery" element={<VendorDelivery />} />
                 <Route path="stats" element={<VendorStats />} />
