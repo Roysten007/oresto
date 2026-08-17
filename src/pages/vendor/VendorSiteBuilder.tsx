@@ -3,7 +3,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { db, storage } from "@/lib/firebase";
 import { ref, update, onValue, set, push, query, orderByChild, equalTo, get } from "firebase/database";
 import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
-import { Globe, Utensils, Calendar, Settings, Palette, Rocket, ChevronLeft, ChevronRight, ChefHat, Building } from "lucide-react";
 import { toast } from "sonner";
 import { VendorProfile, Product } from "@/data/mockData";
 import StepIdentite from "./builder/StepIdentite";
@@ -40,12 +39,12 @@ export default function VendorSiteBuilder() {
   const isHotel = isHotelCategory(formData.category || vendorProfile?.category);
 
   const steps = [
-    { id: 1, title: "Identité", icon: Globe },
-    { id: 2, title: isHotel ? "Mes Chambres" : "La Carte", icon: isHotel ? Building : Utensils },
-    { id: 3, title: "Menus", icon: Calendar },
-    { id: 4, title: "Ventes", icon: Settings },
-    { id: 5, title: "Design", icon: Palette },
-    { id: 6, title: "Lancement", icon: Rocket },
+    { id: 1, title: "Identité", icon: "fa-solid fa-globe" },
+    { id: 2, title: isHotel ? "Mes Chambres" : "La Carte", icon: isHotel ? "fa-solid fa-hotel" : "fa-solid fa-utensils" },
+    { id: 3, title: "Menus", icon: "fa-solid fa-calendar-days" },
+    { id: 4, title: "Ventes & Paiements", icon: "fa-solid fa-money-bill-wave" },
+    { id: 5, title: "Design", icon: "fa-solid fa-palette" },
+    { id: 6, title: "Lancement", icon: "fa-solid fa-rocket" },
   ];
 
   useEffect(() => {
@@ -170,24 +169,25 @@ export default function VendorSiteBuilder() {
   return (
     <div className="min-h-screen bg-[#F8F8F8] flex flex-col">
       {/* Header */}
-      <div className="bg-white border-b border-gray-100 px-6 md:px-10 py-5 flex items-center justify-between">
+      <div className="bg-white border-b border-gray-100 px-6 md:px-10 py-5 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-4">
-          <div className="w-10 h-10 bg-primary rounded-2xl flex items-center justify-center shadow-lg">
-            <ChefHat size={20} className="text-white" />
+          <div className="w-10 h-10 bg-primary rounded-2xl flex items-center justify-center text-white shadow-lg shadow-primary/30">
+            <i className="fa-solid fa-wand-magic-sparkles text-lg"></i>
           </div>
           <div>
             <h1 className="font-black text-lg leading-none">Site Factory</h1>
-            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Oresto Connect</p>
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Oresto Connect Pro</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
           {formData.is_published && (
-            <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-200 rounded-full text-xs font-bold text-green-700">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" /> Site en ligne
+            <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-emerald-50 border border-emerald-200 rounded-full text-xs font-bold text-emerald-700">
+              <i className="fa-solid fa-circle text-[8px] text-emerald-500 animate-pulse"></i> Site en ligne
             </div>
           )}
-          <button onClick={() => saveChanges(false)} disabled={isSaving} className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-full text-xs font-bold transition-colors disabled:opacity-50">
-            {isSaving ? "Sauvegarde..." : "Sauvegarder"}
+          <button onClick={() => saveChanges(false)} disabled={isSaving} className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-full text-xs font-bold transition-colors disabled:opacity-50 flex items-center gap-1.5">
+            <i className="fa-solid fa-floppy-disk"></i>
+            <span>{isSaving ? "Sauvegarde..." : "Sauvegarder"}</span>
           </button>
         </div>
       </div>
@@ -195,20 +195,23 @@ export default function VendorSiteBuilder() {
       {/* Step Navigation */}
       <div className="bg-white border-b border-gray-100 px-6 md:px-10 overflow-x-auto">
         <div className="flex items-center max-w-5xl mx-auto">
-          {steps.map((step, i) => {
-            const Icon = step.icon;
+          {steps.map((step) => {
             const active = currentStep === step.id;
             const done = currentStep > step.id;
             return (
               <button
                 key={step.id}
                 onClick={() => setCurrentStep(step.id)}
-                className={`flex items-center gap-3 px-5 py-4 border-b-2 transition-all whitespace-nowrap font-bold text-xs uppercase tracking-widest ${active ? "border-black text-black" : done ? "border-transparent text-green-600" : "border-transparent text-gray-400 hover:text-gray-600"}`}
+                className={`flex items-center gap-2.5 px-5 py-4 border-b-2 transition-all whitespace-nowrap font-bold text-xs uppercase tracking-widest ${
+                  active ? "border-black text-black" : done ? "border-transparent text-emerald-600" : "border-transparent text-gray-400 hover:text-gray-600"
+                }`}
               >
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black ${active ? "bg-black text-white" : done ? "bg-green-500 text-white" : "bg-gray-100 text-gray-400"}`}>
-                  {done ? "✓" : step.id}
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black ${
+                  active ? "bg-black text-white shadow-sm" : done ? "bg-emerald-500 text-white" : "bg-gray-100 text-gray-400"
+                }`}>
+                  {done ? <i className="fa-solid fa-check text-[9px]"></i> : step.id}
                 </div>
-                <Icon size={14} />
+                <i className={step.icon}></i>
                 {step.title}
               </button>
             );
@@ -231,29 +234,29 @@ export default function VendorSiteBuilder() {
                 disabled={currentStep === 1}
                 className="flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold text-gray-500 hover:text-black hover:bg-gray-100 transition-all disabled:opacity-0"
               >
-                <ChevronLeft size={18} /> Précédent
+                <i className="fa-solid fa-arrow-left"></i> Précédent
               </button>
 
               <div className="flex gap-1.5">
                 {steps.map(s => (
-                  <button key={s.id} onClick={() => setCurrentStep(s.id)} className={`h-1.5 rounded-full transition-all ${currentStep === s.id ? "bg-black w-8" : currentStep > s.id ? "bg-green-500 w-3" : "bg-gray-200 w-3"}`} />
+                  <button key={s.id} onClick={() => setCurrentStep(s.id)} className={`h-1.5 rounded-full transition-all ${currentStep === s.id ? "bg-black w-8" : currentStep > s.id ? "bg-emerald-500 w-3" : "bg-gray-200 w-3"}`} />
                 ))}
               </div>
 
               {currentStep < 6 ? (
                 <button
                   onClick={() => setCurrentStep(p => Math.min(6, p + 1))}
-                  className="flex items-center gap-2 px-8 py-3 rounded-full bg-black text-white text-sm font-bold hover:bg-gray-800 transition-colors shadow-lg"
+                  className="flex items-center gap-2 px-8 py-3.5 rounded-full bg-black text-white text-sm font-bold hover:bg-primary transition-all shadow-lg active:scale-95"
                 >
-                  Suivant <ChevronRight size={18} />
+                  Suivant <i className="fa-solid fa-arrow-right"></i>
                 </button>
               ) : (
                 <button
                   onClick={() => saveChanges(true)}
                   disabled={isSaving}
-                  className="flex items-center gap-2 px-8 py-3 rounded-full bg-black text-white text-sm font-bold hover:bg-gray-800 transition-colors shadow-lg disabled:opacity-50"
+                  className="flex items-center gap-2 px-8 py-3.5 rounded-full bg-primary text-white text-sm font-black uppercase tracking-wider hover:bg-primary/90 transition-all shadow-xl shadow-primary/25 disabled:opacity-50 active:scale-95"
                 >
-                  🚀 Publier
+                  <i className="fa-solid fa-rocket"></i> Publier mon site
                 </button>
               )}
             </div>

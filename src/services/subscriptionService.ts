@@ -38,28 +38,16 @@ export const PLANS: Record<string, { name: string; price: number; firstMonthPric
   }
 };
 
-// Date charnière du lancement officiel : 1er Septembre 2026 00:00:00 UTC
-export const LAUNCH_DATE_TIMESTAMP = Date.UTC(2026, 8, 1, 0, 0, 0); // Mois 8 = Septembre en JS
-// Date de fin d'essai pour tout compte créé avant le 1er Septembre 2026 : 1er Octobre 2026
-export const LAUNCH_TRIAL_END_TIMESTAMP = Date.UTC(2026, 9, 1, 0, 0, 0); // Mois 9 = Octobre en JS
+export const TRIAL_DURATION_DAYS = 14;
+export const TRIAL_DURATION_MS = TRIAL_DURATION_DAYS * 24 * 60 * 60 * 1000;
 
 /**
- * Calcul automatique des dates d'essai gratuit selon la règle Oresto :
- * - Inscription < 1er septembre 2026 => trialEndsAt = 1er octobre 2026
- * - Inscription >= 1er septembre 2026 => trialEndsAt = date d'inscription + 30 jours
+ * Calcul automatique de la période d'essai gratuit (14 jours sans carte bancaire)
  */
 export function calculateTrialDates(registrationTime = Date.now()): { trialStartedAt: number; trialEndsAt: number } {
-  if (registrationTime < LAUNCH_DATE_TIMESTAMP) {
-    return {
-      trialStartedAt: LAUNCH_DATE_TIMESTAMP,
-      trialEndsAt: LAUNCH_TRIAL_END_TIMESTAMP,
-    };
-  }
-
-  const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
   return {
     trialStartedAt: registrationTime,
-    trialEndsAt: registrationTime + THIRTY_DAYS_MS,
+    trialEndsAt: registrationTime + TRIAL_DURATION_MS,
   };
 }
 
