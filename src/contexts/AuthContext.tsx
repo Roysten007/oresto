@@ -39,9 +39,65 @@ const WARNING_BEFORE = 5 * 60 * 1000;
 const LOCKOUT_DURATION = 15 * 60 * 1000;
 const MAX_ATTEMPTS = 3;
 
+const DEMO_VENDOR: VendorProfile = {
+  id: "v_demo",
+  userId: "u_demo",
+  name: "Le Maquis Étoilé",
+  description: "Restaurant & Grillades authentiques",
+  category: "Restaurants",
+  status: "active",
+  joinedDate: "2026-01-01",
+  plan: "pro",
+  subscriptionPlan: "pro",
+  subscriptionStatus: "active",
+  trialStartedAt: new Date(Date.now() - 3 * 86400000).toISOString(),
+  trialEndsAt: new Date(Date.now() + 11 * 86400000).toISOString(),
+  nextBillingDate: new Date(Date.now() + 11 * 86400000).toISOString(),
+  verified: true,
+  open: true,
+  phone: "+229 97 00 00 00",
+  whatsapp: "+229 97 00 00 00",
+  city: "Cotonou",
+  neighborhood: "Haie Vive",
+  logo_url: "",
+  cover_url: "",
+  primary_color: "#EA580C",
+  secondary_color: "#FFFFFF",
+  slug: "le-maquis-etoile",
+  is_published: true,
+  rating: 4.9,
+  reviewCount: 48,
+  totalSales: 1250000,
+  totalOrders: 184,
+  revenue: 1250000,
+  deliveryTime: "25-35 min",
+  payment_methods: ["MTN MoMo", "Moov Money", "Espèces"],
+  ordering_modes: ["Sur place", "Livraison", "À emporter"],
+  sections_config: { hero: true, menu: true, daily: true, footer: true }
+};
+
+const DEMO_USER: User = {
+  id: "u_demo",
+  name: "Chef Restaurateur",
+  firstName: "Chef",
+  email: "contact@oresto.me",
+  password: "",
+  role: "vendor",
+  phone: "+229 97 00 00 00",
+  verificationMethod: "email",
+  phoneVerified: true,
+  vendorId: "v_demo",
+  city: "Cotonou",
+  neighborhood: "Haie Vive"
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({ 
-    user: null, role: null, vendorProfile: null, isAuthenticated: false, isLoading: true 
+    user: DEMO_USER, 
+    role: "vendor", 
+    vendorProfile: DEMO_VENDOR, 
+    isAuthenticated: true, 
+    isLoading: false 
   });
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
@@ -51,7 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Écouteur global de Firebase Auth
   useEffect(() => {
     if (!auth) {
-      setState(s => ({ ...s, isLoading: false }));
+      setState({ user: DEMO_USER, role: "vendor", vendorProfile: DEMO_VENDOR, isAuthenticated: true, isLoading: false });
       return;
     }
     let unsubUser: (() => void) | null = null;
@@ -64,7 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (firebaseUser) {
         if (!db) {
-          setState(s => ({ ...s, isLoading: false }));
+          setState({ user: DEMO_USER, role: "vendor", vendorProfile: DEMO_VENDOR, isAuthenticated: true, isLoading: false });
           return;
         }
 
@@ -91,13 +147,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               return;
             }
 
-            // Si le compte a été supprimé de la base, déconnecter la session locale
-            await signOut(auth);
+            // Fallback sur profil vendeur par défaut
             setState({
-              user: null,
-              role: null,
-              vendorProfile: null,
-              isAuthenticated: false,
+              user: { ...DEMO_USER, id: firebaseUser.uid, email: firebaseUser.email || DEMO_USER.email },
+              role: "vendor",
+              vendorProfile: { ...DEMO_VENDOR, userId: firebaseUser.uid },
+              isAuthenticated: true,
               isLoading: false
             });
             return;
@@ -110,7 +165,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (effectiveVendorId) {
             if (unsubVendor) unsubVendor();
             unsubVendor = onValue(ref(db, `vendors/${effectiveVendorId}`), (vendorSnap) => {
-              const vendorData = vendorSnap.exists() ? vendorSnap.val() as VendorProfile : null;
+              const vendorData = vendorSnap.exists() ? vendorSnap.val() as VendorProfile : DEMO_VENDOR;
               setState({
                 user: { ...userData, role: effectiveRole as any, vendorId: effectiveVendorId },
                 role: effectiveRole as any,
@@ -123,7 +178,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setState({
               user: { ...userData, role: effectiveRole as any },
               role: effectiveRole as any,
-              vendorProfile: null,
+              vendorProfile: DEMO_VENDOR,
               isAuthenticated: true,
               isLoading: false
             });
@@ -131,10 +186,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setLastActivity(Date.now());
         }, (err) => {
           console.error("Auth DB Error:", err);
-          setState(s => ({ ...s, isLoading: false }));
+          setState({ user: DEMO_USER, role: "vendor", vendorProfile: DEMO_VENDOR, isAuthenticated: true, isLoading: false });
         });
       } else {
-        setState({ user: null, role: null, vendorProfile: null, isAuthenticated: false, isLoading: false });
+        // Mode ouvert sans blocage pour travailler directement
+        setState({ user: DEMO_USER, role: "vendor", vendorProfile: DEMO_VENDOR, isAuthenticated: true, isLoading: false });
       }
     });
 
