@@ -1,20 +1,32 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase";
+import { ref, update } from "firebase/database";
 import { confirmVendorSubscriptionPayment, FIRST_MONTH_PRICE, STANDARD_PLAN_PRICE } from "@/services/subscriptionService";
 import AIChatBot from "@/components/AIChatBot";
 import { toast } from "sonner";
 
-const navItems = [
-  { path: "/vendor/dashboard", icon: "fa-solid fa-chart-pie", label: "Dashboard" },
-  { path: "/vendor/site", icon: "fa-solid fa-wand-magic-sparkles", label: "Mon Site Factory" },
-  { path: "/vendor/catalogue", icon: "fa-solid fa-utensils", label: "Mon Menu / Chambres" },
-  { path: "/vendor/orders", icon: "fa-solid fa-bag-shopping", label: "Commandes & MoMo" },
-  { path: "/vendor/delivery", icon: "fa-solid fa-truck-fast", label: "Livraison" },
-  { path: "/vendor/stats", icon: "fa-solid fa-chart-line", label: "Statistiques" },
-  { path: "/vendor/subscription", icon: "fa-solid fa-credit-card", label: "Abonnement" },
+const restoNavItems = [
+  { path: "/vendor/dashboard", icon: "fa-solid fa-chart-pie", label: "Tableau de Bord" },
+  { path: "/vendor/site", icon: "fa-solid fa-wand-magic-sparkles", label: "Site Factory Resto" },
+  { path: "/vendor/catalogue", icon: "fa-solid fa-utensils", label: "Ma Carte & Plats" },
+  { path: "/vendor/orders", icon: "fa-solid fa-bell-concierge", label: "Commandes & MoMo" },
+  { path: "/vendor/delivery", icon: "fa-solid fa-motorcycle", label: "Livraisons & Tables" },
+  { path: "/vendor/stats", icon: "fa-solid fa-chart-line", label: "Statistiques Repas" },
+  { path: "/vendor/subscription", icon: "fa-solid fa-crown", label: "Abonnement Pro" },
   { path: "/vendor/settings", icon: "fa-solid fa-gear", label: "Paramètres" },
+];
+
+const ecommerceNavItems = [
+  { path: "/vendor/dashboard", icon: "fa-solid fa-chart-pie", label: "Tableau de Bord" },
+  { path: "/vendor/site", icon: "fa-solid fa-wand-magic-sparkles", label: "Boutique Factory" },
+  { path: "/vendor/catalogue", icon: "fa-solid fa-boxes-stacked", label: "Mon Catalogue & Stocks" },
+  { path: "/vendor/orders", icon: "fa-solid fa-box", label: "Commandes & Colis" },
+  { path: "/vendor/delivery", icon: "fa-solid fa-truck-fast", label: "Expéditions & Livraisons" },
+  { path: "/vendor/stats", icon: "fa-solid fa-chart-line", label: "Statistiques Ventes" },
+  { path: "/vendor/subscription", icon: "fa-solid fa-crown", label: "Abonnement Pro" },
+  { path: "/vendor/settings", icon: "fa-solid fa-gear", label: "Paramètres Boutique" },
 ];
 
 export default function VendorLayout() {
@@ -25,6 +37,36 @@ export default function VendorLayout() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showUnblockModal, setShowUnblockModal] = useState(false);
 
+  // Business workspace switch: 'restaurant' | 'ecommerce'
+  const [businessType, setBusinessType] = useState<"restaurant" | "ecommerce">(() => {
+    if (vendorProfile?.business_type === "ecommerce" || vendorProfile?.business_type === "restaurant") {
+      return vendorProfile.business_type;
+    }
+    const saved = localStorage.getItem("oresto_active_workspace");
+    if (saved === "ecommerce" || saved === "restaurant") return saved;
+    const cat = (vendorProfile?.category || "").toLowerCase();
+    if (cat.includes("boutique") || cat.includes("mode") || cat.includes("vente") || cat.includes("tech") || cat.includes("e-commerce")) return "ecommerce";
+    return "restaurant";
+  });
+
+  useEffect(() => {
+    if (vendorProfile?.business_type && (vendorProfile.business_type === "restaurant" || vendorProfile.business_type === "ecommerce")) {
+      setBusinessType(vendorProfile.business_type);
+      localStorage.setItem("oresto_active_workspace", vendorProfile.business_type);
+    }
+  }, [vendorProfile?.business_type]);
+
+  const handleSwitchWorkspace = async (newType: "restaurant" | "ecommerce") => {
+    setBusinessType(newType);
+    localStorage.setItem("oresto_active_workspace", newType);
+    if (db && vendorProfile?.id) {
+      try {
+        await update(ref(db, `vendors/${vendorProfile.id}`), { business_type: newType });
+      } catch {}
+    }
+    toast.success(`Bascule vers l'${newType === "restaurant" ? "Espace Restaurant Pro 🍽️" : "Espace Boutique E-Commerce Pro 🛍️"}`);
+  };
+
   const isBlocked = vendorProfile?.subscriptionStatus === "blocked" || vendorProfile?.subscriptionStatus === "restricted";
   const isFirstPayment = !vendorProfile?.paymentHistory || vendorProfile.paymentHistory.length === 0;
   const payAmount = isFirstPayment ? FIRST_MONTH_PRICE : STANDARD_PLAN_PRICE;
@@ -34,7 +76,7 @@ export default function VendorLayout() {
     setIsProcessing(true);
     try {
       await confirmVendorSubscriptionPayment(db, vendorProfile.id, vendorProfile.pendingInvoice?.id);
-      toast.success("🎉 Paiement validé avec succès ! Votre espace commerçant est débloqué.");
+      toast.success("🎉 Paiement validé avec succès ! Votre espace est débloqué.");
       setShowUnblockModal(false);
     } catch (err) {
       toast.error("Erreur lors de la confirmation du paiement.");
@@ -43,47 +85,85 @@ export default function VendorLayout() {
     }
   };
 
+  const activeNavItems = businessType === "ecommerce" ? ecommerceNavItems : restoNavItems;
+
   return (
     <div className="min-h-screen flex bg-background font-body">
       {/* Sidebar desktop */}
       <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-card border-r border-border transform transition-transform md:relative md:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex flex-col h-full p-4">
-          <div className="flex items-center justify-between mb-6">
+          
+          {/* Logo Branding */}
+          <div className="flex items-center justify-between mb-4">
             <Link to="/" className="flex items-center gap-2.5 no-underline">
-              <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center text-white text-sm shadow-md shadow-primary/25">
-                <i className="fa-solid fa-utensils"></i>
+              <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white text-sm shadow-md shadow-primary/25">
+                <i className={`fa-solid ${businessType === "ecommerce" ? "fa-bag-shopping" : "fa-utensils"}`}></i>
               </div>
-              <span className="font-heading text-lg font-black tracking-tight uppercase text-foreground">
-                Oresto <span className="text-primary">Pro</span>
-              </span>
+              <div>
+                <span className="font-heading text-base font-black tracking-tight uppercase text-foreground block leading-tight">
+                  Oresto <span className="text-primary">{businessType === "ecommerce" ? "Boutique" : "Resto"}</span>
+                </span>
+                <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Espace Admin Dédié</span>
+              </div>
             </Link>
             <button className="md:hidden text-gray-500 hover:text-black" onClick={() => setSidebarOpen(false)}>
               <i className="fa-solid fa-xmark text-lg"></i>
             </button>
           </div>
 
+          {/* Workspace Switcher */}
+          <div className="mb-4 p-1.5 bg-muted rounded-2xl border border-border">
+            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground px-2 py-1">Type d'espace :</p>
+            <div className="grid grid-cols-2 gap-1">
+              <button
+                type="button"
+                onClick={() => handleSwitchWorkspace("restaurant")}
+                className={`py-2 px-1.5 rounded-xl text-[10px] font-heading font-black transition-all flex items-center justify-center gap-1.5 ${
+                  businessType === "restaurant" 
+                    ? "bg-black text-white shadow-sm" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-card"
+                }`}
+              >
+                <i className="fa-solid fa-utensils text-[9px]"></i>
+                <span>Restaurant</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleSwitchWorkspace("ecommerce")}
+                className={`py-2 px-1.5 rounded-xl text-[10px] font-heading font-black transition-all flex items-center justify-center gap-1.5 ${
+                  businessType === "ecommerce" 
+                    ? "bg-primary text-white shadow-sm" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-card"
+                }`}
+              >
+                <i className="fa-solid fa-bag-shopping text-[9px]"></i>
+                <span>Boutique</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Profile Card */}
           {vendorProfile && (
-            <div className="mb-6 p-3.5 rounded-2xl bg-muted border border-border">
-              <p className="font-heading text-sm font-bold text-foreground truncate">{vendorProfile.name || "Le Maquis Étoilé"}</p>
-              <div className="flex items-center gap-2 mt-1.5">
-                <span className="px-2 py-0.5 rounded-full bg-primary text-white text-[9px] font-black uppercase tracking-wider">
-                  ORESTO PRO
+            <div className="mb-4 p-3 rounded-2xl bg-card border border-border shadow-sm space-y-1">
+              <div className="flex items-center justify-between">
+                <p className="font-heading text-xs font-bold text-foreground truncate max-w-[130px]">
+                  {vendorProfile.name || (businessType === "ecommerce" ? "Ma Boutique Chic" : "Le Maquis Étoilé")}
+                </p>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[8px] font-black uppercase tracking-wider">
+                  {businessType === "ecommerce" ? "BOUTIQUE PRO" : "RESTO PRO"}
                 </span>
-                {isBlocked ? (
-                  <span className="px-2 py-0.5 rounded-full bg-red-500/10 text-red-600 text-[9px] font-black uppercase tracking-wider">
-                    Bloqué
-                  </span>
-                ) : (
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 text-[9px] font-bold">
-                    Actif
-                  </span>
-                )}
+                <span className="text-[9px] text-muted-foreground font-bold">0% Comm</span>
               </div>
             </div>
           )}
 
-          <nav className="flex-1 space-y-1 overflow-y-auto">
-            {navItems.map(item => {
+          {/* Dedicated Nav Items */}
+          <nav className="flex-1 space-y-1 overflow-y-auto pr-1">
+            {activeNavItems.map(item => {
               const active = location.pathname === item.path;
               return (
                 <Link 
@@ -96,19 +176,27 @@ export default function VendorLayout() {
                       : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   } ${isBlocked && item.path !== "/vendor/subscription" ? "opacity-50" : ""}`}
                 >
-                  <i className={`${item.icon} text-sm w-4 text-center`}></i>
+                  <i className={`${item.icon} text-xs w-4 text-center`}></i>
                   <span>{item.label}</span>
                 </Link>
               );
             })}
           </nav>
 
-          <div className="space-y-2 pt-4 border-t border-border text-xs">
-            <Link to={`/r/${vendorProfile?.slug || "le-maquis-etoile"}`} target="_blank" className="flex items-center gap-2 px-3 py-2 text-muted-foreground hover:text-primary font-bold">
-              <i className="fa-solid fa-arrow-up-right-from-square text-xs"></i>
-              <span>Voir mon site public</span>
+          {/* Bottom Actions */}
+          <div className="space-y-1.5 pt-3 border-t border-border text-xs">
+            <Link 
+              to={`/r/${vendorProfile?.slug || (businessType === "ecommerce" ? "ma-boutique-chic" : "le-maquis-etoile")}`} 
+              target="_blank" 
+              className="flex items-center gap-2 px-3 py-2 text-muted-foreground hover:text-primary font-bold rounded-xl hover:bg-muted transition-colors"
+            >
+              <i className="fa-solid fa-arrow-up-right-from-square text-xs text-primary"></i>
+              <span>Voir ma vitrine en ligne</span>
             </Link>
-            <button onClick={() => { logout(); navigate("/login"); }} className="flex items-center gap-2 px-3 py-2 text-destructive font-bold hover:bg-red-50 rounded-xl w-full transition-colors">
+            <button 
+              onClick={() => { logout(); navigate("/login"); }} 
+              className="flex items-center gap-2 px-3 py-2 text-destructive font-bold hover:bg-red-50 rounded-xl w-full transition-colors"
+            >
               <i className="fa-solid fa-arrow-right-from-bracket text-xs"></i>
               <span>Déconnexion</span>
             </button>
@@ -119,11 +207,16 @@ export default function VendorLayout() {
       {sidebarOpen && <div className="fixed inset-0 bg-foreground/30 z-40 md:hidden" onClick={() => setSidebarOpen(false)} />}
 
       <div className="flex-1 flex flex-col min-w-0">
+        {/* Mobile Header */}
         <header className="sticky top-0 z-30 bg-background border-b border-border px-4 py-3 md:hidden flex items-center justify-between">
           <button onClick={() => setSidebarOpen(true)} className="p-2 text-gray-700">
             <i className="fa-solid fa-bars text-lg"></i>
           </button>
-          <span className="font-heading text-lg font-bold text-primary">ORESTO PRO</span>
+          <div className="flex items-center gap-2">
+            <span className="font-heading text-sm font-black text-primary uppercase">
+              {businessType === "ecommerce" ? "Oresto Boutique Pro" : "Oresto Resto Pro"}
+            </span>
+          </div>
           <Link to={`/r/${vendorProfile?.slug || "le-maquis-etoile"}`} target="_blank" className="text-xs text-primary font-bold">
             <i className="fa-solid fa-globe text-base"></i>
           </Link>
@@ -141,42 +234,26 @@ export default function VendorLayout() {
                 </div>
 
                 <div className="space-y-2">
-                  <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full bg-red-500/10 text-red-600 border border-red-500/20 inline-block">
-                    Délai de grâce expiré
-                  </span>
-                  <h2 className="font-heading text-3xl font-black uppercase tracking-tight text-foreground">
-                    Espace commerçant <span className="text-red-500">suspendu</span>
+                  <h2 className="font-heading text-2xl md:text-3xl font-black tracking-tight text-foreground uppercase">
+                    Accès temporairement suspendu
                   </h2>
-                  <p className="text-sm text-muted-foreground leading-relaxed max-w-md mx-auto">
-                    Votre abonnement <strong>Oresto Pro</strong> est arrivé à échéance et le délai de grâce de 3 jours est terminé. Vos outils et la prise de commande sur votre vitrine sont actuellement suspendus.
+                  <p className="font-sub text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
+                    Votre période de grâce est expirée. Veuillez régulariser votre abonnement Oresto Pro pour réactiver votre espace de gestion et rouvrir votre vitrine web.
                   </p>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-orange-50 border border-orange-200/80 text-left flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-primary block">
-                      {isFirstPayment ? "Tarif Réduit 1er Mois (-50%)" : "Tarif Mensuel Standard"}
-                    </span>
-                    <span className="font-black text-lg text-foreground">
-                      {payAmount.toLocaleString()} FCFA
-                    </span>
-                  </div>
-                  <span className="text-xs font-bold text-gray-500">Mobile Money (Maketou)</span>
+                <div className="p-4 bg-muted/60 rounded-2xl border border-border inline-block text-left space-y-1">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Montant à régler :</p>
+                  <p className="font-heading text-2xl font-black text-foreground">{payAmount.toLocaleString()} FCFA</p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                <div className="pt-2 flex flex-col sm:flex-row gap-3 justify-center">
                   <button
-                    onClick={() => setShowUnblockModal(true)}
-                    className="flex-1 py-4 rounded-2xl bg-primary text-white font-black text-xs uppercase tracking-widest shadow-xl shadow-primary/25 hover:scale-105 transition-all flex items-center justify-center gap-2"
+                    onClick={() => navigate("/vendor/subscription")}
+                    className="px-8 py-4 rounded-2xl bg-primary text-white font-heading font-black text-xs uppercase tracking-widest hover:bg-primary/90 transition-all shadow-xl shadow-primary/25"
                   >
-                    <i className="fa-solid fa-credit-card"></i> Débloquer maintenant ({payAmount.toLocaleString()} F)
+                    Régulariser par Mobile Money
                   </button>
-                  <Link
-                    to="/vendor/subscription"
-                    className="py-4 px-6 rounded-2xl border-2 border-border text-foreground font-bold text-xs hover:bg-muted transition-all"
-                  >
-                    Voir l'abonnement
-                  </Link>
                 </div>
               </div>
             </div>
@@ -186,55 +263,8 @@ export default function VendorLayout() {
         </main>
       </div>
 
+      {/* Floating IZI IA Assistant */}
       <AIChatBot />
-
-      {/* Modal Déblocage Immédiat */}
-      {showUnblockModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-primary font-black uppercase text-xs tracking-wider">
-                <i className="fa-solid fa-shield-halved"></i> Paiement MoMo Sécurisé
-              </div>
-              <button onClick={() => setShowUnblockModal(false)} className="text-muted-foreground hover:text-foreground">
-                <i className="fa-solid fa-xmark text-lg"></i>
-              </button>
-            </div>
-
-            <div className="space-y-2">
-              <h3 className="font-heading text-xl font-black text-foreground">
-                Renouveler Oresto Pro
-              </h3>
-              <p className="text-xs text-muted-foreground">
-                Effectuez votre transfert de <strong>{payAmount.toLocaleString()} FCFA</strong> par Mobile Money pour réactiver instantanément votre boutique et vos commandes.
-              </p>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-primary/10 border border-primary/20 space-y-2">
-              <div className="flex justify-between text-xs">
-                <span className="text-muted-foreground">Destinataire :</span>
-                <span className="font-bold text-foreground">Oresto SAS (Maketou)</span>
-              </div>
-              <div className="flex justify-between text-xs">
-                <span className="text-muted-foreground">Numéro MoMo :</span>
-                <span className="font-mono font-bold text-primary">+229 97 00 00 00</span>
-              </div>
-              <div className="flex justify-between text-xs">
-                <span className="text-muted-foreground">Montant net :</span>
-                <span className="font-black text-foreground">{payAmount.toLocaleString()} FCFA</span>
-              </div>
-            </div>
-
-            <button
-              onClick={handlePayNow}
-              disabled={isProcessing}
-              className="w-full py-4 rounded-2xl bg-primary text-white font-black text-xs uppercase tracking-widest shadow-xl shadow-primary/30 hover:scale-105 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              {isProcessing ? "Confirmation..." : "J'ai effectué le paiement"}
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

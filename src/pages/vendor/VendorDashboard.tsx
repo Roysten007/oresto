@@ -117,25 +117,27 @@ export default function VendorDashboard() {
 
     weeklyData.push({
       name: dayNames[d.getDay()],
-      revenue: dayRevenue
+    revenue: dayRevenue
     });
   }
+
+  const isEcommerce = vendorProfile?.business_type === "ecommerce" || (typeof window !== 'undefined' && localStorage.getItem("oresto_active_workspace") === "ecommerce");
 
   const weeklyRevenue = weeklyData.reduce((s, d) => s + d.revenue, 0);
 
   const kpis = [
     {
-      label: "CA Encaissé (7j)",
+      label: isEcommerce ? "Ventes Encaissées (7j)" : "CA Encaissé (7j)",
       value: `${weeklyRevenue.toLocaleString()} FCFA`,
-      trend: "Paiements validés",
+      trend: "Paiements MoMo validés",
       icon: DollarSign,
       color: "text-emerald-500",
       bg: "bg-emerald-500/10"
     },
     {
-      label: "Commandes Validées",
+      label: isEcommerce ? "Colis Validés (Aujourd'hui)" : "Repas Servis (Aujourd'hui)",
       value: String(todayPaidOrders.length),
-      trend: "Aujourd'hui",
+      trend: isEcommerce ? "Prêts à l'expédition" : "Sortis de cuisine",
       icon: ShoppingBag,
       color: "text-orange-500",
       bg: "bg-orange-500/10"
@@ -149,9 +151,9 @@ export default function VendorDashboard() {
       bg: pendingValidationOrders.length > 0 ? "bg-blue-100" : "bg-amber-500/10"
     },
     {
-      label: "Clients Reçus",
+      label: isEcommerce ? "Acheteurs Fidélisés" : "Clients Reçus",
       value: String(uniqueClients),
-      trend: "Total fidélisés",
+      trend: "Total boutique",
       icon: Users,
       color: "text-purple-500",
       bg: "bg-purple-500/10"

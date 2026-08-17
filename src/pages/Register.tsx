@@ -8,8 +8,16 @@ export default function Register() {
   const navigate = useNavigate();
 
   const [step, setStep] = useState(1);
+  const [businessType, setBusinessType] = useState<"restaurant" | "ecommerce">("restaurant");
   const [form, setForm] = useState({ firstName: "", name: "", phone: "", email: "", password: "", confirmPassword: "" });
-  const [vendorForm, setVendorForm] = useState({ shopName: "", category: "Restaurants", city: "", neighborhood: "", shopPhone: "", subscriptionPlan: "pro" as "starter" | "pro" });
+  const [vendorForm, setVendorForm] = useState({ 
+    shopName: "", 
+    category: "Restaurants", 
+    city: "", 
+    neighborhood: "", 
+    shopPhone: "", 
+    subscriptionPlan: "pro" as "starter" | "pro" 
+  });
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -39,7 +47,7 @@ export default function Register() {
 
     if (step === 2) {
       if (!vendorForm.shopName || !vendorForm.city) { 
-        setError("Veuillez renseigner au moins le nom et la ville de votre restaurant."); 
+        setError("Veuillez renseigner au moins le nom et la ville de votre établissement."); 
         return; 
       }
       setLoading(true);
@@ -47,14 +55,18 @@ export default function Register() {
         ...form, 
         ...vendorForm, 
         role: "vendor", 
-        category: "Restaurants", 
+        business_type: businessType,
+        category: businessType === "ecommerce" ? "E-Commerce & Boutiques" : "Restaurants", 
         vendorId: `v${Date.now()}` 
       });
       if (result.success) {
-        toast.success("Votre établissement a été configuré avec succès ! Bienvenue 🚀", { duration: 4000 });
+        if (typeof window !== 'undefined') {
+          localStorage.setItem("oresto_active_workspace", businessType);
+        }
+        toast.success("Votre espace professionnel a été créé avec succès ! Bienvenue 🚀", { duration: 4000 });
         navigate("/vendor/dashboard", { replace: true });
       } else {
-        setError(result.error || "Erreur lors de la création de la boutique");
+        setError(result.error || "Erreur lors de la création de l'espace");
         setLoading(false);
       }
     }
@@ -70,7 +82,7 @@ export default function Register() {
         
         <Link to="/" className="relative z-10 flex items-center gap-2.5 no-underline">
           <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white shadow-lg">
-            <i className="fa-solid fa-utensils"></i>
+            <i className="fa-solid fa-store"></i>
           </div>
           <span className="font-heading font-black text-xl tracking-tight uppercase text-white">
             Oresto <span className="text-primary">Connect</span>
@@ -85,14 +97,14 @@ export default function Register() {
             Votre sérénité<br />commence ici.
           </h1>
           <p className="text-gray-400 text-sm leading-relaxed">
-            Rejoignez les professionnels qui automatisent leurs commandes et gardent 100% de leurs revenus.
+            Rejoignez les restaurateurs et e-commerçants qui automatisent leurs ventes et gardent 100% de leurs revenus.
           </p>
         </div>
 
         <div className="relative z-10 space-y-5 text-xs">
           {[
-            { t: "Création Rapide", d: "Votre site prêt en 12 minutes", icon: "fa-solid fa-bolt" },
-            { t: "Zéro Commission", d: "100% de vos gains dans votre poche", icon: "fa-solid fa-shield-halved" },
+            { t: "Espaces Dédiés", d: "Restaurants ou Boutiques E-Commerce", icon: "fa-solid fa-layer-group" },
+            { t: "Zéro Commission", d: "100% de vos gains conservés par MoMo", icon: "fa-solid fa-shield-halved" },
             { t: "14 Jours Gratuits", d: "Sans engagement ni carte bancaire", icon: "fa-solid fa-clock" }
           ].map((item, i) => (
             <div key={i} className="flex items-center gap-3.5">
@@ -113,7 +125,7 @@ export default function Register() {
         <div className="lg:hidden mb-8 w-full flex justify-center">
           <Link to="/" className="flex items-center gap-2 no-underline">
             <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center text-white">
-              <i className="fa-solid fa-utensils"></i>
+              <i className="fa-solid fa-store"></i>
             </div>
             <span className="font-heading font-black text-xl text-gray-900 tracking-tight uppercase">
               Oresto <span className="text-primary">Connect</span>
@@ -121,43 +133,33 @@ export default function Register() {
           </Link>
         </div>
 
-        <div className="w-full max-w-lg">
-          {/* Progress Bar */}
-          <div className="flex gap-2 mb-10">
-            {Array.from({ length: totalSteps }).map((_, i) => (
-              <div key={i} className={`flex-1 h-1.5 rounded-full transition-all duration-500 ${i < step ? "bg-primary" : "bg-gray-200"}`} />
-            ))}
+        <div className="w-full max-w-md space-y-8">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest">
+                Étape {step} sur {totalSteps}
+              </span>
+              <span className="text-xs font-bold text-gray-400">
+                {step === 1 ? "Vos Identifiants" : "Votre Établissement"}
+              </span>
+            </div>
+            <h2 className="font-heading font-black text-2xl lg:text-3xl text-gray-900 tracking-tight">
+              {step === 1 ? "Créez votre compte Pro" : "Configurez votre espace dédié"}
+            </h2>
+            <p className="text-gray-500 text-xs mt-1 font-medium">
+              {step === 1 ? "Renseignez vos accès personnels pour débuter vos 14 jours d'essai gratuit." : "Sélectionnez votre type d'activité pour obtenir un espace 100% sur-mesure."}
+            </p>
           </div>
 
           {error && (
-            <div className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs font-medium space-y-2 animate-in fade-in duration-300">
-              <div className="flex items-center gap-2">
-                <i className="fa-solid fa-triangle-exclamation text-red-500 text-sm shrink-0"></i>
-                <span>{error}</span>
-              </div>
-              {error.includes("Se connecter") && (
-                <div className="pt-2 border-t border-red-200/60">
-                  <Link 
-                    to={`/login?email=${encodeURIComponent(form.email)}`}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-600 text-white font-bold text-xs hover:bg-red-700 transition-colors shadow-sm"
-                  >
-                    <i className="fa-solid fa-arrow-right-to-bracket"></i>
-                    Se connecter avec cet email
-                  </Link>
-                </div>
-              )}
+            <div className="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs font-bold flex items-center gap-3">
+              <i className="fa-solid fa-triangle-exclamation text-base shrink-0"></i>
+              <span>{error}</span>
             </div>
           )}
 
-          <div className="mb-8 text-center lg:text-left">
-            <h2 className="font-heading font-black text-2xl sm:text-3xl text-gray-900 mb-1">
-              {step === 1 ? "Vos informations personnelles" : "Votre établissement"}
-            </h2>
-            <p className="text-xs text-gray-500 font-bold">Étape {step} sur {totalSteps}</p>
-          </div>
-
-          <div className="space-y-6">
-            {/* Étape 1 : Informations personnelles */}
+          <form onSubmit={e => { e.preventDefault(); handleNext(); }} className="space-y-5">
+            {/* Étape 1 : Identifiants personnels */}
             {step === 1 && (
               <div className="space-y-4 animate-in slide-in-from-right-10 duration-300">
                 <div className="grid grid-cols-2 gap-3">
@@ -166,7 +168,7 @@ export default function Register() {
                     <input 
                       value={form.firstName} onChange={e => updateForm("firstName", e.target.value)} required
                       className="w-full px-4 py-3.5 rounded-2xl border border-gray-200 bg-white text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-xs"
-                      placeholder="Ex: Sophie"
+                      placeholder="Jean"
                     />
                   </div>
                   <div>
@@ -174,26 +176,26 @@ export default function Register() {
                     <input 
                       value={form.name} onChange={e => updateForm("name", e.target.value)} required
                       className="w-full px-4 py-3.5 rounded-2xl border border-gray-200 bg-white text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-xs"
-                      placeholder="Ex: Lawson"
+                      placeholder="Houndété"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-700 uppercase tracking-widest mb-1.5 px-1">Numéro Téléphone / WhatsApp</label>
+                  <label className="block text-[10px] font-bold text-gray-700 uppercase tracking-widest mb-1.5 px-1">Adresse Email *</label>
                   <input 
-                    value={form.phone} onChange={e => updateForm("phone", e.target.value)}
-                    className="w-full px-4 py-3.5 rounded-2xl border border-gray-200 bg-white text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-xs" 
-                    placeholder="+229 97 00 00 00"
+                    type="email" value={form.email} onChange={e => updateForm("email", e.target.value)} required
+                    className="w-full px-4 py-3.5 rounded-2xl border border-gray-200 bg-white text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-xs"
+                    placeholder="jean@moncommerce.bj"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-700 uppercase tracking-widest mb-1.5 px-1">Email *</label>
+                  <label className="block text-[10px] font-bold text-gray-700 uppercase tracking-widest mb-1.5 px-1">Téléphone WhatsApp</label>
                   <input 
-                    type="email" value={form.email} onChange={e => updateForm("email", e.target.value)} required
+                    type="tel" value={form.phone} onChange={e => updateForm("phone", e.target.value)}
                     className="w-full px-4 py-3.5 rounded-2xl border border-gray-200 bg-white text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-xs"
-                    placeholder="contact@monrestaurant.com"
+                    placeholder="+229 97 00 00 00"
                   />
                 </div>
 
@@ -222,15 +224,64 @@ export default function Register() {
               </div>
             )}
 
-            {/* Étape 2 : Votre établissement */}
+            {/* Étape 2 : Votre établissement & Choix d'espace */}
             {step === 2 && (
               <div className="space-y-4 animate-in slide-in-from-right-10 duration-300">
+                
+                {/* Choix du type de commerce */}
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-bold text-gray-700 uppercase tracking-widest px-1">
+                    Votre type d'activité *
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setBusinessType("restaurant");
+                        setVendorForm(p => ({ ...p, category: "Restaurants" }));
+                      }}
+                      className={`p-3.5 rounded-2xl border-2 transition-all text-left flex flex-col gap-1.5 ${
+                        businessType === "restaurant" ? "border-primary bg-orange-50/50 shadow-sm" : "border-gray-200 bg-white hover:border-gray-300"
+                      }`}
+                    >
+                      <div className="w-8 h-8 rounded-xl bg-orange-100 text-primary flex items-center justify-center text-sm">
+                        <i className="fa-solid fa-utensils"></i>
+                      </div>
+                      <div>
+                        <span className="font-heading font-black text-xs text-gray-900 block">Restaurant / Maquis</span>
+                        <span className="text-[10px] text-gray-500">Plats, Cuisine, Menus</span>
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setBusinessType("ecommerce");
+                        setVendorForm(p => ({ ...p, category: "E-Commerce & Boutiques" }));
+                      }}
+                      className={`p-3.5 rounded-2xl border-2 transition-all text-left flex flex-col gap-1.5 ${
+                        businessType === "ecommerce" ? "border-primary bg-orange-50/50 shadow-sm" : "border-gray-200 bg-white hover:border-gray-300"
+                      }`}
+                    >
+                      <div className="w-8 h-8 rounded-xl bg-primary/20 text-primary flex items-center justify-center text-sm">
+                        <i className="fa-solid fa-bag-shopping"></i>
+                      </div>
+                      <div>
+                        <span className="font-heading font-black text-xs text-gray-900 block">Boutique en Ligne</span>
+                        <span className="text-[10px] text-gray-500">Mode, Tech, Stocks</span>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-700 uppercase tracking-widest mb-1.5 px-1">Nom de votre établissement *</label>
+                  <label className="block text-[10px] font-bold text-gray-700 uppercase tracking-widest mb-1.5 px-1">
+                    {businessType === "ecommerce" ? "Nom de votre boutique *" : "Nom de votre établissement *"}
+                  </label>
                   <input 
                     value={vendorForm.shopName} onChange={e => setVendorForm(p => ({ ...p, shopName: e.target.value }))} required
                     className="w-full px-4 py-3.5 rounded-2xl border border-gray-200 bg-white text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-xs"
-                    placeholder="Ex: Le Maquis Étoilé"
+                    placeholder={businessType === "ecommerce" ? "Ex: Boutique Prestige & Tech" : "Ex: Le Maquis Étoilé"}
                   />
                 </div>
 
@@ -254,7 +305,7 @@ export default function Register() {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-700 uppercase tracking-widest mb-1.5 px-1">Numéro Mobile Money (MoMo / Moov)</label>
+                  <label className="block text-[10px] font-bold text-gray-700 uppercase tracking-widest mb-1.5 px-1">Numéro Mobile Money (MTN / Moov / Celtiis)</label>
                   <input 
                     value={vendorForm.shopPhone} onChange={e => setVendorForm(p => ({ ...p, shopPhone: e.target.value }))}
                     className="w-full px-4 py-3.5 rounded-2xl border border-gray-200 bg-white text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-xs"
@@ -277,40 +328,45 @@ export default function Register() {
                     <span className="text-xs font-bold text-gray-500">/ mois</span>
                   </div>
                   <p className="text-[11px] text-gray-600 leading-relaxed">
-                    🎉 <strong>Essai 100% gratuit pendant 14 jours</strong> sans carte bancaire. 0% de commission sur vos commandes, Site Web autonome inclus & Assistant IA IZI.
+                    🎉 <strong>Essai 100% gratuit pendant 14 jours</strong> sans engagement. 0% de commission sur vos encaissements, Vitrine Web autonome et Assistant IA IZI.
                   </p>
                 </div>
               </div>
             )}
 
-            <div className="flex gap-3 pt-2">
+            <div className="flex items-center gap-3 pt-2">
               {step > 1 && (
-                <button 
-                  type="button"
-                  onClick={() => { setStep(step - 1); setError(""); }}
-                  className="flex-1 py-4 rounded-full border-2 border-gray-200 text-gray-900 font-bold text-xs flex items-center justify-center gap-2 hover:bg-gray-50 transition-all"
+                <button
+                  type="button" onClick={() => setStep(p => p - 1)}
+                  className="px-6 py-4 rounded-2xl border border-gray-200 text-gray-600 font-black text-xs uppercase tracking-wider hover:bg-gray-50 transition-all"
                 >
-                  <i className="fa-solid fa-arrow-left"></i> Retour
+                  Retour
                 </button>
               )}
-              <button 
-                type="button"
-                onClick={handleNext}
-                disabled={loading}
-                className="flex-1 py-4 rounded-full bg-primary text-white font-bold text-xs flex items-center justify-center gap-2 hover:bg-primary/90 transition-all shadow-lg shadow-primary/25 disabled:opacity-50 active:scale-95"
+              <button
+                type="submit" disabled={loading}
+                className="flex-1 py-4 rounded-2xl bg-primary text-white font-heading font-black text-xs uppercase tracking-widest shadow-xl shadow-primary/25 hover:bg-primary/90 transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
               >
                 {loading ? (
-                  <span><i className="fa-solid fa-spinner fa-spin mr-1"></i> Création...</span>
+                  <>
+                    <i className="fa-solid fa-spinner fa-spin"></i>
+                    <span>Création en cours...</span>
+                  </>
                 ) : (
-                  <span>{step === totalSteps ? "Lancer mon établissement" : "Continuer"} <i className="fa-solid fa-arrow-right ml-1"></i></span>
+                  <span>{step === 1 ? "Continuer" : "Lancer mon espace Pro"}</span>
                 )}
               </button>
             </div>
-          </div>
+          </form>
 
-          <p className="mt-8 text-center text-gray-500 text-xs font-medium">
-            Déjà partenaire ? <Link to="/login" className="text-primary font-bold hover:underline">Se connecter</Link>
-          </p>
+          <div className="text-center pt-2">
+            <p className="text-xs text-gray-500 font-medium">
+              Vous avez déjà un compte ?{" "}
+              <Link to="/login" className="text-primary font-bold hover:underline">
+                Se connecter
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>
