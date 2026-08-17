@@ -168,18 +168,18 @@ export default function ProLanding() {
         </div>
       </motion.nav>
 
-      {/* ─── Hero Section : Cuisinez l'Esprit Tranquille ─── */}
-      <section className="relative pt-36 pb-20 md:pt-44 md:pb-28 px-6 overflow-hidden">
-        <motion.div className="max-w-6xl mx-auto text-center relative z-10 space-y-6">
+      {/* ─── Hero Section : Cuisinez l'Esprit Tranquille (Centré Parfaitement) ─── */}
+      <section className="relative min-h-[90vh] flex flex-col justify-center items-center pt-28 pb-16 px-6 overflow-hidden">
+        <motion.div className="max-w-6xl mx-auto text-center relative z-10 space-y-7 my-auto flex flex-col items-center justify-center">
           
           <FadeIn delay={0.05}>
-            <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-orange-50 border border-orange-200 text-primary text-xs font-black uppercase tracking-widest shadow-sm">
+            <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-orange-50/90 border border-orange-200 text-primary text-xs font-black uppercase tracking-widest shadow-sm">
               <i className="fa-solid fa-dove text-sm"></i> La Tranquillité d'Esprit pour Restaurateurs & Hôteliers
             </div>
           </FadeIn>
 
-          <FadeIn delay={0.15}>
-            <h1 className="font-heading text-3xl sm:text-5xl md:text-6xl lg:text-[68px] xl:text-[74px] font-[900] leading-[1.05] tracking-tighter uppercase text-foreground">
+          <FadeIn delay={0.15} className="w-full flex justify-center">
+            <h1 className="font-heading text-3xl sm:text-5xl md:text-6xl lg:text-[68px] xl:text-[74px] font-[900] leading-[1.08] tracking-tighter uppercase text-foreground text-center">
               <span className="block sm:inline md:block whitespace-normal md:whitespace-nowrap">
                 Cuisinez l'esprit tranquille,
               </span>
@@ -189,13 +189,13 @@ export default function ProLanding() {
             </h1>
           </FadeIn>
 
-          <FadeIn delay={0.25} className="max-w-3xl mx-auto">
-            <p className="text-lg md:text-xl text-muted-foreground font-body leading-relaxed">
+          <FadeIn delay={0.25} className="max-w-2xl mx-auto text-center">
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground font-body leading-relaxed">
               Fini le désordre des messages WhatsApp, les doutes sur les paiements et les fermetures tardives à recompter les carnets. <strong>Retrouvez la sérénité au quotidien</strong> avec un système simple, autonome et <strong>100% de vos bénéfices dans votre poche</strong>.
             </p>
           </FadeIn>
 
-          <FadeIn delay={0.35} className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 pt-4">
+          <FadeIn delay={0.35} className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-5 pt-3 w-full">
             <Link 
               to="/register?role=vendor" 
               className="group w-full sm:w-auto px-9 py-5 bg-primary text-white rounded-full font-sub text-xs sm:text-sm font-black uppercase tracking-widest flex items-center justify-center gap-3 shadow-2xl shadow-primary/30 hover:scale-105 transition-all"
@@ -206,13 +206,11 @@ export default function ProLanding() {
             </Link>
             <a 
               href="#schema-anime" 
-              className="flex items-center gap-2 px-7 py-5 rounded-full bg-white border border-gray-200 shadow-sm font-sub text-xs font-black uppercase tracking-widest text-foreground hover:bg-gray-50 transition-colors"
+              className="flex items-center justify-center gap-2 px-8 py-5 rounded-full bg-white border border-gray-200 shadow-sm font-sub text-xs font-black uppercase tracking-widest text-foreground hover:bg-gray-50 transition-colors"
             >
               <i className="fa-solid fa-play text-primary"></i> Voir la démonstration en direct ↓
             </a>
           </FadeIn>
-
-
         </motion.div>
 
         {/* Ambient Glows */}
