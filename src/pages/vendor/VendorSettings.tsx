@@ -180,15 +180,51 @@ export default function VendorSettings() {
             </div>
           )}
 
-          {/* Section 1: Localisation (Leaflet Natif Stable) */}
+          {/* Section 1: Localisation (Leaflet Natif Stable & GPS Automatique) */}
           {activeTab === 1 && (
             <div className="p-8 rounded-[40px] bg-card border border-border shadow-sm space-y-8 animate-in fade-in duration-300">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
+              {/* Carte GPS */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-2 flex items-center gap-2">
+                    Position exacte sur la carte <i className="fa-solid fa-map-pin text-primary"></i>
+                  </label>
+                  <span className="text-[10px] font-bold text-primary bg-primary/10 px-3 py-1 rounded-full">
+                    GPS & Marqueur Déplaçable
+                  </span>
+                </div>
+
+                <div className="h-80 rounded-[32px] overflow-hidden border border-border shadow-inner bg-gray-100">
+                  <MapComponent 
+                    center={markerPos}
+                    zoom={15}
+                    autoPromptLocation={true}
+                    markers={[{ ...markerPos, title: shopData.name || "Mon Restaurant" }]}
+                    onMapClick={handleMapClick}
+                    onAddressDetected={(detected) => {
+                      setLocationData(prev => ({
+                        country: detected.country || prev.country || "Bénin",
+                        city: detected.city || prev.city || "Cotonou",
+                        neighborhood: detected.neighborhood || prev.neighborhood,
+                        address: detected.address || prev.address
+                      }));
+                      toast.success(`📍 Position détectée : ${detected.neighborhood || detected.city || "Emplacement mis à jour"}`);
+                    }}
+                  />
+                </div>
+                <p className="text-[11px] text-muted-foreground italic text-center">
+                  💡 Déplacez le repère bleu ou cliquez sur la carte pour définir l'entrée exacte de votre restaurant.
+                </p>
+              </div>
+
+              {/* Formulaire Adresse */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
                 {[
                   { label: "Pays", value: locationData.country, key: "country" },
                   { label: "Ville", value: locationData.city, key: "city" },
                   { label: "Quartier", value: locationData.neighborhood, key: "neighborhood" },
-                  { label: "Adresse Complète", value: locationData.address, key: "address" },
+                  { label: "Adresse Complète / Repère", value: locationData.address, key: "address" },
                 ].map((f) => (
                   <div key={f.key} className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-2">{f.label}</label>
@@ -196,31 +232,31 @@ export default function VendorSettings() {
                       value={f.value}
                       onChange={(e) => setLocationData({...locationData, [f.key]: e.target.value})}
                       className="w-full p-4 rounded-2xl bg-muted/20 border border-border focus:outline-none focus:ring-2 focus:ring-primary/20 text-xs"
+                      placeholder={`Ex: ${f.label}`}
                     />
                   </div>
                 ))}
               </div>
 
-              <div className="space-y-3">
-                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-2 flex items-center gap-2">
-                  Position sur la carte <i className="fa-solid fa-map-pin text-primary"></i>
-                </label>
-                <div className="h-72 rounded-[32px] overflow-hidden border border-border shadow-inner bg-gray-100">
-                  <MapComponent 
-                    center={markerPos}
-                    zoom={14}
-                    markers={[{ ...markerPos, title: shopData.name || "Position Établissement" }]}
-                    onMapClick={handleMapClick}
-                  />
+              <div className="p-4 rounded-2xl bg-orange-50 border border-orange-200/80 flex items-center justify-between text-xs">
+                <div className="flex items-center gap-3">
+                  <i className="fa-solid fa-location-crosshairs text-primary text-base"></i>
+                  <div>
+                    <span className="font-bold text-gray-900 block">Coordonnées GPS enregistrées</span>
+                    <span className="text-gray-500 font-mono text-[11px]">Lat: {markerPos.lat.toFixed(5)}, Lng: {markerPos.lng.toFixed(5)}</span>
+                  </div>
                 </div>
-                <p className="text-[10px] text-muted-foreground italic text-center">Cliquez sur la carte ou utilisez le bouton "Me localiser" pour définir vos coordonnées GPS exactes.</p>
+                <span className="text-[10px] font-black uppercase text-emerald-600 bg-emerald-100/60 px-2.5 py-1 rounded-full">
+                  Prêt pour les livreurs
+                </span>
               </div>
 
               <button 
                 onClick={() => saveSection("Localisation", {...locationData, lat: markerPos.lat, lng: markerPos.lng})}
-                className="w-full md:w-auto px-10 py-5 rounded-[24px] bg-black text-white font-sub text-[11px] font-black uppercase tracking-widest shadow-xl hover:bg-primary transition-all flex items-center justify-center gap-2"
+                disabled={isSaving}
+                className="w-full md:w-auto px-10 py-5 rounded-[24px] bg-primary text-white font-sub text-[11px] font-black uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
               >
-                <i className="fa-solid fa-check"></i> Confirmer la position
+                <i className="fa-solid fa-floppy-disk"></i> Enregistrer ma localisation
               </button>
             </div>
           )}
