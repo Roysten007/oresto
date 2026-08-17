@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useState } from "react";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { useState, useEffect } from "react";
 
 const FadeIn = ({ children, delay = 0, y = 20, className = "" }: { children: React.ReactNode, delay?: number, y?: number, className?: string }) => (
   <motion.div
@@ -20,7 +20,17 @@ export default function ProLanding() {
   const navBorder = useTransform(scrollY, [0, 50], ["transparent", "rgba(0, 0, 0, 0.05)"]);
 
   const [openFaq, setOpenFaq] = useState<number | null>(0);
-  const [selectedSolution, setSelectedSolution] = useState<number>(0);
+  const [activeFlowStep, setActiveFlowStep] = useState<number>(0);
+  const [autoPlay, setAutoPlay] = useState<boolean>(true);
+
+  // Auto-cycle through the live flow schema
+  useEffect(() => {
+    if (!autoPlay) return;
+    const timer = setInterval(() => {
+      setActiveFlowStep((prev) => (prev + 1) % 4);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, [autoPlay]);
 
   // Solutions concrètes aux problèmes du quotidien
   const solutions = [
@@ -86,6 +96,46 @@ export default function ProLanding() {
     }
   ];
 
+  // Schéma interactif illustré des étapes
+  const flowSteps = [
+    {
+      step: 1,
+      title: "Le Client commande sur votre vitrine",
+      short: "1. Choix du plat & Panier",
+      icon: "fa-solid fa-mobile-screen-button",
+      desc: "Le client ouvre votre site ou scanne le QR Code sur sa table. Il choisit son Poulet Braisé & Alloco (3 500 F) et valide son panier en 2 clics.",
+      mockupType: "client_order",
+      highlight: "Zéro application à installer pour le client"
+    },
+    {
+      step: 2,
+      title: "Paiement Mobile Money direct dans le Chat",
+      short: "2. MoMo & Preuve dans le chat",
+      icon: "fa-solid fa-money-bill-transfer",
+      desc: "Dans la discussion de commande, votre numéro MoMo (MTN / Moov) est affiché avec un bouton 'Copier'. Le client transfère et clique sur 'J'ai envoyé le paiement'.",
+      mockupType: "chat_payment",
+      highlight: "Aucun risque d'erreur de numéro"
+    },
+    {
+      step: 3,
+      title: "Le Restaurateur valide d'un seul clic",
+      short: "3. Validation en 1 clic",
+      icon: "fa-solid fa-circle-check",
+      desc: "Vous recevez l'alerte sur votre téléphone, vérifiez la réception et cliquez sur 'Valider réception paiement'. La commande passe immédiatement en cuisine.",
+      mockupType: "vendor_validation",
+      highlight: "Bulle verte de confirmation automatique"
+    },
+    {
+      step: 4,
+      title: "Votre Chiffre d'Affaires s'actualise en direct",
+      short: "4. CA & Comptabilité en direct",
+      icon: "fa-solid fa-chart-line",
+      desc: "Votre tableau de bord intègre automatiquement les 3 500 FCFA dans vos ventes du jour. Tout est tracé, clair et prêt pour la clôture du soir.",
+      mockupType: "dashboard_update",
+      highlight: "Comptes du soir prêts instantanément"
+    }
+  ];
+
   const faqs = [
     { 
       q: "Comment Oresto m'aide concrètement au quotidien ?", 
@@ -129,9 +179,9 @@ export default function ProLanding() {
 
           <div className="hidden lg:flex items-center gap-1 p-1 rounded-full bg-white/80 backdrop-blur-xl border border-gray-200 shadow-sm">
             <a href="#solutions" className="px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors">Vos Solutions</a>
+            <a href="#schema-anime" className="px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest text-primary font-bold">Schéma en Direct</a>
             <a href="#comparatif" className="px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors">Avant / Après</a>
-            <a href="#fonctionnement" className="px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors">En Pratique</a>
-            <a href="#tarifs" className="px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest text-primary font-bold">Tarifs</a>
+            <a href="#tarifs" className="px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors">Tarifs</a>
             <a href="#faq" className="px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors">Questions</a>
           </div>
 
@@ -146,7 +196,7 @@ export default function ProLanding() {
         </div>
       </motion.nav>
 
-      {/* ─── Hero : Orienté Empathie & Résolution de Problèmes ─── */}
+      {/* ─── Hero Section ─── */}
       <section className="relative pt-36 pb-20 md:pt-44 md:pb-28 px-6 overflow-hidden">
         <motion.div className="max-w-5xl mx-auto text-center relative z-10 space-y-6">
           
@@ -171,11 +221,11 @@ export default function ProLanding() {
 
           <FadeIn delay={0.35} className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 pt-4">
             <a 
-              href="#solutions" 
+              href="#schema-anime" 
               className="group w-full sm:w-auto px-9 py-5 bg-primary text-white rounded-full font-sub text-xs sm:text-sm font-black uppercase tracking-widest flex items-center justify-center gap-3 shadow-2xl shadow-primary/30 hover:scale-105 transition-all"
             >
-              <i className="fa-solid fa-list-check"></i>
-              Découvrir les solutions pour mon restaurant 
+              <i className="fa-solid fa-play"></i>
+              Voir le schéma illustré en direct
               <i className="fa-solid fa-arrow-down group-hover:translate-y-1 transition-transform"></i>
             </a>
             <Link 
@@ -210,7 +260,244 @@ export default function ProLanding() {
         </div>
       </section>
 
-      {/* ─── SECTION MAJEURE : VOS DÉFIS ➔ NOS SOLUTIONS CONCRÈTES ─── */}
+      {/* ─── NOUVEAU SCHÉMA ILLUSTRÉ & DYNAMIQUE : COMMENT ÇA MARCHE EN IMAGES ─── */}
+      <section id="schema-anime" className="py-24 px-6 bg-gradient-to-br from-gray-950 via-black to-gray-950 text-white rounded-[48px] mx-4 md:mx-10 my-8 shadow-2xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 rounded-full blur-[140px] pointer-events-none" />
+        
+        <div className="max-w-6xl mx-auto space-y-12 relative z-10">
+          <FadeIn className="text-center space-y-3">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/20 border border-primary/30 text-primary text-xs font-black uppercase tracking-widest">
+              <i className="fa-solid fa-diagram-project"></i> Démonstration Visuelle Interactive
+            </div>
+            <h2 className="font-heading text-3xl md:text-5xl font-black uppercase tracking-tight">
+              Comment tout se déroule, <span className="text-primary">étape par étape</span>
+            </h2>
+            <p className="text-sm text-gray-400 max-w-2xl mx-auto">
+              Cliquez sur les étapes ou laissez l'animation vous montrer la simplicité de l'expérience entre votre client et votre cuisine.
+            </p>
+          </FadeIn>
+
+          {/* Stepper Tabs Bar */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {flowSteps.map((s, idx) => {
+              const active = activeFlowStep === idx;
+              return (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    setActiveFlowStep(idx);
+                    setAutoPlay(false);
+                  }}
+                  className={`p-4 rounded-2xl border-2 text-left transition-all relative overflow-hidden flex flex-col justify-between space-y-2 ${
+                    active 
+                      ? "bg-white/15 border-primary shadow-xl shadow-primary/20 scale-[1.02]" 
+                      : "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs ${
+                      active ? "bg-primary text-white" : "bg-white/10 text-gray-400"
+                    }`}>
+                      <i className={s.icon}></i>
+                    </span>
+                    {active && (
+                      <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                    )}
+                  </div>
+                  <div>
+                    <h4 className="font-heading font-black text-xs uppercase tracking-tight text-white">{s.short}</h4>
+                  </div>
+                  {active && (
+                    <motion.div 
+                      layoutId="activeGlow" 
+                      className="absolute bottom-0 left-0 right-0 h-1 bg-primary" 
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Dynamic Interactive Illustration Canvas */}
+          <div className="p-8 sm:p-12 rounded-[40px] bg-white/5 border border-white/15 backdrop-blur-xl grid lg:grid-cols-12 gap-8 items-center">
+            
+            {/* Left: Step Explanation */}
+            <div className="lg:col-span-5 space-y-6">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/20 text-primary text-[10px] font-black uppercase tracking-widest border border-primary/30">
+                Étape {flowSteps[activeFlowStep].step} sur 4
+              </div>
+
+              <h3 className="font-heading text-2xl sm:text-3xl font-black text-white leading-tight">
+                {flowSteps[activeFlowStep].title}
+              </h3>
+
+              <p className="text-sm text-gray-300 leading-relaxed">
+                {flowSteps[activeFlowStep].desc}
+              </p>
+
+              <div className="p-4 rounded-2xl bg-white/10 border border-white/10 flex items-center gap-3 text-xs font-bold text-emerald-400">
+                <i className="fa-solid fa-circle-check text-base shrink-0"></i>
+                <span>{flowSteps[activeFlowStep].highlight}</span>
+              </div>
+
+              <div className="flex items-center gap-4 pt-2">
+                <button
+                  onClick={() => {
+                    setActiveFlowStep((prev) => (prev === 0 ? 3 : prev - 1));
+                    setAutoPlay(false);
+                  }}
+                  className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
+                >
+                  <i className="fa-solid fa-chevron-left text-xs"></i>
+                </button>
+                <span className="text-xs font-mono text-gray-400">
+                  {activeFlowStep + 1} / 4
+                </span>
+                <button
+                  onClick={() => {
+                    setActiveFlowStep((prev) => (prev + 1) % 4);
+                    setAutoPlay(false);
+                  }}
+                  className="w-10 h-10 rounded-full bg-primary hover:bg-primary/90 flex items-center justify-center text-white transition-colors shadow-lg shadow-primary/30"
+                >
+                  <i className="fa-solid fa-chevron-right text-xs"></i>
+                </button>
+                <button
+                  onClick={() => setAutoPlay(!autoPlay)}
+                  className="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-white ml-auto"
+                >
+                  {autoPlay ? "⏸ Pause animation" : "▶ Lecture auto"}
+                </button>
+              </div>
+            </div>
+
+            {/* Right: Live Visual Mockup Illustration */}
+            <div className="lg:col-span-7 flex items-center justify-center">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeFlowStep}
+                  initial={{ opacity: 0, y: 15, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -15, scale: 0.98 }}
+                  transition={{ duration: 0.3 }}
+                  className="w-full max-w-md bg-white text-gray-900 rounded-[36px] p-6 sm:p-7 shadow-2xl border-4 border-gray-800 space-y-4"
+                >
+                  {/* Mockup Top Status Bar */}
+                  <div className="flex items-center justify-between border-b border-gray-100 pb-3 text-xs text-gray-500 font-bold">
+                    <span className="flex items-center gap-1.5 text-primary">
+                      <i className="fa-solid fa-store"></i> Chez Maman (Cotonou)
+                    </span>
+                    <span className="text-[10px] font-mono bg-gray-100 px-2 py-0.5 rounded-full">
+                      12:30 • Live
+                    </span>
+                  </div>
+
+                  {/* 1. MOCKUP ÉCRAN COMMANDE CLIENT */}
+                  {flowSteps[activeFlowStep].mockupType === "client_order" && (
+                    <div className="space-y-3 animate-in fade-in duration-300">
+                      <div className="p-4 rounded-2xl bg-orange-50/70 border border-orange-200/80 flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-xl bg-orange-500 text-white flex items-center justify-center text-xl shadow-sm">
+                          🍗
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h5 className="font-heading font-black text-sm text-gray-900">Poulet Braisé & Alloco</h5>
+                          <p className="text-[10px] text-gray-500 font-medium">Piment maison + oignons grillés</p>
+                        </div>
+                        <span className="font-heading font-black text-sm text-primary">3 500 F</span>
+                      </div>
+
+                      <div className="p-3 rounded-2xl bg-gray-50 flex justify-between text-xs font-bold text-gray-700">
+                        <span>Panier : 1 article</span>
+                        <span className="text-primary font-black">Total : 3 500 FCFA</span>
+                      </div>
+
+                      <div className="w-full py-3.5 rounded-2xl bg-black text-white font-black text-xs uppercase tracking-wider text-center flex items-center justify-center gap-2 shadow-md">
+                        <i className="fa-solid fa-cart-shopping"></i> Valider ma commande
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 2. MOCKUP CHAT PAIEMENT MOMO */}
+                  {flowSteps[activeFlowStep].mockupType === "chat_payment" && (
+                    <div className="space-y-3 animate-in fade-in duration-300">
+                      {/* Message Resto */}
+                      <div className="p-3 rounded-2xl bg-gray-100 text-xs text-gray-800 space-y-1">
+                        <p className="font-bold text-[10px] text-primary uppercase tracking-wider">Restaurant Chez Maman :</p>
+                        <p>Bonjour ! Pour régler vos 3 500 F, effectuez le transfert MoMo au <strong>97 00 00 00</strong>. Merci !</p>
+                      </div>
+
+                      {/* Carte MoMo interactive */}
+                      <div className="p-3.5 rounded-2xl bg-primary/10 border border-primary/30 flex items-center justify-between">
+                        <div>
+                          <span className="text-[9px] font-black uppercase tracking-wider text-primary block">Numéro MTN MoMo</span>
+                          <span className="font-mono font-black text-sm text-gray-900">97 00 00 00</span>
+                        </div>
+                        <button className="px-3 py-1.5 rounded-xl bg-black text-white text-[10px] font-bold">
+                          Copier
+                        </button>
+                      </div>
+
+                      {/* Action Client */}
+                      <div className="w-full py-3 rounded-2xl bg-emerald-600 text-white font-black text-xs uppercase tracking-wider text-center flex items-center justify-center gap-2 shadow-md">
+                        <i className="fa-solid fa-paper-plane"></i> 💸 J'ai envoyé le paiement
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 3. MOCKUP VALIDATION RESTAURATEUR */}
+                  {flowSteps[activeFlowStep].mockupType === "vendor_validation" && (
+                    <div className="space-y-3 animate-in fade-in duration-300">
+                      <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-black uppercase tracking-wider text-blue-700">Alerte Paiement Reçu</span>
+                          <span className="text-[9px] font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">MoMo 3 500 F</span>
+                        </div>
+                        <p className="text-xs text-blue-900 font-medium">Le client a déclaré avoir effectué le transfert de 3 500 FCFA.</p>
+                      </div>
+
+                      <div className="w-full py-3.5 rounded-2xl bg-emerald-600 text-white font-black text-xs uppercase tracking-wider text-center flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20">
+                        <i className="fa-solid fa-circle-check"></i> ✅ Valider & Lancer en cuisine
+                      </div>
+
+                      <p className="text-[10px] text-center text-gray-400 font-medium italic">
+                        La bulle verte de confirmation est envoyée instantanément au client.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* 4. MOCKUP ACTUALISATION DASHBOARD & CA */}
+                  {flowSteps[activeFlowStep].mockupType === "dashboard_update" && (
+                    <div className="space-y-3 animate-in fade-in duration-300">
+                      <div className="p-4 rounded-2xl bg-gray-900 text-white space-y-2">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Chiffre d'Affaires du Jour</span>
+                        <div className="flex items-baseline gap-2">
+                          <span className="font-heading text-2xl font-black text-emerald-400">+3 500 F</span>
+                          <span className="text-[10px] text-gray-400">Total : 42 000 FCFA</span>
+                        </div>
+                      </div>
+
+                      <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-between text-xs">
+                        <span className="font-bold text-emerald-900 flex items-center gap-1.5">
+                          <i className="fa-solid fa-utensils text-emerald-600"></i> Commande #084
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-800 text-[10px] font-black uppercase">
+                          En cuisine 🍽️
+                        </span>
+                      </div>
+
+                      <p className="text-[10px] text-center text-emerald-700 font-bold">
+                        ✓ Vente comptabilisée • 100% encaissé sur votre Mobile Money
+                      </p>
+                    </div>
+                  )}
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── SECTION DÉFIS ➔ SOLUTIONS ─── */}
       <section id="solutions" className="py-24 px-6 bg-gray-50/70 border-y border-gray-100">
         <div className="max-w-7xl mx-auto space-y-16">
           <FadeIn className="text-center space-y-3">
@@ -345,59 +632,6 @@ export default function ProLanding() {
                 ))}
               </tbody>
             </table>
-          </FadeIn>
-        </div>
-      </section>
-
-      {/* ─── COMMENT ÇA SE PASSE EN PRATIQUE ─── */}
-      <section id="fonctionnement" className="py-20 px-6 bg-black text-white rounded-[48px] mx-4 md:mx-10 my-10 shadow-2xl">
-        <div className="max-w-5xl mx-auto space-y-16">
-          <FadeIn className="text-center space-y-3">
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">
-              Simple, Rapide et Accessible à Tous
-            </span>
-            <h2 className="font-heading text-3xl md:text-5xl font-black uppercase tracking-tighter">
-              Comment votre nouveau système fonctionne en 4 étapes
-            </h2>
-          </FadeIn>
-          
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {[
-              { 
-                step: "1", 
-                title: "Création en 12 minutes", 
-                desc: "Vous renseignez vos plats, vos chambres et votre numéro Mobile Money. Votre site est prêt sans aucun code." 
-              },
-              { 
-                step: "2", 
-                title: "Vos clients commandent", 
-                desc: "Ils ouvrent votre lien ou scannent le QR Code sur vos tables et composent leur commande en toute liberté." 
-              },
-              { 
-                step: "3", 
-                title: "Paiement dans le chat", 
-                desc: "Le client transfère le montant par Mobile Money et confirme d'un clic. Vous validez la réception instantanément." 
-              },
-              { 
-                step: "4", 
-                title: "Suivi & CA en direct", 
-                desc: "Votre cuisine prépare la commande et votre tableau de bord comptabilise la vente en temps réel." 
-              },
-            ].map((s, i) => (
-              <FadeIn key={i} delay={i * 0.1} className="p-6 rounded-3xl bg-white/5 border border-white/10 space-y-3 flex flex-col justify-between">
-                <div className="w-10 h-10 rounded-2xl bg-primary text-white flex items-center justify-center font-black text-base shadow-lg shadow-primary/30">
-                  {s.step}
-                </div>
-                <h3 className="font-heading text-base font-bold uppercase tracking-tight text-white">{s.title}</h3>
-                <p className="text-xs text-white/60 leading-relaxed">{s.desc}</p>
-              </FadeIn>
-            ))}
-          </div>
-
-          <FadeIn className="text-center">
-            <div className="inline-flex items-center gap-3 px-6 py-4 rounded-2xl bg-primary/10 border border-primary/30 text-primary text-xs font-bold">
-              <i className="fa-solid fa-lock"></i> <span className="text-white">Transparence totale : Oresto n'encaisse jamais votre argent à votre place. Tout va directement sur votre propre compte Mobile Money.</span>
-            </div>
           </FadeIn>
         </div>
       </section>
@@ -569,8 +803,8 @@ export default function ProLanding() {
                 <h4 className="font-black uppercase tracking-widest text-white/40 text-[10px]">Explorer</h4>
                 <ul className="space-y-2 text-gray-300 font-semibold">
                   <li><a href="#solutions" className="hover:text-primary transition-colors">Nos Solutions</a></li>
+                  <li><a href="#schema-anime" className="hover:text-primary transition-colors">Schéma Illustré</a></li>
                   <li><a href="#comparatif" className="hover:text-primary transition-colors">Avant / Après</a></li>
-                  <li><a href="#fonctionnement" className="hover:text-primary transition-colors">Fonctionnement</a></li>
                   <li><a href="#tarifs" className="hover:text-primary transition-colors">Tarifs</a></li>
                 </ul>
               </div>
