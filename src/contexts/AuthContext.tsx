@@ -454,9 +454,75 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { success: true, role: newUser.role, uid };
     } catch (error: any) {
       console.error("Erreur inscription Firebase:", error);
+      
+      // Si l'email existe déjà dans Firebase Auth, tenter une connexion directe et mettre à jour le restaurant
+      if (error.code === 'auth/email-already-in-use') {
+        try {
+          const userCredential = await signInWithEmailAndPassword(auth, data.email!, data.password);
+          const uid = userCredential.user.uid;
+          const vendorId = data.vendorId || `v_${uid}`;
+          
+          const newUser: User = {
+            id: uid,
+            name: `${data.firstName || ""} ${data.name || ""}`.trim() || data.email!.split("@")[0],
+            firstName: data.firstName || "",
+            email: data.email || "",
+            password: "",
+            role: "vendor",
+            phone: data.phone || "",
+            verificationMethod: data.verificationMethod || "email",
+            phoneVerified: false,
+            vendorId: vendorId,
+            city: data.city || "",
+            neighborhood: data.neighborhood || "",
+          };
+
+          const { trialStartedAt, trialEndsAt } = calculateTrialDates();
+          const existingVendorSnap = await get(child(ref(db), `vendors/${vendorId}`));
+          const existingVendor = existingVendorSnap.exists() ? existingVendorSnap.val() as VendorProfile : null;
+
+          const updatedVendorProfile: VendorProfile = {
+            ...(existingVendor || {}),
+            id: vendorId,
+            userId: uid,
+            name: data.shopName || existingVendor?.name || `${data.firstName || "Mon"} Restaurant`,
+            category: data.category || existingVendor?.category || "Restaurants",
+            city: data.city || existingVendor?.city || "",
+            neighborhood: data.neighborhood || existingVendor?.neighborhood || "",
+            phone: data.shopPhone || data.phone || existingVendor?.phone || "",
+            whatsapp: data.shopPhone || data.phone || existingVendor?.whatsapp || "",
+            subscriptionPlan: "pro",
+            plan: "pro",
+            subscriptionStatus: existingVendor?.subscriptionStatus || "trial",
+            trialStartedAt: existingVendor?.trialStartedAt || trialStartedAt,
+            trialEndsAt: existingVendor?.trialEndsAt || trialEndsAt,
+            nextBillingDate: existingVendor?.nextBillingDate || trialEndsAt,
+          } as any;
+
+          await update(ref(db), {
+            [`users/${uid}`]: newUser,
+            [`vendors/${vendorId}`]: updatedVendorProfile
+          });
+
+          setState({
+            user: newUser,
+            role: "vendor",
+            vendorProfile: updatedVendorProfile,
+            isAuthenticated: true,
+            isLoading: false
+          });
+
+          return { success: true, role: "vendor", uid };
+        } catch (loginErr: any) {
+          return { 
+            success: false, 
+            error: "Cet email possède déjà un compte avec un mot de passe différent. Cliquez sur 'Se connecter' ci-dessous." 
+          };
+        }
+      }
+
       let errMsg = "Une erreur est survenue lors de l'inscription.";
-      if (error.code === 'auth/email-already-in-use') errMsg = "Cet email est déjà utilisé par un autre compte.";
-      else if (error.code === 'auth/weak-password') errMsg = "Le mot de passe doit faire au moins 6 caractères.";
+      if (error.code === 'auth/weak-password') errMsg = "Le mot de passe doit faire au moins 6 caractères.";
       else if (error.code === 'auth/invalid-email') errMsg = "L'adresse email saisie est invalide.";
       else if (error.message) errMsg = error.message;
 

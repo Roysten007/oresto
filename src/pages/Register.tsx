@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Eye, EyeOff, ArrowRight, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Register() {
@@ -52,7 +51,7 @@ export default function Register() {
         vendorId: `v${Date.now()}` 
       });
       if (result.success) {
-        toast.success("Votre établissement a été créé avec succès ! Bienvenue 🚀", { duration: 4000 });
+        toast.success("Votre établissement a été configuré avec succès ! Bienvenue 🚀", { duration: 4000 });
         navigate("/vendor/dashboard", { replace: true });
       } else {
         setError(result.error || "Erreur lors de la création de la boutique");
@@ -64,38 +63,45 @@ export default function Register() {
   const updateForm = (key: string, value: string) => setForm(prev => ({ ...prev, [key]: value }));
 
   return (
-    <div className="min-h-screen bg-white flex flex-col lg:flex-row" style={{ fontFamily: "'Outfit', sans-serif" }}>
+    <div className="min-h-screen bg-white flex flex-col lg:flex-row font-body">
       {/* Left Panel - Hero Info */}
-      <div className="hidden lg:flex lg:w-1/3 bg-[#0A0A0A] p-10 lg:p-16 flex-col justify-between relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-[#FF6B00] opacity-5 blur-[80px] rounded-full translate-x-1/2 -translate-y-1/2" />
+      <div className="hidden lg:flex lg:w-1/3 bg-[#0A0A0A] p-10 lg:p-16 flex-col justify-between relative overflow-hidden text-white">
+        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-primary opacity-10 blur-[80px] rounded-full translate-x-1/2 -translate-y-1/2" />
         
-        <Link to="/" className="relative z-10 flex items-center gap-1 no-underline">
-          <span style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: 22, color: "white" }}>OREST</span>
-          <span style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: 22, color: "white", position: "relative" }}>
-            O<div className="absolute bottom-1 right-[-6px] w-[5px] h-[5px] bg-[#FF6B00] rounded-[1px]" />
+        <Link to="/" className="relative z-10 flex items-center gap-2.5 no-underline">
+          <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white shadow-lg">
+            <i className="fa-solid fa-utensils"></i>
+          </div>
+          <span className="font-heading font-black text-xl tracking-tight uppercase text-white">
+            Oresto <span className="text-primary">Connect</span>
           </span>
         </Link>
 
-        <div className="relative z-10">
-          <h1 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800 }} className="text-3xl lg:text-5xl text-white leading-tight mb-6">
-            Votre empire<br />commence ici.
+        <div className="relative z-10 space-y-4">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 text-primary text-xs font-black uppercase tracking-wider">
+            <i className="fa-solid fa-dove"></i> Tranquillité d'Esprit
+          </div>
+          <h1 className="font-heading font-black text-3xl lg:text-5xl text-white leading-tight">
+            Votre sérénité<br />commence ici.
           </h1>
-          <p className="text-[#888] text-lg leading-relaxed">
-            Rejoignez la plateforme qui révolutionne la restauration et l'hôtellerie en Afrique de l'Ouest.
+          <p className="text-gray-400 text-sm leading-relaxed">
+            Rejoignez les professionnels qui automatisent leurs commandes et gardent 100% de leurs revenus.
           </p>
         </div>
 
-        <div className="relative z-10 space-y-6">
+        <div className="relative z-10 space-y-5 text-xs">
           {[
-            { t: "Rapide", d: "Créez votre site en 12 min" },
-            { t: "Complet", d: "Dashboard, Site & Chat inclus" },
-            { t: "Gratuit", d: "Sans frais d'inscription" }
+            { t: "Création Rapide", d: "Votre site prêt en 12 minutes", icon: "fa-solid fa-bolt" },
+            { t: "Zéro Commission", d: "100% de vos gains dans votre poche", icon: "fa-solid fa-shield-halved" },
+            { t: "14 Jours Gratuits", d: "Sans engagement ni carte bancaire", icon: "fa-solid fa-clock" }
           ].map((item, i) => (
-            <div key={i} className="flex items-center gap-4">
-              <CheckCircle2 size={24} className="text-[#FF6B00]" />
+            <div key={i} className="flex items-center gap-3.5">
+              <div className="w-8 h-8 rounded-xl bg-primary/20 text-primary flex items-center justify-center text-xs">
+                <i className={item.icon}></i>
+              </div>
               <div>
-                <p className="text-white font-bold text-sm">{item.t}</p>
-                <p className="text-[#666] text-xs">{item.d}</p>
+                <p className="text-white font-bold">{item.t}</p>
+                <p className="text-gray-400 text-[11px]">{item.d}</p>
               </div>
             </div>
           ))}
@@ -105,139 +111,159 @@ export default function Register() {
       {/* Right Panel - Steps Form */}
       <div className="flex-1 flex flex-col items-center justify-center p-6 lg:p-20">
         <div className="lg:hidden mb-8 w-full flex justify-center">
-          <Link to="/" className="flex items-center gap-1 no-underline">
-            <span style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: 24, color: "#0A0A0A" }}>OREST</span>
-            <span style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: 24, color: "#0A0A0A", position: "relative" }}>
-              O<div className="absolute bottom-1 right-[-6px] w-[6px] h-[6px] bg-[#FF6B00] rounded-[1px]" />
+          <Link to="/" className="flex items-center gap-2 no-underline">
+            <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center text-white">
+              <i className="fa-solid fa-utensils"></i>
+            </div>
+            <span className="font-heading font-black text-xl text-gray-900 tracking-tight uppercase">
+              Oresto <span className="text-primary">Connect</span>
             </span>
           </Link>
         </div>
 
         <div className="w-full max-w-lg">
           {/* Progress Bar */}
-          <div className="flex gap-2 mb-12">
+          <div className="flex gap-2 mb-10">
             {Array.from({ length: totalSteps }).map((_, i) => (
-              <div key={i} className={`flex-1 h-1.5 rounded-full transition-all duration-500 ${i < step ? "bg-[#FF6B00]" : "bg-[#EEEEEE]"}`} />
+              <div key={i} className={`flex-1 h-1.5 rounded-full transition-all duration-500 ${i < step ? "bg-primary" : "bg-gray-200"}`} />
             ))}
           </div>
 
           {error && (
-            <div className="mb-8 p-4 rounded-2xl bg-red-50 border border-red-100 text-red-600 text-sm font-medium animate-in fade-in duration-300">
-              ⚠️ {error}
+            <div className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs font-medium space-y-2 animate-in fade-in duration-300">
+              <div className="flex items-center gap-2">
+                <i className="fa-solid fa-triangle-exclamation text-red-500 text-sm shrink-0"></i>
+                <span>{error}</span>
+              </div>
+              {error.includes("Se connecter") && (
+                <div className="pt-2 border-t border-red-200/60">
+                  <Link 
+                    to={`/login?email=${encodeURIComponent(form.email)}`}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-600 text-white font-bold text-xs hover:bg-red-700 transition-colors shadow-sm"
+                  >
+                    <i className="fa-solid fa-arrow-right-to-bracket"></i>
+                    Se connecter avec cet email
+                  </Link>
+                </div>
+              )}
             </div>
           )}
 
-          <div className="mb-10 text-center lg:text-left">
-            <h2 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800 }} className="text-3xl text-[#0A0A0A] mb-2">
-              {step === 1 ? "Vos informations" : "Votre établissement"}
+          <div className="mb-8 text-center lg:text-left">
+            <h2 className="font-heading font-black text-2xl sm:text-3xl text-gray-900 mb-1">
+              {step === 1 ? "Vos informations personnelles" : "Votre établissement"}
             </h2>
-            <p className="text-[#777]">Étape {step} sur {totalSteps}</p>
+            <p className="text-xs text-gray-500 font-bold">Étape {step} sur {totalSteps}</p>
           </div>
 
-          <div className="space-y-8">
+          <div className="space-y-6">
             {/* Étape 1 : Informations personnelles */}
             {step === 1 && (
-              <div className="space-y-5 animate-in slide-in-from-right-10 duration-500">
-                <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-4 animate-in slide-in-from-right-10 duration-300">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Prénom</label>
+                    <label className="block text-[10px] font-bold text-gray-700 uppercase tracking-widest mb-1.5 px-1">Prénom *</label>
                     <input 
                       value={form.firstName} onChange={e => updateForm("firstName", e.target.value)} required
-                      className="w-full px-5 py-4 rounded-2xl border border-[#EEEEEE] bg-white text-[#0A0A0A] focus:border-[#FF6B00] focus:ring-1 focus:ring-[#FF6B00] outline-none"
+                      className="w-full px-4 py-3.5 rounded-2xl border border-gray-200 bg-white text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-xs"
+                      placeholder="Ex: Sophie"
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Nom</label>
+                    <label className="block text-[10px] font-bold text-gray-700 uppercase tracking-widest mb-1.5 px-1">Nom *</label>
                     <input 
                       value={form.name} onChange={e => updateForm("name", e.target.value)} required
-                      className="w-full px-5 py-4 rounded-2xl border border-[#EEEEEE] bg-white text-[#0A0A0A] focus:border-[#FF6B00] focus:ring-1 focus:ring-[#FF6B00] outline-none"
+                      className="w-full px-4 py-3.5 rounded-2xl border border-gray-200 bg-white text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-xs"
+                      placeholder="Ex: Lawson"
                     />
                   </div>
                 </div>
+
                 <div>
-                  <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Téléphone</label>
+                  <label className="block text-[10px] font-bold text-gray-700 uppercase tracking-widest mb-1.5 px-1">Numéro Téléphone / WhatsApp</label>
                   <input 
                     value={form.phone} onChange={e => updateForm("phone", e.target.value)}
-                    className="w-full px-5 py-4 rounded-2xl border border-[#EEEEEE] bg-white text-[#0A0A0A] focus:border-[#FF6B00] focus:ring-1 focus:ring-[#FF6B00] outline-none" placeholder="+229 97 00 00 00"
+                    className="w-full px-4 py-3.5 rounded-2xl border border-gray-200 bg-white text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-xs" 
+                    placeholder="+229 97 00 00 00"
                   />
                 </div>
+
                 <div>
-                  <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Email pro</label>
+                  <label className="block text-[10px] font-bold text-gray-700 uppercase tracking-widest mb-1.5 px-1">Email *</label>
                   <input 
                     type="email" value={form.email} onChange={e => updateForm("email", e.target.value)} required
-                    className="w-full px-5 py-4 rounded-2xl border border-[#EEEEEE] bg-white text-[#0A0A0A] focus:border-[#FF6B00] focus:ring-1 focus:ring-[#FF6B00] outline-none"
+                    className="w-full px-4 py-3.5 rounded-2xl border border-gray-200 bg-white text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-xs"
+                    placeholder="contact@monrestaurant.com"
                   />
                 </div>
+
                 <div>
-                  <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Mot de passe</label>
+                  <label className="block text-[10px] font-bold text-gray-700 uppercase tracking-widest mb-1.5 px-1">Mot de passe * (min 6 caractères)</label>
                   <div className="relative">
                     <input 
                       type={showPw ? "text" : "password"} value={form.password} onChange={e => updateForm("password", e.target.value)} required
-                      className="w-full px-5 py-4 rounded-2xl border border-[#EEEEEE] bg-white text-[#0A0A0A] focus:border-[#FF6B00] focus:ring-1 focus:ring-[#FF6B00] outline-none pr-12"
+                      className="w-full px-4 py-3.5 rounded-2xl border border-gray-200 bg-white text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none pr-12 text-xs"
+                      placeholder="••••••••"
                     />
-                    <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#BBB]">
-                      {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
+                    <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                      <i className={showPw ? "fa-solid fa-eye-slash text-xs" : "fa-solid fa-eye text-xs"}></i>
                     </button>
                   </div>
                 </div>
+
                 <div>
-                  <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Confirmer le mot de passe</label>
+                  <label className="block text-[10px] font-bold text-gray-700 uppercase tracking-widest mb-1.5 px-1">Confirmer le mot de passe *</label>
                   <input 
                     type="password" value={form.confirmPassword} onChange={e => updateForm("confirmPassword", e.target.value)} required
-                    className="w-full px-5 py-4 rounded-2xl border border-[#EEEEEE] bg-white text-[#0A0A0A] focus:border-[#FF6B00] focus:ring-1 focus:ring-[#FF6B00] outline-none"
+                    className="w-full px-4 py-3.5 rounded-2xl border border-gray-200 bg-white text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-xs"
+                    placeholder="••••••••"
                   />
                 </div>
               </div>
             )}
 
-            {/* Étape 2 : Informations Vendeur */}
+            {/* Étape 2 : Votre établissement */}
             {step === 2 && (
-              <div className="space-y-5 animate-in slide-in-from-right-10 duration-500">
+              <div className="space-y-4 animate-in slide-in-from-right-10 duration-300">
                 <div>
-                  <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Nom de l'établissement</label>
+                  <label className="block text-[10px] font-bold text-gray-700 uppercase tracking-widest mb-1.5 px-1">Nom de votre établissement *</label>
                   <input 
-                    value={vendorForm.shopName} onChange={e => setVendorForm(p => ({ ...p, shopName: e.target.value }))}
-                    placeholder="Ex: Le Béninois, Chez Maman..."
-                    className="w-full px-5 py-4 rounded-2xl border border-[#EEEEEE] bg-white text-[#0A0A0A] focus:border-[#FF6B00] focus:ring-1 focus:ring-[#FF6B00] outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Catégorie</label>
-                  <div className="w-full px-5 py-4 rounded-2xl border border-[#EEEEEE] bg-[#FAFAFA] flex items-center gap-3">
-                    <span className="text-xl">🍽️</span>
-                    <span className="font-bold text-[#0A0A0A]">Restaurants</span>
-                    <span className="ml-auto text-[9px] font-black uppercase tracking-widest text-[#FF6B00] bg-[#FFF3E8] px-2 py-1 rounded-full">Catégorie par défaut</span>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Ville</label>
-                    <input 
-                      value={vendorForm.city} onChange={e => setVendorForm(p => ({ ...p, city: e.target.value }))}
-                      placeholder="Ex: Cotonou"
-                      className="w-full px-5 py-4 rounded-2xl border border-[#EEEEEE] bg-white text-[#0A0A0A] focus:border-[#FF6B00] focus:ring-1 focus:ring-[#FF6B00] outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Quartier</label>
-                    <input 
-                      value={vendorForm.neighborhood} onChange={e => setVendorForm(p => ({ ...p, neighborhood: e.target.value }))}
-                      placeholder="Ex: Haïe Vive"
-                      className="w-full px-5 py-4 rounded-2xl border border-[#EEEEEE] bg-white text-[#0A0A0A] focus:border-[#FF6B00] focus:ring-1 focus:ring-[#FF6B00] outline-none"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Téléphone de la réception</label>
-                  <input 
-                    value={vendorForm.shopPhone} onChange={e => setVendorForm(p => ({ ...p, shopPhone: e.target.value }))}
-                    placeholder="+229 97 00 00 00"
-                    className="w-full px-5 py-4 rounded-2xl border border-[#EEEEEE] bg-white text-[#0A0A0A] focus:border-[#FF6B00] focus:ring-1 focus:ring-[#FF6B00] outline-none"
+                    value={vendorForm.shopName} onChange={e => setVendorForm(p => ({ ...p, shopName: e.target.value }))} required
+                    className="w-full px-4 py-3.5 rounded-2xl border border-gray-200 bg-white text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-xs"
+                    placeholder="Ex: Le Maquis Étoilé"
                   />
                 </div>
 
-                {/* Formule d'abonnement unique */}
-                <div className="p-5 rounded-2xl bg-orange-50/60 border border-orange-200/80 space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-700 uppercase tracking-widest mb-1.5 px-1">Ville *</label>
+                    <input 
+                      value={vendorForm.city} onChange={e => setVendorForm(p => ({ ...p, city: e.target.value }))} required
+                      className="w-full px-4 py-3.5 rounded-2xl border border-gray-200 bg-white text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-xs"
+                      placeholder="Ex: Cotonou"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-700 uppercase tracking-widest mb-1.5 px-1">Quartier</label>
+                    <input 
+                      value={vendorForm.neighborhood} onChange={e => setVendorForm(p => ({ ...p, neighborhood: e.target.value }))}
+                      className="w-full px-4 py-3.5 rounded-2xl border border-gray-200 bg-white text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-xs"
+                      placeholder="Ex: Haie Vive"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-700 uppercase tracking-widest mb-1.5 px-1">Numéro Mobile Money (MoMo / Moov)</label>
+                  <input 
+                    value={vendorForm.shopPhone} onChange={e => setVendorForm(p => ({ ...p, shopPhone: e.target.value }))}
+                    className="w-full px-4 py-3.5 rounded-2xl border border-gray-200 bg-white text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-xs"
+                    placeholder="+229 97 00 00 00"
+                  />
+                </div>
+
+                {/* Formule info */}
+                <div className="p-4 rounded-2xl bg-orange-50/80 border border-orange-200 space-y-2 text-xs">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-black uppercase tracking-widest text-primary">
                       ✨ Formule Unique Oresto Pro
@@ -247,7 +273,7 @@ export default function Register() {
                     </span>
                   </div>
                   <div className="flex items-baseline gap-2">
-                    <span className="font-heading font-black text-2xl text-[#0A0A0A]">5 000 FCFA</span>
+                    <span className="font-heading font-black text-2xl text-gray-900">5 000 FCFA</span>
                     <span className="text-xs font-bold text-gray-500">/ mois</span>
                   </div>
                   <p className="text-[11px] text-gray-600 leading-relaxed">
@@ -257,29 +283,33 @@ export default function Register() {
               </div>
             )}
 
-            <div className="flex gap-4 pt-4">
+            <div className="flex gap-3 pt-2">
               {step > 1 && (
                 <button 
                   type="button"
                   onClick={() => { setStep(step - 1); setError(""); }}
-                  className="flex-1 py-5 rounded-full border-2 border-[#EEEEEE] text-[#0A0A0A] font-bold flex items-center justify-center gap-2 hover:bg-[#F8F8F8] transition-all"
+                  className="flex-1 py-4 rounded-full border-2 border-gray-200 text-gray-900 font-bold text-xs flex items-center justify-center gap-2 hover:bg-gray-50 transition-all"
                 >
-                  <ArrowLeft size={18} /> Retour
+                  <i className="fa-solid fa-arrow-left"></i> Retour
                 </button>
               )}
               <button 
                 type="button"
                 onClick={handleNext}
                 disabled={loading}
-                className="flex-1 py-5 rounded-full bg-[#0A0A0A] text-white font-bold flex items-center justify-center gap-2 hover:bg-[#FF6B00] transition-all transform active:scale-95 disabled:opacity-50"
+                className="flex-1 py-4 rounded-full bg-primary text-white font-bold text-xs flex items-center justify-center gap-2 hover:bg-primary/90 transition-all shadow-lg shadow-primary/25 disabled:opacity-50 active:scale-95"
               >
-                {loading ? "Création..." : (step === totalSteps ? "Lancer mon établissement" : "Suivant")} <ArrowRight size={18} />
+                {loading ? (
+                  <span><i className="fa-solid fa-spinner fa-spin mr-1"></i> Création...</span>
+                ) : (
+                  <span>{step === totalSteps ? "Lancer mon établissement" : "Continuer"} <i className="fa-solid fa-arrow-right ml-1"></i></span>
+                )}
               </button>
             </div>
           </div>
 
-          <p className="mt-12 text-center text-[#777] font-medium">
-            Déjà partenaire ? <Link to="/login" className="text-[#FF6B00] font-bold hover:underline">Se connecter</Link>
+          <p className="mt-8 text-center text-gray-500 text-xs font-medium">
+            Déjà partenaire ? <Link to="/login" className="text-primary font-bold hover:underline">Se connecter</Link>
           </p>
         </div>
       </div>
