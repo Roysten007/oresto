@@ -14,6 +14,7 @@ if (!getApps().length) {
   });
 }
 
+const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -40,27 +41,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       if (!dueDate) continue;
 
-      // J-3: Warning notification
-      if (now >= dueDate - THREE_DAYS_MS && now < dueDate && status !== "pending_payment" && status !== "restricted") {
-        // Don't change status yet, just log (notification handled client-side)
-        results.push(`${vendorId}: J-3 warning`);
+      // 1. J-7: Warning notification window (1 week before deadline)
+      if (now >= dueDate - SEVEN_DAYS_MS && now < dueDate && status !== "pending_payment" && status !== "blocked" && status !== "restricted") {
+        results.push(`${vendorId}: J-7 notification window`);
       }
 
-      // Day 0: Set to pending_payment
-      if (now >= dueDate && now < dueDate + THREE_DAYS_MS && status !== "pending_payment" && status !== "restricted" && status !== "active") {
+      // 2. Day 0 (Jour J): Set to pending_payment with 3 days grace period
+      if (now >= dueDate && now < dueDate + THREE_DAYS_MS && status !== "pending_payment" && status !== "blocked" && status !== "restricted" && status !== "active") {
         await db.ref(`vendors/${vendorId}`).update({
           subscriptionStatus: "pending_payment",
         });
-        results.push(`${vendorId}: → pending_payment`);
+        results.push(`${vendorId}: → pending_payment (Grace period 3 days)`);
         processed++;
       }
 
-      // J+3: Restrict
-      if (now >= dueDate + THREE_DAYS_MS && status !== "restricted") {
+      // 3. J+3: Block vendor store if still unpaid
+      if (now >= dueDate + THREE_DAYS_MS && status !== "blocked" && status !== "restricted") {
         await db.ref(`vendors/${vendorId}`).update({
-          subscriptionStatus: "restricted",
+          subscriptionStatus: "blocked",
         });
-        results.push(`${vendorId}: → restricted`);
+        results.push(`${vendorId}: → blocked`);
         processed++;
       }
     }

@@ -236,30 +236,23 @@ export default function Register() {
                   />
                 </div>
 
-                {/* Formule d'abonnement */}
-                <div>
-                  <label className="block text-[10px] font-bold text-[#0A0A0A] uppercase tracking-widest mb-2 px-1">Abonnement (Essai gratuit actif)</label>
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setVendorForm(p => ({ ...p, subscriptionPlan: "starter" }))}
-                      className={`p-4 rounded-2xl border-2 text-left transition-all ${vendorForm.subscriptionPlan === "starter" ? "border-[#FF6B00] bg-[#FFF3E8]" : "border-[#EEEEEE] bg-white"}`}
-                    >
-                      <span className="font-bold text-xs block text-[#0A0A0A]">Starter</span>
-                      <span className="font-black text-sm text-[#FF6B00] block">3 000 F/mois</span>
-                      <span className="text-[10px] text-[#777] block mt-1">2% comm • Site inclus</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setVendorForm(p => ({ ...p, subscriptionPlan: "pro" }))}
-                      className={`p-4 rounded-2xl border-2 text-left transition-all relative ${vendorForm.subscriptionPlan === "pro" ? "border-[#FF6B00] bg-[#FFF3E8]" : "border-[#EEEEEE] bg-white"}`}
-                    >
-                      <span className="absolute -top-2.5 right-2 text-[8px] font-black uppercase tracking-widest text-white bg-[#FF6B00] px-2 py-0.5 rounded-full">Recommandé</span>
-                      <span className="font-bold text-xs block text-[#0A0A0A]">Pro</span>
-                      <span className="font-black text-sm text-[#FF6B00] block">5 000 F/mois</span>
-                      <span className="text-[10px] text-[#777] block mt-1">0% comm • IZA AI</span>
-                    </button>
+                {/* Formule d'abonnement unique */}
+                <div className="p-5 rounded-2xl bg-orange-50/60 border border-orange-200/80 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-primary">
+                      ✨ Formule Unique Oresto Pro
+                    </span>
+                    <span className="text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-emerald-500 text-white shadow-sm">
+                      -50% 1er mois (2 500 F)
+                    </span>
                   </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="font-heading font-black text-2xl text-[#0A0A0A]">5 000 FCFA</span>
+                    <span className="text-xs font-bold text-gray-500">/ mois</span>
+                  </div>
+                  <p className="text-[11px] text-gray-600 leading-relaxed">
+                    🎉 <strong>Essai 100% gratuit</strong> jusqu'au 1er octobre 2026. 0% de commission sur vos commandes, Site Web autonome inclus & Assistant IA IZA.
+                  </p>
                 </div>
               </div>
             )}

@@ -3,7 +3,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase";
 import { 
   confirmVendorSubscriptionPayment, 
-  updateVendorSubscriptionPlan,
+  FIRST_MONTH_PRICE,
+  STANDARD_PLAN_PRICE,
   PLANS 
 } from "@/services/subscriptionService";
 import { 
@@ -17,7 +18,9 @@ import {
   Zap, 
   History,
   CheckCircle2,
-  Lock
+  Lock,
+  Calendar,
+  Bell
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -26,39 +29,28 @@ export default function VendorSubscription() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
-  const plan = vendorProfile?.subscriptionPlan || "starter";
   const subStatus = vendorProfile?.subscriptionStatus || "trial";
   const trialEndsAt = vendorProfile?.trialEndsAt || Date.now() + 30 * 24 * 60 * 60 * 1000;
   const nextBillingDate = vendorProfile?.nextBillingDate || trialEndsAt;
   const pendingInvoice = vendorProfile?.pendingInvoice;
   const paymentHistory = vendorProfile?.paymentHistory || [];
 
+  const isFirstPayment = !paymentHistory || paymentHistory.length === 0;
+  const payAmount = isFirstPayment ? FIRST_MONTH_PRICE : STANDARD_PLAN_PRICE;
+
   const daysLeftInTrial = Math.max(0, Math.ceil((trialEndsAt - Date.now()) / (1000 * 60 * 60 * 24)));
   const daysUntilDue = Math.max(0, Math.ceil((nextBillingDate - Date.now()) / (1000 * 60 * 60 * 24)));
+  const graceDaysLeft = subStatus === "pending_payment" ? Math.max(0, 3 - Math.floor((Date.now() - nextBillingDate) / (1000 * 60 * 60 * 24))) : 3;
 
   const handlePayNowSimulation = async () => {
     if (!db || !vendorProfile?.id) return;
     setIsProcessing(true);
     try {
       await confirmVendorSubscriptionPayment(db, vendorProfile.id, pendingInvoice?.id);
-      toast.success("🎉 Paiement simulé avec succès ! Votre abonnement est réactivé.");
+      toast.success("🎉 Paiement validé avec succès ! Votre abonnement Oresto Pro est actif.");
       setShowPaymentModal(false);
     } catch (err) {
       toast.error("Erreur lors de la confirmation du paiement.");
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleChangePlan = async (newPlan: "starter" | "pro") => {
-    if (!db || !vendorProfile?.id) return;
-    if (newPlan === plan) return;
-    setIsProcessing(true);
-    try {
-      await updateVendorSubscriptionPlan(db, vendorProfile.id, newPlan);
-      toast.success(`Formule mise à jour vers ${newPlan === "pro" ? "Pro" : "Starter"}`);
-    } catch (err) {
-      toast.error("Erreur de changement de formule.");
     } finally {
       setIsProcessing(false);
     }
@@ -72,7 +64,7 @@ export default function VendorSubscription() {
           Mon <span className="text-primary">Abonnement</span>
         </h1>
         <p className="font-sub text-sm text-muted-foreground mt-1">
-          Gérez votre formule, vos factures et votre cycle de facturation mensuel
+          Formule unique Oresto Pro • Facturation mensuelle Mobile Money (Maketou)
         </p>
       </div>
 
@@ -84,7 +76,7 @@ export default function VendorSubscription() {
           <div className="space-y-2">
             <div className="flex items-center gap-3">
               <span className="text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
-                Formule {plan === "pro" ? "PRO (0% comm)" : "STARTER (2% comm)"}
+                Formule ORESTO PRO (0% comm)
               </span>
               {subStatus === "trial" && (
                 <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center gap-1.5">
@@ -99,12 +91,12 @@ export default function VendorSubscription() {
               )}
               {subStatus === "pending_payment" && (
                 <span className="text-xs font-bold px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/20 flex items-center gap-1">
-                  <Clock size={12} /> Paiement en attente
+                  <Clock size={12} /> Période de grâce ({graceDaysLeft}j restants)
                 </span>
               )}
-              {subStatus === "restricted" && (
+              {(subStatus === "blocked" || subStatus === "restricted") && (
                 <span className="text-xs font-bold px-3 py-1 rounded-full bg-red-500/10 text-red-600 border border-red-500/20 flex items-center gap-1">
-                  <Lock size={12} /> Restreint (Impayé)
+                  <Lock size={12} /> Bloqué (Impayé)
                 </span>
               )}
             </div>
@@ -112,23 +104,23 @@ export default function VendorSubscription() {
             <h2 className="text-2xl font-black tracking-tight">
               {subStatus === "trial" && `Gratuit jusqu'au ${new Date(trialEndsAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}`}
               {subStatus === "active" && `Prochaine échéance le ${new Date(nextBillingDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}`}
-              {subStatus === "pending_payment" && "Renouvellement en cours — Action requise"}
-              {subStatus === "restricted" && "Commandes suspendues — Veuillez régler votre abonnement"}
+              {subStatus === "pending_payment" && `Échéance dépassée — ${graceDaysLeft} jours de grâce pour régulariser`}
+              {(subStatus === "blocked" || subStatus === "restricted") && "Boutique suspendue — Veuillez régler votre abonnement"}
             </h2>
             <p className="text-sm text-muted-foreground max-w-xl">
               {subStatus === "trial" 
-                ? "Profitez de toutes les fonctionnalités d'Oresto Connect sans frais jusqu'au lancement officiel."
-                : `Facturation mensuelle de ${PLANS[plan].price.toLocaleString()} FCFA/mois via Mobile Money (Maketou).`}
+                ? `Profitez de toutes les fonctionnalités d'Oresto Pro sans frais jusqu'au lancement officiel. Premier mois à ${FIRST_MONTH_PRICE.toLocaleString()} FCFA (-50%).`
+                : `Abonnement mensuel de ${STANDARD_PLAN_PRICE.toLocaleString()} FCFA/mois via Mobile Money (Maketou).`}
             </p>
           </div>
 
           <div className="flex flex-wrap gap-3 relative z-10">
-            {(subStatus === "pending_payment" || subStatus === "restricted") && (
+            {(subStatus === "pending_payment" || subStatus === "blocked" || subStatus === "restricted") && (
               <button
                 onClick={() => setShowPaymentModal(true)}
                 className="px-8 py-4 rounded-2xl bg-primary text-white font-black text-xs uppercase tracking-widest shadow-xl shadow-primary/25 hover:scale-105 transition-all flex items-center gap-2 animate-bounce"
               >
-                <CreditCard size={16} /> Régler maintenant ({PLANS[plan].price.toLocaleString()} F)
+                <CreditCard size={16} /> Régler ({payAmount.toLocaleString()} F)
               </button>
             )}
             {subStatus === "trial" && (
@@ -136,129 +128,86 @@ export default function VendorSubscription() {
                 onClick={() => setShowPaymentModal(true)}
                 className="px-6 py-3 rounded-2xl border-2 border-primary/30 text-primary font-bold text-xs hover:bg-primary/5 transition-all"
               >
-                Simuler le paiement Maketou
+                Simuler le paiement Maketou ({payAmount.toLocaleString()} F)
               </button>
             )}
           </div>
         </div>
       </div>
 
-      {/* Plans Comparison */}
-      <div>
-        <h2 className="text-xl font-black uppercase tracking-tight mb-6">Nos Formules Officielles</h2>
-        <div className="grid md:grid-cols-2 gap-8">
-          {/* STARTER */}
-          <div className={`p-8 rounded-[36px] border-2 bg-card space-y-6 relative transition-all ${
-            plan === "starter" ? "border-primary shadow-xl ring-2 ring-primary/20" : "border-border"
-          }`}>
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Formule de démarrage</span>
-                <h3 className="text-2xl font-black tracking-tight">STARTER</h3>
-              </div>
-              {plan === "starter" && (
-                <span className="text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full bg-primary text-white">
-                  Actuel
-                </span>
-              )}
-            </div>
-
-            <div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-4xl font-black tracking-tight text-foreground">3 000</span>
-                <span className="text-sm font-bold text-muted-foreground">FCFA / mois</span>
-              </div>
-              <p className="text-xs text-primary font-bold mt-1">2% de commission sur les commandes</p>
-            </div>
-
-            <ul className="space-y-3 pt-4 border-t border-border">
-              {[
-                "Site Web autonome sur-mesure (Site Factory)",
-                "Catalogue illimité (Plats & Chambres)",
-                "Commandes en direct & WhatsApp",
-                "Paiements Mobile Money (MTN & Moov)",
-                "Support standard 7j/7"
-              ].map((f, i) => (
-                <li key={i} className="flex items-center gap-3 text-xs font-medium text-foreground">
-                  <div className="w-5 h-5 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
-                    <Check size={12} />
-                  </div>
-                  {f}
-                </li>
-              ))}
-            </ul>
-
-            <button
-              disabled={plan === "starter" || isProcessing}
-              onClick={() => handleChangePlan("starter")}
-              className={`w-full py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${
-                plan === "starter" 
-                  ? "bg-muted text-muted-foreground cursor-not-allowed" 
-                  : "bg-black text-white hover:bg-primary"
-              }`}
-            >
-              {plan === "starter" ? "Votre formule actuelle" : "Basculer vers Starter"}
-            </button>
-          </div>
-
-          {/* PRO */}
-          <div className={`p-8 rounded-[36px] border-2 bg-card space-y-6 relative transition-all ${
-            plan === "pro" ? "border-primary shadow-xl ring-2 ring-primary/20" : "border-border"
-          }`}>
-            <span className="absolute -top-3 right-8 text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full bg-primary text-white shadow-lg shadow-primary/25">
-              Recommandé • 0% Commission
+      {/* Cycle de Facturation Timeline */}
+      <div className="p-8 rounded-[36px] bg-card border-2 border-border space-y-6">
+        <h3 className="text-lg font-black uppercase tracking-tight flex items-center gap-2">
+          <Calendar size={20} className="text-primary" /> Cycle de Facturation Oresto Pro
+        </h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="p-5 rounded-2xl bg-muted/40 border border-border space-y-2">
+            <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full bg-primary/10 text-primary inline-block">
+              1. Relance J-7 (1 semaine avant)
             </span>
-
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-primary font-bold">Performance Maximale</span>
-                <h3 className="text-2xl font-black tracking-tight">PRO</h3>
-              </div>
-              {plan === "pro" && (
-                <span className="text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full bg-primary text-white">
-                  Actuel
-                </span>
-              )}
-            </div>
-
-            <div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-4xl font-black tracking-tight text-foreground">5 000</span>
-                <span className="text-sm font-bold text-muted-foreground">FCFA / mois</span>
-              </div>
-              <p className="text-xs text-emerald-600 font-bold mt-1">✨ 0% de commission (100% de vos gains)</p>
-            </div>
-
-            <ul className="space-y-3 pt-4 border-t border-border">
-              {[
-                "Tout ce qui est inclus dans Starter",
-                "0% de commission sur vos ventes",
-                "Assistant IA Opérationnel IZA intégré",
-                "Programme de fidélité & avis clients",
-                "Statistiques financières avancées",
-                "Support VIP prioritaire WhatsApp"
-              ].map((f, i) => (
-                <li key={i} className="flex items-center gap-3 text-xs font-medium text-foreground">
-                  <div className="w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                    <Check size={12} />
-                  </div>
-                  {f}
-                </li>
-              ))}
-            </ul>
-
-            <button
-              disabled={plan === "pro" || isProcessing}
-              onClick={() => handleChangePlan("pro")}
-              className={`w-full py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${
-                plan === "pro" 
-                  ? "bg-muted text-muted-foreground cursor-not-allowed" 
-                  : "bg-primary text-white hover:bg-primary/90 shadow-xl shadow-primary/20"
-              }`}
-            >
-              {plan === "pro" ? "Votre formule actuelle" : "Passer à la formule Pro"}
-            </button>
+            <h4 className="font-bold text-sm">Notification d'anticipation</h4>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Le site commence à vous notifier sur votre tableau de bord et par message pour préparer votre renouvellement en toute sérénité.
+            </p>
           </div>
+
+          <div className="p-5 rounded-2xl bg-amber-500/5 border border-amber-500/20 space-y-2">
+            <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-700 inline-block">
+              2. Jour J — Grâce de 3 jours
+            </span>
+            <h4 className="font-bold text-sm">Délai de grâce actif</h4>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              À la date limite, votre boutique reste active pendant 3 jours supplémentaires pour vous laisser le temps de finaliser le règlement.
+            </p>
+          </div>
+
+          <div className="p-5 rounded-2xl bg-red-500/5 border border-red-500/20 space-y-2">
+            <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full bg-red-500/10 text-red-600 inline-block">
+              3. J+3 — Suspension si impayé
+            </span>
+            <h4 className="font-bold text-sm">Blocage automatique</h4>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Si aucun paiement n'est effectué après les 3 jours de grâce, l'espace commerçant et les commandes sur la vitrine se bloquent jusqu'au règlement.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Plan Features Card */}
+      <div className="p-8 rounded-[36px] border-2 border-primary/40 bg-card space-y-6 relative shadow-lg">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <span className="text-[10px] font-black uppercase tracking-widest text-primary">Formule Tout Inclus</span>
+            <h3 className="text-2xl font-black tracking-tight">ORESTO PRO</h3>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-3xl font-black text-foreground">5 000</span>
+            <span className="text-sm font-bold text-muted-foreground">FCFA / mois</span>
+            <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full ml-2">
+              -50% 1er mois = 2 500 F
+            </span>
+          </div>
+        </div>
+
+        <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-border">
+          {[
+            "Site Web autonome sur-mesure",
+            "0% de commission sur vos ventes",
+            "Catalogue illimité (Plats / Chambres)",
+            "Commandes directes & WhatsApp",
+            "Paiements Mobile Money intégrés",
+            "Assistant IA Opérationnel IZA",
+            "Programme fidélité & avis",
+            "Support prioritaire 7j/7"
+          ].map((f, i) => (
+            <div key={i} className="flex items-center gap-2.5 text-xs font-medium text-foreground">
+              <div className="w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                <Check size={12} />
+              </div>
+              {f}
+            </div>
+          ))}
         </div>
       </div>
 
@@ -285,7 +234,7 @@ export default function VendorSubscription() {
                 {paymentHistory.map((p, idx) => (
                   <tr key={idx} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
                     <td className="py-4 px-4 font-bold">{new Date(p.date).toLocaleDateString('fr-FR')}</td>
-                    <td className="py-4 px-4 uppercase font-black text-primary">{p.plan}</td>
+                    <td className="py-4 px-4 uppercase font-black text-primary">ORESTO PRO</td>
                     <td className="py-4 px-4 font-bold">{p.amount.toLocaleString()} FCFA</td>
                     <td className="py-4 px-4 text-muted-foreground font-mono">{p.invoiceId || p.paymentRef || "MAKETOU_SIM"}</td>
                     <td className="py-4 px-4 text-right">
@@ -326,15 +275,17 @@ export default function VendorSubscription() {
             <div className="p-4 rounded-2xl bg-muted/40 border border-border space-y-2">
               <div className="flex justify-between text-xs font-medium">
                 <span className="text-muted-foreground">Formule</span>
-                <span className="font-black text-foreground uppercase">{plan}</span>
+                <span className="font-black text-foreground uppercase">ORESTO PRO</span>
               </div>
               <div className="flex justify-between text-xs font-medium">
-                <span className="text-muted-foreground">Période</span>
-                <span className="font-bold text-foreground">1 Mois (Renouvellement)</span>
+                <span className="text-muted-foreground">Offre appliquée</span>
+                <span className="font-bold text-emerald-600">
+                  {isFirstPayment ? "50% de réduction (1er mois)" : "Tarif standard"}
+                </span>
               </div>
               <div className="flex justify-between text-sm font-black pt-2 border-t border-border">
                 <span>Montant à régler</span>
-                <span className="text-primary">{PLANS[plan].price.toLocaleString()} FCFA</span>
+                <span className="text-primary">{payAmount.toLocaleString()} FCFA</span>
               </div>
             </div>
 

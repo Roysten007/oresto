@@ -1,9 +1,9 @@
-import { ref, push, set, serverTimestamp } from "firebase/database";
+import { ref, push, set } from "firebase/database";
 import { Database } from "firebase/database";
 
 export interface AppNotification {
   id?: string;
-  type: "welcome_trial" | "j_minus_3" | "d_day" | "restricted" | "payment_confirmed" | "info" | "warning";
+  type: "welcome_trial" | "j_minus_7" | "j_minus_3" | "d_day" | "blocked" | "restricted" | "payment_confirmed" | "info" | "warning";
   title: string;
   message: string;
   actionUrl?: string;
@@ -13,22 +13,20 @@ export interface AppNotification {
 }
 
 /**
-  * Stub d'envoi WhatsApp API Business.
-  * Si l'API WhatsApp n'est pas encore en place, enregistre proprement la tentative sans bloquer le flux.
-  */
+ * Stub d'envoi WhatsApp API Business.
+ */
 export async function sendWhatsAppNotification(phone: string, message: string): Promise<boolean> {
   console.log(`[WHATSAPP STUB] Envoi à ${phone} : "${message}"`);
-  // En production, brancher ici l'API WhatsApp Business ou service tier (ex: Twilio / Meta Cloud API)
   if (!phone) {
     console.warn("[WHATSAPP STUB] Numéro de téléphone absent.");
     return false;
   }
-  return true; // Simulé avec succès
+  return true;
 }
 
 /**
-  * Stub d'envoi Email.
-  */
+ * Stub d'envoi Email.
+ */
 export async function sendEmailNotification(email: string, subject: string, body: string): Promise<boolean> {
   console.log(`[EMAIL STUB] Envoi à ${email} : [${subject}] ${body}`);
   if (!email) {
@@ -39,22 +37,22 @@ export async function sendEmailNotification(email: string, subject: string, body
 }
 
 /**
-  * Modèle de notifications d'abonnement Oresto
-  */
+ * Modèle de notifications d'abonnement Oresto
+ */
 export async function dispatchVendorNotification(
   db: Database,
   vendorId: string,
   type: AppNotification["type"],
   data: {
-    plan?: "starter" | "pro";
+    plan?: string;
     trialEndsAt?: number;
     nextBillingDate?: number;
     paymentUrl?: string;
     phone?: string;
     email?: string;
+    isFirstPayment?: boolean;
   }
 ) {
-  const planLabel = data.plan === "pro" ? "Pro (5 000 FCFA/mois)" : "Starter (3 000 FCFA/mois)";
   const formattedDate = (ts?: number) =>
     ts ? new Date(ts).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }) : "";
 
@@ -64,35 +62,41 @@ export async function dispatchVendorNotification(
 
   switch (type) {
     case "welcome_trial":
-      title = "🎉 Bienvenue sur Oresto !";
-      message = `Votre essai gratuit est actif jusqu'au ${formattedDate(data.trialEndsAt)}. Profitez de la plateforme en toute liberté.`;
+      title = "🎉 Bienvenue sur Oresto Pro !";
+      message = `Votre essai gratuit est actif jusqu'au ${formattedDate(data.trialEndsAt)}. Profitez de 50% de réduction (2 500 F au lieu de 5 000 F) sur votre 1er mois !`;
+      break;
+
+    case "j_minus_7":
+      title = "⏳ Échéance dans 1 semaine (J-7)";
+      message = `Votre abonnement Oresto Pro arrive à échéance dans 7 jours. ${data.isFirstPayment !== false ? "Profitez de 50% de réduction sur votre 1er mois (2 500 FCFA)." : "Montant : 5 000 FCFA."} Réglez dès maintenant pour continuer sans interruption.`;
       break;
 
     case "j_minus_3":
-      title = "⏳ Échéance d'abonnement proche (J-3)";
-      message = `Votre abonnement Oresto ${planLabel} se renouvelle dans 3 jours. Payez dès maintenant pour continuer sans interruption.`;
+      title = "⏳ Échéance d'abonnement dans 3 jours (J-3)";
+      message = `Votre abonnement Oresto Pro arrive à échéance dans 3 jours. Réglez dès maintenant pour anticiper en toute sérénité.`;
       break;
 
     case "d_day":
-      title = "⚠️ Abonnement à échéance aujourd'hui";
-      message = `Votre abonnement Oresto arrive à échéance aujourd'hui. Réglez maintenant pour éviter toute coupure de vos ventes.`;
+      title = "⚠️ Échéance aujourd'hui — 3 jours de grâce";
+      message = `Votre abonnement Oresto Pro est arrivé à échéance. Vous bénéficiez de 3 jours de grâce pour régler avant le blocage de votre boutique.`;
       break;
 
+    case "blocked":
     case "restricted":
-      title = "🚫 Accès commandes temporairement suspendu";
-      message = `Votre accès aux commandes/réservations est temporairement suspendu faute de paiement. Réglez votre abonnement pour réactiver votre boutique.`;
+      title = "🚫 Espace boutique bloqué (Impayé)";
+      message = `Le délai de grâce de 3 jours est expiré. Votre espace commerçant et vos commandes sont bloqués. Réglez dès maintenant votre abonnement pour débloquer immédiatement votre compte.`;
       break;
 
     case "payment_confirmed":
       title = "✅ Paiement confirmé !";
-      message = `Merci ! Votre abonnement ${planLabel} est actif jusqu'au ${formattedDate(data.nextBillingDate)}.`;
+      message = `Merci ! Votre abonnement Oresto Pro est actif jusqu'au ${formattedDate(data.nextBillingDate)}.`;
       break;
 
     default:
       message = "Mise à jour concernant votre compte vendeur.";
   }
 
-  // 1. Notification In-App (Obligatoire dans Firebase RTDB)
+  // 1. Notification In-App
   const notifRef = push(ref(db, `notifications/${vendorId}`));
   const notifId = notifRef.key || `notif_${Date.now()}`;
 
@@ -109,12 +113,12 @@ export async function dispatchVendorNotification(
 
   await set(notifRef, notificationRecord);
 
-  // 2. Repli WhatsApp (si numéro renseigné)
+  // 2. Repli WhatsApp
   if (data.phone) {
     await sendWhatsAppNotification(data.phone, `${title}\n${message}\n${actionUrl}`);
   }
 
-  // 3. Repli Email (si email renseigné)
+  // 3. Repli Email
   if (data.email) {
     await sendEmailNotification(data.email, title, `${message}\nLien : ${actionUrl}`);
   }

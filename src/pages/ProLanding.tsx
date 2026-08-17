@@ -221,96 +221,89 @@ export default function ProLanding() {
       </section>
 
       {/* ─── TARIFS ─── */}
-      <section id="tarifs" className="py-20 px-6 bg-gray-50 border-y border-gray-100">
-        <div className="max-w-5xl mx-auto">
-          <FadeIn className="text-center mb-16">
-            <h2 className="font-heading text-3xl md:text-5xl font-black uppercase tracking-tighter">Des tarifs transparents, sans surprise</h2>
+      <section id="tarifs" className="py-24 px-6 bg-gradient-to-b from-gray-50 via-white to-orange-50/30 border-y border-gray-100">
+        <div className="max-w-4xl mx-auto">
+          <FadeIn className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary font-sub text-[10px] font-black uppercase tracking-widest mb-4">
+              ✨ Une offre unique, tout compris
+            </div>
+            <h2 className="font-heading text-3xl md:text-5xl font-black uppercase tracking-tighter">
+              Un tarif simple, clair et sans commission
+            </h2>
             <p className="text-base text-primary font-bold mt-4">
-              🎁 Essai gratuit jusqu'au 1er octobre 2026 pour les premiers inscrits
+              🎉 Offre de lancement : 100% Gratuit jusqu'au 1er octobre 2026
             </p>
           </FadeIn>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
-            {/* Starter */}
-            <FadeIn delay={0.1} className="h-full">
-              <div className="bg-white rounded-[36px] border border-gray-200 p-8 sm:p-10 h-full flex flex-col justify-between shadow-sm hover:shadow-xl transition-all">
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between h-7">
-                    <div className="px-3 py-1 rounded-full bg-gray-100 text-[10px] font-black uppercase tracking-widest text-gray-600">
-                      Starter
-                    </div>
+          <FadeIn delay={0.1}>
+            <div className="bg-black text-white rounded-[40px] border-2 border-primary/50 p-8 sm:p-12 shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-80 h-80 bg-primary/15 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+              
+              <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <div className="lg:col-span-7 space-y-6">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="px-3 py-1 rounded-full bg-primary text-white text-[10px] font-black uppercase tracking-widest">
+                      Formule Complète Oresto Pro
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-black uppercase tracking-widest">
+                      50% de réduction 1er mois
+                    </span>
                   </div>
+
                   <div>
-                    <div className="flex items-baseline gap-1">
-                      <span className="font-heading text-4xl sm:text-5xl font-black tracking-tighter">3 000</span>
-                      <span className="text-sm font-bold text-gray-500">FCFA / mois</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3 pt-4 border-t border-gray-100 text-sm font-bold min-h-[170px]">
-                    {[
-                      "Site basique",
-                      "Dashboard de gestion",
-                      "Chat client",
-                    ].map((feat, i) => (
-                      <div key={i} className="flex items-center gap-3">
-                        <Check size={16} className="text-emerald-500 flex-shrink-0" />
-                        <span>{feat}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="pt-8 mt-6 border-t border-gray-100">
-                  <Link to="/register?role=vendor" className="block w-full py-4 rounded-full bg-black text-white text-center font-sub text-xs font-black uppercase tracking-widest hover:bg-gray-800 transition-all shadow-md">
-                    Démarrer gratuitement
-                  </Link>
-                </div>
-              </div>
-            </FadeIn>
-
-            {/* Pro */}
-            <FadeIn delay={0.2} className="h-full">
-              <div className="bg-black text-white rounded-[36px] border-2 border-primary p-8 sm:p-10 h-full flex flex-col justify-between shadow-2xl transition-all">
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between h-7">
-                    <div className="px-3 py-1 rounded-full bg-primary/20 text-primary text-[10px] font-black uppercase tracking-widest">
-                      Pro
-                    </div>
-                    <div className="bg-primary text-white font-black text-[9px] uppercase tracking-widest px-3 py-1 rounded-full shadow-lg">
-                      ★ Recommandé
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex items-baseline gap-1">
-                      <span className="font-heading text-4xl sm:text-5xl font-black tracking-tighter text-white">5 000</span>
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-heading text-5xl sm:text-6xl font-black tracking-tighter text-white">5 000</span>
                       <span className="text-sm font-bold text-gray-400">FCFA / mois</span>
                     </div>
+                    <p className="text-xs text-primary font-bold mt-1.5 flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                      Premier mois à seulement <strong>2 500 FCFA</strong> (50% de réduction de bienvenue)
+                    </p>
                   </div>
 
-                  <div className="space-y-3 pt-4 border-t border-white/10 text-sm font-bold min-h-[170px]">
+                  <p className="text-sm text-gray-300 leading-relaxed">
+                    Digitalisez votre restaurant, maquis, hôtel ou auberge avec toutes les fonctionnalités incluses, sans frais cachés ni commission sur vos commandes.
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 border-t border-white/10 text-xs font-semibold text-gray-200">
                     {[
-                      "Tout de l'offre Starter",
-                      "Stats avancées",
-                      "IZA AI (Assistante)",
-                      "Support prioritaire",
+                      "Site Web autonome sur-mesure",
+                      "0% de commission sur vos ventes",
+                      "Catalogue illimité (Plats & Chambres)",
+                      "Commandes directes & WhatsApp",
+                      "Paiements Mobile Money intégrés",
+                      "Assistant IA Opérationnel IZA",
+                      "Programme fidélité & avis",
+                      "Support prioritaire 7j/7",
                     ].map((feat, i) => (
-                      <div key={i} className="flex items-center gap-3 text-white">
-                        <Check size={16} className="text-primary flex-shrink-0" />
+                      <div key={i} className="flex items-center gap-2.5">
+                        <Check size={14} className="text-primary flex-shrink-0" />
                         <span>{feat}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="pt-8 mt-6 border-t border-white/10">
-                  <Link to="/register?role=vendor" className="block w-full py-4 rounded-full bg-primary text-white text-center font-sub text-xs font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_10px_30px_rgba(234,88,12,0.4)]">
-                    Démarrer gratuitement
+                <div className="lg:col-span-5 flex flex-col justify-center items-center text-center p-6 sm:p-8 rounded-3xl bg-white/5 border border-white/10 space-y-4">
+                  <span className="text-[11px] font-black uppercase tracking-widest text-primary">
+                    Commencez sans payer
+                  </span>
+                  <p className="text-xs text-gray-300">
+                    Testez gratuitement jusqu'au 1er octobre 2026. Aucune carte bancaire requise.
+                  </p>
+                  <Link 
+                    to="/register?role=vendor" 
+                    className="w-full py-4 rounded-full bg-primary text-white font-sub text-xs font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_10px_30px_rgba(234,88,12,0.4)]"
+                  >
+                    Créer ma boutique gratuitement
                   </Link>
+                  <p className="text-[10px] text-gray-400">
+                    Paiement Mobile Money uniquement lors du renouvellement
+                  </p>
                 </div>
               </div>
-            </FadeIn>
-          </div>
+            </div>
+          </FadeIn>
         </div>
       </section>
 

@@ -3,12 +3,7 @@ import { db } from "@/lib/firebase";
 import { ref, onValue } from "firebase/database";
 import { VendorProfile } from "@/data/mockData";
 
-const PLAN_PRICE: Record<string, number> = { starter: 3000, pro: 5000 };
-const PLAN_LABEL: Record<string, string> = { starter: "Starter", pro: "Pro" };
-const PLAN_CLS: Record<string, string> = {
-  starter: "bg-muted text-muted-foreground border border-border",
-  pro: "bg-primary/10 text-primary border border-primary/20 font-bold",
-};
+const PLAN_PRICE = 5000;
 
 export default function AdminSubscriptions() {
   const [vendors, setVendors] = useState<VendorProfile[]>([]);
@@ -24,34 +19,28 @@ export default function AdminSubscriptions() {
     return () => unsub();
   }, []);
 
-  const counts: Record<string, number> = { starter: 0, pro: 0 };
-  vendors.forEach(v => { 
-    const p = (v.subscriptionPlan || v.plan || "starter").toLowerCase(); 
-    if (counts[p] !== undefined) counts[p]++; 
-  });
-  
-  // MRR prévisionnel
-  const mrr = vendors.reduce((s, v) => {
-    const p = (v.subscriptionPlan || v.plan || "starter").toLowerCase();
-    return s + (PLAN_PRICE[p] || 3000);
-  }, 0);
+  const trialCount = vendors.filter(v => (!v.subscriptionStatus || v.subscriptionStatus === "trial")).length;
+  const activeCount = vendors.filter(v => v.subscriptionStatus === "active").length;
+  const pendingCount = vendors.filter(v => v.subscriptionStatus === "pending_payment").length;
+  const blockedCount = vendors.filter(v => v.subscriptionStatus === "blocked" || v.subscriptionStatus === "restricted").length;
 
-  const activeCount = vendors.filter(v => (v.subscriptionStatus === "active" || v.subscriptionStatus === "trial")).length;
+  // MRR prévisionnel standard (5 000 F / boutique)
+  const mrr = (trialCount + activeCount + pendingCount) * PLAN_PRICE;
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="font-heading text-2xl font-bold text-foreground">Abonnements SaaS Commerçants</h1>
-        <p className="font-body text-muted-foreground text-sm">Formules, statut d'essai gratuit et revenus récurrents (MRR).</p>
+        <p className="font-body text-muted-foreground text-sm">Formule unique Oresto Pro (5 000 FCFA/mois — -50% 1er mois = 2 500 F).</p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: "Revenu mensuel estimé (MRR)", value: `${mrr.toLocaleString()} F` },
-          { label: "Boutiques en ligne", value: activeCount },
-          { label: "Formule Starter (3 000 F)", value: counts.starter },
-          { label: "Formule Pro (5 000 F)", value: counts.pro },
+          { label: "MRR Prévisionnel (5 000 F/btq)", value: `${mrr.toLocaleString()} F` },
+          { label: "Essais Gratuits (Lancement)", value: trialCount },
+          { label: "En Période de Grâce", value: pendingCount },
+          { label: "Boutiques Bloquées", value: blockedCount },
         ].map((s, i) => (
           <div key={i} className="p-5 rounded-2xl bg-card border border-border">
             <p className="font-heading text-2xl font-black text-foreground">{s.value}</p>
@@ -73,32 +62,34 @@ export default function AdminSubscriptions() {
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-muted/50 border-b border-border text-left">
-                <th className="p-4 font-sub text-xs uppercase tracking-widest text-muted-foreground">Boutique</th>
+                <th className="p-4 font-sub text-xs uppercase tracking-widest text-muted-foreground">Établissement</th>
                 <th className="p-4 font-sub text-xs uppercase tracking-widest text-muted-foreground">Formule</th>
-                <th className="p-4 font-sub text-xs uppercase tracking-widest text-muted-foreground">Tarif / mois</th>
-                <th className="p-4 font-sub text-xs uppercase tracking-widest text-muted-foreground">Statut Abonnement</th>
-                <th className="p-4 font-sub text-xs uppercase tracking-widest text-muted-foreground">Échéance</th>
+                <th className="p-4 font-sub text-xs uppercase tracking-widest text-muted-foreground">Tarif</th>
+                <th className="p-4 font-sub text-xs uppercase tracking-widest text-muted-foreground">Statut d'Abonnement</th>
+                <th className="p-4 font-sub text-xs uppercase tracking-widest text-muted-foreground">Prochaine Échéance</th>
               </tr>
             </thead>
             <tbody>
               {vendors.map(v => {
-                const plan = (v.subscriptionPlan || v.plan || "starter").toLowerCase();
                 const subStatus = v.subscriptionStatus || "trial";
                 const dueDate = v.nextBillingDate || v.trialEndsAt;
+                const isFirst = !v.paymentHistory || v.paymentHistory.length === 0;
 
                 return (
                   <tr key={v.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
                     <td className="p-4 font-heading font-bold text-foreground">{v.name}</td>
                     <td className="p-4">
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-sub ${PLAN_CLS[plan] || PLAN_CLS.starter}`}>
-                        {PLAN_LABEL[plan] || plan}
+                      <span className="px-2.5 py-1 rounded-full text-xs font-sub bg-primary/10 text-primary border border-primary/20 font-bold">
+                        Oresto Pro
                       </span>
                     </td>
-                    <td className="p-4 font-heading font-black text-foreground">{(PLAN_PRICE[plan] || 3000).toLocaleString()} F</td>
+                    <td className="p-4 font-heading font-bold text-foreground">
+                      {isFirst ? "2 500 F (1er mois)" : "5 000 F/mois"}
+                    </td>
                     <td className="p-4 font-body">
                       {subStatus === "trial" && (
                         <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 font-bold text-xs">
-                          🎉 Essai gratuit
+                          🎉 Essai gratuit (Oct. 2026)
                         </span>
                       )}
                       {subStatus === "active" && (
@@ -108,12 +99,12 @@ export default function AdminSubscriptions() {
                       )}
                       {subStatus === "pending_payment" && (
                         <span className="px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-600 font-bold text-xs">
-                          🟡 En attente de paiement
+                          🟡 Grâce (3 jours)
                         </span>
                       )}
-                      {subStatus === "restricted" && (
+                      {(subStatus === "blocked" || subStatus === "restricted") && (
                         <span className="px-2.5 py-1 rounded-full bg-red-500/10 text-red-600 font-bold text-xs">
-                          🔴 Restreint (Impayé)
+                          🔴 Bloqué (Impayé)
                         </span>
                       )}
                     </td>

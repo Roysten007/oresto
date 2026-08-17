@@ -189,11 +189,11 @@ export default function RestaurantPublic() {
   }, [slug, user]);
 
 
-  const isRestricted = vendor?.subscriptionStatus === "restricted";
+  const isRestricted = vendor?.subscriptionStatus === "restricted" || vendor?.subscriptionStatus === "blocked";
 
   const handleAddToCart = (product: Product) => {
     if (isRestricted) {
-      toast.warning("Les commandes sont temporairement indisponibles.");
+      toast.warning("Les commandes sont temporairement suspendues pour cet établissement.");
       return;
     }
     setCart(prev => {
@@ -730,65 +730,83 @@ export default function RestaurantPublic() {
                   </div>
                 </div>
 
-                {/* Submit */}
-                <button
-                  disabled={!orderForm.name.trim() || !orderForm.phone.trim() || placingOrder}
-                  onClick={async () => {
-                    if (!db || !vendor) return;
-                    setPlacingOrder(true);
-                    try {
-                      const ordersRef = ref(db, "orders");
-                      const newOrderRef = push(ordersRef);
-                      const orderId = newOrderRef.key!;
-                      const orderData = {
-                        id: orderId,
-                        vendorId: vendor.id,
-                        vendorName: vendor.name,
-                        clientId: `guest_${Date.now()}`,
-                        clientName: orderForm.name.trim(),
-                        clientPhone: orderForm.phone.trim(),
-                        items: cart.map(i => ({ name: i.product.name, qty: i.qty, price: i.product.price })),
-                        total: totalPrice,
-                        status: "awaiting_payment",
-                        notes: orderForm.notes.trim(),
-                        date: new Date().toISOString(),
-                      };
-                      await set(newOrderRef, orderData);
+                {/* Submit & WhatsApp */}
+                <div className="space-y-3 pt-2">
+                  <button
+                    disabled={!orderForm.name.trim() || !orderForm.phone.trim() || placingOrder}
+                    onClick={async () => {
+                      if (!db || !vendor) return;
+                      setPlacingOrder(true);
+                      try {
+                        const ordersRef = ref(db, "orders");
+                        const newOrderRef = push(ordersRef);
+                        const orderId = newOrderRef.key!;
+                        const orderData = {
+                          id: orderId,
+                          vendorId: vendor.id,
+                          vendorName: vendor.name,
+                          clientId: `guest_${Date.now()}`,
+                          clientName: orderForm.name.trim(),
+                          clientPhone: orderForm.phone.trim(),
+                          items: cart.map(i => ({ name: i.product.name, qty: i.qty, price: i.product.price })),
+                          total: totalPrice,
+                          status: "awaiting_payment",
+                          notes: orderForm.notes.trim(),
+                          date: new Date().toISOString(),
+                        };
+                        await set(newOrderRef, orderData);
 
-                      // Create initial system message in chat
-                      const msgsRef = ref(db, `messages/${orderId}`);
-                      const systemMsgRef = push(msgsRef);
-                      await set(systemMsgRef, {
-                        senderId: "system",
-                        senderName: "Oresto",
-                        senderRole: "system",
-                        text: `🛒 Nouvelle commande de ${orderForm.name} — ${totalPrice.toLocaleString()} F CFA\n\n${cart.map(i => `${i.qty}× ${i.product.name}`).join("\n")}\n\n💬 Indiquez au client comment procéder au paiement.`,
-                        type: "system",
-                        timestamp: Date.now(),
-                      });
+                        // Create initial system message in chat
+                        const msgsRef = ref(db, `messages/${orderId}`);
+                        const systemMsgRef = push(msgsRef);
+                        await set(systemMsgRef, {
+                          senderId: "system",
+                          senderName: "Oresto",
+                          senderRole: "system",
+                          text: `🛒 Nouvelle commande de ${orderForm.name} — ${totalPrice.toLocaleString()} F CFA\n\n${cart.map(i => `${i.qty}× ${i.product.name}`).join("\n")}\n\n💬 Indiquez au client comment procéder au paiement.`,
+                          type: "system",
+                          timestamp: Date.now(),
+                        });
 
-                      // Update vendor stats
-                      const vendorOrdersRef = ref(db, `vendors/${vendor.id}/totalOrders`);
-                      const snapshot = await get(vendorOrdersRef);
-                      const currentTotal = snapshot.exists() ? snapshot.val() : 0;
-                      await set(vendorOrdersRef, currentTotal + 1);
+                        // Update vendor stats
+                        const vendorOrdersRef = ref(db, `vendors/${vendor.id}/totalOrders`);
+                        const snapshot = await get(vendorOrdersRef);
+                        const currentTotal = snapshot.exists() ? snapshot.val() : 0;
+                        await set(vendorOrdersRef, currentTotal + 1);
 
-                      setCurrentOrderId(orderId);
-                      setShowOrderForm(false);
-                      setShowOrderChat(true);
-                      setCart([]);
-                      toast.success("Commande envoyée ! Discutez avec le restaurant.");
-                    } catch (err) {
-                      console.error(err);
-                      toast.error("Erreur lors de la commande");
-                    } finally {
-                      setPlacingOrder(false);
-                    }
-                  }}
-                  className="w-full py-5 rounded-[20px] bg-black text-white font-black text-xs uppercase tracking-widest disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary transition-all flex items-center justify-center gap-2"
-                >
-                  {placingOrder ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <><Check size={16} /> Envoyer ma commande</>}
-                </button>
+                        setCurrentOrderId(orderId);
+                        setShowOrderForm(false);
+                        setShowOrderChat(true);
+                        setCart([]);
+                        toast.success("Commande envoyée ! Discutez avec le restaurant.");
+                      } catch (err) {
+                        console.error(err);
+                        toast.error("Erreur lors de la commande");
+                      } finally {
+                        setPlacingOrder(false);
+                      }
+                    }}
+                    className="w-full py-5 rounded-[20px] bg-black text-white font-black text-xs uppercase tracking-widest disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary transition-all flex items-center justify-center gap-2 shadow-lg shadow-black/20"
+                  >
+                    {placingOrder ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <><Check size={16} /> Valider ma commande sur le site</>}
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={!orderForm.name.trim() || !orderForm.phone.trim()}
+                    onClick={() => {
+                      if (!vendor) return;
+                      const rawPhone = (vendor.whatsapp || vendor.phone || "+22946305190").replace(/\D/g, "");
+                      const itemsList = cart.map(i => `• ${i.qty}x ${i.product.name} (${(i.product.price * i.qty).toLocaleString()} F)`).join("\n");
+                      const msg = encodeURIComponent(`Bonjour *${vendor.name}* !\nJe souhaite passer commande :\n\n${itemsList}\n\n*Total : ${totalPrice.toLocaleString()} FCFA*\n👤 Nom : ${orderForm.name.trim()}\n📞 Tél : ${orderForm.phone.trim()}${orderForm.notes ? `\n📝 Notes : ${orderForm.notes.trim()}` : ''}\n\nEnvoyé depuis Oresto Connect.`);
+                      window.open(`https://wa.me/${rawPhone}?text=${msg}`, "_blank");
+                      toast.success("Commande transmise sur WhatsApp !");
+                    }}
+                    className="w-full py-4 rounded-[20px] bg-[#25D366] text-white font-black text-xs uppercase tracking-widest disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#20bd5a] transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20"
+                  >
+                    <i className="fa-brands fa-whatsapp text-base"></i> Commander via WhatsApp
+                  </button>
+                </div>
               </div>
             </motion.div>
           </>

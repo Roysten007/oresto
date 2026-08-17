@@ -157,39 +157,28 @@ export default function VendorDashboard() {
     },
   ];
 
-  // Calculs abonnement
-  const plan = vendorProfile?.subscriptionPlan || "starter";
+  // Calculs abonnement unique Oresto Pro
+  const plan = "pro";
   const subStatus = vendorProfile?.subscriptionStatus || "trial";
   const trialEndsAt = vendorProfile?.trialEndsAt || Date.now() + 30 * 24 * 60 * 60 * 1000;
   const nextBillingDate = vendorProfile?.nextBillingDate || trialEndsAt;
   const pendingInvoice = vendorProfile?.pendingInvoice;
+  const isFirstPayment = !vendorProfile?.paymentHistory || vendorProfile.paymentHistory.length === 0;
+  const currentPayAmount = isFirstPayment ? 2500 : 5000;
 
   const daysLeftInTrial = Math.max(0, Math.ceil((trialEndsAt - Date.now()) / (1000 * 60 * 60 * 24)));
   const daysUntilDue = Math.max(0, Math.ceil((nextBillingDate - Date.now()) / (1000 * 60 * 60 * 24)));
+  const graceDaysLeft = subStatus === "pending_payment" ? Math.max(0, 3 - Math.floor((Date.now() - nextBillingDate) / (1000 * 60 * 60 * 24))) : 3;
 
   const handlePayNowSimulation = async () => {
     if (!db || !vendorProfile?.id) return;
     setIsProcessing(true);
     try {
       await confirmVendorSubscriptionPayment(db, vendorProfile.id, pendingInvoice?.id);
-      toast.success("🎉 Paiement simulé avec succès ! Votre abonnement est réactivé.");
+      toast.success("🎉 Paiement validé avec succès ! Votre abonnement Oresto Pro est actif.");
       setShowPaymentModal(false);
     } catch (err) {
       toast.error("Erreur lors de la confirmation du paiement.");
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleChangePlan = async (newPlan: "starter" | "pro") => {
-    if (!db || !vendorProfile?.id) return;
-    setIsProcessing(true);
-    try {
-      await updateVendorSubscriptionPlan(db, vendorProfile.id, newPlan);
-      toast.success(`Formule mise à jour vers ${newPlan === "pro" ? "Pro" : "Starter"}`);
-      setShowPlanModal(false);
-    } catch (err) {
-      toast.error("Erreur de changement de formule.");
     } finally {
       setIsProcessing(false);
     }
@@ -232,23 +221,44 @@ export default function VendorDashboard() {
         </div>
       </div>
 
-      {/* Bannière Alerte In-App (Accès restreint / Paiement en attente) */}
-      {subStatus === "restricted" && (
-        <div className="p-6 rounded-3xl bg-red-500/10 border border-red-500/30 text-red-600 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 animate-in fade-in">
+      {/* Alerte J-7 (1 semaine avant échéance) */}
+      {subStatus === "trial" && daysUntilDue <= 7 && daysUntilDue > 0 && (
+        <div className="p-6 rounded-3xl bg-orange-500/10 border border-orange-500/30 text-orange-700 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 animate-in fade-in">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-red-500 text-white flex items-center justify-center flex-shrink-0">
-              <Lock size={20} />
+            <div className="w-10 h-10 rounded-2xl bg-primary text-white flex items-center justify-center flex-shrink-0 shadow-md">
+              <Clock size={20} />
             </div>
             <div>
-              <p className="font-bold text-sm">Accès aux commandes temporairement restreint</p>
-              <p className="text-xs text-red-600/80">Votre site public reste visible mais les commandes sont désactivées faute de paiement.</p>
+              <p className="font-bold text-sm">Échéance dans {daysUntilDue} jour{daysUntilDue > 1 ? "s" : ""} — Offre spéciale -50%</p>
+              <p className="text-xs text-orange-700/80">Profitez de 50% de réduction sur votre 1er mois (2 500 FCFA au lieu de 5 000 FCFA). Réglez dès maintenant pour anticiper sans coupure.</p>
             </div>
           </div>
           <button
             onClick={() => setShowPaymentModal(true)}
-            className="px-6 py-3 rounded-xl bg-red-600 text-white text-xs font-black uppercase tracking-widest hover:bg-red-700 transition-colors shadow-md whitespace-nowrap"
+            className="px-6 py-3 rounded-xl bg-primary text-white text-xs font-black uppercase tracking-widest hover:bg-primary/90 transition-colors shadow-md whitespace-nowrap"
           >
-            Régler l'abonnement
+            Régler (2 500 F)
+          </button>
+        </div>
+      )}
+
+      {/* Bannière Alerte Jour J / Grâce 3 jours */}
+      {subStatus === "pending_payment" && (
+        <div className="p-6 rounded-3xl bg-amber-500/15 border border-amber-500/30 text-amber-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 animate-in fade-in">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center flex-shrink-0 shadow-md">
+              <AlertTriangle size={20} />
+            </div>
+            <div>
+              <p className="font-bold text-sm">Période de grâce active : {graceDaysLeft} jour{graceDaysLeft > 1 ? "s" : ""} restant{graceDaysLeft > 1 ? "s" : ""}</p>
+              <p className="text-xs text-amber-800/80">Votre abonnement est arrivé à terme. Veuillez régulariser avant l'expiration du délai de 3 jours pour éviter le blocage de votre espace et de votre site.</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowPaymentModal(true)}
+            className="px-6 py-3 rounded-xl bg-amber-600 text-white text-xs font-black uppercase tracking-widest hover:bg-amber-700 transition-colors shadow-md whitespace-nowrap"
+          >
+            Régler ({currentPayAmount.toLocaleString()} F)
           </button>
         </div>
       )}
@@ -264,16 +274,14 @@ export default function VendorDashboard() {
                 <Crown size={20} />
               </div>
               <div>
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary block">Abonnement Vendeur</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary block">Formule Exclusive</span>
                 <h2 className="font-heading text-2xl font-black uppercase tracking-tight flex items-center gap-2">
-                  Formule {plan === "pro" ? "Pro (5 000 F/mois)" : "Starter (3 000 F/mois)"}
+                  Oresto Pro (5 000 F/mois)
                 </h2>
               </div>
             </div>
             <p className="text-white/60 text-xs italic max-w-xl">
-              {plan === "pro"
-                ? "Inclus : IZA AI (assistant 24h/24) • 0% de commission • Site Factory complet • MoMo"
-                : "Inclus : Site Factory complet • Suivi commandes/réservations • Paiements Mobile Money • 2% comm"}
+              Inclus : Assistant IA IZA • 0% de commission • Site Factory complet • MoMo MTN/Moov • Support VIP
             </p>
           </div>
 
@@ -290,8 +298,8 @@ export default function VendorDashboard() {
               </span>
             )}
             {subStatus === "pending_payment" && (
-              <span className="px-4 py-2 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30 text-xs font-black uppercase tracking-widest flex items-center gap-2">
-                <AlertTriangle size={14} /> Paiement en attente
+              <span className="px-4 py-2 rounded-full bg-amber-500/20 text-amber-400 border border-orange-500/30 text-xs font-black uppercase tracking-widest flex items-center gap-2">
+                <AlertTriangle size={14} /> Grâce ({graceDaysLeft}j restants)
               </span>
             )}
             {subStatus === "restricted" && (
