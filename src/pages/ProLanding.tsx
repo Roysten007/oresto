@@ -170,7 +170,7 @@ export default function ProLanding() {
 
       {/* ─── Hero Section : Cuisinez l'Esprit Tranquille ─── */}
       <section className="relative pt-36 pb-20 md:pt-44 md:pb-28 px-6 overflow-hidden">
-        <motion.div className="max-w-5xl mx-auto text-center relative z-10 space-y-6">
+        <motion.div className="max-w-6xl mx-auto text-center relative z-10 space-y-6">
           
           <FadeIn delay={0.05}>
             <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-orange-50 border border-orange-200 text-primary text-xs font-black uppercase tracking-widest shadow-sm">
@@ -179,9 +179,13 @@ export default function ProLanding() {
           </FadeIn>
 
           <FadeIn delay={0.15}>
-            <h1 className="font-heading text-4xl sm:text-6xl md:text-7xl lg:text-[76px] font-[900] leading-[0.92] tracking-tighter uppercase text-foreground">
-              Cuisinez l'esprit tranquille, <br />
-              <span className="text-primary italic">Oresto s'occupe du reste.</span>
+            <h1 className="font-heading text-3xl sm:text-5xl md:text-6xl lg:text-[68px] xl:text-[74px] font-[900] leading-[1.05] tracking-tighter uppercase text-foreground">
+              <span className="block sm:inline md:block whitespace-normal md:whitespace-nowrap">
+                Cuisinez l'esprit tranquille,
+              </span>
+              <span className="block sm:inline md:block text-primary italic whitespace-normal md:whitespace-nowrap">
+                Oresto s'occupe du reste.
+              </span>
             </h1>
           </FadeIn>
 
