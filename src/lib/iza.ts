@@ -1,7 +1,11 @@
-import { runIZA, IZARequestBody, IZAResponse } from "../../api/_lib/iza-core";
+import type { IZARequestBody, IZAResponse } from "../../api/_lib/iza-core";
 
 export type { IZAResponse };
 
+/**
+ * Service client IZA — communique exclusivement avec le backend sécurisé (/api/iza).
+ * La clé API Gemini reste 100% protégée côté serveur et n'est jamais exposée au navigateur.
+ */
 export async function askIZA(
   userMessage: string,
   history: { role: string; content: string }[] = [],
@@ -9,7 +13,6 @@ export async function askIZA(
 ): Promise<IZAResponse> {
   const body: IZARequestBody = { message: userMessage, history, platformContext };
 
-  // 1. Essayer le serveur Vercel /api/iza
   try {
     const res = await fetch("/api/iza", {
       method: "POST",
@@ -17,18 +20,14 @@ export async function askIZA(
       body: JSON.stringify(body),
     });
 
-    if (res.ok) {
-      return await res.json();
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.error || `Erreur serveur IZA (${res.status})`);
     }
-  } catch {
-    // Si l'API serveur échoue (ex: dev local Vite sans Vercel), fallback sur l'appel direct
-  }
 
-  // 2. Fallback client-side avec la clé d'environnement VITE_GEMINI_API_KEY
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-  if (!apiKey) {
-    throw new Error("Clé API Gemini non configurée.");
+    return await res.json();
+  } catch (err: any) {
+    console.error("Erreur communication IZA:", err);
+    throw new Error(err.message || "Impossible de joindre l'assistant IZA. Veuillez réessayer.");
   }
-
-  return await runIZA(body, apiKey);
 }

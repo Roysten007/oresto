@@ -10,10 +10,19 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+
 # Local env files
 .env
 .env.local
 .env.*.local
+
+# Sensitive DB / Admin setup scripts
+setup-admin-and-reset.mjs
+reset-all.mjs
+reset-clients.mjs
+seed-test-accounts.mjs
+debug-page.mjs
+test-models.mjs
 
 # Editor directories and files
 .vscode/*

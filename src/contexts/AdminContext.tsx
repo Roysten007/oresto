@@ -32,8 +32,13 @@ const MAX_ATTEMPTS = 5;
 async function checkIsAdmin(uid: string): Promise<boolean> {
   if (!db) return false;
   try {
-    const snap = await get(ref(db, `admins/${uid}`));
-    return snap.exists() && snap.val() !== false;
+    const [adminSnap, userSnap] = await Promise.all([
+      get(ref(db, `admins/${uid}`)),
+      get(ref(db, `users/${uid}/role`))
+    ]);
+    const isAdminNode = adminSnap.exists() && adminSnap.val() !== false;
+    const isUserRoleAdmin = userSnap.exists() && userSnap.val() === "admin";
+    return isAdminNode || isUserRoleAdmin;
   } catch {
     return false;
   }
@@ -76,13 +81,6 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     const cleanEmail = email.trim().toLowerCase();
     const cleanPassword = password.trim();
 
-    // Fallback prédéfini Oresto Admin
-    if (cleanEmail === "roystendesign@gmail.com" && cleanPassword === "creativecode@gmail.com") {
-      setState({ isAdminAuthenticated: true, adminEmail: cleanEmail, isAdminLoading: false });
-      setFailedAttempts(0);
-      return { success: true };
-    }
-
     if (!auth || !db) return { success: false, error: "Service d'authentification indisponible." };
     if (lockedUntil && Date.now() < lockedUntil) {
       return { success: false, error: "Compte bloqué. Réessayez dans 15 minutes." };
@@ -92,19 +90,19 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       const isAdmin = await checkIsAdmin(cred.user.uid);
       if (!isAdmin) {
         await signOut(auth);
-        return { success: false, error: "Ce compte n'a pas les droits administrateur." };
+        return { success: false, error: "Ce compte ne possède pas les privilèges administrateur." };
       }
       setState({ isAdminAuthenticated: true, adminEmail: cred.user.email, isAdminLoading: false });
       setFailedAttempts(0);
       return { success: true };
-    } catch (err) {
+    } catch (err: any) {
       const newAttempts = failedAttempts + 1;
       setFailedAttempts(newAttempts);
       if (newAttempts >= MAX_ATTEMPTS) {
         setLockedUntil(Date.now() + LOCKOUT_DURATION);
-        return { success: false, error: "Trop de tentatives. Compte bloqué pendant 15 minutes." };
+        return { success: false, error: "Trop de tentatives échouées. Accès verrouillé pendant 15 minutes." };
       }
-      return { success: false, error: "Identifiants incorrects." };
+      return { success: false, error: "Email ou mot de passe incorrect." };
     }
   }, [failedAttempts, lockedUntil]);
 

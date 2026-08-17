@@ -1,0 +1,61 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "platform_settings": {
+      ".read": true,
+      ".write": "auth != null && (root.child('admins').child(auth.uid).exists() || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+    },
+
+    "admins": {
+      ".read": "auth != null && (root.child('admins').child(auth.uid).exists() || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+      ".write": "auth != null && (root.child('admins').child(auth.uid).exists() || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+    },
+
+    "users": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).exists() || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+        ".write": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).exists() || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+      }
+    },
+
+    "vendors": {
+      ".read": true,
+      "$vendorId": {
+        ".write": "auth != null && (!data.exists() || data.child('userId').val() === auth.uid || newData.child('userId').val() === auth.uid || root.child('admins').child(auth.uid).exists() || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+        "totalOrders": {
+          ".write": true
+        }
+      }
+    },
+
+    "products": {
+      ".read": true,
+      "$vendorId": {
+        ".write": "auth != null && (root.child('vendors').child($vendorId).child('userId').val() === auth.uid || root.child('admins').child(auth.uid).exists() || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+      }
+    },
+
+    "orders": {
+      ".read": true,
+      "$orderId": {
+        ".write": true
+      }
+    },
+
+    "messages": {
+      "$orderId": {
+        ".read": true,
+        ".write": true
+      }
+    },
+
+    "notifications": {
+      "$target": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
+    }
+  }
+}
