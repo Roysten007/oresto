@@ -10,6 +10,7 @@ import OrderChat from "@/components/OrderChat";
 
 const STATUS_META: Record<string, { label: string; color: string; bg: string; border: string; icon: any }> = {
   awaiting_payment: { label: "En attente paiement", color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-200", icon: CreditCard },
+  payment_sent: { label: "Paiement envoyé (MoMo)", color: "text-blue-700 font-black", bg: "bg-blue-100", border: "border-blue-300", icon: CreditCard },
   pending:   { label: "En attente",    color: "text-orange-600",  bg: "bg-orange-50",  border: "border-orange-200", icon: Clock },
   preparing: { label: "Préparation",   color: "text-blue-600",    bg: "bg-blue-50",    border: "border-blue-200",   icon: Package },
   delivering:{ label: "En route",      color: "text-purple-600",  bg: "bg-purple-50",  border: "border-purple-200", icon: Truck },
@@ -160,17 +161,17 @@ export default function VendorOrders() {
     </div>
   );
 
-  const awaitingPayment = orders.filter(o => o.status === "awaiting_payment");
+  const awaitingPayment = orders.filter(o => o.status === "awaiting_payment" || o.status === "payment_sent");
   const pending   = orders.filter(o => o.status === "pending");
   const preparing = orders.filter(o => o.status === "preparing" || o.status === "delivering");
   const delivered = orders.filter(o => o.status === "delivered");
 
   const columns = [
     {
-      emoji: "💳", title: "Attente paiement", orders: awaitingPayment,
+      emoji: "💳", title: "Paiement MoMo", orders: awaitingPayment,
       accent: "border-amber-300 bg-amber-50/50",
       headerColor: "text-amber-600",
-      actionLabel: "✅ Confirmer paiement",
+      actionLabel: "✅ Valider paiement",
       nextStatus: "preparing" as Order["status"],
     },
     {
