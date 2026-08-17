@@ -71,26 +71,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const userRef = ref(db, `users/${firebaseUser.uid}`);
         unsubUser = onValue(userRef, async (userSnap) => {
           if (!userSnap.exists()) {
-            console.log("User profile missing in DB, creating default vendor profile...");
-            const defaultVendorId = `v_${firebaseUser.uid}`;
-            const newUser: User = {
-              id: firebaseUser.uid,
-              name: firebaseUser.email?.split("@")[0] || "Restaurateur",
-              email: firebaseUser.email || "",
-              role: "vendor",
-              vendorId: defaultVendorId,
-              created_at: new Date().toISOString()
-            };
-            try {
-              await set(ref(db, `users/${firebaseUser.uid}`), newUser);
-            } catch (e) {
-              console.error("Error creating default user profile:", e);
+            // Vérifier si c'est un compte admin
+            const adminSnap = await get(ref(db, `admins/${firebaseUser.uid}`));
+            if (adminSnap.exists()) {
+              const adminUser: User = {
+                id: firebaseUser.uid,
+                name: "Administrateur",
+                email: firebaseUser.email || "",
+                role: "admin" as any,
+                created_at: new Date().toISOString()
+              };
+              setState({
+                user: adminUser,
+                role: "admin" as any,
+                vendorProfile: null,
+                isAuthenticated: true,
+                isLoading: false
+              });
+              return;
             }
+
+            // Si le compte a été supprimé de la base, déconnecter la session locale
+            await signOut(auth);
             setState({
-              user: newUser,
-              role: "vendor",
+              user: null,
+              role: null,
               vendorProfile: null,
-              isAuthenticated: true,
+              isAuthenticated: false,
               isLoading: false
             });
             return;
