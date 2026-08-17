@@ -90,13 +90,16 @@ export default function VendorDashboard() {
     </div>
   );
 
-  // Stats commandes
-  const validOrders = orders.filter(o => o.status !== "cancelled");
+  // Stats commandes reliées en direct au système de paiement
+  const paidOrders = orders.filter(o => o.status === "preparing" || o.status === "delivering" || o.status === "delivered" || o.status === "paid");
+  const pendingValidationOrders = orders.filter(o => o.status === "payment_sent");
+  const awaitingPaymentOrders = orders.filter(o => o.status === "awaiting_payment");
+  
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
 
-  const todayOrders = validOrders.filter(o => new Date(o.date) >= todayStart);
-  const uniqueClients = new Set(validOrders.map(o => o.clientId)).size;
+  const todayPaidOrders = paidOrders.filter(o => new Date(o.date) >= todayStart);
+  const uniqueClients = new Set(orders.filter(o => o.status !== "cancelled").map(o => o.clientId)).size;
 
   const weeklyData = [];
   const dayNames = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
@@ -107,7 +110,7 @@ export default function VendorDashboard() {
     const nextD = new Date(d);
     nextD.setDate(d.getDate() + 1);
 
-    const dayRevenue = validOrders
+    const dayRevenue = paidOrders
       .filter(o => {
         const od = new Date(o.date);
         return od >= d && od < nextD;
@@ -124,37 +127,37 @@ export default function VendorDashboard() {
 
   const kpis = [
     {
-      label: "Chiffre d'Affaires (7j)",
+      label: "CA Encaissé (7j)",
       value: `${weeklyRevenue.toLocaleString()} FCFA`,
-      trend: "7 jours",
+      trend: "Paiements validés",
       icon: DollarSign,
       color: "text-emerald-500",
       bg: "bg-emerald-500/10"
     },
     {
-      label: "Commandes Live",
-      value: String(todayOrders.length),
+      label: "Commandes Validées",
+      value: String(todayPaidOrders.length),
       trend: "Aujourd'hui",
       icon: ShoppingBag,
       color: "text-orange-500",
       bg: "bg-orange-500/10"
     },
     {
-      label: "Nouveaux Clients",
-      value: String(uniqueClients),
-      trend: "Total",
-      icon: Users,
-      color: "text-blue-500",
-      bg: "bg-blue-500/10"
+      label: "Paiements à Valider",
+      value: String(pendingValidationOrders.length),
+      trend: `${awaitingPaymentOrders.length} en attente`,
+      icon: CreditCard,
+      color: pendingValidationOrders.length > 0 ? "text-blue-600 animate-pulse" : "text-amber-500",
+      bg: pendingValidationOrders.length > 0 ? "bg-blue-100" : "bg-amber-500/10"
     },
     {
-      label: "Satisfaction",
-      value: vendorProfile?.rating ? `${vendorProfile.rating}/5` : "—",
-      trend: "Stable",
-      icon: Activity,
+      label: "Clients Reçus",
+      value: String(uniqueClients),
+      trend: "Total fidélisés",
+      icon: Users,
       color: "text-purple-500",
       bg: "bg-purple-500/10"
-    },
+    }
   ];
 
   // Calculs abonnement unique Oresto Pro
@@ -259,6 +262,31 @@ export default function VendorDashboard() {
             className="px-6 py-3 rounded-xl bg-amber-600 text-white text-xs font-black uppercase tracking-widest hover:bg-amber-700 transition-colors shadow-md whitespace-nowrap"
           >
             Régler ({currentPayAmount.toLocaleString()} F)
+          </button>
+        </div>
+      )}
+
+      {/* Alerte Urgente : Paiements MoMo Reçus à Valider */}
+      {pendingValidationOrders.length > 0 && (
+        <div className="p-6 rounded-3xl bg-blue-500/15 border-2 border-blue-500/40 text-blue-900 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 animate-in fade-in shadow-lg shadow-blue-500/10">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-md">
+              <CreditCard size={22} className="animate-pulse" />
+            </div>
+            <div>
+              <p className="font-heading font-black text-base uppercase tracking-tight text-blue-950">
+                🔔 {pendingValidationOrders.length} Paiement{pendingValidationOrders.length > 1 ? "s" : ""} Mobile Money en attente de validation
+              </p>
+              <p className="text-xs text-blue-800 font-medium">
+                Vos clients ont effectué leur transfert MoMo. Validez la réception pour lancer la préparation et comptabiliser la vente dans votre CA.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => navigate("/vendor/orders")}
+            className="px-6 py-3.5 rounded-2xl bg-blue-600 text-white text-xs font-black uppercase tracking-widest hover:bg-blue-700 active:scale-95 transition-all shadow-md whitespace-nowrap flex items-center gap-2"
+          >
+            <CheckCircle2 size={16} /> Voir & Valider ({pendingValidationOrders.length})
           </button>
         </div>
       )}
