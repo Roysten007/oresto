@@ -38,7 +38,6 @@ import { toast } from "sonner";
 import {
   runSubscriptionBillingCheck,
   confirmVendorSubscriptionPayment,
-  updateVendorSubscriptionPlan,
   MAKETOU_SIMULATION_MODE
 } from "@/services/subscriptionService";
 
@@ -73,7 +72,6 @@ export default function VendorDashboard() {
   }, [vendorId]);
 
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [showPlanModal, setShowPlanModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -338,10 +336,10 @@ export default function VendorDashboard() {
 
             {/* Boutons d'action */}
             <button
-              onClick={() => setShowPlanModal(true)}
-              className="px-5 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all backdrop-blur-md"
+              onClick={() => navigate("/vendor/subscription")}
+              className="px-5 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all backdrop-blur-md flex items-center gap-2"
             >
-              Changer de formule
+              <CreditCard size={14} /> Gérer mon abonnement
             </button>
 
             {pendingInvoice && (
@@ -552,58 +550,6 @@ export default function VendorDashboard() {
                 </>
               )}
             </button>
-          </div>
-        </div>
-      )}
-
-      {/* ─── MODAL : Changer de Formule ─── */}
-      {showPlanModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white rounded-[32px] p-8 max-w-lg w-full space-y-6 shadow-2xl relative">
-            <button
-              onClick={() => setShowPlanModal(false)}
-              className="absolute top-6 right-6 w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200"
-            >
-              <X size={18} />
-            </button>
-
-            <div>
-              <h3 className="font-heading text-xl font-black uppercase">Changer de formule</h3>
-              <p className="text-xs text-gray-500 mt-1">Sélectionnez la formule adaptée à votre établissement.</p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Starter */}
-              <div
-                onClick={() => handleChangePlan("starter")}
-                className={`p-6 rounded-3xl border-2 cursor-pointer transition-all ${plan === "starter" ? "border-primary bg-orange-50/50" : "border-gray-100 hover:border-gray-300"}`}
-              >
-                <span className="font-heading font-black text-lg block">Starter</span>
-                <span className="font-black text-xl text-primary block mt-1">3 000 FCFA/mois</span>
-                <ul className="text-xs text-gray-600 space-y-2 mt-4 italic">
-                  <li>✓ Site Factory complet</li>
-                  <li>✓ Suivi commandes/réservations</li>
-                  <li>✓ Paiements MoMo</li>
-                  <li>• Commission de 2% par vente</li>
-                </ul>
-              </div>
-
-              {/* Pro */}
-              <div
-                onClick={() => handleChangePlan("pro")}
-                className={`p-6 rounded-3xl border-2 cursor-pointer transition-all relative ${plan === "pro" ? "border-primary bg-orange-50/50" : "border-gray-100 hover:border-gray-300"}`}
-              >
-                <span className="absolute -top-3 right-4 bg-primary text-white text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">Recommandé</span>
-                <span className="font-heading font-black text-lg block">Pro</span>
-                <span className="font-black text-xl text-primary block mt-1">5 000 FCFA/mois</span>
-                <ul className="text-xs text-gray-600 space-y-2 mt-4 italic">
-                  <li>✓ Tout Starter inclus</li>
-                  <li>✓ Assistant IA IZI (24h/24)</li>
-                  <li>✓ **0% de commission**</li>
-                  <li>✓ Support prioritaire</li>
-                </ul>
-              </div>
-            </div>
           </div>
         </div>
       )}
