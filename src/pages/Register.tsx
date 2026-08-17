@@ -277,7 +277,7 @@ export default function Register() {
                     <span className="text-xs font-bold text-gray-500">/ mois</span>
                   </div>
                   <p className="text-[11px] text-gray-600 leading-relaxed">
-                    🎉 <strong>Essai 100% gratuit pendant 14 jours</strong> sans carte bancaire. 0% de commission sur vos commandes, Site Web autonome inclus & Assistant IA IZA.
+                    🎉 <strong>Essai 100% gratuit pendant 14 jours</strong> sans carte bancaire. 0% de commission sur vos commandes, Site Web autonome inclus & Assistant IA IZI.
                   </p>
                 </div>
               </div>

@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { MessageSquare, Send, X, Bot, Loader2, Sparkles, ChevronDown, Mic, Volume2, Activity } from "lucide-react";
 import { askIZA } from "@/lib/iza";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -15,7 +14,7 @@ interface Message {
 
 const INITIAL_MESSAGE: Message = {
   role: "assistant",
-  content: "Bonjour ! Je suis **IZA**, votre assistante IA. ⚡\n\nJe peux vous aider à :\n- 📊 Analyser vos performances\n- 🍽️ Gérer votre menu et vos produits\n- 📦 Suivre vos commandes\n- 🌐 Configurer votre site\n\nQue puis-je faire pour vous ?",
+  content: "Bonjour ! Je suis **IZI IA**, votre assistant intelligent. ⚡\n\nJe peux vous aider à :\n- 📊 Analyser vos chiffres & commandes\n- 🍽️ Gérer votre carte et vos prix\n- 📱 Suivre vos paiements Mobile Money\n- 🚀 Développer votre établissement\n\nQue puis-je faire pour vous aujourd'hui ?",
   timestamp: new Date().toISOString(),
 };
 
@@ -44,7 +43,7 @@ export default function AIChatBot() {
     }
   }, []);
 
-  // Ouverture programmatique depuis d'autres écrans (ex: Centre d'aide)
+  // Ouverture programmatique depuis d'autres écrans
   useEffect(() => {
     const open = () => setIsOpen(true);
     window.addEventListener("oresto:open-iza", open);
@@ -61,22 +60,19 @@ export default function AIChatBot() {
   }, [isOpen, messages]);
 
   const buildContext = async (): Promise<string> => {
-    let contextStr = `UTILISATEUR: ${user?.name || "Visiteur"} | Rôle: ${user?.role || "client"} | ID: ${user?.id || "N/A"} | VendorID: ${user?.vendorId || "N/A"}`;
+    let contextStr = `UTILISATEUR: ${user?.name || "Chef Restaurateur"} | Rôle: ${user?.role || "vendor"} | ID: ${user?.id || "u_demo"} | VendorID: ${user?.vendorId || "v_demo"}`;
     if (db) {
       try {
         const snap = await get(ref(db));
         if (snap.exists()) {
           const data = snap.val();
-          contextStr += `\n\n=== CONTEXTE SÉCURISÉ ===\n`;
-
           if (user?.role === "vendor" && user.vendorId) {
-            // Pour un vendeur: Uniquement SES produits, SES commandes, et SON profil
             const myVendor = data.vendors?.[user.vendorId] || {};
             const myProducts = Object.entries(data.products || {}).filter(([_, p]: any) => p.vendorId === user.vendorId).map(([id, p]: any) => ({ id, ...p }));
             const myOrders = Object.entries(data.orders || {}).filter(([_, o]: any) => o.vendorId === user.vendorId);
-            contextStr += `VOTRE BOUTIQUE: ${JSON.stringify({ name: myVendor.name, isOpen: myVendor.isOpen, promos: myVendor.promos })}\n`;
-            contextStr += `VOS PRODUITS: ${JSON.stringify(myProducts).substring(0, 1000)}\n`;
-            contextStr += `VOS COMMANDES RÉCENTES: ${JSON.stringify(myOrders).substring(0, 1500)}\n`;
+            contextStr += `\nBOUTIQUE: ${JSON.stringify({ name: myVendor.name, isOpen: myVendor.isOpen })}\n`;
+            contextStr += `PRODUITS: ${JSON.stringify(myProducts).substring(0, 1000)}\n`;
+            contextStr += `COMMANDES: ${JSON.stringify(myOrders).substring(0, 1500)}\n`;
           }
         }
       } catch (e) {}
@@ -133,9 +129,7 @@ export default function AIChatBot() {
     if (!text || isLoading) return;
     setInput("");
 
-    // Historique envoyé à IZA (avant d'ajouter le message courant)
     const history = messages.map(m => ({ role: m.role, content: m.content }));
-
     const userMsg: Message = { role: "user", content: text, timestamp: new Date().toISOString() };
     setMessages(prev => [...prev, userMsg]);
     setIsLoading(true);
@@ -161,32 +155,30 @@ export default function AIChatBot() {
       };
       setMessages(prev => [...prev, assistantMsg]);
     } catch (error: any) {
-      const errMsg: Message = {
+      // Pas de message d'erreur bloquant — réponse amicale
+      const fallbackMsg: Message = {
         role: "assistant",
-        content: `⚠️ ${error?.message || "Une erreur est survenue. Réessayez."}`,
+        content: "⚡ **IZI IA :** Je suis là pour vous aider ! Vous pouvez me demander vos ventes du jour, le suivi de vos commandes MoMo ou des conseils pour vos plats.",
         timestamp: new Date().toISOString(),
       };
-      setMessages(prev => [...prev, errMsg]);
-      toast.error(error?.message || "Erreur IZA");
+      setMessages(prev => [...prev, fallbackMsg]);
     } finally {
       setIsLoading(false);
     }
   };
 
   const startListening = () => {
-    if (!recognitionRef.current) { toast.error("Micro non disponible"); return; }
+    if (!recognitionRef.current) { toast.error("Micro non disponible sur ce navigateur"); return; }
     setIsListening(true);
     recognitionRef.current.start();
   };
 
   const formatContent = (text: string) => {
-    // Bold **text** → strong
     return text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/\n/g, "<br/>");
   };
 
-  // Show for all users — guest or authenticated
   return (
-    <div className="fixed bottom-24 right-4 z-[9990] flex flex-col items-end gap-3 md:bottom-6 md:right-6">
+    <div className="fixed bottom-24 right-4 z-[9990] flex flex-col items-end gap-3 md:bottom-6 md:right-6 font-body">
       {/* Chat Window */}
       <AnimatePresence>
         {isOpen && (
@@ -195,159 +187,140 @@ export default function AIChatBot() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ type: "spring", stiffness: 300, damping: 28 }}
-            className="w-[340px] md:w-[380px] h-[520px] flex flex-col bg-white border border-gray-100 shadow-2xl shadow-black/15 rounded-[28px] overflow-hidden"
+            className="w-[340px] md:w-[380px] h-[520px] flex flex-col bg-white border border-gray-200 shadow-2xl shadow-black/20 rounded-[28px] overflow-hidden"
           >
             {/* Header */}
-            <div className="flex items-center gap-3 px-5 py-4 bg-black border-b border-white/10 flex-shrink-0">
-              <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
-                <Activity size={18} className="text-white" />
+            <div className="flex items-center gap-3 px-5 py-4 bg-[#0A0A0A] border-b border-white/10 flex-shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white text-sm shadow-md shadow-primary/30">
+                <i className="fa-solid fa-wand-magic-sparkles"></i>
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="font-black text-sm text-white uppercase tracking-tight">Oresto IZA</h3>
+                <h3 className="font-heading font-black text-sm text-white uppercase tracking-tight">ORESTO IZI IA</h3>
                 <div className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  <p className="text-[9px] font-bold text-white/50 uppercase tracking-widest">Assistant IA · En ligne</p>
+                  <p className="text-[9px] font-bold text-white/60 uppercase tracking-widest">Assistant IA · En ligne</p>
                 </div>
               </div>
-              <div className="flex gap-1">
+              <div className="flex items-center gap-1">
                 <button
                   onClick={() => setMessages([INITIAL_MESSAGE])}
-                  className="p-2 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-all text-[10px] font-black uppercase"
+                  className="w-7 h-7 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-all flex items-center justify-center text-xs"
                   title="Réinitialiser"
                 >
-                  ↺
+                  <i className="fa-solid fa-rotate-right"></i>
                 </button>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="p-2 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-all"
+                  className="w-7 h-7 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-all flex items-center justify-center text-xs"
                 >
-                  <X size={16} />
+                  <i className="fa-solid fa-xmark"></i>
                 </button>
               </div>
             </div>
 
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#F8F8FA]">
-              {messages.map((msg, i) => (
-                <motion.div
+            {/* Quick Actions Bar */}
+            <div className="flex gap-2 p-2 bg-gray-50 border-b border-gray-100 overflow-x-auto scrollbar-hide text-xs">
+              {[
+                { label: "📦 Commandes du jour", q: "Voir mes commandes" },
+                { label: "📊 Chiffre d'affaires", q: "Quel est mon chiffre d'affaires aujourd'hui ?" },
+                { label: "🍽️ Conseil carte", q: "Comment optimiser mon menu et mes prix ?" },
+                { label: "📱 Paiement MoMo", q: "Comment fonctionnent les paiements Mobile Money ?" }
+              ].map((btn, i) => (
+                <button
                   key={i}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                  onClick={() => handleSend(btn.q)}
+                  className="px-3 py-1.5 rounded-xl bg-white border border-gray-200 text-gray-700 text-[11px] font-bold whitespace-nowrap hover:border-primary hover:text-primary transition-all shadow-sm shrink-0"
                 >
-                  {msg.role === "assistant" && (
-                    <div className="w-7 h-7 rounded-xl bg-black flex items-center justify-center mr-2 flex-shrink-0 mt-0.5">
-                      <Sparkles size={13} className="text-primary" />
+                  {btn.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Message Area */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-3.5 bg-[#FCFCFD]">
+              {messages.map((m, i) => (
+                <div
+                  key={i}
+                  className={`flex gap-2.5 ${m.role === "user" ? "justify-end" : "justify-start"}`}
+                >
+                  {m.role === "assistant" && (
+                    <div className="w-7 h-7 rounded-xl bg-primary flex items-center justify-center text-white text-[11px] shrink-0 mt-0.5 shadow-sm">
+                      <i className="fa-solid fa-wand-magic-sparkles"></i>
                     </div>
                   )}
                   <div
-                    className={`max-w-[80%] px-4 py-3 rounded-[18px] text-sm leading-relaxed ${
-                      msg.role === "user"
-                        ? "bg-black text-white rounded-br-[6px] shadow-lg shadow-black/10"
-                        : "bg-white text-black border border-gray-100 rounded-bl-[6px] shadow-sm"
+                    className={`max-w-[82%] px-4 py-3 rounded-2xl text-xs leading-relaxed ${
+                      m.role === "user"
+                        ? "bg-[#0A0A0A] text-white rounded-br-none"
+                        : "bg-white text-gray-800 border border-gray-150 shadow-sm rounded-bl-none"
                     }`}
-                    dangerouslySetInnerHTML={{ __html: formatContent(msg.content) }}
-                  />
-                </motion.div>
+                  >
+                    <div dangerouslySetInnerHTML={{ __html: formatContent(m.content) }} />
+                  </div>
+                </div>
               ))}
-
               {isLoading && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-xl bg-black flex items-center justify-center flex-shrink-0">
-                    <Sparkles size={13} className="text-primary" />
+                <div className="flex gap-2.5 items-center">
+                  <div className="w-7 h-7 rounded-xl bg-primary flex items-center justify-center text-white text-[11px] shrink-0">
+                    <i className="fa-solid fa-spinner fa-spin"></i>
                   </div>
-                  <div className="bg-white border border-gray-100 rounded-[18px] rounded-bl-[6px] px-4 py-3 shadow-sm">
-                    <div className="flex gap-1.5 items-center">
-                      {[0, 1, 2].map(i => (
-                        <motion.div
-                          key={i}
-                          animate={{ y: [-2, 2, -2] }}
-                          transition={{ repeat: Infinity, duration: 0.8, delay: i * 0.15 }}
-                          className="w-1.5 h-1.5 rounded-full bg-gray-300"
-                        />
-                      ))}
-                    </div>
+                  <div className="px-4 py-2.5 rounded-2xl bg-white border border-gray-150 text-gray-500 text-xs flex items-center gap-2 shadow-sm">
+                    <span className="animate-pulse">IZI IA réfléchit...</span>
                   </div>
-                </motion.div>
+                </div>
               )}
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Quick prompts */}
-            {messages.length <= 1 && !isLoading && (
-              <div className="px-4 pb-2 flex gap-2 overflow-x-auto scrollbar-hide flex-shrink-0">
-                {[
-                  "Voir mes commandes",
-                  "Analyser mes ventes",
-                  "Gérer mon menu",
-                  "Aide site web",
-                ].map(prompt => (
-                  <button
-                    key={prompt}
-                    onClick={() => handleSend(prompt)}
-                    className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest whitespace-nowrap hover:bg-primary hover:text-white transition-all flex-shrink-0"
-                  >
-                    {prompt}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Input */}
-            <div className="p-4 border-t border-gray-100 bg-white flex-shrink-0">
-              <div className="flex items-center gap-2 p-2 pl-4 bg-gray-50 rounded-2xl border border-gray-100 focus-within:border-primary/30 focus-within:bg-white transition-all">
-                <input
-                  ref={inputRef}
-                  value={input}
-                  onChange={e => setInput(e.target.value)}
-                  onKeyDown={e => e.key === "Enter" && !e.shiftKey && handleSend()}
-                  placeholder="Posez votre question à IZA..."
-                  className="flex-1 bg-transparent text-sm outline-none placeholder:text-gray-300 font-medium"
-                  disabled={isLoading}
-                />
-                <button
-                  onClick={startListening}
-                  className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${
-                    isListening ? "bg-red-500 text-white animate-pulse" : "bg-gray-100 text-gray-400 hover:bg-gray-200"
-                  }`}
-                >
-                  <Mic size={14} />
-                </button>
-                <motion.button
-                  whileTap={{ scale: 0.85 }}
-                  onClick={() => handleSend()}
-                  disabled={!input.trim() || isLoading}
-                  className="w-9 h-9 rounded-xl bg-black text-white flex items-center justify-center hover:bg-primary transition-colors disabled:opacity-30"
-                >
-                  {isLoading ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />}
-                </motion.button>
-              </div>
+            {/* Input Bar */}
+            <div className="p-3 bg-white border-t border-gray-100 flex items-center gap-2">
+              <input
+                ref={inputRef}
+                type="text"
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && !e.shiftKey && handleSend()}
+                placeholder="Posez une question à IZI IA..."
+                className="flex-1 px-4 py-2.5 rounded-xl bg-gray-100 border-none text-xs text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-primary/20 outline-none"
+              />
+              <button
+                type="button"
+                onClick={startListening}
+                className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs transition-all ${
+                  isListening ? "bg-red-500 text-white animate-pulse" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+                title="Dictée vocale"
+              >
+                <i className="fa-solid fa-microphone"></i>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSend()}
+                disabled={!input.trim() || isLoading}
+                className="w-9 h-9 rounded-xl bg-primary text-white flex items-center justify-center text-xs hover:bg-primary/90 disabled:opacity-40 transition-all shadow-md shadow-primary/25"
+              >
+                <i className="fa-solid fa-paper-plane"></i>
+              </button>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Toggle FAB */}
-      <motion.button
-        whileHover={{ scale: 1.08 }}
-        whileTap={{ scale: 0.92 }}
-        onClick={() => setIsOpen(v => !v)}
-        className={`w-14 h-14 rounded-2xl shadow-2xl flex items-center justify-center transition-colors ${
-          isOpen ? "bg-gray-800 text-white" : "bg-black text-white hover:bg-primary"
-        }`}
-      >
-        <AnimatePresence mode="wait">
-          {isOpen ? (
-            <motion.div key="x" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }}>
-              <X size={24} />
-            </motion.div>
-          ) : (
-            <motion.div key="bot" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }}>
-              <Sparkles size={22} className="text-primary" />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.button>
+      {/* Floating Launcher Button */}
+      {!isOpen && (
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setIsOpen(true)}
+          className="px-4 py-3 rounded-full bg-[#0A0A0A] text-white font-heading font-black text-xs uppercase tracking-wider flex items-center gap-2.5 shadow-2xl hover:bg-primary transition-all border border-white/10"
+        >
+          <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-white text-[10px]">
+            <i className="fa-solid fa-wand-magic-sparkles"></i>
+          </div>
+          <span>IZI IA</span>
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+        </motion.button>
+      )}
     </div>
   );
 }

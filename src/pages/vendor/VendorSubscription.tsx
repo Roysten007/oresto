@@ -197,7 +197,7 @@ export default function VendorSubscription() {
             "Catalogue illimité (Plats / Chambres)",
             "Commandes directes & WhatsApp",
             "Paiements Mobile Money intégrés",
-            "Assistant IA Opérationnel IZA",
+            "Assistant IA Opérationnel IZI",
             "Programme fidélité & avis",
             "Support prioritaire 7j/7"
           ].map((f, i) => (

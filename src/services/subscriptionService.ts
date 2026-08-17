@@ -19,7 +19,7 @@ export const PLANS: Record<string, { name: string; price: number; firstMonthPric
       "Catalogue illimité (Plats & Menus / Chambres & Nuitées)",
       "Commandes directes & intégration WhatsApp",
       "Paiements Mobile Money (MTN & Moov)",
-      "Assistant IA Opérationnel IZA intégré",
+      "Assistant IA Opérationnel IZI intégré",
       "Programme de fidélité & avis clients",
       "Support prioritaire 7j/7"
     ]
@@ -33,7 +33,7 @@ export const PLANS: Record<string, { name: string; price: number; firstMonthPric
       "0% de commission sur vos ventes",
       "Catalogue illimité",
       "Paiements Mobile Money",
-      "Assistant IA Opérationnel IZA"
+      "Assistant IA Opérationnel IZI"
     ]
   }
 };

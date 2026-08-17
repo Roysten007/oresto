@@ -309,7 +309,7 @@ export default function VendorDashboard() {
               </div>
             </div>
             <p className="text-white/60 text-xs italic max-w-xl">
-              Inclus : Assistant IA IZA • 0% de commission • Site Factory complet • MoMo MTN/Moov • Support VIP
+              Inclus : Assistant IA IZI • 0% de commission • Site Factory complet • MoMo MTN/Moov • Support VIP
             </p>
           </div>
 
@@ -598,7 +598,7 @@ export default function VendorDashboard() {
                 <span className="font-black text-xl text-primary block mt-1">5 000 FCFA/mois</span>
                 <ul className="text-xs text-gray-600 space-y-2 mt-4 italic">
                   <li>✓ Tout Starter inclus</li>
-                  <li>✓ Assistant IA IZA (24h/24)</li>
+                  <li>✓ Assistant IA IZI (24h/24)</li>
                   <li>✓ **0% de commission**</li>
                   <li>✓ Support prioritaire</li>
                 </ul>

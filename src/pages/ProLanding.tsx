@@ -709,7 +709,7 @@ export default function ProLanding() {
                   { 
                     situation: "Assistance & Conseils", 
                     before: "Seul face à vos doutes pour fixer vos prix ou créer des offres", 
-                    after: "Assistant IA IZA disponible 24h/24 pour optimiser vos menus et marges" 
+                    after: "Assistant IA IZI disponible 24h/24 pour optimiser vos menus et marges" 
                   }
                 ].map((row, idx) => (
                   <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
@@ -779,7 +779,7 @@ export default function ProLanding() {
                       "Catalogue illimité (Plats & Chambres)",
                       "Commandes directes & WhatsApp",
                       "Paiements Mobile Money dans le chat",
-                      "Assistant IA Opérationnel IZA",
+                      "Assistant IA Opérationnel IZI",
                       "Référencement SEO Google Local",
                       "Support d'accompagnement 7j/7",
                     ].map((feat, i) => (

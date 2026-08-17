@@ -1,19 +1,16 @@
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from 'react-leaflet';
+import { useEffect, useRef, useState } from 'react';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import { useEffect, useState } from 'react';
-import { Locate } from 'lucide-react';
-
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 
-let DefaultIcon = L.icon({
-    iconUrl: icon,
-    shadowUrl: iconShadow,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41]
+const DefaultIcon = L.icon({
+  iconUrl: icon,
+  shadowUrl: iconShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34]
 });
-L.Marker.prototype.options.icon = DefaultIcon;
 
 interface MapComponentProps {
   center?: { lat: number; lng: number };
@@ -22,79 +19,106 @@ interface MapComponentProps {
   onMapClick?: (lat: number, lng: number) => void;
 }
 
-function ClickHandler({ onMapClick }: { onMapClick?: (lat: number, lng: number) => void }) {
-  useMapEvents({
-    click(e) {
-      if (onMapClick) onMapClick(e.latlng.lat, e.latlng.lng);
-    },
-  });
-  return null;
-}
-
-function FlyToLocation({ pos }: { pos: { lat: number; lng: number } | null }) {
-  const map = useMap();
-  useEffect(() => {
-    if (pos) map.flyTo([pos.lat, pos.lng], 16);
-  }, [pos]);
-  return null;
-}
-
 export default function MapComponent({ 
   center = { lat: 6.3654, lng: 2.4183 }, 
-  zoom = 13, 
+  zoom = 14, 
   markers = [],
   onMapClick 
 }: MapComponentProps) {
-  const [gpsPos, setGpsPos] = useState<{ lat: number; lng: number } | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+  const markersLayerRef = useRef<L.LayerGroup | null>(null);
   const [locating, setLocating] = useState(false);
 
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    if (!mapInstanceRef.current) {
+      const map = L.map(containerRef.current, {
+        center: [center.lat, center.lng],
+        zoom: zoom,
+        zoomControl: true,
+      });
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+
+      const markersLayer = L.layerGroup().addTo(map);
+      markersLayerRef.current = markersLayer;
+
+      map.on('click', (e: L.LeafletMouseEvent) => {
+        if (onMapClick) {
+          onMapClick(e.latlng.lat, e.latlng.lng);
+        }
+      });
+
+      mapInstanceRef.current = map;
+    }
+
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, []);
+
+  // Mettre à jour la vue si le centre change
+  useEffect(() => {
+    if (mapInstanceRef.current && center) {
+      mapInstanceRef.current.setView([center.lat, center.lng], zoom);
+    }
+  }, [center.lat, center.lng, zoom]);
+
+  // Mettre à jour les marqueurs
+  useEffect(() => {
+    if (!mapInstanceRef.current || !markersLayerRef.current) return;
+    markersLayerRef.current.clearLayers();
+
+    markers.forEach(m => {
+      const marker = L.marker([m.lat, m.lng], { icon: DefaultIcon });
+      if (m.title) marker.bindPopup(m.title);
+      markersLayerRef.current?.addLayer(marker);
+    });
+  }, [markers]);
+
   const handleLocate = () => {
-    if (!navigator.geolocation) return;
+    if (!navigator.geolocation || !mapInstanceRef.current) return;
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const pos = { lat: position.coords.latitude, lng: position.coords.longitude };
-        setGpsPos(pos);
-        if (onMapClick) onMapClick(pos.lat, pos.lng);
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.flyTo([latitude, longitude], 16);
+          if (markersLayerRef.current) {
+            const gpsMarker = L.marker([latitude, longitude], { icon: DefaultIcon }).bindPopup('📍 Ma position');
+            markersLayerRef.current.addLayer(gpsMarker);
+          }
+        }
+        if (onMapClick) onMapClick(latitude, longitude);
         setLocating(false);
       },
-      () => setLocating(false)
+      () => setLocating(false),
+      { enableHighAccuracy: true, timeout: 10000 }
     );
   };
 
   return (
-    <div className="relative w-full h-full">
-      <MapContainer 
-        key={`${center.lat}-${center.lng}`}
-        center={[center.lat, center.lng]} 
-        zoom={zoom} 
-        style={{ height: '100%', width: '100%', zIndex: 0 }}
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        {markers.map((marker, index) => (
-          <Marker key={index} position={[marker.lat, marker.lng]}>
-            {marker.title && <Popup>{marker.title}</Popup>}
-          </Marker>
-        ))}
-        {gpsPos && (
-          <Marker position={[gpsPos.lat, gpsPos.lng]}>
-            <Popup>📍 Ma position GPS</Popup>
-          </Marker>
-        )}
-        <ClickHandler onMapClick={onMapClick} />
-        <FlyToLocation pos={gpsPos} />
-      </MapContainer>
-
-      {/* GPS Button */}
+    <div className="relative w-full h-full min-h-[260px]">
+      <div 
+        ref={containerRef} 
+        className="w-full h-full rounded-[24px] overflow-hidden" 
+        style={{ minHeight: '280px', width: '100%', height: '100%', zIndex: 0 }} 
+      />
+      
       <button
+        type="button"
         onClick={handleLocate}
-        className="absolute bottom-3 right-3 z-[1000] bg-white shadow-lg border border-border rounded-xl px-3 py-2 text-sm font-sub text-foreground flex items-center gap-1.5 hover:bg-muted transition-colors"
+        className="absolute bottom-3 right-3 z-[400] bg-white shadow-lg border border-gray-200 rounded-xl px-3 py-2 text-xs font-bold text-gray-800 flex items-center gap-1.5 hover:bg-gray-50 transition-colors"
       >
-        <Locate size={16} className={locating ? "animate-spin text-primary" : "text-primary"} />
-        {locating ? "Localisation..." : "Me localiser"}
+        <i className={`fa-solid fa-location-crosshairs ${locating ? "animate-spin text-primary" : "text-primary"}`}></i>
+        <span>{locating ? "Localisation..." : "Me localiser"}</span>
       </button>
     </div>
   );
