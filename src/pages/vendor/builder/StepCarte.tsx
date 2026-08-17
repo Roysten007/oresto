@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Plus, Settings, Trash2, Camera, X, Check } from "lucide-react";
 import { Product } from "@/data/mockData";
 import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "@/lib/firebase";
@@ -34,24 +33,21 @@ export default function StepCarte({ products, vendorId, onSave, onDelete, catego
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Toujours afficher un aperçu local instantané
     const reader = new FileReader();
     reader.onloadend = () => {
       setEditing(prev => prev ? { ...prev, image: reader.result as string } : prev);
     };
     reader.readAsDataURL(file);
 
-    // Tenter l'upload Firebase en arrière-plan (optionnel)
     if (!storage || !vendorId) return;
     setUploading(true);
     try {
       const sRef = storageRef(storage, `products/${vendorId}/${Date.now()}_${file.name}`);
       await uploadBytes(sRef, file);
       const url = await getDownloadURL(sRef);
-      // Remplacer le base64 par l'URL permanente
       setEditing(prev => prev ? { ...prev, image: url } : prev);
-    } catch (err) {
-      console.warn("Firebase Storage indisponible, aperçu local conservé", err);
+    } catch {
+      // Conserver l'aperçu local
     } finally {
       setUploading(false);
     }
@@ -59,12 +55,16 @@ export default function StepCarte({ products, vendorId, onSave, onDelete, catego
 
   const handleSave = async () => {
     if (!editing?.name || !editing?.price) { 
-      toast.error(isHotel ? "Nom de chambre et prix par nuit requis" : "Nom et prix requis"); 
+      toast.error(isHotel ? "Nom de chambre et prix requis" : "Nom et prix du plat requis"); 
       return; 
     }
     setSaving(true);
-    try { await onSave(editing); setEditing(null); }
-    finally { setSaving(false); }
+    try { 
+      await onSave(editing); 
+      setEditing(null); 
+    } finally { 
+      setSaving(false); 
+    }
   };
 
   const allCategories = Array.from(new Set([...defaultCategories, ...products.map(p => p.category)])).filter(Boolean);
@@ -76,158 +76,236 @@ export default function StepCarte({ products, vendorId, onSave, onDelete, catego
   const ungrouped = products.filter(p => !p.category);
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8 font-body">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold">{isHotel ? "Mes Chambres" : "La Carte"}</h2>
-          <p className="text-sm text-gray-500 mt-1">
-            {products.length} {isHotel ? `chambre${products.length !== 1 ? 's' : ''}` : `plat${products.length !== 1 ? 's' : ''}`} enregistré{products.length !== 1 ? 's' : ''}
+          <h2 className="font-heading font-black text-2xl text-gray-900">
+            {isHotel ? "Chambres & Hébergements" : "La Carte & Vos Plats"}
+          </h2>
+          <p className="text-xs text-gray-500 font-medium mt-0.5">
+            {products.length} {isHotel ? `chambre${products.length !== 1 ? 's' : ''}` : `plat${products.length !== 1 ? 's' : ''}`} configuré{products.length !== 1 ? 's' : ''} sur votre vitrine
           </p>
         </div>
         <button
           onClick={() => setEditing({ name: "", price: 0, category: isHotel ? "Standard" : "Plats", image: "", description: "" })}
-          className="flex items-center gap-2 px-6 py-3 bg-black text-white rounded-full font-bold text-sm hover:bg-gray-800 transition-colors shadow-lg"
+          className="px-5 py-3 bg-primary text-white rounded-2xl font-bold text-xs hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2 shrink-0 active:scale-95"
         >
-          <Plus size={18} /> {isHotel ? "Nouvelle chambre" : "Nouveau plat"}
+          <i className="fa-solid fa-plus"></i>
+          <span>{isHotel ? "Ajouter une chambre" : "Ajouter un plat"}</span>
         </button>
       </div>
 
       {products.length === 0 && (
-        <div className="py-20 border-2 border-dashed border-gray-200 rounded-3xl flex flex-col items-center gap-4 text-gray-400">
-          <i className={`fa-solid ${isHotel ? "fa-hotel" : "fa-utensils"} text-5xl text-primary/40`}></i>
-          <p className="font-bold">{isHotel ? "Aucune chambre enregistrée" : "Votre carte est vide"}</p>
-          <p className="text-sm">Cliquez sur "{isHotel ? "Nouvelle chambre" : "Nouveau plat"}" pour commencer</p>
+        <div className="py-14 border-2 border-dashed border-gray-200 rounded-3xl flex flex-col items-center justify-center gap-3 text-center bg-gray-50/50 p-6">
+          <div className="w-14 h-14 rounded-2xl bg-orange-50 text-primary flex items-center justify-center text-2xl">
+            <i className={`fa-solid ${isHotel ? "fa-bed" : "fa-utensils"}`}></i>
+          </div>
+          <p className="font-bold text-gray-800 text-sm">{isHotel ? "Aucune chambre enregistrée" : "Votre carte est vide"}</p>
+          <p className="text-xs text-gray-400 max-w-xs">
+            Ajoutez vos spécialités ou chambres pour qu'elles s'affichent en temps réel sur votre site.
+          </p>
+          <button
+            onClick={() => setEditing({ name: "", price: 0, category: isHotel ? "Standard" : "Plats", image: "", description: "" })}
+            className="mt-2 px-4 py-2 bg-black text-white text-xs font-bold rounded-xl hover:bg-gray-800 transition-colors"
+          >
+            Commencer maintenant
+          </button>
         </div>
       )}
 
-      {categorizedProducts.map(({ cat, items }) => (
-        <div key={cat} className="space-y-4">
-          <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 border-b pb-2">{cat}</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {items.map(p => (
-              <div key={p.id} className="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition-all">
-                <div className="h-40 bg-gray-100 relative overflow-hidden">
-                  {p.image ? <img src={p.image} className="w-full h-full object-cover" alt={p.name} /> : <div className="absolute inset-0 flex items-center justify-center text-gray-300 text-3xl"><i className={`fa-solid ${isHotel ? "fa-bed" : "fa-utensils"}`}></i></div>}
-                  <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => setEditing(p)} className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-md hover:bg-black hover:text-white transition-colors"><Settings size={13} /></button>
-                    <button onClick={() => { if(confirm(isHotel ? "Supprimer cette chambre ?" : "Supprimer ce plat ?")) onDelete(p.id); }} className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-md text-red-500 hover:bg-red-500 hover:text-white transition-colors"><Trash2 size={13} /></button>
-                  </div>
-                </div>
-                <div className="p-4">
-                  <p className="font-bold text-sm">{p.name}</p>
-                  <p className="text-gray-400 text-xs mt-0.5 line-clamp-1">{p.description}</p>
-                  <p className="font-black text-lg mt-2">{Number(p.price).toLocaleString()} F {isHotel ? "/ nuit" : ""}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
-
-      {ungrouped.length > 0 && (
-        <div className="space-y-4">
-          <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 border-b pb-2">Autres</h3>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {ungrouped.map(p => (
-              <div key={p.id} className="group bg-white rounded-2xl border border-gray-100 overflow-hidden">
-                <div className="h-36 bg-gray-100">{p.image && <img src={p.image} className="w-full h-full object-cover" />}</div>
-                <div className="p-4"><p className="font-bold text-sm">{p.name}</p><p className="font-black">{Number(p.price).toLocaleString()} F {isHotel ? "/ nuit" : ""}</p></div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Modal */}
-      {editing && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-6">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setEditing(null)} />
-          <div className="relative bg-white w-full sm:max-w-lg rounded-t-[32px] sm:rounded-[32px] overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
-            <div className="flex items-center justify-between p-6 border-b">
-              <h3 className="font-black text-lg">
-                {editing.id ? (isHotel ? "Modifier la chambre" : "Modifier le plat") : (isHotel ? "Nouvelle chambre" : "Nouveau plat")}
+      {/* Groupes par catégorie */}
+      <div className="space-y-6">
+        {categorizedProducts.map(({ cat, items }) => (
+          <div key={cat} className="space-y-3">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-2">
+              <h3 className="text-xs font-black uppercase tracking-widest text-gray-500 flex items-center gap-2">
+                <i className="fa-solid fa-tag text-primary text-[10px]"></i>
+                {cat}
               </h3>
-              <button onClick={() => setEditing(null)} className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200"><X size={18} /></button>
+              <span className="text-[10px] font-bold text-gray-400">{items.length} article{items.length > 1 ? 's' : ''}</span>
             </div>
 
-            <div className="overflow-y-auto p-6 space-y-5 flex-1">
-              {/* Image upload */}
-              <div className="relative aspect-video rounded-2xl bg-gray-100 overflow-hidden cursor-pointer group">
-                {editing.image
-                  ? <img src={editing.image} className="w-full h-full object-cover" alt="" />
-                  : <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400 gap-2"><Camera size={32} /><span className="text-xs font-bold uppercase">{isHotel ? "Photo de la chambre" : "Photo du plat"}</span></div>
-                }
-                {uploading && <div className="absolute bottom-2 right-2 bg-black/70 text-white text-[9px] font-bold uppercase px-3 py-1 rounded-full flex items-center gap-1.5"><div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" /> Sauvegarde...</div>}
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-bold text-sm">Changer la photo</div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {items.map(p => (
+                <div key={p.id} className="p-3 bg-white rounded-2xl border border-gray-200/80 shadow-sm flex items-center gap-3 hover:border-primary/50 transition-all">
+                  <div className="w-16 h-16 rounded-xl bg-gray-100 relative overflow-hidden shrink-0">
+                    {p.image ? (
+                      <img src={p.image} className="w-full h-full object-cover" alt={p.name} />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-300 text-lg">
+                        <i className={`fa-solid ${isHotel ? "fa-bed" : "fa-utensils"}`}></i>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-xs text-gray-900 truncate">{p.name}</p>
+                    <p className="text-[10px] text-gray-500 line-clamp-1">{p.description || "Recette maison"}</p>
+                    <p className="font-heading font-black text-xs text-primary mt-1">
+                      {Number(p.price).toLocaleString()} F {isHotel ? "/ nuit" : ""}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-1 shrink-0">
+                    <button 
+                      onClick={() => setEditing(p)} 
+                      className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-black hover:text-white transition-colors text-xs"
+                      title="Modifier"
+                    >
+                      <i className="fa-solid fa-pen"></i>
+                    </button>
+                    <button 
+                      onClick={() => { if(confirm("Supprimer cet élément ?")) onDelete(p.id); }} 
+                      className="w-7 h-7 rounded-lg bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors text-xs"
+                      title="Supprimer"
+                    >
+                      <i className="fa-solid fa-trash"></i>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+
+        {ungrouped.length > 0 && (
+          <div className="space-y-3">
+            <h3 className="text-xs font-black uppercase tracking-widest text-gray-500 border-b border-gray-100 pb-2">Autres articles</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {ungrouped.map(p => (
+                <div key={p.id} className="p-3 bg-white rounded-2xl border border-gray-200/80 shadow-sm flex items-center gap-3">
+                  <div className="w-14 h-14 bg-gray-100 rounded-xl overflow-hidden shrink-0">
+                    {p.image && <img src={p.image} className="w-full h-full object-cover" alt="" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-xs text-gray-900 truncate">{p.name}</p>
+                    <p className="font-black text-xs text-primary">{Number(p.price).toLocaleString()} F</p>
+                  </div>
+                  <div className="flex gap-1">
+                    <button onClick={() => setEditing(p)} className="p-2 text-gray-400 hover:text-black"><i className="fa-solid fa-pen"></i></button>
+                    <button onClick={() => onDelete(p.id)} className="p-2 text-red-400 hover:text-red-600"><i className="fa-solid fa-trash"></i></button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Modal Ajout / Modification */}
+      {editing && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-white w-full max-w-md rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <div className="flex items-center justify-between p-5 border-b border-gray-100">
+              <h3 className="font-heading font-black text-base text-gray-900">
+                {editing.id ? (isHotel ? "Modifier la chambre" : "Modifier le plat") : (isHotel ? "Ajouter une chambre" : "Ajouter un plat")}
+              </h3>
+              <button onClick={() => setEditing(null)} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 text-gray-600">
+                <i className="fa-solid fa-xmark text-sm"></i>
+              </button>
+            </div>
+
+            <div className="overflow-y-auto p-5 space-y-4 flex-1 text-xs">
+              {/* Photo */}
+              <div className="relative aspect-video rounded-2xl bg-gray-100 overflow-hidden cursor-pointer group border-2 border-dashed border-gray-200 hover:border-primary transition-all">
+                {editing.image ? (
+                  <img src={editing.image} className="w-full h-full object-cover" alt="" />
+                ) : (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400 gap-1.5">
+                    <i className="fa-solid fa-camera text-2xl text-gray-400"></i>
+                    <span className="text-[10px] font-bold uppercase">{isHotel ? "Photo de la chambre" : "Photo du plat"}</span>
+                  </div>
+                )}
+                {uploading && (
+                  <div className="absolute bottom-2 right-2 bg-black/70 text-white text-[9px] font-bold uppercase px-3 py-1 rounded-full flex items-center gap-1.5">
+                    <i className="fa-solid fa-spinner fa-spin"></i> Sauvegarde...
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-bold text-xs">
+                  Changer la photo
+                </div>
                 <input type="file" accept="image/*" onChange={handleImageUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
               </div>
 
               <div>
-                <label className="text-xs font-bold uppercase tracking-widest text-gray-400 block mb-2">
-                  {isHotel ? "Nom / Numéro de la chambre *" : "Nom du plat *"}
+                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 block mb-1">
+                  {isHotel ? "Nom de la chambre *" : "Nom du plat *"}
                 </label>
                 <input
                   type="text"
                   value={editing.name || ""}
                   onChange={e => setEditing({ ...editing, name: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl bg-gray-100 font-bold text-base outline-none focus:ring-2 focus:ring-black"
-                  placeholder={isHotel ? "Ex: Suite Royale 201" : "Ex: Poulet Braisé"}
-                  autoFocus
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 font-bold text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                  placeholder={isHotel ? "Ex: Suite Royale 201" : "Ex: Poulet Braisé & Alloco"}
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold uppercase tracking-widest text-gray-400 block mb-2">
-                  {isHotel ? "Prix par nuit (FCFA) *" : "Prix (FCFA) *"}
+                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 block mb-1">
+                  {isHotel ? "Prix par nuit (FCFA) *" : "Prix du plat (FCFA) *"}
                 </label>
                 <input
                   type="number"
                   value={editing.price || ""}
                   onChange={e => setEditing({ ...editing, price: Number(e.target.value) })}
-                  className="w-full px-4 py-3 rounded-xl bg-gray-100 font-black text-xl outline-none focus:ring-2 focus:ring-black"
-                  placeholder="0"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 font-heading font-black text-lg text-primary outline-none focus:border-primary"
+                  placeholder="4500"
                   min="0"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold uppercase tracking-widest text-gray-400 block mb-2">Catégorie</label>
-                <div className="flex flex-col gap-3">
-                  <div className="flex flex-wrap gap-2">
-                    {Array.from(new Set([...defaultCategories, ...products.map(p => p.category)])).filter(Boolean).map(c => (
-                      <button key={c} type="button" onClick={() => setEditing({ ...editing, category: c })} className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${editing.category === c ? "bg-black text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>{c}</button>
-                    ))}
-                  </div>
-                  <input
-                    type="text"
-                    value={editing.category || ""}
-                    onChange={e => setEditing({ ...editing, category: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl bg-gray-100 font-bold text-sm outline-none focus:ring-2 focus:ring-black"
-                    placeholder={isHotel ? "Ex: Vue sur mer, Bungalow VIP..." : "Ou tapez une nouvelle catégorie (ex: Boissons fraîches)..."}
-                  />
+                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 block mb-1">Catégorie</label>
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {Array.from(new Set([...defaultCategories, ...products.map(p => p.category)])).filter(Boolean).map(c => (
+                    <button 
+                      key={c} 
+                      type="button" 
+                      onClick={() => setEditing({ ...editing, category: c })} 
+                      className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-all ${
+                        editing.category === c ? "bg-black text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      }`}
+                    >
+                      {c}
+                    </button>
+                  ))}
                 </div>
+                <input
+                  type="text"
+                  value={editing.category || ""}
+                  onChange={e => setEditing({ ...editing, category: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs outline-none focus:border-primary"
+                  placeholder="Ou tapez une catégorie personnalisée..."
+                />
               </div>
 
               <div>
-                <label className="text-xs font-bold uppercase tracking-widest text-gray-400 block mb-2">
-                  {isHotel ? "Description & Équipements" : "Description"}
+                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 block mb-1">
+                  Description
                 </label>
                 <textarea
+                  rows={2}
                   value={editing.description || ""}
                   onChange={e => setEditing({ ...editing, description: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl bg-gray-100 text-sm outline-none focus:ring-2 focus:ring-black resize-none h-20"
-                  placeholder={isHotel ? "Lit King size, Climatisation, Wifi, Balcon, Petit-déjeuner inclus..." : "Ingrédients, préparation..."}
+                  className="w-full p-3 rounded-xl border border-gray-200 text-xs outline-none focus:border-primary resize-none"
+                  placeholder={isHotel ? "Lit King size, Climatisation, Wifi, Balcon..." : "Accompagnement, épices, préparation..."}
                 />
               </div>
             </div>
 
-            <div className="p-6 border-t bg-gray-50">
+            <div className="p-4 border-t border-gray-100 bg-gray-50 flex gap-2">
+              <button
+                onClick={() => setEditing(null)}
+                className="py-3 px-5 rounded-xl border border-gray-200 font-bold text-xs text-gray-700 hover:bg-gray-100"
+              >
+                Annuler
+              </button>
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="w-full py-4 rounded-2xl bg-black text-white font-black text-sm uppercase tracking-widest disabled:opacity-50 hover:bg-gray-800 transition-colors"
+                className="flex-1 py-3 rounded-xl bg-primary text-white font-black text-xs uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md shadow-primary/20"
               >
-                {saving ? "Enregistrement..." : "Enregistrer le plat"}
+                {saving ? "Sauvegarde..." : "Valider et enregistrer"}
               </button>
             </div>
           </div>

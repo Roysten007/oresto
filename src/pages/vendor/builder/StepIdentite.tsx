@@ -1,4 +1,3 @@
-import { Camera, Image as ImageIcon, Plus, Compass, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { VendorProfile } from "@/data/mockData";
@@ -13,184 +12,199 @@ interface Props {
   handleFileUpload: (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'cover') => void;
 }
 
-export default function StepIdentite({ formData, setFormData, localLogo, localCover, checkingSlug, handleSlugChange, handleFileUpload }: Props) {
+export default function StepIdentite({ 
+  formData, 
+  setFormData, 
+  localLogo, 
+  localCover, 
+  checkingSlug, 
+  handleSlugChange, 
+  handleFileUpload 
+}: Props) {
   const [isLocating, setIsLocating] = useState(false);
 
   const handleLocateMe = () => {
     if (!navigator.geolocation) {
-      toast.error("Géolocalisation non supportée");
+      toast.error("Géolocalisation non supportée par votre navigateur");
       return;
     }
     
     setIsLocating(true);
-    toast.loading("Recherche de votre position...", { id: "geo-vendor" });
+    toast.loading("Détection de votre position GPS...", { id: "geo-step" });
     
     navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
+      async (pos) => {
+        const { latitude, longitude } = pos.coords;
         try {
           const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`);
           const data = await res.json();
-          const city = data.address.city || data.address.town || data.address.village || "";
-          const neighborhood = data.address.suburb || data.address.neighbourhood || data.address.road || "";
+          const city = data.address?.city || data.address?.town || data.address?.village || "Cotonou";
+          const neighborhood = data.address?.suburb || data.address?.neighbourhood || data.address?.quarter || "";
           
           setFormData({ ...formData, city, neighborhood });
-          toast.success("Position trouvée !", { id: "geo-vendor" });
-        } catch (error) {
-          toast.error("Impossible de récupérer l'adresse exacte", { id: "geo-vendor" });
+          toast.success("Position GPS détectée avec succès !", { id: "geo-step" });
+        } catch {
+          toast.success("Position GPS captée", { id: "geo-step" });
         } finally {
           setIsLocating(false);
         }
       },
-      (error) => {
+      () => {
         setIsLocating(false);
-        toast.error("Erreur de géolocalisation", { id: "geo-vendor" });
+        toast.error("Veuillez autoriser l'accès GPS dans votre navigateur", { id: "geo-step" });
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 10000 }
     );
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-      <div className="space-y-8">
-        <div>
-          <h2 className="text-2xl font-bold mb-1">Identité du restaurant</h2>
-          <p className="text-sm text-gray-500">Ces informations apparaîtront sur votre site public.</p>
-        </div>
+    <div className="space-y-8 font-body">
+      <div>
+        <h2 className="font-heading font-black text-2xl text-gray-900 mb-1">
+          Identité & Coordonnées
+        </h2>
+        <p className="text-xs text-gray-500 font-medium">
+          Définissez les informations principales de votre établissement qui apparaîtront sur votre vitrine.
+        </p>
+      </div>
 
+      {/* Champs principaux */}
+      <div className="space-y-6">
+        
+        {/* Nom du restaurant */}
         <div className="space-y-2">
-          <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Nom du restaurant</label>
+          <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500">
+            Nom de l'établissement *
+          </label>
           <input
             type="text"
             value={formData.name || ""}
             onChange={e => setFormData({ ...formData, name: e.target.value })}
-            className="w-full border-b-2 border-gray-200 focus:border-black py-3 text-2xl font-bold outline-none transition-colors bg-transparent"
-            placeholder="Ex: Chez Fatou"
+            className="w-full px-5 py-3.5 rounded-2xl border border-gray-200 bg-gray-50/50 text-gray-900 font-heading font-bold text-lg focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+            placeholder="Ex: Le Maquis Étoilé"
           />
         </div>
 
+        {/* URL personnalisée */}
         <div className="space-y-2">
-          <label className="text-xs font-bold uppercase tracking-widest text-gray-400">URL du site</label>
-          <div className="flex items-center gap-2 border-b-2 border-gray-200 focus-within:border-black py-3 transition-colors">
-            <span className="text-gray-400 text-sm">oresto.app/r/</span>
+          <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500">
+            Lien web direct (URL de votre site) *
+          </label>
+          <div className="flex items-center rounded-2xl border border-gray-200 bg-gray-50/50 px-4 py-3 focus-within:bg-white focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+            <span className="text-xs font-bold text-gray-400 select-none mr-1">oresto.app/r/</span>
             <input
               type="text"
               value={formData.slug || ""}
               onChange={e => handleSlugChange(e.target.value)}
-              className="flex-1 outline-none font-bold text-lg bg-transparent"
-              placeholder="chez-fatou"
+              className="flex-1 bg-transparent font-bold text-sm text-gray-900 outline-none"
+              placeholder="le-maquis-etoile"
             />
-            {checkingSlug && <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />}
+            {checkingSlug && <i className="fa-solid fa-spinner fa-spin text-primary text-sm"></i>}
+          </div>
+          <p className="text-[11px] text-gray-400 italic">Ce lien court pourra être partagé sur vos réseaux sociaux et WhatsApp.</p>
+        </div>
+
+        {/* Photos (Logo + Couverture) */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+          {/* Logo */}
+          <div className="sm:col-span-1 space-y-2">
+            <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500">Logo</label>
+            <div className="relative w-full aspect-square rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50/80 hover:bg-orange-50/30 hover:border-primary transition-all flex flex-col items-center justify-center p-3 text-center cursor-pointer group overflow-hidden">
+              {localLogo || formData.logo_url ? (
+                <img src={localLogo || formData.logo_url} alt="Logo" className="w-full h-full object-cover rounded-xl" />
+              ) : (
+                <>
+                  <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm mb-1 group-hover:scale-110 transition-transform">
+                    <i className="fa-solid fa-camera"></i>
+                  </div>
+                  <span className="text-[10px] font-bold text-gray-600">Ajouter un logo</span>
+                </>
+              )}
+              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold">
+                Changer
+              </div>
+              <input type="file" accept="image/*" onChange={e => handleFileUpload(e, 'logo')} className="absolute inset-0 opacity-0 cursor-pointer" />
+            </div>
+          </div>
+
+          {/* Couverture */}
+          <div className="sm:col-span-2 space-y-2">
+            <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500">Image de Bannière</label>
+            <div className="relative w-full aspect-[16/8] rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50/80 hover:bg-orange-50/30 hover:border-primary transition-all flex flex-col items-center justify-center p-3 text-center cursor-pointer group overflow-hidden">
+              {localCover || formData.cover_url ? (
+                <img src={localCover || formData.cover_url} alt="Cover" className="w-full h-full object-cover rounded-xl" />
+              ) : (
+                <>
+                  <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm mb-1 group-hover:scale-110 transition-transform">
+                    <i className="fa-solid fa-image"></i>
+                  </div>
+                  <span className="text-[10px] font-bold text-gray-600">Ajouter une bannière</span>
+                </>
+              )}
+              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold">
+                Changer
+              </div>
+              <input type="file" accept="image/*" onChange={e => handleFileUpload(e, 'cover')} className="absolute inset-0 opacity-0 cursor-pointer" />
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Instagram</label>
-            <input
-              type="text"
-              value={formData.social_links?.instagram || ""}
-              onChange={e => setFormData({ ...formData, social_links: { ...formData.social_links, instagram: e.target.value } })}
-              className="w-full bg-gray-100 rounded-xl px-4 py-3 font-medium outline-none focus:ring-2 focus:ring-black text-sm"
-              placeholder="@username"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Facebook</label>
-            <input
-              type="text"
-              value={formData.social_links?.facebook || ""}
-              onChange={e => setFormData({ ...formData, social_links: { ...formData.social_links, facebook: e.target.value } })}
-              className="w-full bg-gray-100 rounded-xl px-4 py-3 font-medium outline-none focus:ring-2 focus:ring-black text-sm"
-              placeholder="Nom de la page"
-            />
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Description</label>
-          <textarea
-            value={formData.description || ""}
-            onChange={e => setFormData({ ...formData, description: e.target.value })}
-            className="w-full bg-gray-100 rounded-xl p-4 font-medium h-28 resize-none outline-none focus:ring-2 focus:ring-black text-sm"
-            placeholder="Racontez votre histoire..."
-          />
-        </div>
-
-        <div className="pt-4 border-t border-gray-100">
-          <div className="flex items-center justify-between mb-4">
+        {/* Localisation */}
+        <div className="pt-4 border-t border-gray-100 space-y-3">
+          <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-bold">Localisation</h3>
-              <p className="text-xs text-gray-500">Où se trouve votre restaurant ?</p>
+              <h3 className="font-heading font-black text-sm text-gray-900">Emplacement & Ville</h3>
+              <p className="text-[11px] text-gray-500">Où se situe votre restaurant ?</p>
             </div>
             <button
+              type="button"
               onClick={handleLocateMe}
               disabled={isLocating}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary/10 text-primary text-xs font-bold hover:bg-primary/20 transition-colors"
+              className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-primary/10 text-primary text-xs font-bold hover:bg-primary hover:text-white transition-all shadow-sm"
             >
-              {isLocating ? <Loader2 size={14} className="animate-spin" /> : <Compass size={14} />}
-              Me localiser
+              <i className={`fa-solid fa-location-crosshairs ${isLocating ? "animate-spin" : ""}`}></i>
+              <span>{isLocating ? "Détection..." : "Me localiser"}</span>
             </button>
           </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Ville</label>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Ville</label>
               <input
                 type="text"
                 value={formData.city || ""}
                 onChange={e => setFormData({ ...formData, city: e.target.value })}
-                className="w-full bg-gray-100 rounded-xl px-4 py-3 font-medium outline-none focus:ring-2 focus:ring-black text-sm"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-xs font-bold outline-none focus:bg-white focus:border-primary"
                 placeholder="Ex: Cotonou"
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Quartier / Adresse</label>
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Quartier</label>
               <input
                 type="text"
                 value={formData.neighborhood || ""}
                 onChange={e => setFormData({ ...formData, neighborhood: e.target.value })}
-                className="w-full bg-gray-100 rounded-xl px-4 py-3 font-medium outline-none focus:ring-2 focus:ring-black text-sm"
-                placeholder="Ex: Haïe Vive"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-xs font-bold outline-none focus:bg-white focus:border-primary"
+                placeholder="Ex: Haie Vive"
               />
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="space-y-8">
-        <div>
-          <h2 className="text-2xl font-bold mb-1">Photos</h2>
-          <p className="text-sm text-gray-500">Cliquez sur les zones pour uploader vos images.</p>
-        </div>
-
-        {/* Logo */}
-        <div className="flex flex-col items-center gap-3">
-          <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Logo</label>
-          <div className="relative w-32 h-32 group cursor-pointer">
-            <div className="w-full h-full rounded-full border-2 border-dashed border-gray-300 bg-gray-50 overflow-hidden flex items-center justify-center group-hover:border-black transition-colors">
-              {localLogo
-                ? <img src={localLogo} className="w-full h-full object-cover" alt="logo" />
-                : <div className="text-center text-gray-400"><Camera size={28} className="mx-auto" /><span className="text-[9px] font-bold uppercase mt-1 block">Logo</span></div>
-              }
-            </div>
-            <input type="file" accept="image/*" onChange={e => handleFileUpload(e, 'logo')} className="absolute inset-0 opacity-0 cursor-pointer" />
-            <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center shadow-lg"><Plus size={14} /></div>
-          </div>
-        </div>
-
-        {/* Cover */}
+        {/* Description / Histoire */}
         <div className="space-y-2">
-          <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Image de couverture</label>
-          <div className="relative w-full aspect-[16/7] rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 overflow-hidden group cursor-pointer hover:border-black transition-colors">
-            {localCover
-              ? <img src={localCover} className="w-full h-full object-cover" alt="cover" />
-              : <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400 gap-2"><ImageIcon size={36} /><span className="text-xs font-bold uppercase">Couverture</span></div>
-            }
-            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-bold text-sm">Changer l'image</div>
-            <input type="file" accept="image/*" onChange={e => handleFileUpload(e, 'cover')} className="absolute inset-0 opacity-0 cursor-pointer" />
-          </div>
+          <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500">
+            Description & Spécialités
+          </label>
+          <textarea
+            rows={3}
+            value={formData.description || ""}
+            onChange={e => setFormData({ ...formData, description: e.target.value })}
+            className="w-full p-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-xs leading-relaxed outline-none focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none"
+            placeholder="Présentez brièvement vos spécialités, vos grillades maison et l'ambiance de votre établissement..."
+          />
         </div>
+
       </div>
     </div>
   );
