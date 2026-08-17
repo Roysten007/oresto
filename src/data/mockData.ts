@@ -102,8 +102,13 @@ export interface VendorProfile {
   avg_delivery_time?: number;
   avg_price_range?: string;
   cuisine_tags?: string[];
+  business_type?: "restaurant" | "ecommerce" | "hotel" | "services";
 }
 
+export interface ProductVariant {
+  name: string; // ex: "Taille", "Couleur", "Modèle"
+  options: string[]; // ex: ["S", "M", "L", "XL"] ou ["Noir", "Blanc", "Or"]
+}
 
 export interface Product {
   id: string;
@@ -111,9 +116,16 @@ export interface Product {
   name: string;
   description: string;
   price: number;
+  originalPrice?: number; // Prix barré pour promos (ex: 25000)
   category: string;
-  image: string;
+  image: string; // Image principale
+  images?: string[]; // Galerie multi-photos (jusqu'à 4 photos)
   available: boolean;
+  stock?: number; // Quantité en stock
+  inStock?: boolean;
+  badge?: "PROMO" | "BESTSELLER" | "NOUVEAU" | "VENTE FLASH" | "STOCK LIMITÉ" | string;
+  variants?: ProductVariant[];
+  features?: string[]; // Points forts / Caractéristiques clés
 }
 
 export interface Order {
