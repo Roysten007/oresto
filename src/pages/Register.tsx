@@ -320,15 +320,15 @@ export default function Register() {
                       ✨ Formule Unique Oresto Pro
                     </span>
                     <span className="text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-emerald-500 text-white shadow-sm">
-                      -50% 1er mois (2 500 F)
+                      -25% 1er mois (3 750 F)
                     </span>
                   </div>
                   <div className="flex items-baseline gap-2">
-                    <span className="font-heading font-black text-2xl text-gray-900">5 000 FCFA</span>
-                    <span className="text-xs font-bold text-gray-500">/ mois</span>
+                    <span className="font-heading font-black text-2xl text-gray-900">3 750 FCFA</span>
+                    <span className="text-xs font-bold text-gray-500">le 1er mois (puis 5 000 F/mois)</span>
                   </div>
                   <p className="text-[11px] text-gray-600 leading-relaxed">
-                    🎉 <strong>Essai 100% gratuit pendant 14 jours</strong> sans engagement. 0% de commission sur vos encaissements, Vitrine Web autonome et Assistant IA IZI.
+                    🎉 <strong>Réduction immédiate de 25% activée</strong>. 0% de commission sur vos encaissements, Vitrine Web autonome et Assistant IA IZI inclus.
                   </p>
                 </div>
               </div>

@@ -1,13 +1,13 @@
 import { Link } from "react-router-dom";
-import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useState } from "react";
 
 const FadeIn = ({ children, delay = 0, y = 20, className = "" }: { children: React.ReactNode, delay?: number, y?: number, className?: string }) => (
   <motion.div
     initial={{ opacity: 0, y }}
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true }}
-    transition={{ duration: 0.8, delay, ease: [0.16, 1, 0.3, 1] }}
+    transition={{ duration: 0.7, delay, ease: [0.16, 1, 0.3, 1] }}
     className={className}
   >
     {children}
@@ -20,825 +20,587 @@ export default function ProLanding() {
   const navBorder = useTransform(scrollY, [0, 50], ["transparent", "rgba(0, 0, 0, 0.05)"]);
 
   const [openFaq, setOpenFaq] = useState<number | null>(0);
-  const [activeFlowStep, setActiveFlowStep] = useState<number>(0);
-  const [autoPlay, setAutoPlay] = useState<boolean>(true);
-
-  // Auto-cycle through the live flow schema
-  useEffect(() => {
-    if (!autoPlay) return;
-    const timer = setInterval(() => {
-      setActiveFlowStep((prev) => (prev + 1) % 4);
-    }, 4500);
-    return () => clearInterval(timer);
-  }, [autoPlay]);
-
-  // Solutions concrètes orientées Tranquillité d'Esprit
-  const peaceOfMindPillars = [
-    {
-      id: 0,
-      icon: "fa-solid fa-peace",
-      title: "1. Tranquillité en Cuisine",
-      problem: "Le téléphone qui sonne pendant que vous cuisinez, dicter les prix à chaque client...",
-      solution: "Les clients choisissent et commandent en autonomie sur votre vitrine. Vous recevez des commandes complètes et précises sans interruption.",
-      relief: "Fin du désordre • Concentration totale sur vos plats"
-    },
-    {
-      id: 1,
-      icon: "fa-solid fa-shield-halved",
-      title: "2. Tranquillité Financière",
-      problem: "Les doutes sur les transferts MoMo et la peur des faux SMS de confirmation...",
-      solution: "Le numéro MoMo est clairement affiché, le client joint son reçu dans le chat et vous validez d'un clic avant d'allumer le feu.",
-      relief: "Encaissement direct • 0% de commission prélevée"
-    },
-    {
-      id: 2,
-      icon: "fa-solid fa-moon",
-      title: "3. Tranquillité à la Fermeture",
-      problem: "Passer une heure le soir à recompter les tickets et les carnets papier avec fatigue...",
-      solution: "Votre tableau de bord compte vos recettes en temps réel. À la fermeture, votre total de journée est prêt instantanément.",
-      relief: "Comptabilité sans effort • Rentrez chez vous détendu"
-    },
-    {
-      id: 3,
-      icon: "fa-solid fa-heart",
-      title: "4. Tranquillité avec vos Clients",
-      problem: "Les disputes sur les commandes mal comprises ou les retards évitables...",
-      solution: "Un suivi en direct et un chat interactif pour rassurer le client à chaque étape (Paiement reçu ➔ En cuisine ➔ Livré).",
-      relief: "Clients ravis • Fidélisation naturelle"
-    }
-  ];
-
-  // Schéma interactif illustré des étapes
-  const flowSteps = [
-    {
-      step: 1,
-      title: "Le Client choisit en autonomie",
-      short: "1. Commande sans stress",
-      icon: "fa-solid fa-mobile-screen-button",
-      desc: "Le client ouvre votre site ou scanne le QR Code sur sa table. Il compose sa commande avec précision sans vous interrompre en cuisine.",
-      mockupType: "client_order",
-      highlight: "Zéro interruption en cuisine pour dicter le menu"
-    },
-    {
-      step: 2,
-      title: "Paiement Mobile Money limpide",
-      short: "2. MoMo direct & Preuve",
-      icon: "fa-solid fa-money-bill-transfer",
-      desc: "Votre numéro MTN / Moov est visible avec copie 1-clic. Le client transfère l'argent et confirme dans le chat de commande.",
-      mockupType: "chat_payment",
-      highlight: "Zéro doute sur le montant ou le numéro"
-    },
-    {
-      step: 3,
-      title: "Validation immédiate d'un geste",
-      short: "3. Validation en 1 clic",
-      icon: "fa-solid fa-circle-check",
-      desc: "Vous jetez un coup d'œil à la notification et cliquez sur 'Valider'. La confirmation rassure le client et lance la préparation.",
-      mockupType: "vendor_validation",
-      highlight: "Bulle verte de confirmation automatique"
-    },
-    {
-      step: 4,
-      title: "Comptes du soir prêts en temps réel",
-      short: "4. Recettes tracées en direct",
-      icon: "fa-solid fa-chart-line",
-      desc: "La vente est automatiquement enregistrée dans votre chiffre d'affaires du jour. Vos comptes sont impeccables sans calcul manuel.",
-      mockupType: "dashboard_update",
-      highlight: "Fermeture du restaurant sans prise de tête"
-    }
-  ];
+  const [activePreviewType, setActivePreviewType] = useState<"restaurant" | "ecommerce">("restaurant");
 
   const faqs = [
-    { 
-      q: "Comment Oresto m'apporte la tranquillité d'esprit au quotidien ?", 
-      a: "Oresto supprime la charge mentale : fini de dicter le menu au téléphone, fini de vérifier 10 fois si un transfert MoMo est arrivé, et fini de faire les comptes à la main le soir. Tout est fluide, automatique et clair." 
+    {
+      q: "Mes clients doivent-ils installer une application ?",
+      a: "Non. Votre vitrine s'ouvre instantanément dans n'importe quel navigateur mobile en cliquant sur votre lien (ex: oresto.app/r/votre-nom) ou en scannant votre QR Code."
     },
-    { 
-      q: "Mes clients doivent-ils télécharger une application ?", 
-      a: "Non ! Vos clients cliquent simplement sur votre lien ou scannent le QR Code sur leur table. Le site s'ouvre instantanément dans leur navigateur, sans téléchargement ni inscription." 
+    {
+      q: "Comment suis-je payé par mes clients ?",
+      a: "Directement sur votre compte MTN Mobile Money, Moov Money ou Celtiis Cash. L'argent ne transite par aucun compte tiers : 100% de vos recettes arrivent immédiatement sur votre propre téléphone."
     },
-    { 
-      q: "Comment se passent les paiements Mobile Money ?", 
-      a: "Le paiement se fait directement entre votre client et votre compte Mobile Money (MTN MoMo, Moov Money, Celtiis). Oresto fournit le cadre interactif dans le chat de commande pour que le client voie votre numéro, envoie sa preuve et que vous validiez d'un clic." 
+    {
+      q: "Combien me coûte Oresto Pro après le premier mois ?",
+      a: "La formule unique est à 5 000 FCFA par mois, tout inclus (Site Factory, Catalogue illimité, Encaissement MoMo 0% commission, Assistant IZI IA). Vous bénéficiez de -25% de réduction immédiate dès votre inscription (soit 3 750 FCFA le premier mois)."
     },
-    { 
-      q: "Est-ce difficile à utiliser si je ne suis pas à l'aise avec la technologie ?", 
-      a: "C'est conçu pour être d'une simplicité enfantine. En 12 minutes chrono, vous renseignez le nom de votre établissement, ajoutez vos plats ou chambres avec leurs prix, et tout fonctionne tout seul." 
+    {
+      q: "Combien de temps faut-il pour créer et lancer mon site ?",
+      a: "12 minutes chrono. Vous téléchargez votre logo, ajoutez vos spécialités ou vos articles avec leurs photos et tarifs, et votre site est en ligne immédiatement."
     },
-    { 
-      q: "Combien coûte la solution après les 14 jours d'essai gratuit ?", 
-      a: "L'essai est 100% gratuit pendant 14 jours sans carte bancaire. Ensuite, le tarif est de seulement 5 000 FCFA / mois (avec 50% de réduction pour votre premier mois, soit 2 500 FCFA). 0% de commission sur vos ventes." 
+    {
+      q: "Est-ce adapté aux restaurants ET aux boutiques e-commerce ?",
+      a: "Oui. Oresto Pro propose deux espaces 100% dédiés : l'espace Restaurant (Plats, Cuisine, Menus de la semaine) et l'espace Boutique E-Commerce (Multi-photos, Tailles/Couleurs, Gestion des stocks, Bannières d'annonces)."
     }
   ];
 
   return (
-    <div className="min-h-screen w-full bg-white text-foreground selection:bg-primary selection:text-white font-body overflow-x-hidden">
+    <div className="min-h-screen bg-white text-gray-900 font-body selection:bg-orange-100 selection:text-orange-900 overflow-x-hidden">
       
-      {/* ─── Navigation ─── */}
+      {/* Sticky Top Navigation */}
       <motion.nav 
-        style={{ backgroundColor: navBg, borderBottom: `1px solid`, borderBottomColor: navBorder }}
-        className="fixed top-0 left-0 right-0 z-50 px-6 py-4 transition-all"
+        style={{ backgroundColor: navBg, borderColor: navBorder }}
+        className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md border-b px-4 sm:px-8 py-3.5 transition-all"
       >
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3 no-underline">
-            <div className="w-10 h-10 bg-primary rounded-2xl flex items-center justify-center text-white shadow-lg shadow-primary/25">
-              <i className="fa-solid fa-utensils text-lg"></i>
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2.5 no-underline">
+            <div className="w-9 h-9 rounded-2xl bg-primary flex items-center justify-center text-white text-base shadow-md shadow-primary/25">
+              <i className="fa-solid fa-store"></i>
             </div>
-            <span className="font-heading text-2xl font-black tracking-tighter uppercase text-foreground">
-              Oresto <span className="text-primary">Connect</span>
+            <span className="font-heading font-black text-xl tracking-tight uppercase text-gray-900">
+              Oresto <span className="text-primary">Pro</span>
             </span>
           </Link>
 
-          <div className="hidden lg:flex items-center gap-1 p-1 rounded-full bg-white/80 backdrop-blur-xl border border-gray-200 shadow-sm">
-            <a href="#serenite" className="px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors">Tranquillité d'Esprit</a>
-            <a href="#schema-anime" className="px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest text-primary font-bold">En Pratique</a>
-            <a href="#comparatif" className="px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors">Avant / Après</a>
-            <a href="#tarifs" className="px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors">Tarifs</a>
-            <a href="#faq" className="px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors">Questions</a>
-          </div>
-
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Link to="/login" className="px-4 py-2.5 rounded-full font-sub text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors">
-              <i className="fa-solid fa-arrow-right-to-bracket mr-1.5"></i> Connexion
+          <div className="flex items-center gap-3">
+            <Link 
+              to="/login"
+              className="px-4 py-2 text-xs font-bold text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              Connexion
             </Link>
-            <Link to="/register?role=vendor" className="px-5 py-2.5 bg-primary text-white rounded-full font-sub text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-lg shadow-primary/25 flex items-center gap-2">
-              <i className="fa-solid fa-dove"></i> Démarrer sans stress
+
+            <Link
+              to="/register"
+              className="px-5 py-2.5 rounded-2xl bg-primary text-white font-heading font-black text-xs uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md shadow-primary/20 flex items-center gap-2"
+            >
+              <span>Activer à -25% (3 750 F)</span>
+              <i className="fa-solid fa-arrow-right text-[10px]"></i>
             </Link>
           </div>
         </div>
       </motion.nav>
 
-      {/* ─── Hero Section : Cuisinez l'Esprit Tranquille (Centré Parfaitement) ─── */}
-      <section className="relative min-h-[90vh] flex flex-col justify-center items-center pt-28 pb-16 px-6 overflow-hidden">
-        <motion.div className="max-w-6xl mx-auto text-center relative z-10 space-y-7 my-auto flex flex-col items-center justify-center">
+      {/* Hero Section */}
+      <header className="pt-28 sm:pt-36 pb-12 sm:pb-20 px-4 sm:px-6 relative overflow-hidden">
+        <div className="max-w-5xl mx-auto text-center space-y-6">
           
-          <FadeIn delay={0.05}>
-            <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-orange-50/90 border border-orange-200 text-primary text-xs font-black uppercase tracking-widest shadow-sm">
-              <i className="fa-solid fa-dove text-sm"></i> La Tranquillité d'Esprit pour Restaurateurs & Hôteliers
+          <FadeIn delay={0.1}>
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-50 border border-orange-200 text-primary text-xs font-black uppercase tracking-wider shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+              0% DE COMMISSION • -25% DÈS LE 1ER MOIS (3 750 FCFA)
             </div>
           </FadeIn>
 
-          <FadeIn delay={0.15} className="w-full flex justify-center">
-            <h1 className="font-heading text-3xl sm:text-5xl md:text-6xl lg:text-[68px] xl:text-[74px] font-[900] leading-[1.08] tracking-tighter uppercase text-foreground text-center">
-              <span className="block sm:inline md:block whitespace-normal md:whitespace-nowrap">
-                Cuisinez l'esprit tranquille,
-              </span>
-              <span className="block sm:inline md:block text-primary italic whitespace-normal md:whitespace-nowrap">
-                Oresto s'occupe du reste.
-              </span>
+          <FadeIn delay={0.2}>
+            <h1 className="font-heading font-black text-3xl sm:text-5xl md:text-6xl text-gray-900 tracking-tight leading-[1.1] max-w-4xl mx-auto">
+              Reprenez le contrôle de votre commerce <span className="text-primary">dès maintenant.</span>
             </h1>
           </FadeIn>
 
-          <FadeIn delay={0.25} className="max-w-2xl mx-auto text-center">
-            <p className="text-base sm:text-lg md:text-xl text-muted-foreground font-body leading-relaxed">
-              Fini le désordre des messages WhatsApp, les doutes sur les paiements et les fermetures tardives à recompter les carnets. <strong>Retrouvez la sérénité au quotidien</strong> avec un système simple, autonome et <strong>100% de vos bénéfices dans votre poche</strong>.
+          <FadeIn delay={0.3}>
+            <p className="text-sm sm:text-lg text-gray-600 font-medium max-w-2xl mx-auto leading-relaxed">
+              Encaissez 100% de vos commandes directement sur votre compte Mobile Money, sans payer la moindre commission, grâce à votre vitrine en ligne prête en 12 minutes.
             </p>
           </FadeIn>
 
-          <FadeIn delay={0.35} className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-5 pt-3 w-full">
-            <Link 
-              to="/register?role=vendor" 
-              className="group w-full sm:w-auto px-9 py-5 bg-primary text-white rounded-full font-sub text-xs sm:text-sm font-black uppercase tracking-widest flex items-center justify-center gap-3 shadow-2xl shadow-primary/30 hover:scale-105 transition-all"
-            >
-              <i className="fa-solid fa-wand-magic-sparkles"></i>
-              Créer mon site en 12 minutes 
-              <i className="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
-            </Link>
-            <a 
-              href="#schema-anime" 
-              className="flex items-center justify-center gap-2 px-8 py-5 rounded-full bg-white border border-gray-200 shadow-sm font-sub text-xs font-black uppercase tracking-widest text-foreground hover:bg-gray-50 transition-colors"
-            >
-              <i className="fa-solid fa-play text-primary"></i> Voir la démonstration en direct ↓
-            </a>
-          </FadeIn>
-        </motion.div>
-
-        {/* Ambient Glows */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full -z-10 opacity-15 pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-primary/30 rounded-full blur-[140px]" />
-          <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-orange-400/20 rounded-full blur-[140px]" />
-        </div>
-      </section>
-
-      {/* ─── NOUVEL APERÇU DU TABLEAU DE BORD RESTAURATEUR EN DIRECT ─── */}
-      <section className="py-12 px-6 -mt-8 relative z-20">
-        <div className="max-w-6xl mx-auto">
-          <FadeIn delay={0.1}>
-            <div className="rounded-[40px] bg-gray-900 border-2 border-gray-800 p-6 sm:p-10 shadow-2xl text-white relative overflow-hidden">
-              <div className="absolute top-0 right-1/4 w-72 h-72 bg-primary/20 rounded-full blur-[100px] pointer-events-none" />
-
-              {/* Dashboard Header Mockup */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-8 border-b border-gray-800">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-white text-xl shadow-lg shadow-primary/30">
-                    <i className="fa-solid fa-store"></i>
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-heading text-lg sm:text-xl font-black text-white">Le Maquis Étoilé</h3>
-                      <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-black uppercase flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> En ligne & Actif
-                      </span>
-                    </div>
-                    <p className="text-xs text-gray-400">Cotonou, Haie Vive • Menu Ouvert</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <div className="px-4 py-2 rounded-2xl bg-white/5 border border-white/10 text-xs font-bold text-gray-300 flex items-center gap-2">
-                    <i className="fa-solid fa-calendar-day text-primary"></i> Aujourd'hui
-                  </div>
-                  <div className="px-4 py-2 rounded-2xl bg-primary/10 border border-primary/30 text-xs font-bold text-primary flex items-center gap-2">
-                    <i className="fa-solid fa-bolt"></i> Temps Réel
-                  </div>
-                </div>
-              </div>
-
-              {/* 4 KPIs Cards */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 my-8">
-                <div className="p-5 rounded-3xl bg-white/5 border border-white/10 space-y-2">
-                  <div className="flex items-center justify-between text-xs text-gray-400 font-bold">
-                    <span>CA Encaissé (MoMo)</span>
-                    <i className="fa-solid fa-money-bill-wave text-emerald-400"></i>
-                  </div>
-                  <div className="font-heading text-2xl sm:text-3xl font-black text-white tracking-tight">
-                    87 500 <span className="text-xs font-bold text-emerald-400">FCFA</span>
-                  </div>
-                  <p className="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
-                    <i className="fa-solid fa-arrow-trend-up"></i> +18% vs hier • 0% commission
-                  </p>
-                </div>
-
-                <div className="p-5 rounded-3xl bg-white/5 border border-white/10 space-y-2">
-                  <div className="flex items-center justify-between text-xs text-gray-400 font-bold">
-                    <span>Commandes Servies</span>
-                    <i className="fa-solid fa-utensils text-primary"></i>
-                  </div>
-                  <div className="font-heading text-2xl sm:text-3xl font-black text-white tracking-tight">
-                    19 <span className="text-xs font-bold text-gray-400">repas</span>
-                  </div>
-                  <p className="text-[10px] text-gray-400 font-bold">
-                    100% enregistrées en ligne
-                  </p>
-                </div>
-
-                <div className="p-5 rounded-3xl bg-white/5 border border-white/10 space-y-2">
-                  <div className="flex items-center justify-between text-xs text-gray-400 font-bold">
-                    <span>Temps de Préparation</span>
-                    <i className="fa-solid fa-stopwatch text-blue-400"></i>
-                  </div>
-                  <div className="font-heading text-2xl sm:text-3xl font-black text-white tracking-tight">
-                    14 <span className="text-xs font-bold text-gray-400">min</span>
-                  </div>
-                  <p className="text-[10px] text-blue-400 font-bold">
-                    Cuisine fluide sans attente
-                  </p>
-                </div>
-
-                <div className="p-5 rounded-3xl bg-white/5 border border-white/10 space-y-2">
-                  <div className="flex items-center justify-between text-xs text-gray-400 font-bold">
-                    <span>Satisfaction Client</span>
-                    <i className="fa-solid fa-star text-amber-400"></i>
-                  </div>
-                  <div className="font-heading text-2xl sm:text-3xl font-black text-white tracking-tight">
-                    4.9 <span className="text-xs font-bold text-amber-400">/ 5</span>
-                  </div>
-                  <p className="text-[10px] text-amber-400 font-bold">
-                    ★ ★ ★ ★ ★ (48 avis)
-                  </p>
-                </div>
-              </div>
-
-              {/* Feed des commandes en direct */}
-              <div className="space-y-3 pt-4 border-t border-gray-800">
-                <div className="flex items-center justify-between text-xs font-bold text-gray-400 px-1">
-                  <span>Dernières Commandes Validées en Direct</span>
-                  <span className="text-primary flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-primary animate-ping" /> Synchronisation Live
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <p className="text-xs font-bold text-white">#042 • Poulet Braisé + Alloco</p>
-                      <p className="text-[10px] text-gray-400">Client : Sègbégnon • MTN MoMo</p>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-xs font-black text-emerald-400 block">4 500 F</span>
-                      <span className="text-[9px] font-black uppercase text-emerald-300 bg-emerald-500/20 px-2 py-0.5 rounded-full">
-                        En cuisine 🍽️
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <p className="text-xs font-bold text-white">#041 • Capitaine Braisé & Ignames</p>
-                      <p className="text-[10px] text-gray-400">Client : Dr. Nadine • Moov Money</p>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-xs font-black text-emerald-400 block">6 000 F</span>
-                      <span className="text-[9px] font-black uppercase text-blue-300 bg-blue-500/20 px-2 py-0.5 rounded-full">
-                        En livraison 🛵
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <p className="text-xs font-bold text-white">#040 • Brochettes Mérou & Piron</p>
-                      <p className="text-[10px] text-gray-400">Client : Carlos K. • MoMo direct</p>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-xs font-black text-emerald-400 block">3 500 F</span>
-                      <span className="text-[9px] font-black uppercase text-gray-400 bg-white/10 px-2 py-0.5 rounded-full">
-                        Livré ✓
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+          <FadeIn delay={0.4}>
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Link
+                to="/register"
+                className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-primary text-white font-heading font-black text-xs sm:text-sm uppercase tracking-widest hover:bg-primary/90 transition-all shadow-xl shadow-primary/25 flex items-center justify-center gap-3 active:scale-95"
+              >
+                <span>Activer mon accès Oresto Pro à -25% (3 750 F)</span>
+                <i className="fa-solid fa-arrow-right"></i>
+              </Link>
             </div>
-          </FadeIn>
-        </div>
-      </section>
-
-      {/* ─── LES 4 PILIERS DE LA TRANQUILLITÉ D'ESPRIT ─── */}
-      <section id="serenite" className="py-24 px-6 bg-gray-50/70 border-y border-gray-100">
-        <div className="max-w-7xl mx-auto space-y-16">
-          <FadeIn className="text-center space-y-3">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-black uppercase tracking-widest">
-              <i className="fa-solid fa-dove"></i> Votre Sérénité au Quotidien
-            </div>
-            <h2 className="font-heading text-3xl md:text-5xl font-black uppercase tracking-tight">
-              4 façons dont Oresto vous apporte <span className="text-primary">la tranquillité d'esprit</span>
-            </h2>
-            <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
-              Chaque détail a été pensé pour vous soulager de la charge mentale et vous laisser faire ce que vous aimez le plus : régaler vos clients.
+            <p className="text-[11px] text-gray-400 font-medium mt-2.5">
+              Prêt en 12 minutes • 0% de commission • MTN MoMo, Moov Money & Celtiis direct
             </p>
           </FadeIn>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {peaceOfMindPillars.map((p, idx) => (
-              <FadeIn key={p.id} delay={idx * 0.08} className="h-full">
-                <div className="p-8 rounded-[36px] bg-white border border-gray-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col justify-between h-full space-y-6">
-                  <div className="space-y-4">
-                    <div className="w-14 h-14 rounded-2xl bg-orange-50 text-primary flex items-center justify-center text-xl shadow-sm border border-orange-100">
-                      <i className={p.icon}></i>
-                    </div>
-
-                    <h3 className="font-heading text-xl font-black uppercase tracking-tight text-foreground">
-                      {p.title}
-                    </h3>
-
-                    {/* Problème avant */}
-                    <div className="p-3 rounded-2xl bg-red-50/60 border border-red-100 text-xs text-red-900/80 italic">
-                      ❌ {p.problem}
-                    </div>
-
-                    {/* Solution & Soulagement */}
-                    <p className="text-xs text-gray-600 leading-relaxed">
-                      {p.solution}
-                    </p>
-                  </div>
-
-                  <div className="pt-4 border-t border-gray-100 flex items-center gap-2 text-xs font-black text-emerald-600">
-                    <i className="fa-solid fa-circle-check"></i>
-                    <span>{p.relief}</span>
-                  </div>
-                </div>
-              </FadeIn>
-            ))}
-          </div>
         </div>
-      </section>
 
-      {/* ─── SCHÉMA ILLUSTRÉ & DYNAMIQUE : EN IMAGES ET EN DIRECT ─── */}
-      <section id="schema-anime" className="py-24 px-6 bg-gradient-to-br from-gray-950 via-black to-gray-950 text-white rounded-[48px] mx-4 md:mx-10 my-8 shadow-2xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 rounded-full blur-[140px] pointer-events-none" />
-        
-        <div className="max-w-6xl mx-auto space-y-12 relative z-10">
-          <FadeIn className="text-center space-y-3">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/20 border border-primary/30 text-primary text-xs font-black uppercase tracking-widest">
-              <i className="fa-solid fa-diagram-project"></i> Démonstration Visuelle en Direct
-            </div>
-            <h2 className="font-heading text-3xl md:text-5xl font-black uppercase tracking-tight">
-              Comment tout s'enchaîne, <span className="text-primary">sans aucun stress</span>
-            </h2>
-            <p className="text-sm text-gray-400 max-w-2xl mx-auto">
-              Cliquez sur les étapes ou laissez l'animation vous montrer la fluidité entre votre client et votre établissement.
-            </p>
-          </FadeIn>
-
-          {/* Stepper Tabs Bar */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {flowSteps.map((s, idx) => {
-              const active = activeFlowStep === idx;
-              return (
-                <button
-                  key={idx}
-                  onClick={() => {
-                    setActiveFlowStep(idx);
-                    setAutoPlay(false);
-                  }}
-                  className={`p-4 rounded-2xl border-2 text-left transition-all relative overflow-hidden flex flex-col justify-between space-y-2 ${
-                    active 
-                      ? "bg-white/15 border-primary shadow-xl shadow-primary/20 scale-[1.02]" 
-                      : "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs ${
-                      active ? "bg-primary text-white" : "bg-white/10 text-gray-400"
-                    }`}>
-                      <i className={s.icon}></i>
-                    </span>
-                    {active && (
-                      <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                    )}
-                  </div>
-                  <div>
-                    <h4 className="font-heading font-black text-xs uppercase tracking-tight text-white">{s.short}</h4>
-                  </div>
-                  {active && (
-                    <motion.div 
-                      layoutId="activeGlow" 
-                      className="absolute bottom-0 left-0 right-0 h-1 bg-primary" 
-                    />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Dynamic Interactive Illustration Canvas */}
-          <div className="p-8 sm:p-12 rounded-[40px] bg-white/5 border border-white/15 backdrop-blur-xl grid lg:grid-cols-12 gap-8 items-center">
-            
-            {/* Left: Step Explanation */}
-            <div className="lg:col-span-5 space-y-6">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/20 text-primary text-[10px] font-black uppercase tracking-widest border border-primary/30">
-                Étape {flowSteps[activeFlowStep].step} sur 4
-              </div>
-
-              <h3 className="font-heading text-2xl sm:text-3xl font-black text-white leading-tight">
-                {flowSteps[activeFlowStep].title}
-              </h3>
-
-              <p className="text-sm text-gray-300 leading-relaxed">
-                {flowSteps[activeFlowStep].desc}
-              </p>
-
-              <div className="p-4 rounded-2xl bg-white/10 border border-white/10 flex items-center gap-3 text-xs font-bold text-emerald-400">
-                <i className="fa-solid fa-circle-check text-base shrink-0"></i>
-                <span>{flowSteps[activeFlowStep].highlight}</span>
-              </div>
-
-              <div className="flex items-center gap-4 pt-2">
-                <button
-                  onClick={() => {
-                    setActiveFlowStep((prev) => (prev === 0 ? 3 : prev - 1));
-                    setAutoPlay(false);
-                  }}
-                  className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
-                >
-                  <i className="fa-solid fa-chevron-left text-xs"></i>
-                </button>
-                <span className="text-xs font-mono text-gray-400">
-                  {activeFlowStep + 1} / 4
-                </span>
-                <button
-                  onClick={() => {
-                    setActiveFlowStep((prev) => (prev + 1) % 4);
-                    setAutoPlay(false);
-                  }}
-                  className="w-10 h-10 rounded-full bg-primary hover:bg-primary/90 flex items-center justify-center text-white transition-colors shadow-lg shadow-primary/30"
-                >
-                  <i className="fa-solid fa-chevron-right text-xs"></i>
-                </button>
-                <button
-                  onClick={() => setAutoPlay(!autoPlay)}
-                  className="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-white ml-auto"
-                >
-                  {autoPlay ? "⏸ Pause animation" : "▶ Lecture auto"}
-                </button>
-              </div>
-            </div>
-
-            {/* Right: Live Visual Mockup Illustration */}
-            <div className="lg:col-span-7 flex items-center justify-center">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeFlowStep}
-                  initial={{ opacity: 0, y: 15, scale: 0.98 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -15, scale: 0.98 }}
-                  transition={{ duration: 0.3 }}
-                  className="w-full max-w-md bg-white text-gray-900 rounded-[36px] p-6 sm:p-7 shadow-2xl border-4 border-gray-800 space-y-4"
-                >
-                  {/* Mockup Top Status Bar */}
-                  <div className="flex items-center justify-between border-b border-gray-100 pb-3 text-xs text-gray-500 font-bold">
-                    <span className="flex items-center gap-1.5 text-primary">
-                      <i className="fa-solid fa-store"></i> Chez Maman (Cotonou)
-                    </span>
-                    <span className="text-[10px] font-mono bg-gray-100 px-2 py-0.5 rounded-full">
-                      12:30 • Live
-                    </span>
-                  </div>
-
-                  {/* 1. MOCKUP ÉCRAN COMMANDE CLIENT */}
-                  {flowSteps[activeFlowStep].mockupType === "client_order" && (
-                    <div className="space-y-3 animate-in fade-in duration-300">
-                      <div className="p-4 rounded-2xl bg-orange-50/70 border border-orange-200/80 flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-xl bg-orange-500 text-white flex items-center justify-center text-xl shadow-sm">
-                          🍗
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h5 className="font-heading font-black text-sm text-gray-900">Poulet Braisé & Alloco</h5>
-                          <p className="text-[10px] text-gray-500 font-medium">Piment maison + oignons grillés</p>
-                        </div>
-                        <span className="font-heading font-black text-sm text-primary">3 500 F</span>
-                      </div>
-
-                      <div className="p-3 rounded-2xl bg-gray-50 flex justify-between text-xs font-bold text-gray-700">
-                        <span>Panier : 1 article</span>
-                        <span className="text-primary font-black">Total : 3 500 FCFA</span>
-                      </div>
-
-                      <div className="w-full py-3.5 rounded-2xl bg-black text-white font-black text-xs uppercase tracking-wider text-center flex items-center justify-center gap-2 shadow-md">
-                        <i className="fa-solid fa-cart-shopping"></i> Valider ma commande
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 2. MOCKUP CHAT PAIEMENT MOMO */}
-                  {flowSteps[activeFlowStep].mockupType === "chat_payment" && (
-                    <div className="space-y-3 animate-in fade-in duration-300">
-                      {/* Message Resto */}
-                      <div className="p-3 rounded-2xl bg-gray-100 text-xs text-gray-800 space-y-1">
-                        <p className="font-bold text-[10px] text-primary uppercase tracking-wider">Restaurant Chez Maman :</p>
-                        <p>Bonjour ! Pour régler vos 3 500 F, effectuez le transfert MoMo au <strong>97 00 00 00</strong>. Merci !</p>
-                      </div>
-
-                      {/* Carte MoMo interactive */}
-                      <div className="p-3.5 rounded-2xl bg-primary/10 border border-primary/30 flex items-center justify-between">
-                        <div>
-                          <span className="text-[9px] font-black uppercase tracking-wider text-primary block">Numéro MTN MoMo</span>
-                          <span className="font-mono font-black text-sm text-gray-900">97 00 00 00</span>
-                        </div>
-                        <button className="px-3 py-1.5 rounded-xl bg-black text-white text-[10px] font-bold">
-                          Copier
-                        </button>
-                      </div>
-
-                      {/* Action Client */}
-                      <div className="w-full py-3 rounded-2xl bg-emerald-600 text-white font-black text-xs uppercase tracking-wider text-center flex items-center justify-center gap-2 shadow-md">
-                        <i className="fa-solid fa-paper-plane"></i> 💸 J'ai envoyé le paiement
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 3. MOCKUP VALIDATION RESTAURATEUR */}
-                  {flowSteps[activeFlowStep].mockupType === "vendor_validation" && (
-                    <div className="space-y-3 animate-in fade-in duration-300">
-                      <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200 space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-black uppercase tracking-wider text-blue-700">Alerte Paiement Reçu</span>
-                          <span className="text-[9px] font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">MoMo 3 500 F</span>
-                        </div>
-                        <p className="text-xs text-blue-900 font-medium">Le client a déclaré avoir effectué le transfert de 3 500 FCFA.</p>
-                      </div>
-
-                      <div className="w-full py-3.5 rounded-2xl bg-emerald-600 text-white font-black text-xs uppercase tracking-wider text-center flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20">
-                        <i className="fa-solid fa-circle-check"></i> ✅ Valider & Lancer en cuisine
-                      </div>
-
-                      <p className="text-[10px] text-center text-gray-400 font-medium italic">
-                        La bulle verte de confirmation est envoyée instantanément au client.
-                      </p>
-                    </div>
-                  )}
-
-                  {/* 4. MOCKUP ACTUALISATION DASHBOARD & CA */}
-                  {flowSteps[activeFlowStep].mockupType === "dashboard_update" && (
-                    <div className="space-y-3 animate-in fade-in duration-300">
-                      <div className="p-4 rounded-2xl bg-gray-900 text-white space-y-2">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Chiffre d'Affaires du Jour</span>
-                        <div className="flex items-baseline gap-2">
-                          <span className="font-heading text-2xl font-black text-emerald-400">+3 500 F</span>
-                          <span className="text-[10px] text-gray-400">Total : 42 000 FCFA</span>
-                        </div>
-                      </div>
-
-                      <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-between text-xs">
-                        <span className="font-bold text-emerald-900 flex items-center gap-1.5">
-                          <i className="fa-solid fa-utensils text-emerald-600"></i> Commande #084
-                        </span>
-                        <span className="px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-800 text-[10px] font-black uppercase">
-                          En cuisine 🍽️
-                        </span>
-                      </div>
-
-                      <p className="text-[10px] text-center text-emerald-700 font-bold">
-                        ✓ Vente comptabilisée • 100% encaissé sur votre Mobile Money
-                      </p>
-                    </div>
-                  )}
-                </motion.div>
-              </AnimatePresence>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── TABLEAU AVANT / APRÈS : TRANSFORMATION DU QUOTIDIEN ─── */}
-      <section id="comparatif" className="py-24 px-6">
-        <div className="max-w-5xl mx-auto space-y-12">
-          <FadeIn className="text-center space-y-3">
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">
-              Transformation Réelle
-            </span>
-            <h2 className="font-heading text-3xl md:text-5xl font-black uppercase tracking-tight">
-              Votre quotidien : Sans Oresto vs Avec Oresto
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Voici concrètement comment votre travail change dès la mise en place d'Oresto Connect.
-            </p>
-          </FadeIn>
-
-          <FadeIn delay={0.1} className="overflow-x-auto rounded-[36px] bg-white border border-gray-200 shadow-xl">
-            <table className="w-full text-left text-xs sm:text-sm">
-              <thead>
-                <tr className="border-b border-gray-100 bg-gray-50/80">
-                  <th className="p-5 font-black uppercase text-[10px] tracking-widest text-gray-500">Votre Situation</th>
-                  <th className="p-5 font-black uppercase text-[10px] tracking-widest text-red-600 bg-red-50/30">
-                    <i className="fa-solid fa-circle-xmark mr-1"></i> Sans Oresto (Stress & Pertes)
-                  </th>
-                  <th className="p-5 font-black uppercase text-[10px] tracking-widest text-emerald-700 bg-emerald-50/50">
-                    <i className="fa-solid fa-circle-check mr-1"></i> Avec Oresto Connect (Sérénité)
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {[
-                  { 
-                    situation: "Prise de commande", 
-                    before: "Messages WhatsApp brouillons, clients impatients, plats mal notés", 
-                    after: "Site interactif clair : le client choisit et valide son panier en autonomie" 
-                  },
-                  { 
-                    situation: "Paiement client", 
-                    before: "Numéro MoMo dicté, attente incertaine du SMS de transfert", 
-                    after: "Numéro MoMo visible avec copie 1-clic, alerte dans le chat et validation immédiate" 
-                  },
-                  { 
-                    situation: "Commissions sur vos ventes", 
-                    before: "20% à 30% prélevés par des applications intermédiaires", 
-                    after: "0% de commission : 100% de l'argent va directement sur votre compte" 
-                  },
-                  { 
-                    situation: "Visibilité sur Google", 
-                    before: "Invisible lorsqu'un client cherche un restaurant dans votre ville", 
-                    after: "Vitrine optimisée SEO Local apparaissant en 1ère page des recherches" 
-                  },
-                  { 
-                    situation: "Fermeture & Comptes du soir", 
-                    before: "Calculs manuels sur carnet, erreurs de caisse et fatigue", 
-                    after: "Tableau de bord automatique qui calcule votre CA encaissé en direct" 
-                  },
-                  { 
-                    situation: "Assistance & Conseils", 
-                    before: "Seul face à vos doutes pour fixer vos prix ou créer des offres", 
-                    after: "Assistant IA IZI disponible 24h/24 pour optimiser vos menus et marges" 
-                  }
-                ].map((row, idx) => (
-                  <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="p-5 font-bold text-foreground">{row.situation}</td>
-                    <td className="p-5 text-gray-500 bg-red-50/10">{row.before}</td>
-                    <td className="p-5 font-bold text-emerald-800 bg-emerald-50/30 flex items-center gap-2">
-                      <i className="fa-solid fa-check text-emerald-600 shrink-0"></i>
-                      <span>{row.after}</span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </FadeIn>
-        </div>
-      </section>
-
-      {/* ─── TARIFICATION TRANSPARENTE ET ACCESSIBLE ─── */}
-      <section id="tarifs" className="py-24 px-6 bg-gradient-to-b from-gray-50 via-white to-orange-50/30 border-y border-gray-100">
-        <div className="max-w-4xl mx-auto space-y-12">
-          <FadeIn className="text-center space-y-3">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary font-sub text-[10px] font-black uppercase tracking-widest">
-              <i className="fa-solid fa-handshake-simple"></i> Un Partenaire Accessible & Loyal
-            </div>
-            <h2 className="font-heading text-3xl md:text-5xl font-black uppercase tracking-tighter">
-              Une formule unique à 5 000 FCFA / mois
-            </h2>
-            <p className="text-sm font-bold text-primary">
-              🎉 14 Jours d'Essai Gratuit • 50% de Réduction sur le 1er mois payant (2 500 FCFA) • 0% de Commission
-            </p>
-          </FadeIn>
-
-          <FadeIn delay={0.1}>
-            <div className="bg-black text-white rounded-[40px] border-2 border-primary/50 p-8 sm:p-12 shadow-2xl relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-80 h-80 bg-primary/15 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        {/* Real Live Dashboard & Smartphone Mockup Illustration */}
+        <div className="max-w-6xl mx-auto mt-12 sm:mt-16">
+          <FadeIn delay={0.5}>
+            <div className="p-4 sm:p-8 rounded-[40px] bg-[#0A0A0A] border-4 border-gray-800 shadow-2xl shadow-black/40 text-white space-y-6">
               
-              <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-                <div className="lg:col-span-7 space-y-6">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="px-3 py-1 rounded-full bg-primary text-white text-[10px] font-black uppercase tracking-widest">
-                      Formule Tout Inclus Oresto Pro
-                    </span>
-                    <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-black uppercase tracking-widest">
-                      0% de Commission
-                    </span>
+              {/* Mockup Header Controls */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex gap-1.5">
+                    <span className="w-3 h-3 rounded-full bg-red-500/80" />
+                    <span className="w-3 h-3 rounded-full bg-yellow-500/80" />
+                    <span className="w-3 h-3 rounded-full bg-emerald-500/80" />
                   </div>
-
-                  <div>
-                    <div className="flex items-baseline gap-2">
-                      <span className="font-heading text-5xl sm:text-6xl font-black tracking-tighter text-white">5 000</span>
-                      <span className="text-sm font-bold text-gray-400">FCFA / mois</span>
-                    </div>
-                    <p className="text-xs text-primary font-bold mt-1.5 flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                      Premier mois à seulement <strong>2 500 FCFA</strong> (-50% de bienvenue)
-                    </p>
-                  </div>
-
-                  <p className="text-sm text-gray-300 leading-relaxed">
-                    Tout ce qu'il vous faut pour simplifier votre quotidien et développer votre activité, sans aucun frais caché.
-                  </p>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 border-t border-white/10 text-xs font-semibold text-gray-200">
-                    {[
-                      "Site Web autonome sur-mesure",
-                      "0% de commission sur vos ventes",
-                      "Catalogue illimité (Plats & Chambres)",
-                      "Commandes directes & WhatsApp",
-                      "Paiements Mobile Money dans le chat",
-                      "Assistant IA Opérationnel IZI",
-                      "Référencement SEO Google Local",
-                      "Support d'accompagnement 7j/7",
-                    ].map((feat, i) => (
-                      <div key={i} className="flex items-center gap-2.5">
-                        <i className="fa-solid fa-check text-primary shrink-0 text-xs"></i>
-                        <span>{feat}</span>
-                      </div>
-                    ))}
-                  </div>
+                  <span className="text-xs font-mono font-bold text-white/70">
+                    oresto.app/vendor/dashboard
+                  </span>
                 </div>
 
-                <div className="lg:col-span-5 flex flex-col justify-center items-center text-center p-6 sm:p-8 rounded-3xl bg-white/5 border border-white/10 space-y-4">
-                  <span className="text-[11px] font-black uppercase tracking-widest text-primary">
-                    Essayez sans risque
-                  </span>
-                  <p className="text-xs text-gray-300">
-                    14 jours d'essai gratuit. Aucune carte bancaire requise. Vous ne payez que si vous êtes satisfait.
-                  </p>
-                  <Link 
-                    to="/register?role=vendor" 
-                    className="w-full py-4 rounded-full bg-primary text-white font-sub text-xs font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_10px_30px_rgba(234,88,12,0.4)] flex items-center justify-center gap-2"
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setActivePreviewType("restaurant")}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                      activePreviewType === "restaurant" ? "bg-primary text-white" : "bg-white/10 text-white/60 hover:text-white"
+                    }`}
                   >
-                    <i className="fa-solid fa-dove"></i> Commencer mon essai sereinement
-                  </Link>
-                  <p className="text-[10px] text-gray-400">
-                    Paiement Mobile Money lors du renouvellement
-                  </p>
+                    🍽️ Vue Restaurant
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActivePreviewType("ecommerce")}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                      activePreviewType === "ecommerce" ? "bg-primary text-white" : "bg-white/10 text-white/60 hover:text-white"
+                    }`}
+                  >
+                    🛍️ Vue Boutique E-Commerce
+                  </button>
                 </div>
               </div>
+
+              {/* Grid Content : Dashboard on Left, Mobile Storefront on Right */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                
+                {/* Left: Real Dashboard Overview */}
+                <div className="lg:col-span-7 space-y-5">
+                  
+                  {/* KPI Cards Row */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-white/50 block">CA Encaissé (7j)</span>
+                      <p className="font-heading font-black text-lg text-emerald-400">1 250 000 F</p>
+                      <span className="text-[9px] text-emerald-500 font-mono">● 100% MoMo direct</span>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-white/50 block">
+                        {activePreviewType === "restaurant" ? "Repas Servis" : "Colis Validés"}
+                      </span>
+                      <p className="font-heading font-black text-lg text-primary">19 du jour</p>
+                      <span className="text-[9px] text-white/60">Sans coupure</span>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-white/50 block">Commission</span>
+                      <p className="font-heading font-black text-lg text-white">0 FCFA</p>
+                      <span className="text-[9px] text-emerald-400 font-bold">0% prélevé</span>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-white/50 block">Panier Moyen</span>
+                      <p className="font-heading font-black text-lg text-white">4 600 F</p>
+                      <span className="text-[9px] text-white/60">Automatisé</span>
+                    </div>
+                  </div>
+
+                  {/* Real Live Orders Card */}
+                  <div className="p-5 rounded-3xl bg-white/5 border border-white/10 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-heading font-black text-xs uppercase tracking-wider text-white flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                        Commandes Validées & Encaissées en Direct
+                      </h4>
+                      <span className="text-[10px] text-emerald-400 font-bold">● Synchronisé MoMo</span>
+                    </div>
+
+                    <div className="space-y-2 text-xs">
+                      {activePreviewType === "restaurant" ? (
+                        <>
+                          <div className="p-3 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                              <span className="font-mono font-black text-primary text-xs">#042</span>
+                              <div>
+                                <p className="font-bold text-white">1x Poulet Braisé & Alloco</p>
+                                <p className="text-[10px] text-white/50">Jean H. • Table 4 • 13:24</p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-black text-emerald-400">4 500 F</p>
+                              <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">
+                                ✓ MoMo Reçu
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="p-3 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                              <span className="font-mono font-black text-primary text-xs">#041</span>
+                              <div>
+                                <p className="font-bold text-white">1x Capitaine Braisé</p>
+                                <p className="text-[10px] text-white/50">Amina K. • Livraison Haie Vive • 13:10</p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-black text-emerald-400">6 000 F</p>
+                              <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300">
+                                🛵 En Livraison
+                              </span>
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="p-3 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                              <span className="font-mono font-black text-primary text-xs">#089</span>
+                              <div>
+                                <p className="font-bold text-white">1x Sneakers Streetwear (Pointure 42)</p>
+                                <p className="text-[10px] text-white/50">Marc D. • Expédition Express • 12:45</p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-black text-emerald-400">18 500 F</p>
+                              <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">
+                                ✓ MoMo Reçu
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="p-3 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                              <span className="font-mono font-black text-primary text-xs">#088</span>
+                              <div>
+                                <p className="font-bold text-white">1x Smartwatch Ultra Pro 4G</p>
+                                <p className="text-[10px] text-white/50">Sophie T. • Cotonou • 11:30</p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-black text-emerald-400">29 000 F</p>
+                              <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300">
+                                📦 Colis Prêt
+                              </span>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* IZI IA Assistant Live Card */}
+                  <div className="p-4 rounded-2xl bg-primary/10 border border-primary/30 flex items-start gap-3.5">
+                    <div className="w-9 h-9 rounded-xl bg-primary text-white flex items-center justify-center text-sm shrink-0 shadow-md">
+                      <i className="fa-solid fa-wand-magic-sparkles"></i>
+                    </div>
+                    <div className="space-y-1 text-xs">
+                      <p className="font-bold text-primary">Assistant IA IZI (Opérationnel 24h/24) :</p>
+                      <p className="text-white/80 leading-relaxed">
+                        {activePreviewType === "restaurant" 
+                          ? "« Chef, vos ventes de midi ont rapporté 87 500 FCFA sur 19 commandes. Vos encaissements MoMo sont validés sans intermédiaire. »"
+                          : "« Boutique à jour : 8 colis prêts à l'expédition pour 142 000 FCFA encaissés. Zéro commission prélevée sur vos ventes. »"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right: Smartphone Live Customer View */}
+                <div className="lg:col-span-5 flex justify-center">
+                  <div className="w-full max-w-[290px] rounded-[36px] bg-white text-gray-900 border-4 border-gray-700 shadow-2xl overflow-hidden text-xs flex flex-col">
+                    
+                    {/* Phone Status Bar */}
+                    <div className="bg-gray-900 text-white p-3 flex justify-between items-center text-[10px]">
+                      <span className="font-mono text-[9px] truncate">oresto.app/r/votre-nom</span>
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-500 text-white font-black text-[8px]">Ouvert</span>
+                    </div>
+
+                    {/* Store Header Banner */}
+                    <div className="h-20 bg-primary/90 text-white p-3 flex items-center gap-2.5">
+                      <div className="w-10 h-10 rounded-xl bg-white text-primary flex items-center justify-center font-heading font-black text-sm shadow-md">
+                        {activePreviewType === "restaurant" ? "M" : "B"}
+                      </div>
+                      <div>
+                        <h5 className="font-heading font-black text-xs leading-tight">
+                          {activePreviewType === "restaurant" ? "Le Maquis Étoilé" : "Boutique Prestige"}
+                        </h5>
+                        <p className="text-[9px] text-white/80">Cotonou • 0% Commission</p>
+                      </div>
+                    </div>
+
+                    {/* Products Grid in Phone */}
+                    <div className="p-3 space-y-2 bg-gray-50 flex-1">
+                      {activePreviewType === "restaurant" ? (
+                        <>
+                          <div className="p-2 bg-white rounded-xl border border-gray-200 shadow-sm flex items-center justify-between gap-2">
+                            <div>
+                              <p className="font-bold text-[11px]">Poulet Braisé & Alloco</p>
+                              <p className="text-[9px] text-gray-400">Épices du terroir</p>
+                              <span className="font-black text-primary text-xs">4 500 F</span>
+                            </div>
+                            <span className="w-7 h-7 rounded-lg bg-black text-white flex items-center justify-center text-xs font-bold">+</span>
+                          </div>
+
+                          <div className="p-2 bg-white rounded-xl border border-gray-200 shadow-sm flex items-center justify-between gap-2">
+                            <div>
+                              <p className="font-bold text-[11px]">Capitaine Braisé</p>
+                              <p className="text-[9px] text-gray-400">Poisson frais du jour</p>
+                              <span className="font-black text-primary text-xs">6 000 F</span>
+                            </div>
+                            <span className="w-7 h-7 rounded-lg bg-black text-white flex items-center justify-center text-xs font-bold">+</span>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="p-2 bg-white rounded-xl border border-gray-200 space-y-1">
+                            <span className="bg-red-600 text-white text-[7px] font-black px-1 py-0.5 rounded">PROMO -25%</span>
+                            <p className="font-bold text-[10px] truncate">Sneakers Urban</p>
+                            <p className="font-black text-primary text-xs">18 500 F</p>
+                          </div>
+
+                          <div className="p-2 bg-white rounded-xl border border-gray-200 space-y-1">
+                            <span className="bg-black text-white text-[7px] font-black px-1 py-0.5 rounded">BESTSELLER</span>
+                            <p className="font-bold text-[10px] truncate">Smartwatch 4G</p>
+                            <p className="font-black text-primary text-xs">29 000 F</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Instant MoMo Checkout Button */}
+                    <div className="p-2.5 bg-white border-t border-gray-100">
+                      <div className="py-2 rounded-xl bg-primary text-white text-[10px] font-black uppercase text-center flex items-center justify-center gap-1.5 shadow-sm">
+                        <i className="fa-solid fa-mobile-screen"></i>
+                        <span>Payer par Mobile Money</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </FadeIn>
+        </div>
+      </header>
+
+      {/* ─── BLOC 1 : LE PROBLÈME ─── */}
+      <section className="py-16 sm:py-24 bg-gray-50 border-t border-b border-gray-150 px-4 sm:px-6">
+        <div className="max-w-4xl mx-auto space-y-8">
+          <FadeIn>
+            <div className="space-y-3">
+              <span className="text-xs font-black uppercase tracking-widest text-primary">1. Le problème quotidien</span>
+              <h2 className="font-heading font-black text-2xl sm:text-4xl text-gray-900 tracking-tight">
+                Vous passez vos journées à faire du secrétariat au lieu d’encaisser.
+              </h2>
+            </div>
+          </FadeIn>
+
+          <FadeIn delay={0.1}>
+            <p className="text-gray-700 text-sm sm:text-base leading-relaxed">
+              Il est midi ou 19h. C'est l'heure où votre chiffre d'affaires devrait exploser.
+            </p>
+            <p className="text-gray-700 text-sm sm:text-base leading-relaxed mt-2">
+              Au lieu de cela, votre téléphone n'arrête pas de sonner. Vous recevez 30 fois les mêmes messages :  
+              *« Bonjour, envoyez-moi vos photos »*, *« C'est combien la portion ? »*, *« Envoyez votre numéro MoMo »*, *« Est-ce que c'est encore disponible ? »*
+            </p>
+            <p className="text-gray-700 text-sm sm:text-base leading-relaxed mt-2">
+              Vous perdez votre temps à chercher des photos dans votre galerie, à taper vos prix un par un et à vérifier des captures d'écran de transfert. Pendant ce temps, les clients pressés partent commander chez votre concurrent.
+            </p>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* ─── BLOC 2 : LA FRUSTRATION ─── */}
+      <section className="py-16 sm:py-24 px-4 sm:px-6">
+        <div className="max-w-4xl mx-auto space-y-8">
+          <FadeIn>
+            <div className="space-y-3">
+              <span className="text-xs font-black uppercase tracking-widest text-red-600">2. Les conséquences réelles</span>
+              <h2 className="font-heading font-black text-2xl sm:text-4xl text-gray-900 tracking-tight">
+                Ce que ce désordre vous coûte chaque jour.
+              </h2>
+            </div>
+          </FadeIn>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4">
+            <FadeIn delay={0.1}>
+              <div className="p-6 rounded-3xl bg-red-50/60 border border-red-200/80 space-y-3">
+                <div className="w-10 h-10 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center text-base">
+                  <i className="fa-solid fa-user-xmark"></i>
+                </div>
+                <h3 className="font-heading font-black text-base text-gray-900">Clients perdus</h3>
+                <p className="text-xs text-gray-600 leading-relaxed">
+                  1 client sur 3 abandonne dès qu'il doit attendre votre réponse pour connaître un prix ou voir une photo.
+                </p>
+              </div>
+            </FadeIn>
+
+            <FadeIn delay={0.2}>
+              <div className="p-6 rounded-3xl bg-red-50/60 border border-red-200/80 space-y-3">
+                <div className="w-10 h-10 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center text-base">
+                  <i className="fa-solid fa-scissors"></i>
+                </div>
+                <h3 className="font-heading font-black text-base text-gray-900">Commissions abusives</h3>
+                <p className="text-xs text-gray-600 leading-relaxed">
+                  Les plateformes tierces vous prélèvent entre 15% et 25% sur chaque vente et bloquent vos fonds pendant des jours.
+                </p>
+              </div>
+            </FadeIn>
+
+            <FadeIn delay={0.3}>
+              <div className="p-6 rounded-3xl bg-red-50/60 border border-red-200/80 space-y-3">
+                <div className="w-10 h-10 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center text-base">
+                  <i className="fa-solid fa-battery-quarter"></i>
+                </div>
+                <h3 className="font-heading font-black text-base text-gray-900">Épuisement mental</h3>
+                <p className="text-xs text-gray-600 leading-relaxed">
+                  Vous passez vos soirées à recompter vos tickets et vos SMS MoMo à la main au lieu de vous reposer.
+                </p>
+              </div>
+            </FadeIn>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── BLOC 3 : LA SOLUTION ─── */}
+      <section className="py-16 sm:py-24 bg-gray-900 text-white px-4 sm:px-6">
+        <div className="max-w-4xl mx-auto space-y-10">
+          <FadeIn>
+            <div className="space-y-3 text-center sm:text-left">
+              <span className="text-xs font-black uppercase tracking-widest text-primary">3. La solution évidente</span>
+              <h2 className="font-heading font-black text-2xl sm:text-4xl text-white tracking-tight">
+                Un système autonome qui prend les commandes et encaisse pour vous.
+              </h2>
+            </div>
+          </FadeIn>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <FadeIn delay={0.1}>
+              <div className="p-6 rounded-3xl bg-white/5 border border-white/10 space-y-3">
+                <div className="w-10 h-10 rounded-2xl bg-primary text-white flex items-center justify-center font-heading font-black">
+                  1
+                </div>
+                <h3 className="font-heading font-black text-base text-white">Vitrine en 1 seconde</h3>
+                <p className="text-xs text-white/70 leading-relaxed">
+                  Vos clients ouvrent votre lien sans rien télécharger. Ils voient vos photos HD, vos options et vos prix exacts.
+                </p>
+              </div>
+            </FadeIn>
+
+            <FadeIn delay={0.2}>
+              <div className="p-6 rounded-3xl bg-white/5 border border-white/10 space-y-3">
+                <div className="w-10 h-10 rounded-2xl bg-primary text-white flex items-center justify-center font-heading font-black">
+                  2
+                </div>
+                <h3 className="font-heading font-black text-base text-white">MoMo direct 100% à vous</h3>
+                <p className="text-xs text-white/70 leading-relaxed">
+                  Le client règle directement sur votre compte MTN MoMo, Moov ou Celtiis. Aucun pourcentage n'est prélevé.
+                </p>
+              </div>
+            </FadeIn>
+
+            <FadeIn delay={0.3}>
+              <div className="p-6 rounded-3xl bg-white/5 border border-white/10 space-y-3">
+                <div className="w-10 h-10 rounded-2xl bg-primary text-white flex items-center justify-center font-heading font-black">
+                  3
+                </div>
+                <h3 className="font-heading font-black text-base text-white">Commande validée</h3>
+                <p className="text-xs text-white/70 leading-relaxed">
+                  Vous recevez la commande propre avec le paiement validé. Vous n'avez plus qu'à servir ou expédier.
+                </p>
+              </div>
+            </FadeIn>
+          </div>
+
+          <FadeIn delay={0.4}>
+            <div className="pt-4 text-center">
+              <Link
+                to="/register"
+                className="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-primary text-white font-heading font-black text-xs uppercase tracking-widest hover:bg-primary/90 transition-all shadow-xl shadow-primary/30"
+              >
+                <span>Activer mon accès Oresto Pro à -25% (3 750 F)</span>
+                <i className="fa-solid fa-arrow-right"></i>
+              </Link>
             </div>
           </FadeIn>
         </div>
       </section>
 
-      {/* ─── FAQ ─── */}
-      <section id="faq" className="py-24 px-6">
-        <div className="max-w-4xl mx-auto space-y-12">
-          <FadeIn className="text-center space-y-3">
-            <h2 className="font-heading text-3xl md:text-5xl font-black uppercase tracking-tighter">
-              Questions Fréquentes
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Des réponses claires et directes à toutes vos interrogations.
-            </p>
+      {/* ─── BLOC 4 : LA PREUVE & L'OFFRE ─── */}
+      <section className="py-16 sm:py-24 px-4 sm:px-6">
+        <div className="max-w-4xl mx-auto space-y-10">
+          <FadeIn>
+            <div className="space-y-3 text-center">
+              <span className="text-xs font-black uppercase tracking-widest text-primary">4. Des chiffres vérifiables</span>
+              <h2 className="font-heading font-black text-2xl sm:text-4xl text-gray-900 tracking-tight">
+                Une offre limpide. Zéro condition cachée.
+              </h2>
+            </div>
           </FadeIn>
 
-          <div className="space-y-4">
+          <FadeIn delay={0.1}>
+            <div className="p-8 sm:p-10 rounded-[36px] bg-card border-2 border-primary/40 shadow-xl space-y-6 max-w-xl mx-auto text-center">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-black uppercase tracking-wider">
+                Formule Unique Oresto Pro
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex items-center justify-center gap-3">
+                  <span className="text-gray-400 line-through text-lg font-bold">5 000 FCFA</span>
+                  <span className="font-heading font-black text-4xl sm:text-5xl text-gray-900">3 750 FCFA</span>
+                </div>
+                <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest">
+                  -25% de réduction immédiate sur votre 1er mois
+                </p>
+                <p className="text-xs text-gray-500 font-medium">Puis 5 000 FCFA / mois sans engagement</p>
+              </div>
+
+              <div className="space-y-2.5 text-xs text-left max-w-sm mx-auto pt-2 border-t border-border">
+                {[
+                  "Site Web & Vitrine autonome (Site Factory)",
+                  "0% de commission sur toutes vos commandes",
+                  "Encaissement direct sur votre numéro MoMo",
+                  "Catalogue illimité & Fiches multi-photos",
+                  "Assistant IA IZI opérationnel en direct",
+                  "QR Codes vitrine et tables inclus",
+                  "Support prioritaire 7j/7"
+                ].map((f, i) => (
+                  <div key={i} className="flex items-center gap-2.5 font-bold text-gray-800">
+                    <i className="fa-solid fa-circle-check text-emerald-500"></i>
+                    <span>{f}</span>
+                  </div>
+                ))}
+              </div>
+
+              <Link
+                to="/register"
+                className="w-full py-4 rounded-2xl bg-primary text-white font-heading font-black text-xs uppercase tracking-widest hover:bg-primary/90 transition-all shadow-xl shadow-primary/25 flex items-center justify-center gap-2 block"
+              >
+                <span>Rejoindre Oresto Pro à 3 750 FCFA</span>
+                <i className="fa-solid fa-arrow-right"></i>
+              </Link>
+            </div>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* ─── BLOC 5 : FAQ ─── */}
+      <section className="py-16 sm:py-24 bg-gray-50 border-t border-border px-4 sm:px-6">
+        <div className="max-w-3xl mx-auto space-y-8">
+          <FadeIn>
+            <div className="text-center space-y-2">
+              <span className="text-xs font-black uppercase tracking-widest text-primary">5. Questions fréquentes</span>
+              <h2 className="font-heading font-black text-2xl sm:text-3xl text-gray-900 tracking-tight">
+                Tout ce que vous devez savoir.
+              </h2>
+            </div>
+          </FadeIn>
+
+          <div className="space-y-3">
             {faqs.map((faq, i) => (
-              <FadeIn key={i} delay={i * 0.08}>
-                <div className="border border-gray-200 rounded-3xl overflow-hidden bg-white shadow-sm hover:border-primary/40 transition-colors">
-                  <button 
+              <FadeIn key={i} delay={i * 0.05}>
+                <div className="rounded-2xl bg-white border border-gray-200 overflow-hidden shadow-sm">
+                  <button
+                    type="button"
                     onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                    className="w-full px-6 py-5 text-left flex items-center justify-between font-bold text-foreground hover:bg-gray-50 transition-colors"
+                    className="w-full p-5 text-left font-heading font-bold text-sm text-gray-900 flex items-center justify-between gap-4"
                   >
-                    <span className="text-sm sm:text-base font-heading">{faq.q}</span>
-                    <i className={`fa-solid fa-plus shrink-0 transform transition-transform ${openFaq === i ? "rotate-45 text-primary" : "text-gray-400"}`}></i>
+                    <span>{faq.q}</span>
+                    <i className={`fa-solid fa-chevron-down text-xs text-primary transition-transform ${openFaq === i ? "rotate-180" : ""}`}></i>
                   </button>
                   {openFaq === i && (
-                    <div className="px-6 pb-6 text-muted-foreground text-xs sm:text-sm leading-relaxed border-t border-gray-100 pt-4 bg-gray-50/50">
+                    <div className="px-5 pb-5 text-xs text-gray-600 leading-relaxed border-t border-gray-100 pt-3">
                       {faq.a}
                     </div>
                   )}
@@ -849,65 +611,40 @@ export default function ProLanding() {
         </div>
       </section>
 
-      {/* ─── CTA FINAL & FOOTER ─── */}
-      <footer className="pt-24 pb-12 px-6 bg-black text-white rounded-t-[48px] mt-12">
-        <div className="max-w-7xl mx-auto space-y-16">
-          <div className="text-center max-w-4xl mx-auto space-y-8">
-            <FadeIn>
-              <h2 className="font-heading text-4xl sm:text-6xl md:text-7xl font-[900] leading-tight uppercase tracking-tighter italic">
-                Prêt à cuisiner<br />
-                <span className="text-primary">l'esprit tranquille ?</span>
-              </h2>
-              <p className="text-base text-gray-400 max-w-xl mx-auto mt-4">
-                Rejoignez les professionnels qui gagnent du temps et gardent 100% de leurs marges avec Oresto Connect.
-              </p>
-              <div className="pt-8">
-                <Link to="/register?role=vendor" className="inline-flex items-center gap-4 px-8 py-4 sm:px-12 sm:py-5 bg-white text-black rounded-full font-sub text-xs sm:text-sm font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_20px_60px_rgba(255,255,255,0.15)]">
-                  Créer mon site sans engagement <i className="fa-solid fa-arrow-right"></i>
-                </Link>
-              </div>
-            </FadeIn>
-          </div>
+      {/* Final Call to Action */}
+      <section className="py-20 bg-[#0A0A0A] text-white px-4 sm:px-6 text-center">
+        <div className="max-w-3xl mx-auto space-y-6">
+          <FadeIn>
+            <h2 className="font-heading font-black text-3xl sm:text-5xl text-white tracking-tight">
+              Reprenez le contrôle de votre commerce dès maintenant.
+            </h2>
+            <p className="text-gray-400 text-sm max-w-xl mx-auto mt-3">
+              Arrêtez de perdre des ventes sur WhatsApp. Offrez à vos clients une vitrine moderne et encaissez directement.
+            </p>
+          </FadeIn>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 pt-12 border-t border-white/10 text-xs">
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white">
-                  <i className="fa-solid fa-utensils"></i>
-                </div>
-                <span className="font-heading text-xl font-black tracking-tighter uppercase">Oresto Connect</span>
-              </div>
-              <p className="text-white/50 leading-relaxed max-w-xs">
-                La solution digitale créée pour apporter des réponses concrètes et la tranquillité d'esprit aux restaurateurs et hôteliers en Afrique.
-              </p>
+          <FadeIn delay={0.1}>
+            <div className="pt-2">
+              <Link
+                to="/register"
+                className="inline-flex items-center justify-center gap-3 px-10 py-5 rounded-2xl bg-primary text-white font-heading font-black text-xs sm:text-sm uppercase tracking-widest hover:bg-primary/90 transition-all shadow-2xl shadow-primary/30"
+              >
+                <span>Activer mon accès Oresto Pro à -25% (3 750 FCFA)</span>
+                <i className="fa-solid fa-arrow-right"></i>
+              </Link>
             </div>
-
-            <div className="flex flex-wrap gap-12">
-              <div className="space-y-3">
-                <h4 className="font-black uppercase tracking-widest text-white/40 text-[10px]">Espace Membre</h4>
-                <ul className="space-y-2 text-gray-300 font-semibold">
-                  <li><Link to="/login" className="hover:text-primary transition-colors">Connexion Espace Commerçant</Link></li>
-                  <li><Link to="/register?role=vendor" className="hover:text-primary transition-colors">Créer un Compte Gratuit</Link></li>
-                </ul>
-              </div>
-              <div className="space-y-3">
-                <h4 className="font-black uppercase tracking-widest text-white/40 text-[10px]">Explorer</h4>
-                <ul className="space-y-2 text-gray-300 font-semibold">
-                  <li><a href="#serenite" className="hover:text-primary transition-colors">Tranquillité d'Esprit</a></li>
-                  <li><a href="#schema-anime" className="hover:text-primary transition-colors">Démonstration</a></li>
-                  <li><a href="#comparatif" className="hover:text-primary transition-colors">Avant / Après</a></li>
-                  <li><a href="#tarifs" className="hover:text-primary transition-colors">Tarifs</a></li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="flex flex-col justify-between md:items-end md:text-right space-y-4">
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30">© 2026 Oresto Connect • Tous droits réservés</p>
-              <p className="text-gray-500 text-[11px]">Développé avec passion pour les restaurateurs et hôteliers</p>
-            </div>
-          </div>
+            <p className="text-[11px] text-gray-500 font-medium mt-3">
+              Sans engagement • Prêt en 12 minutes • Encaissements Mobile Money directs
+            </p>
+          </FadeIn>
         </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-8 bg-black text-gray-500 text-xs text-center border-t border-white/10">
+        <p>© 2026 Oresto Connect — La tranquillité d'esprit pour les commerçants africains.</p>
       </footer>
+
     </div>
   );
 }
