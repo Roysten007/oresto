@@ -98,13 +98,13 @@ export default function VendorLayout() {
             <div className="mb-4 p-3 rounded-2xl bg-muted/60 border border-border shadow-sm space-y-1">
               <div className="flex items-center justify-between">
                 <p className="font-heading text-xs font-bold text-foreground truncate max-w-[140px]">
-                  {vendorProfile.name || (businessType === "ecommerce" ? "Ma Boutique Chic" : "Le Maquis Étoilé")}
+                  {vendorProfile.name || (businessType === "ecommerce" ? "KiffStyle & Tech Store" : businessType === "hotel" ? "Palmier Royal" : "L'Atelier du Chef & Grill")}
                 </p>
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="px-2 py-0.5 rounded-md bg-primary text-white text-[8px] font-black uppercase tracking-wider">
-                  {businessType === "ecommerce" ? "ESPACE BOUTIQUE" : "ESPACE RESTAURANT"}
+                  {businessType === "ecommerce" ? "ESPACE BOUTIQUE" : businessType === "hotel" ? "ESPACE HÔTEL" : "ESPACE RESTAURANT"}
                 </span>
                 <span className="text-[9px] text-muted-foreground font-bold">0% Comm</span>
               </div>
@@ -136,7 +136,7 @@ export default function VendorLayout() {
           {/* Bottom Actions */}
           <div className="space-y-1.5 pt-3 border-t border-border text-xs">
             <Link 
-              to={`/r/${vendorProfile?.slug || (businessType === "ecommerce" ? "ma-boutique-chic" : "le-maquis-etoile")}`} 
+              to={`/r/${vendorProfile?.slug || (businessType === "ecommerce" ? "kiffstyle-store" : businessType === "hotel" ? "palmier-royal" : "latelier-du-chef")}`} 
               target="_blank" 
               className="flex items-center gap-2 px-3 py-2 text-muted-foreground hover:text-primary font-bold rounded-xl hover:bg-muted transition-colors"
             >

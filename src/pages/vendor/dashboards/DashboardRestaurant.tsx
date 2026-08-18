@@ -48,8 +48,8 @@ export default function DashboardRestaurant() {
       clientId: "c1",
       clientName: "Jean Houndété",
       vendorId,
-      vendorName: vendorProfile?.name || "Le Maquis Étoilé",
-      items: [{ name: "Poulet Braisé & Alloco", qty: 2, price: 4500 }],
+      vendorName: vendorProfile?.name || "L'Atelier du Chef & Grill",
+      items: [{ name: "Poulet Braisé & Alloco Doré", qty: 2, price: 4500 }],
       total: 9000,
       deliveryFee: 1000,
       status: "preparing",
@@ -62,9 +62,9 @@ export default function DashboardRestaurant() {
       clientId: "c2",
       clientName: "Amina Kora",
       vendorId,
-      vendorName: vendorProfile?.name || "Le Maquis Étoilé",
-      items: [{ name: "Capitaine Braisé", qty: 1, price: 6000 }, { name: "Bissap Frais", qty: 2, price: 1000 }],
-      total: 8000,
+      vendorName: vendorProfile?.name || "L'Atelier du Chef & Grill",
+      items: [{ name: "Capitaine Braisé Royal", qty: 1, price: 6500 }, { name: "Bissap Frais", qty: 2, price: 1000 }],
+      total: 8500,
       deliveryFee: 1500,
       status: "delivering",
       paymentMethod: "momo_moov",
@@ -76,9 +76,9 @@ export default function DashboardRestaurant() {
       clientId: "c3",
       clientName: "Marc Dossou",
       vendorId,
-      vendorName: vendorProfile?.name || "Le Maquis Étoilé",
-      items: [{ name: "Chawarma Viande Spécial", qty: 3, price: 2000 }],
-      total: 6000,
+      vendorName: vendorProfile?.name || "L'Atelier du Chef & Grill",
+      items: [{ name: "Chawarma Viande & Frites", qty: 3, price: 2500 }],
+      total: 7500,
       deliveryFee: 0,
       status: "delivered",
       paymentMethod: "momo_mtn",
@@ -171,7 +171,7 @@ export default function DashboardRestaurant() {
               </span>
             </div>
             <p className="text-xs text-muted-foreground font-bold mt-0.5">
-              {vendorProfile?.name || "Le Maquis Étoilé"} • Suivi des commandes, de la cuisine et des encaissements MoMo
+              {vendorProfile?.name || "L'Atelier du Chef & Grill"} • Suivi des commandes, de la cuisine et des encaissements MoMo
             </p>
           </div>
         </div>
@@ -185,7 +185,7 @@ export default function DashboardRestaurant() {
           </button>
 
           <button
-            onClick={() => window.open(`/r/${vendorProfile?.slug || "le-maquis-etoile"}`, '_blank')}
+            onClick={() => window.open(`/r/${vendorProfile?.slug || "latelier-du-chef"}`, '_blank')}
             className="px-5 py-2.5 rounded-2xl bg-primary text-white font-heading font-black text-xs uppercase tracking-wider shadow-lg shadow-primary/20 hover:bg-primary/90 flex items-center gap-2"
           >
             <span>Voir ma Carte en direct</span>

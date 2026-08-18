@@ -44,7 +44,7 @@ export default function DashboardHotel() {
               </span>
             </div>
             <p className="text-xs text-muted-foreground font-bold mt-0.5">
-              {vendorProfile?.name || "Résidence La Paix"} • Gestion des réservations, nuitées et disponibilités
+              {vendorProfile?.name || "Palmier Royal Résidence & Suites"} • Gestion des réservations, nuitées et disponibilités
             </p>
           </div>
         </div>
@@ -58,7 +58,7 @@ export default function DashboardHotel() {
           </button>
 
           <button
-            onClick={() => window.open(`/r/${vendorProfile?.slug || "residence-la-paix"}`, '_blank')}
+            onClick={() => window.open(`/r/${vendorProfile?.slug || "palmier-royal"}`, '_blank')}
             className="px-5 py-2.5 rounded-2xl bg-primary text-white font-heading font-black text-xs uppercase tracking-wider shadow-lg shadow-primary/20 hover:bg-primary/90 flex items-center gap-2"
           >
             <span>Voir la Vitrine Hôtel</span>

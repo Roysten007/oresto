@@ -147,25 +147,27 @@ export default function RestaurantPublic() {
 
     const loadFallbackIfDemo = (currentSlug: string) => {
       const lower = currentSlug.toLowerCase();
-      if (lower.includes("maquis") || lower.includes("etoile") || lower.includes("resto") || lower.includes("restaurant")) {
+      
+      // 1. RESTAURANT & MAQUIS
+      if (lower.includes("maquis") || lower.includes("etoile") || lower.includes("resto") || lower.includes("restaurant") || lower.includes("atelier") || lower.includes("chef")) {
         setVendor({
           id: "v_demo_resto",
-          name: "Le Maquis Étoilé",
-          slug: "le-maquis-etoile",
+          name: "L'Atelier du Chef & Grill",
+          slug: "latelier-du-chef",
           category: "Restaurant & Grillades",
           business_type: "restaurant",
           city: "Cotonou",
           neighborhood: "Haie Vive",
           phone: "+229 97 00 00 00",
           whatsapp: "+229 97 00 00 00",
-          description: "Spécialités africaines et grillades au feu de bois. Cuisine authentique et produits frais.",
+          description: "Poissons braisés au feu de bois, poulet fermier alloco et spécialités africaines authentiques préparées minute.",
           cover_url: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1200",
           logo_url: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=200",
           primary_color: "#EA580C",
           secondary_color: "#FFFFFF",
           font_choice: "modern",
           rating: 4.9,
-          reviewCount: 42,
+          reviewCount: 54,
           open: true,
           deliveryTime: "30-45 min",
           plan: "pro",
@@ -176,48 +178,116 @@ export default function RestaurantPublic() {
           payment_methods: ["momo_mtn", "momo_moov", "cash"]
         });
         setProducts([
-          { id: "p1", vendorId: "v_demo_resto", name: "Poulet Braisé & Alloco", price: 4500, category: "Plats", description: "Demi-poulet mariné aux épices du chef, servi avec alloco croustillant et sauce piment.", image: "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=600", available: true },
-          { id: "p2", vendorId: "v_demo_resto", name: "Capitaine Braisé", price: 6000, category: "Plats", description: "Poisson capitaine frais braisé aux herbes locales, accompagné d'attiéké frais.", image: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=600", available: true },
-          { id: "p3", vendorId: "v_demo_resto", name: "Chawarma Viande Spécial", price: 2000, category: "Fast-Food", description: "Pain libanais garni de lamelles de bœuf mariné, sauce blanche et frites.", image: "https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=600", available: true },
-          { id: "p4", vendorId: "v_demo_resto", name: "Jus de Bissap Maison", price: 1000, category: "Boissons", description: "Infusion d'hibiscus frais à la menthe et vanille naturelle.", image: "https://images.unsplash.com/photo-1556881286-fc6915169721?w=600", available: true }
+          { id: "p1", vendorId: "v_demo_resto", name: "Poulet Braisé & Alloco Doré", price: 4500, category: "Grillades", description: "Demi-poulet fermier mariné aux épices locales, alloco croustillant et sauce pimentée.", image: "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=600", available: true },
+          { id: "p2", vendorId: "v_demo_resto", name: "Capitaine Braisé Royal", price: 6500, category: "Poissons", description: "Capitaine frais de pêche braisé aux herbes, servi avec attiéké frais et oignons croquants.", image: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=600", available: true },
+          { id: "p3", vendorId: "v_demo_resto", name: "Chawarma Viande & Frites", price: 2500, category: "Fast-Food", description: "Lamelles de bœuf mariné, sauce blanche maison, crudités et frites fraîches.", image: "https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=600", available: true },
+          { id: "p4", vendorId: "v_demo_resto", name: "Jus de Bissap & Menthe Fraîche", price: 1000, category: "Boissons", description: "Infusion naturelle d'hibiscus à la menthe douce et vanille.", image: "https://images.unsplash.com/photo-1556881286-fc6915169721?w=600", available: true }
         ]);
         setLoading(false);
-      } else if (lower.includes("boutique") || lower.includes("chic") || lower.includes("shop") || lower.includes("mode")) {
+      } 
+      // 2. BOUTIQUE E-COMMERCE
+      else if (lower.includes("boutique") || lower.includes("chic") || lower.includes("shop") || lower.includes("mode") || lower.includes("kiff") || lower.includes("tech")) {
         setVendor({
           id: "v_demo_shop",
-          name: "Ma Boutique Chic",
-          slug: "ma-boutique-chic",
+          name: "KiffStyle & Tech Store",
+          slug: "kiffstyle-store",
           category: "E-Commerce & Boutiques",
           business_type: "ecommerce",
           city: "Cotonou",
           neighborhood: "Ganhi",
           phone: "+229 96 00 00 00",
           whatsapp: "+229 96 00 00 00",
-          description: "Prêt-à-porter tendance, sneakers streetwear et accessoires de mode. Livraison rapide partout au Bénin.",
+          description: "Sneakers streetwear tendance, smartwatches AMOLED et prêt-à-porter haut de gamme. Livraison express 24h au Bénin.",
           cover_url: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200",
           logo_url: "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=200",
           primary_color: "#000000",
           secondary_color: "#FFFFFF",
           font_choice: "modern",
-          rating: 4.8,
-          reviewCount: 29,
+          rating: 4.9,
+          reviewCount: 38,
           open: true,
           deliveryTime: "24h Express",
           plan: "pro",
           verified: true,
           status: "active",
           is_published: true,
-          promo_label: "🚚 Livraison offerte dès 20 000 FCFA à Cotonou & Calavi",
+          promo_label: "🚚 Livraison offerte dès 20 000 FCFA à Cotonou, Calavi & Porto-Novo",
           ordering_modes: ["delivery"],
           payment_methods: ["momo_mtn", "momo_moov"]
         });
         setProducts([
-          { id: "s1", vendorId: "v_demo_shop", name: "Sneakers Streetwear Urban", price: 18500, originalPrice: 25000, category: "Chaussures", badge: "PROMO", description: "Design moderne avec semelle amortissante. Parfaites pour le quotidien.", image: "https://images.unsplash.com/photo-1552346154-21d32810aba3?w=600", images: ["https://images.unsplash.com/photo-1552346154-21d32810aba3?w=600", "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600"], available: true, stock: 12, variants: [{ name: "Pointure", options: ["40", "41", "42", "43", "44"] }] },
-          { id: "s2", vendorId: "v_demo_shop", name: "Smartwatch Ultra Pro 4G", price: 29000, originalPrice: 35000, category: "High-Tech", badge: "BESTSELLER", description: "Écran AMOLED HD, suivi cardiaque, appels Bluetooth et autonomie 7 jours.", image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600", available: true, stock: 5, variants: [{ name: "Bracelet", options: ["Noir", "Orange Titane", "Argent"] }] },
-          { id: "s3", vendorId: "v_demo_shop", name: "Robe Soirée Satin Prestige", price: 15000, category: "Vêtements", badge: "NOUVEAU", description: "Coupe élégante en tissu satiné premium. Idéale pour vos soirées et événements.", image: "https://images.unsplash.com/photo-1539008835657-9e8e9680c956?w=600", available: true, stock: 8, variants: [{ name: "Taille", options: ["S", "M", "L", "XL"] }, { name: "Couleur", options: ["Émeraude", "Noir", "Rouge Rubis"] }] }
+          { id: "s1", vendorId: "v_demo_shop", name: "Sneakers Streetwear Urban High", price: 18500, originalPrice: 25000, category: "Chaussures", badge: "PROMO", description: "Design moderne avec semelle amortissante confort pro. Idéales pour le quotidien.", image: "https://images.unsplash.com/photo-1552346154-21d32810aba3?w=600", images: ["https://images.unsplash.com/photo-1552346154-21d32810aba3?w=600", "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600"], available: true, stock: 12, variants: [{ name: "Pointure", options: ["40", "41", "42", "43", "44"] }, { name: "Couleur", options: ["Noir/Rouge", "Blanc/Gris"] }] },
+          { id: "s2", vendorId: "v_demo_shop", name: "Smartwatch Ultra Pro 4G", price: 29000, originalPrice: 35000, category: "High-Tech", badge: "BESTSELLER", description: "Écran AMOLED HD 1.96\", capteur cardiaque, appels Bluetooth et autonomie 7 jours.", image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600", available: true, stock: 5, variants: [{ name: "Bracelet", options: ["Noir", "Orange Titane", "Argent"] }] },
+          { id: "s3", vendorId: "v_demo_shop", name: "Robe Soirée Satin Prestige", price: 15000, category: "Vêtements", badge: "NOUVEAU", description: "Coupe élégante en tissu satiné premium. Parfaite pour soirées et cocktails.", image: "https://images.unsplash.com/photo-1539008835657-9e8e9680c956?w=600", available: true, stock: 8, variants: [{ name: "Taille", options: ["S", "M", "L", "XL"] }, { name: "Couleur", options: ["Émeraude", "Noir", "Rouge Rubis"] }] }
+        ]);
+        setLoading(false);
+      } 
+      // 3. HÔTEL & RÉSIDENCE
+      else if (lower.includes("hotel") || lower.includes("residence") || lower.includes("palmier") || lower.includes("paix") || lower.includes("suite")) {
+        setVendor({
+          id: "v_demo_hotel",
+          name: "Palmier Royal Résidence & Suites",
+          slug: "palmier-royal",
+          category: "Hôtels & Hébergements",
+          business_type: "hotel",
+          city: "Cotonou",
+          neighborhood: "Haie Vive",
+          phone: "+229 97 50 00 00",
+          whatsapp: "+229 97 50 00 00",
+          description: "Suites de luxe climatisées, appartements meublés avec Wi-Fi fibre optique, piscine privée et sécurité 24h/24.",
+          cover_url: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200",
+          logo_url: "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=200",
+          primary_color: "#4F46E5",
+          secondary_color: "#FFFFFF",
+          font_choice: "elegant",
+          rating: 5.0,
+          reviewCount: 47,
+          open: true,
+          deliveryTime: "Réservation instantanée",
+          plan: "pro",
+          verified: true,
+          status: "active",
+          is_published: true,
+          ordering_modes: ["takeaway"],
+          payment_methods: ["momo_mtn", "momo_moov", "cash"]
+        });
+        setProducts([
+          { id: "h1", vendorId: "v_demo_hotel", name: "Suite Exécutive King & Balcon", price: 65000, category: "Suites", description: "Lit King size, salon privatif, jacuzzi, smart TV 65\", vue panoramique et petit-déjeuner inclus.", image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=600", available: true },
+          { id: "h2", vendorId: "v_demo_hotel", name: "Chambre Prestige Deluxe", price: 35000, category: "Chambres", description: "Climatisation silencieuse, lit Queen size, bureau de travail, salle de bain marbre et Wi-Fi haut débit.", image: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=600", available: true },
+          { id: "h3", vendorId: "v_demo_hotel", name: "Appartement Meublé 2 Pièces", price: 45000, category: "Appartements", description: "Cuisine équipée, salon design, chambre séparée. Idéal pour séjours d'affaires et familles.", image: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600", available: true }
         ]);
         setLoading(false);
       } else {
+        // Fallback default
+        setVendor({
+          id: "v_demo_default",
+          name: "L'Atelier du Chef & Grill",
+          slug: currentSlug,
+          category: "Commerce Pro",
+          business_type: "restaurant",
+          city: "Cotonou",
+          neighborhood: "Haie Vive",
+          phone: "+229 97 00 00 00",
+          whatsapp: "+229 97 00 00 00",
+          description: "Vitrine professionnelle certifiée Oresto Pro.",
+          cover_url: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1200",
+          logo_url: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=200",
+          primary_color: "#EA580C",
+          secondary_color: "#FFFFFF",
+          font_choice: "modern",
+          rating: 4.9,
+          reviewCount: 25,
+          open: true,
+          deliveryTime: "30-45 min",
+          plan: "pro",
+          verified: true,
+          status: "active",
+          is_published: true,
+          payment_methods: ["momo_mtn", "momo_moov"]
+        });
+        setProducts([
+          { id: "d1", vendorId: "v_demo_default", name: "Article Spécial En Vedette", price: 5000, category: "Catalogue", description: "Article certifié disponible à la commande en ligne.", image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600", available: true }
+        ]);
         setLoading(false);
       }
     };

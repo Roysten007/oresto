@@ -60,8 +60,22 @@ export default function DashboardEcommerce() {
       clientId: "u2",
       clientName: "Sophie Tossou",
       vendorId,
-      vendorName: vendorProfile?.name || "Ma Boutique Chic",
-      items: [{ name: "Smartwatch Ultra Pro 4G", qty: 1, price: 29000 }],
+      vendorName: vendorProfile?.name || "KiffStyle & Tech Store",
+      items: [{ name: "Sneakers Streetwear Urban High (T.42)", qty: 1, price: 18500 }],
+      total: 18500,
+      deliveryFee: 1500,
+      status: "preparing",
+      paymentMethod: "momo_mtn",
+      address: "Cotonou, Cadjehoun Rue 12",
+      date: new Date().toISOString()
+    },
+    {
+      id: "col_202",
+      clientId: "u2",
+      clientName: "Sophie Tossou",
+      vendorId,
+      vendorName: vendorProfile?.name || "KiffStyle & Tech Store",
+      items: [{ name: "Smartwatch Ultra Pro 4G AMOLED", qty: 1, price: 29000 }],
       total: 29000,
       deliveryFee: 2000,
       status: "delivering",
@@ -74,7 +88,7 @@ export default function DashboardEcommerce() {
       clientId: "u3",
       clientName: "Carine Lawson",
       vendorId,
-      vendorName: vendorProfile?.name || "Ma Boutique Chic",
+      vendorName: vendorProfile?.name || "KiffStyle & Tech Store",
       items: [{ name: "Robe Soirée Satin Prestige (M)", qty: 1, price: 15000 }],
       total: 15000,
       deliveryFee: 1500,
@@ -86,10 +100,10 @@ export default function DashboardEcommerce() {
   ];
 
   const sampleProducts: Product[] = [
-    { id: "p1", vendorId, name: "Sneakers Streetwear Urban", price: 18500, originalPrice: 25000, category: "Chaussures", stock: 12, available: true, image: "" },
-    { id: "p2", vendorId, name: "Smartwatch Ultra Pro 4G", price: 29000, originalPrice: 35000, category: "High-Tech", stock: 2, available: true, image: "" },
+    { id: "p1", vendorId, name: "Sneakers Streetwear Urban High", price: 18500, originalPrice: 25000, category: "Chaussures", stock: 12, available: true, image: "" },
+    { id: "p2", vendorId, name: "Smartwatch Ultra Pro 4G AMOLED", price: 29000, originalPrice: 35000, category: "High-Tech", stock: 2, available: true, image: "" },
     { id: "p3", vendorId, name: "Robe Soirée Satin Prestige", price: 15000, category: "Vêtements", stock: 8, available: true, image: "" },
-    { id: "p4", vendorId, name: "AirPods Pro Gen 2", price: 14000, category: "Accessoires", stock: 1, available: true, image: "" }
+    { id: "p4", vendorId, name: "AirPods Pro Wireless ANC", price: 14000, category: "Accessoires", stock: 1, available: true, image: "" }
   ];
 
   useEffect(() => {
@@ -177,7 +191,7 @@ export default function DashboardEcommerce() {
               </span>
             </div>
             <p className="text-xs text-muted-foreground font-bold mt-0.5">
-              {vendorProfile?.name || "Ma Boutique Chic"} • Gestion des ventes d'articles, expéditions et stocks
+              {vendorProfile?.name || "KiffStyle & Tech Store"} • Gestion des ventes d'articles, expéditions et stocks
             </p>
           </div>
         </div>
@@ -191,7 +205,7 @@ export default function DashboardEcommerce() {
           </button>
 
           <button
-            onClick={() => window.open(`/r/${vendorProfile?.slug || "ma-boutique-chic"}`, '_blank')}
+            onClick={() => window.open(`/r/${vendorProfile?.slug || "kiffstyle-store"}`, '_blank')}
             className="px-5 py-2.5 rounded-2xl bg-primary text-white font-heading font-black text-xs uppercase tracking-wider shadow-lg shadow-primary/20 hover:bg-primary/90 flex items-center gap-2"
           >
             <span>Voir ma Boutique en ligne</span>
