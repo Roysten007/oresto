@@ -13,16 +13,6 @@ import {
   ExternalLink,
   Plus,
   Tag,
-import {
-  ShoppingBag,
-  Package,
-  Truck,
-  DollarSign,
-  Boxes,
-  AlertTriangle,
-  ExternalLink,
-  Plus,
-  Tag,
   CheckCircle2,
   TrendingUp,
   Receipt

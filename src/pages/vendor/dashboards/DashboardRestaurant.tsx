@@ -14,17 +14,6 @@ import {
   Flame,
   AlertCircle,
   ExternalLink,
-import {
-  Utensils,
-  ChefHat,
-  ShoppingBag,
-  DollarSign,
-  Clock,
-  CheckCircle2,
-  Bike,
-  Flame,
-  AlertCircle,
-  ExternalLink,
   Plus,
   QrCode,
   Receipt
