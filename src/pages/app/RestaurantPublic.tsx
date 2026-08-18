@@ -61,6 +61,17 @@ export default function RestaurantPublic() {
   const { user } = useAuth();
   const [isOwner, setIsOwner] = useState(false);
 
+  const isRestricted = vendor?.subscriptionStatus === "restricted" || vendor?.subscriptionStatus === "blocked";
+  
+  const isEcommerceMode = vendor?.business_type === "ecommerce" || 
+    Boolean(vendor?.category && (
+      vendor.category.toLowerCase().includes("boutique") ||
+      vendor.category.toLowerCase().includes("mode") ||
+      vendor.category.toLowerCase().includes("vente") ||
+      vendor.category.toLowerCase().includes("tech") ||
+      vendor.category.toLowerCase().includes("e-commerce")
+    ));
+
   useEffect(() => {
     if (!slug || !db) { setLoading(false); return; }
 
@@ -301,17 +312,6 @@ export default function RestaurantPublic() {
       if (s) s.remove();
     };
   }, [vendor, isEcommerceMode]);
-
-  const isRestricted = vendor?.subscriptionStatus === "restricted" || vendor?.subscriptionStatus === "blocked";
-  
-  const isEcommerceMode = vendor?.business_type === "ecommerce" || 
-    Boolean(vendor?.category && (
-      vendor.category.toLowerCase().includes("boutique") ||
-      vendor.category.toLowerCase().includes("mode") ||
-      vendor.category.toLowerCase().includes("vente") ||
-      vendor.category.toLowerCase().includes("tech") ||
-      vendor.category.toLowerCase().includes("e-commerce")
-    ));
 
   const handleAddToCart = (product: Product) => {
     if (isRestricted) {
