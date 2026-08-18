@@ -114,31 +114,60 @@ export default function VendorSiteBuilder() {
     }
     setBusinessType(detectedType);
 
-    if (vendorProfile) {
-      setFormData(prev => ({
-        ...prev,
-        ...vendorProfile,
-        business_type: detectedType,
-        social_links: vendorProfile.social_links || { instagram: "", facebook: "", tiktok: "" },
-        ordering_modes: vendorProfile.ordering_modes || (detectedType === "ecommerce" ? ["Livraison Express", "Retrait Point Relais"] : ["Livraison", "À Emporter", "WhatsApp Direct"]),
-        payment_methods: vendorProfile.payment_methods || ["MTN MoMo", "Moov Money", "Espèces"]
-      }));
-      setLocalLogo(vendorProfile.logo_url || null);
-      setLocalCover(vendorProfile.cover_url || null);
+    // Charger les données sauvegardées en priorité depuis localStorage ou vendorProfile
+    let mergedProfile = vendorProfile || {};
+    try {
+      const localSaved = localStorage.getItem("oresto_vendor_profile");
+      if (localSaved) {
+        mergedProfile = { ...mergedProfile, ...JSON.parse(localSaved) };
+      }
+    } catch {}
+
+    setFormData(prev => ({
+      ...prev,
+      ...mergedProfile,
+      business_type: detectedType,
+      social_links: mergedProfile.social_links || { instagram: "", facebook: "", tiktok: "" },
+      ordering_modes: mergedProfile.ordering_modes || (detectedType === "ecommerce" ? ["Livraison Express", "Retrait Point Relais"] : ["Livraison", "À Emporter", "WhatsApp Direct"]),
+      payment_methods: mergedProfile.payment_methods || ["MTN MoMo", "Moov Money", "Espèces"]
+    }));
+    setLocalLogo(mergedProfile.logo_url || null);
+    setLocalCover(mergedProfile.cover_url || null);
+
+    const vId = mergedProfile.id || (user as any)?.vendorId || "v_demo";
+
+    // Charger les produits depuis localStorage d'abord
+    let localProducts: Product[] = [];
+    try {
+      const savedProds = localStorage.getItem(`oresto_products_${vId}`);
+      if (savedProds) {
+        localProducts = JSON.parse(savedProds);
+      }
+    } catch {}
+
+    if (localProducts.length > 0) {
+      setProducts(localProducts);
+    } else {
+      const defaultSamples = getSampleProducts(detectedType, vId);
+      setProducts(defaultSamples);
+      try {
+        localStorage.setItem(`oresto_products_${vId}`, JSON.stringify(defaultSamples));
+      } catch {}
     }
 
-    if (!db || !vendorProfile) {
-      setProducts(getSampleProducts(detectedType, vendorProfile?.id || "demo"));
-      return;
-    }
+    if (!db) return;
 
     const unsubscribe = onValue(ref(db, 'products'), snap => {
       const data = snap.val();
       if (data) {
-        const list = Object.keys(data).map(k => ({ id: k, ...data[k] })).filter((p: any) => p.vendorId === vendorProfile.id) as Product[];
-        setProducts(list.length > 0 ? list : getSampleProducts(detectedType, vendorProfile.id));
-      } else {
-        setProducts(getSampleProducts(detectedType, vendorProfile.id));
+        const list = Object.keys(data).map(k => ({ id: k, ...data[k] })).filter((p: any) => p.vendorId === vId) as Product[];
+        if (list.length > 0) {
+          setProducts(list);
+          try {
+            localStorage.setItem(`oresto_products_${vId}`, JSON.stringify(list));
+          } catch {}
+          return;
+        }
       }
     });
     return () => unsubscribe();
