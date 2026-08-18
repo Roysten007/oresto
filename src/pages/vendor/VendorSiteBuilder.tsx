@@ -10,6 +10,8 @@ import StepIdentite from "./builder/StepIdentite";
 import StepCarte from "./builder/StepCarte";
 import StepEcommerceCatalogue from "./builder/StepEcommerceCatalogue";
 import StepEcommercePromos from "./builder/StepEcommercePromos";
+import StepHotelChambres from "./builder/StepHotelChambres";
+import StepHotelServices from "./builder/StepHotelServices";
 import StepMenus from "./builder/StepMenus";
 import StepVentes from "./builder/StepVentes";
 import StepDesign from "./builder/StepDesign";
@@ -35,19 +37,25 @@ export default function VendorSiteBuilder() {
      (vendorProfile?.category || "").toLowerCase().includes("tech") ||
      (vendorProfile?.category || "").toLowerCase().includes("e-commerce") ? "ecommerce" : 
      (vendorProfile?.category || "").toLowerCase().includes("hotel") ||
-     (vendorProfile?.category || "").toLowerCase().includes("hôtel") ? "hotel" : "restaurant");
+     (vendorProfile?.category || "").toLowerCase().includes("hôtel") ||
+     (vendorProfile?.category || "").toLowerCase().includes("résidence") ? "hotel" : "restaurant");
 
   const [businessType, setBusinessType] = useState<"restaurant" | "ecommerce" | "hotel">(initialType);
 
   const [formData, setFormData] = useState<Partial<VendorProfile>>({
-    name: initialType === "ecommerce" ? "Ma Boutique Chic" : initialType === "hotel" ? "Résidence La Paix" : "Le Maquis Étoilé",
-    description: initialType === "ecommerce" ? "Mode tendance, sneakers streetwear et accessoires high-tech." : "Restaurant, Grillades authentiques et saveurs locales",
-    slug: initialType === "ecommerce" ? "ma-boutique-chic" : initialType === "hotel" ? "residence-la-paix" : "le-maquis-etoile",
-    category: initialType === "ecommerce" ? "E-Commerce & Boutiques" : initialType === "hotel" ? "Hôtel & Résidences" : "Restaurant & Grillades",
+    name: initialType === "ecommerce" ? "KiffStyle & Tech Store" : initialType === "hotel" ? "Palmier Royal Résidence & Suites" : "L'Atelier du Chef & Grill",
+    category: initialType === "ecommerce" ? "Mode, Vêtements & Prêt-à-porter" : initialType === "hotel" ? "Hôtel & Suites de Luxe" : "Restaurant & Grillades",
+    categories: [initialType === "ecommerce" ? "Mode, Vêtements & Prêt-à-porter" : initialType === "hotel" ? "Hôtel & Suites de Luxe" : "Restaurant & Grillades"],
+    description: initialType === "ecommerce" 
+      ? "Boutique en ligne spécialisée en sneakers streetwear, vêtements de marque et accessoires high-tech."
+      : initialType === "hotel"
+      ? "Hôtel de charme et résidence meublée de haut standing avec suites climatisées, piscine et Wi-Fi Fibre."
+      : "Restaurant gastronomique et grillades au feu de bois. Spécialités africaines et saveurs du terroir.",
+    slug: initialType === "ecommerce" ? "kiffstyle-store" : initialType === "hotel" ? "palmier-royal" : "latelier-du-chef",
     business_type: initialType,
     logo_url: "",
     cover_url: "",
-    primary_color: initialType === "ecommerce" ? "#000000" : "#EA580C",
+    primary_color: initialType === "ecommerce" ? "#000000" : initialType === "hotel" ? "#4F46E5" : "#EA580C",
     secondary_color: "#FFFFFF",
     font_choice: "modern",
     sections_config: { hero: true, menu: true, daily: true, footer: true },
@@ -55,10 +63,10 @@ export default function VendorSiteBuilder() {
     phone: "+229 97 00 00 00",
     whatsapp: "+229 97 00 00 00",
     city: "Cotonou",
-    neighborhood: initialType === "ecommerce" ? "Ganhi" : "Haie Vive",
+    neighborhood: initialType === "ecommerce" ? "Ganhi" : initialType === "hotel" ? "Haie Vive" : "Cadjehoun",
     social_links: { instagram: "", facebook: "", tiktok: "" },
     payment_methods: ["MTN MoMo", "Moov Money", "Espèces"],
-    ordering_modes: initialType === "ecommerce" ? ["Livraison Express", "Retrait Point Relais"] : ["Livraison", "À Emporter", "WhatsApp Direct"],
+    ordering_modes: initialType === "ecommerce" ? ["Livraison Express", "Retrait Point Relais"] : initialType === "hotel" ? ["Réservation Directe", "Paiement à l'arrivée"] : ["Livraison", "À Emporter", "WhatsApp Direct"],
     is_published: true,
   });
 
@@ -70,25 +78,25 @@ export default function VendorSiteBuilder() {
       id: 1, 
       title: "Identité", 
       icon: isEcommerce ? "fa-solid fa-bag-shopping" : isHotel ? "fa-solid fa-hotel" : "fa-solid fa-store", 
-      desc: isEcommerce ? "Nom de votre boutique, lien web et logo." : "Nom, lien web et logo de votre établissement." 
+      desc: isEcommerce ? "Nom de votre boutique, lien web et logo." : isHotel ? "Nom de votre établissement, lien et coordonnées." : "Nom, lien web et logo de votre restaurant." 
     },
     { 
       id: 2, 
-      title: isEcommerce ? "Catalogue & Fiches" : isHotel ? "Chambres" : "La Carte", 
-      icon: isEcommerce ? "fa-solid fa-boxes-stacked" : isHotel ? "fa-solid fa-hotel" : "fa-solid fa-utensils", 
-      desc: isEcommerce ? "Vos produits avec multi-photos, prix barrés et variantes." : "Vos plats ou chambres avec photos et tarifs." 
+      title: isEcommerce ? "Catalogue & Fiches" : isHotel ? "Chambres & Suites" : "La Carte", 
+      icon: isEcommerce ? "fa-solid fa-boxes-stacked" : isHotel ? "fa-solid fa-bed" : "fa-solid fa-utensils", 
+      desc: isEcommerce ? "Vos produits avec multi-photos, prix barrés et variantes." : isHotel ? "Vos chambres et suites avec tarifs par nuitée et équipements." : "Vos plats et grillades avec photos et tarifs." 
     },
     { 
       id: 3, 
-      title: isEcommerce ? "Promotions" : "Menus", 
-      icon: isEcommerce ? "fa-solid fa-bullhorn" : "fa-solid fa-calendar-days", 
-      desc: isEcommerce ? "Bandeau d'annonces, livraison offerte et codes promo." : "Programmez vos suggestions quotidiennes." 
+      title: isEcommerce ? "Promotions" : isHotel ? "Services & Séjours" : "Menus du Jour", 
+      icon: isEcommerce ? "fa-solid fa-bullhorn" : isHotel ? "fa-solid fa-bell-concierge" : "fa-solid fa-calendar-days", 
+      desc: isEcommerce ? "Bandeau d'annonces, livraison offerte et codes promo." : isHotel ? "Équipements inclus, check-in/out et forfaits long séjour." : "Programmez vos suggestions quotidiennes." 
     },
     { 
       id: 4, 
-      title: "Ventes & MoMo", 
+      title: isEcommerce ? "Livraisons & MoMo" : isHotel ? "Réservations & MoMo" : "Ventes & MoMo", 
       icon: "fa-solid fa-money-bill-wave", 
-      desc: "Modes de paiement Mobile Money et livraisons." 
+      desc: "Modes de paiement Mobile Money et encaissements sans commission." 
     },
     { 
       id: 5, 
@@ -208,19 +216,49 @@ export default function VendorSiteBuilder() {
           description: "Chemise élégante idéale pour les fortes chaleurs et réceptions."
         }
       ];
+    } else if (type === "hotel") {
+      return [
+        {
+          id: "h1", vendorId: vId, name: "Suite Exécutive King & Balcon", price: 65000, originalPrice: 80000, category: "Suite Exécutive King",
+          image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&auto=format&fit=crop&q=80",
+          images: [
+            "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&auto=format&fit=crop&q=80",
+            "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800&auto=format&fit=crop&q=80"
+          ],
+          available: true, stock: 2, badge: "SUITE VIP",
+          features: ["Lit King Size Confort Palace", "Wi-Fi Fibre 100 Mbps", "Climatisation Split 24h", "Baignoire & Eau chaude", "Petit-déjeuner inclus"],
+          description: "Suite spacieuse de 45m² avec grand balcon privé, literie d'exception et salon privé."
+        },
+        {
+          id: "h2", vendorId: vId, name: "Chambre Prestige Deluxe", price: 35000, originalPrice: 45000, category: "Chambre Deluxe",
+          image: "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800&auto=format&fit=crop&q=80",
+          images: [
+            "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800&auto=format&fit=crop&q=80"
+          ],
+          available: true, stock: 4, badge: "PETIT-DÉJ INCLUS",
+          features: ["Lit Queen Size", "Climatisation 24h", "Smart TV Canal+", "Salle de bain privée", "Wi-Fi Gratuit"],
+          description: "Chambre lumineuse tout confort pour séjours d'affaires et escapades à deux."
+        },
+        {
+          id: "h3", vendorId: vId, name: "Appartement Meublé 2 Pièces", price: 45000, originalPrice: 55000, category: "Appartement Meublé",
+          image: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&auto=format&fit=crop&q=80",
+          available: true, stock: 2, badge: "RÉDUCTION LONG SÉJOUR",
+          features: ["Cuisine équipée", "Salon & Table à manger", "Machine à laver", "Wi-Fi Fibre", "Gardiennage 24h"],
+          description: "Appartement meublé autonome avec cuisine équipée pour courts et longs séjours."
+        }
+      ];
     }
     return [
-      { id: "p1", vendorId: vId, name: "Poulet Braisé & Alloco", price: 4500, category: "Plats", description: "Cuisiné aux épices du terroir, alloco doré", available: true },
-      { id: "p2", vendorId: vId, name: "Capitaine Braisé", price: 6000, category: "Plats", description: "Poisson frais du jour, sauce pimentée maison", available: true },
+      { id: "p1", vendorId: vId, name: "Poulet Braisé & Alloco", price: 4500, category: "Plats Principaux & Grillades", description: "Cuisiné aux épices du terroir, alloco doré", available: true },
+      { id: "p2", vendorId: vId, name: "Capitaine Braisé Royal", price: 6500, category: "Plats Principaux & Grillades", description: "Poisson frais du jour, sauce pimentée maison", available: true },
+      { id: "p3", vendorId: vId, name: "Brochettes de Filet de Bœuf", price: 3500, category: "Plats Principaux & Grillades", description: "Viande tendre marinée au kankankan", available: true }
     ];
   };
 
   const handleBusinessTypeChange = (newType: "restaurant" | "ecommerce" | "hotel") => {
     setBusinessType(newType);
-    const updatedName = newType === "ecommerce" && formData.name === "Le Maquis Étoilé" 
-      ? "Boutique Prestige & Tech" 
-      : formData.name;
-    const updatedCat = newType === "ecommerce" ? "E-Commerce & Boutiques" : newType === "hotel" ? "Hôtel & Résidences" : "Restaurant & Grillades";
+    const updatedName = newType === "ecommerce" ? "KiffStyle & Tech Store" : newType === "hotel" ? "Palmier Royal Résidence" : "L'Atelier du Chef & Grill";
+    const updatedCat = newType === "ecommerce" ? "Mode, Vêtements & Prêt-à-porter" : newType === "hotel" ? "Hôtel & Suites de Luxe" : "Restaurant & Grillades";
     
     setFormData(prev => ({
       ...prev,
@@ -228,7 +266,7 @@ export default function VendorSiteBuilder() {
       name: updatedName,
       category: updatedCat,
     }));
-    toast.success(`Mode ${newType === "ecommerce" ? "E-Commerce / Boutique (Style Amazon)" : newType === "hotel" ? "Hôtel & Résidence" : "Restaurant & Maquis"} activé !`);
+    toast.success(`Mode ${newType === "ecommerce" ? "Boutique E-Commerce" : newType === "hotel" ? "Hôtel & Résidences" : "Restaurant & Grillades"} activé !`);
   };
 
   const handleSlugChange = async (val: string) => {
@@ -283,14 +321,14 @@ export default function VendorSiteBuilder() {
     
     const data: any = { 
       id: productId,
-      name: product.name || "Article", 
+      name: product.name || (isHotel ? "Chambre Deluxe" : isEcommerce ? "Article" : "Plat"), 
       vendorId: vId, 
       available: true, 
       price: Number(product.price || 0),
-      category: product.category || (isEcommerce ? "Mode, Vêtements & Prêt-à-porter" : isHotel ? "Chambres & Suites" : "Plats"),
+      category: product.category || (isEcommerce ? "Mode, Vêtements & Prêt-à-porter" : isHotel ? "Chambre Deluxe" : "Plats Principaux & Grillades"),
       description: product.description || "",
       image: product.image || (product.images?.[0] || ""),
-      stock: product.stock !== undefined ? Number(product.stock) : 10,
+      stock: product.stock !== undefined ? Number(product.stock) : (isHotel ? 3 : 10),
       inStock: product.stock !== undefined ? Number(product.stock) > 0 : true
     };
 
@@ -333,11 +371,11 @@ export default function VendorSiteBuilder() {
           await set(newRef, data);
         }
       } catch (err: any) {
-        console.warn("Firebase product save warning (données sauvegardées localement):", err);
+        console.warn("Firebase product save warning:", err);
       }
     }
 
-    toast.success(product.id ? "Fiche article mise à jour" : "Article ajouté à votre vitrine");
+    toast.success(product.id ? (isHotel ? "Chambre mise à jour" : isEcommerce ? "Fiche article mise à jour" : "Plat mis à jour") : (isHotel ? "Chambre ajoutée avec succès" : isEcommerce ? "Article ajouté à votre vitrine" : "Plat ajouté à la carte"));
   };
 
   const deleteProduct = async (id: string) => {
@@ -358,7 +396,7 @@ export default function VendorSiteBuilder() {
         console.warn("Firebase delete warning:", err);
       }
     }
-    toast.success("Article supprimé");
+    toast.success(isHotel ? "Chambre supprimée" : isEcommerce ? "Article supprimé" : "Plat supprimé");
   };
 
   const saveChanges = async (publish = false) => {
@@ -366,7 +404,7 @@ export default function VendorSiteBuilder() {
     setIsSaving(true);
     try {
       const updates: any = {
-        name: formData.name || (isEcommerce ? "KiffStyle & Tech Store" : isHotel ? "Palmier Royal" : "L'Atelier du Chef & Grill"),
+        name: formData.name || (isEcommerce ? "KiffStyle & Tech Store" : isHotel ? "Palmier Royal Résidence & Suites" : "L'Atelier du Chef & Grill"),
         description: formData.description || "",
         slug: formData.slug || (isEcommerce ? "kiffstyle-store" : isHotel ? "palmier-royal" : "latelier-du-chef"),
         category: formData.category || (isEcommerce ? "Mode, Vêtements & Prêt-à-porter" : isHotel ? "Hôtel & Suites de Luxe" : "Restaurant & Grillades"),
@@ -384,7 +422,7 @@ export default function VendorSiteBuilder() {
         city: formData.city || "",
         neighborhood: formData.neighborhood || "",
         payment_methods: formData.payment_methods || ["MTN MoMo", "Moov Money", "Espèces"],
-        ordering_modes: formData.ordering_modes || ["Livraison"],
+        ordering_modes: formData.ordering_modes || (isEcommerce ? ["Livraison Express", "Retrait Point Relais"] : isHotel ? ["Réservation Directe", "Paiement à l'arrivée"] : ["Livraison", "À Emporter", "WhatsApp Direct"]),
       };
       if (publish) updates.is_published = true;
       
@@ -443,10 +481,14 @@ export default function VendorSiteBuilder() {
       case 2: 
         return isEcommerce 
           ? <StepEcommerceCatalogue products={products} vendorId={vendorProfile?.id || "v_demo"} onSave={saveProduct} onDelete={deleteProduct} />
-          : <StepCarte products={products} vendorId={vendorProfile?.id || "v_demo"} onSave={saveProduct} onDelete={deleteProduct} category={formData.category || vendorProfile?.category} />;
+          : isHotel
+          ? <StepHotelChambres products={products} vendorId={vendorProfile?.id || "v_demo"} onSave={saveProduct} onDelete={deleteProduct} />
+          : <StepCarte products={products} vendorId={vendorProfile?.id || "v_demo"} onSave={saveProduct} onDelete={deleteProduct} />;
       case 3: 
         return isEcommerce 
           ? <StepEcommercePromos formData={formData} setFormData={setFormData} />
+          : isHotel
+          ? <StepHotelServices formData={formData} setFormData={setFormData} />
           : <StepMenus formData={formData} setFormData={setFormData} products={products} vendorId={vendorProfile?.id || "v_demo"} />;
       case 4: 
         return <StepVentes formData={formData} setFormData={setFormData} />;

@@ -12,22 +12,27 @@ interface Props {
   category?: string;
 }
 
-const DISH_CATEGORIES = ["Entrées", "Plats", "Desserts", "Boissons", "Spécialités"];
-const ROOM_CATEGORIES = ["Standard", "Deluxe", "Suite", "Bungalow", "Dortoir"];
+const DISH_CATEGORIES = [
+  "Entrées & Tapas",
+  "Plats Principaux & Grillades",
+  "Spécialités Africaines",
+  "Fast-Food, Burgers & Chawarma",
+  "Desserts & Douceurs",
+  "Boissons & Cocktails",
+  "Accompagnements"
+];
 
-export default function StepCarte({ products, vendorId, onSave, onDelete, category }: Props) {
-  const isHotel = Boolean(
-    category && (
-      category.toLowerCase().includes("hôtel") || 
-      category.toLowerCase().includes("hotel") || 
-      category.toLowerCase().includes("auberge")
-    )
-  );
-
-  const defaultCategories = isHotel ? ROOM_CATEGORIES : DISH_CATEGORIES;
+export default function StepCarte({ products, vendorId, onSave, onDelete }: Props) {
   const [editing, setEditing] = useState<Partial<Product> | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+
+  // Filtrer uniquement les plats et produits de restaurant
+  const restaurantProducts = products.filter(p => 
+    !["chaussure", "sneaker", "basket", "mode", "vêtement", "robe", "chemise", "smartphone", "high-tech", "chambre", "suite", "bungalow", "appartement", "studio"].some(
+      forbidden => (p.category || "").toLowerCase().includes(forbidden) || (p.name || "").toLowerCase().includes(forbidden)
+    )
+  );
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -55,43 +60,46 @@ export default function StepCarte({ products, vendorId, onSave, onDelete, catego
 
   const handleSave = async () => {
     if (!editing?.name || !editing?.price) { 
-      toast.error(isHotel ? "Nom de chambre et prix requis" : "Nom et prix du plat requis"); 
+      toast.error("Nom et prix du plat requis"); 
       return; 
     }
     setSaving(true);
     try { 
-      await onSave(editing); 
+      await onSave({
+        ...editing,
+        category: editing.category || DISH_CATEGORIES[1]
+      }); 
       setEditing(null); 
     } finally { 
       setSaving(false); 
     }
   };
 
-  const allCategories = Array.from(new Set([...defaultCategories, ...products.map(p => p.category)])).filter(Boolean);
+  const allCategories = Array.from(new Set([...DISH_CATEGORIES, ...restaurantProducts.map(p => p.category)])).filter(Boolean);
   const categorizedProducts = allCategories.map(cat => ({
     cat,
-    items: products.filter(p => p.category === cat)
+    items: restaurantProducts.filter(p => p.category === cat)
   })).filter(g => g.items.length > 0);
 
-  const ungrouped = products.filter(p => !p.category);
+  const ungrouped = restaurantProducts.filter(p => !p.category);
 
   return (
     <div className="space-y-8 font-body">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="font-heading font-black text-2xl text-gray-900">
-            {isHotel ? "Chambres & Hébergements" : "La Carte & Vos Plats"}
+            La Carte & Vos Plats
           </h2>
           <p className="text-xs text-gray-500 font-medium mt-0.5">
-            {products.length} {isHotel ? `chambre${products.length !== 1 ? 's' : ''}` : `plat${products.length !== 1 ? 's' : ''}`} configuré{products.length !== 1 ? 's' : ''} sur votre vitrine
+            {restaurantProducts.length} plat{restaurantProducts.length !== 1 ? 's' : ''} configuré{restaurantProducts.length !== 1 ? 's' : ''} sur votre vitrine
           </p>
         </div>
         <button
-          onClick={() => setEditing({ name: "", price: 0, category: isHotel ? "Standard" : "Plats", image: "", description: "" })}
+          onClick={() => setEditing({ name: "", price: 4500, category: "Plats Principaux & Grillades", image: "", description: "" })}
           className="px-5 py-3 bg-primary text-white rounded-2xl font-bold text-xs hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2 shrink-0 active:scale-95"
         >
           <i className="fa-solid fa-plus"></i>
-          <span>{isHotel ? "Ajouter une chambre" : "Ajouter un plat"}</span>
+          <span>Ajouter un plat</span>
         </button>
       </div>
 
