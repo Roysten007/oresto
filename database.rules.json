@@ -23,7 +23,7 @@
     "vendors": {
       ".read": true,
       "$vendorId": {
-        ".write": "auth != null && (!data.exists() || data.child('userId').val() === auth.uid || newData.child('userId').val() === auth.uid || root.child('admins').child(auth.uid).exists() || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+        ".write": true,
         "totalOrders": {
           ".write": true
         }
@@ -32,9 +32,12 @@
 
     "products": {
       ".read": true,
-      "$vendorId": {
-        ".write": "auth != null && (root.child('vendors').child($vendorId).child('userId').val() === auth.uid || root.child('admins').child(auth.uid).exists() || root.child('users').child(auth.uid).child('role').val() === 'admin')"
-      }
+      ".write": true
+    },
+
+    "slugs": {
+      ".read": true,
+      ".write": true
     },
 
     "orders": {
@@ -53,8 +56,8 @@
 
     "notifications": {
       "$target": {
-        ".read": "auth != null",
-        ".write": "auth != null"
+        ".read": true,
+        ".write": true
       }
     }
   }

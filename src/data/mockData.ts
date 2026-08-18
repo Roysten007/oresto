@@ -27,6 +27,7 @@ export interface VendorProfile {
   name: string;
   slug?: string;
   category: string;
+  categories?: string[];
   city: string;
   country?: string;
   neighborhood: string;

@@ -60,9 +60,67 @@ export default function StepIdentite({
 }: Props) {
   const [isLocating, setIsLocating] = useState(false);
   const [customCatMode, setCustomCatMode] = useState(false);
+  const [customInput, setCustomInput] = useState("");
 
   const activeSector = businessType || formData.business_type || "restaurant";
   const availableCategories = SECTOR_CATEGORIES[activeSector] || SECTOR_CATEGORIES.restaurant;
+
+  // Extraction de la liste des catégories sélectionnées (support multi-choix)
+  const currentCategories: string[] = formData.categories && formData.categories.length > 0
+    ? formData.categories
+    : formData.category
+      ? formData.category.split(",").map(s => s.trim()).filter(Boolean)
+      : [availableCategories[0]];
+
+  const handleToggleCategory = (cat: string) => {
+    let updated: string[];
+    const exists = currentCategories.some(c => c.toLowerCase() === cat.toLowerCase());
+    if (exists) {
+      if (currentCategories.length <= 1) {
+        toast.info("Vous devez conserver au moins une catégorie active");
+        return;
+      }
+      updated = currentCategories.filter(c => c.toLowerCase() !== cat.toLowerCase());
+    } else {
+      updated = [...currentCategories, cat];
+    }
+    setFormData({
+      ...formData,
+      categories: updated,
+      category: updated.join(", ")
+    });
+    toast.success(exists ? `Catégorie retirée : ${cat}` : `Catégorie ajoutée : ${cat}`);
+  };
+
+  const handleAddCustomCategory = () => {
+    const trimmed = customInput.trim();
+    if (!trimmed) return;
+    if (currentCategories.some(c => c.toLowerCase() === trimmed.toLowerCase())) {
+      toast.info("Cette catégorie est déjà sélectionnée");
+      return;
+    }
+    const updated = [...currentCategories, trimmed];
+    setFormData({
+      ...formData,
+      categories: updated,
+      category: updated.join(", ")
+    });
+    setCustomInput("");
+    toast.success(`Catégorie ajoutée : ${trimmed}`);
+  };
+
+  const handleRemoveCategory = (catToRemove: string) => {
+    if (currentCategories.length <= 1) {
+      toast.info("Conservez au moins une catégorie");
+      return;
+    }
+    const updated = currentCategories.filter(c => c.toLowerCase() !== catToRemove.toLowerCase());
+    setFormData({
+      ...formData,
+      categories: updated,
+      category: updated.join(", ")
+    });
+  };
 
   const handleLocateMe = () => {
     if (!navigator.geolocation) {
@@ -98,11 +156,6 @@ export default function StepIdentite({
     );
   };
 
-  const handleCategorySelect = (cat: string) => {
-    setFormData({ ...formData, category: cat });
-    toast.success(`Catégorie sélectionnée : ${cat}`);
-  };
-
   return (
     <div className="space-y-8 font-body">
       <div>
@@ -114,22 +167,22 @@ export default function StepIdentite({
           </span>
         </div>
         <h2 className="font-heading font-black text-2xl text-gray-900">
-          Identité & Catégorie
+          Identité & Catégories
         </h2>
         <p className="text-xs text-gray-500 font-medium mt-0.5">
-          Définissez la catégorie précise et les informations visibles sur votre vitrine en ligne.
+          Définissez les catégories et les coordonnées visibles sur votre vitrine en ligne.
         </p>
       </div>
 
-      {/* Sélecteur de Catégorie Métier Spécialisée */}
-      <div className="space-y-3 p-5 rounded-2xl bg-gray-50 border border-gray-200/80">
+      {/* Sélecteur de Catégories Multi-Choix */}
+      <div className="space-y-4 p-5 rounded-2xl bg-gray-50 border border-gray-200/80">
         <div className="flex items-center justify-between">
           <div>
             <label className="block text-[10px] font-black uppercase tracking-widest text-gray-700">
-              Catégorie précise de votre {activeSector === "ecommerce" ? "boutique" : activeSector === "hotel" ? "établissement" : "restaurant"} *
+              Catégories de votre {activeSector === "ecommerce" ? "boutique" : activeSector === "hotel" ? "établissement" : "restaurant"} * (Sélection multiple)
             </label>
             <p className="text-[11px] text-gray-500 font-medium mt-0.5">
-              Sélectionnez la catégorie qui correspond exactement à vos produits / services :
+              💡 Cliquez sur plusieurs catégories pour les combiner sur votre vitrine :
             </p>
           </div>
           <button
@@ -137,49 +190,82 @@ export default function StepIdentite({
             onClick={() => setCustomCatMode(!customCatMode)}
             className="text-[11px] font-bold text-primary hover:underline"
           >
-            {customCatMode ? "Choisir dans la liste" : "+ Saisie manuelle"}
+            {customCatMode ? "Fermer la saisie libre" : "+ Ajouter une catégorie personnalisée"}
           </button>
         </div>
 
-        {/* Chips de catégories */}
-        {!customCatMode ? (
-          <div className="flex flex-wrap gap-2 pt-1">
-            {availableCategories.map(cat => {
-              const isSelected = formData.category?.toLowerCase() === cat.toLowerCase();
-              return (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => handleCategorySelect(cat)}
-                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                    isSelected
-                      ? "bg-primary text-white shadow-md shadow-primary/25 scale-[1.02]"
-                      : "bg-white text-gray-700 border border-gray-200 hover:border-primary/50 hover:bg-orange-50/30"
-                  }`}
-                >
-                  {isSelected && <i className="fa-solid fa-check text-[10px]"></i>}
-                  <span>{cat}</span>
-                </button>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="space-y-1.5">
+        {/* Formulaire d'ajout personnalisé si ouvert */}
+        {customCatMode && (
+          <div className="flex gap-2 p-3 bg-white rounded-xl border border-primary/20 shadow-sm">
             <input
               type="text"
-              value={formData.category || ""}
-              onChange={e => setFormData({ ...formData, category: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-xs font-bold outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-              placeholder="Ex: Prêt-à-porter & Accessoires de Luxe"
+              value={customInput}
+              onChange={e => setCustomInput(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && (e.preventDefault(), handleAddCustomCategory())}
+              className="flex-1 px-3 py-2 text-xs font-bold border border-gray-200 rounded-lg outline-none focus:border-primary"
+              placeholder="Ex: Sneakers Édition Limitée, Robes de Cérémonie..."
             />
+            <button
+              type="button"
+              onClick={handleAddCustomCategory}
+              className="px-4 py-2 bg-primary text-white text-xs font-bold rounded-lg hover:bg-primary/90 transition-all shadow-sm"
+            >
+              Ajouter
+            </button>
           </div>
         )}
 
-        <div className="pt-2 text-[11px] text-gray-500 flex items-center gap-2">
-          <span className="font-bold text-gray-700">Catégorie active :</span>
-          <span className="px-2.5 py-0.5 rounded-md bg-primary/10 text-primary font-bold text-xs">
-            {formData.category || (activeSector === "ecommerce" ? "Mode, Vêtements & Prêt-à-porter" : activeSector === "hotel" ? "Hôtel & Suites de Luxe" : "Restaurant & Grillades")}
+        {/* Chips de catégories avec multi-sélection */}
+        <div className="flex flex-wrap gap-2 pt-1">
+          {availableCategories.map(cat => {
+            const isSelected = currentCategories.some(c => c.toLowerCase() === cat.toLowerCase());
+            return (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => handleToggleCategory(cat)}
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+                  isSelected
+                    ? "bg-primary text-white shadow-md shadow-primary/25 scale-[1.02] ring-2 ring-primary/20"
+                    : "bg-white text-gray-700 border border-gray-200 hover:border-primary/50 hover:bg-orange-50/30"
+                }`}
+              >
+                <div className={`w-3.5 h-3.5 rounded flex items-center justify-center text-[9px] ${
+                  isSelected ? "bg-white text-primary" : "border border-gray-300 text-transparent"
+                }`}>
+                  <i className="fa-solid fa-check"></i>
+                </div>
+                <span>{cat}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Récapitulatif des catégories actives */}
+        <div className="pt-3 border-t border-gray-200/70 space-y-2">
+          <span className="block text-[10px] font-black uppercase tracking-widest text-gray-500">
+            {currentCategories.length} Catégorie{currentCategories.length > 1 ? "s" : ""} sélectionnée{currentCategories.length > 1 ? "s" : ""} sur votre vitrine :
           </span>
+          <div className="flex flex-wrap gap-1.5">
+            {currentCategories.map(cat => (
+              <span
+                key={cat}
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 font-bold text-xs"
+              >
+                <span>{cat}</span>
+                {currentCategories.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveCategory(cat)}
+                    className="w-4 h-4 rounded-full hover:bg-primary hover:text-white flex items-center justify-center text-[10px] transition-colors"
+                    title="Retirer cette catégorie"
+                  >
+                    ×
+                  </button>
+                )}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
 
