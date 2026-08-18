@@ -12,14 +12,21 @@ const PAYMENT_METHODS = [
   { id: "Celtiis Cash", label: "Celtiis Cash", icon: "fa-solid fa-wallet", color: "bg-purple-600" },
 ];
 
-const ORDER_MODES = [
-  { id: "Livraison", label: "Livraison à domicile", icon: "fa-solid fa-motorcycle" },
-  { id: "À Emporter", label: "À emporter / Click & Collect", icon: "fa-solid fa-bag-shopping" },
-  { id: "Sur Place", label: "Service à table / QR Code", icon: "fa-solid fa-chair" },
-  { id: "WhatsApp Direct", label: "Commande WhatsApp en 1 clic", icon: "fa-brands fa-whatsapp" }
-];
-
 export default function StepVentes({ formData, setFormData }: Props) {
+  const isEcommerce = formData.business_type === "ecommerce";
+
+  const ORDER_MODES = isEcommerce ? [
+    { id: "Livraison", label: "Livraison Express à domicile (24h/48h)", icon: "fa-solid fa-truck-fast" },
+    { id: "Point Relais", label: "Retrait en Boutique / Point Relais", icon: "fa-solid fa-shop" },
+    { id: "Expédition", label: "Expédition interurbaine (Colis)", icon: "fa-solid fa-boxes-packing" },
+    { id: "WhatsApp Direct", label: "Commande WhatsApp en 1 clic", icon: "fa-brands fa-whatsapp" }
+  ] : [
+    { id: "Livraison", label: "Livraison de repas à domicile", icon: "fa-solid fa-motorcycle" },
+    { id: "À Emporter", label: "À emporter / Click & Collect", icon: "fa-solid fa-bag-shopping" },
+    { id: "Sur Place", label: "Service à table / QR Code", icon: "fa-solid fa-chair" },
+    { id: "WhatsApp Direct", label: "Commande WhatsApp en 1 clic", icon: "fa-brands fa-whatsapp" }
+  ];
+
   const togglePayment = (method: string) => {
     const current = formData.payment_methods || [];
     const updated = current.includes(method) ? current.filter(m => m !== method) : [...current, method];

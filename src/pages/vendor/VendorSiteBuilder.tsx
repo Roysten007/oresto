@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSearchParams } from "react-router-dom";
 import { db, storage } from "@/lib/firebase";
 import { ref, update, onValue, set, push, query, orderByChild, equalTo, get } from "firebase/database";
 import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -16,6 +17,9 @@ import StepLancement from "./builder/StepLancement";
 
 export default function VendorSiteBuilder() {
   const { vendorProfile } = useAuth();
+  const [searchParams] = useSearchParams();
+  const sectorQuery = searchParams.get("sector") || searchParams.get("type");
+
   const [currentStep, setCurrentStep] = useState(1);
   const [isSaving, setIsSaving] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
@@ -25,17 +29,25 @@ export default function VendorSiteBuilder() {
   const [showLivePreview, setShowLivePreview] = useState(true);
 
   // Business Type : 'restaurant' | 'ecommerce' | 'hotel'
-  const [businessType, setBusinessType] = useState<"restaurant" | "ecommerce" | "hotel">("restaurant");
+  const initialType = (sectorQuery as any) || vendorProfile?.business_type || 
+    ((vendorProfile?.category || "").toLowerCase().includes("boutique") ||
+     (vendorProfile?.category || "").toLowerCase().includes("mode") ||
+     (vendorProfile?.category || "").toLowerCase().includes("tech") ||
+     (vendorProfile?.category || "").toLowerCase().includes("e-commerce") ? "ecommerce" : 
+     (vendorProfile?.category || "").toLowerCase().includes("hotel") ||
+     (vendorProfile?.category || "").toLowerCase().includes("hôtel") ? "hotel" : "restaurant");
+
+  const [businessType, setBusinessType] = useState<"restaurant" | "ecommerce" | "hotel">(initialType);
 
   const [formData, setFormData] = useState<Partial<VendorProfile>>({
-    name: "Le Maquis Étoilé",
-    description: "Restaurant, Grillades authentiques et saveurs locales",
-    slug: "le-maquis-etoile",
-    category: "Restaurant & Grillades",
-    business_type: "restaurant",
+    name: initialType === "ecommerce" ? "Ma Boutique Chic" : initialType === "hotel" ? "Résidence La Paix" : "Le Maquis Étoilé",
+    description: initialType === "ecommerce" ? "Mode tendance, sneakers streetwear et accessoires high-tech." : "Restaurant, Grillades authentiques et saveurs locales",
+    slug: initialType === "ecommerce" ? "ma-boutique-chic" : initialType === "hotel" ? "residence-la-paix" : "le-maquis-etoile",
+    category: initialType === "ecommerce" ? "E-Commerce & Boutiques" : initialType === "hotel" ? "Hôtel & Résidences" : "Restaurant & Grillades",
+    business_type: initialType,
     logo_url: "",
     cover_url: "",
-    primary_color: "#EA580C",
+    primary_color: initialType === "ecommerce" ? "#000000" : "#EA580C",
     secondary_color: "#FFFFFF",
     font_choice: "modern",
     sections_config: { hero: true, menu: true, daily: true, footer: true },
@@ -43,10 +55,10 @@ export default function VendorSiteBuilder() {
     phone: "+229 97 00 00 00",
     whatsapp: "+229 97 00 00 00",
     city: "Cotonou",
-    neighborhood: "Haie Vive",
+    neighborhood: initialType === "ecommerce" ? "Ganhi" : "Haie Vive",
     social_links: { instagram: "", facebook: "", tiktok: "" },
     payment_methods: ["MTN MoMo", "Moov Money", "Espèces"],
-    ordering_modes: ["Livraison", "À Emporter", "WhatsApp Direct"],
+    ordering_modes: initialType === "ecommerce" ? ["Livraison Express", "Retrait Point Relais"] : ["Livraison", "À Emporter", "WhatsApp Direct"],
     is_published: true,
   });
 
@@ -88,35 +100,37 @@ export default function VendorSiteBuilder() {
       id: 6, 
       title: "Lancement", 
       icon: "fa-solid fa-rocket", 
-      desc: "Checklist et publication de votre boutique." 
+      desc: "Checklist et publication de votre vitrine." 
     },
   ];
 
   useEffect(() => {
-    if (!vendorProfile || !db) return;
-    
     // Déterminer le business type initial
-    const cat = (vendorProfile.category || "").toLowerCase();
-    let detectedType: "restaurant" | "ecommerce" | "hotel" = "restaurant";
-    if (vendorProfile.business_type) {
+    let detectedType: "restaurant" | "ecommerce" | "hotel" = initialType;
+    if (sectorQuery) {
+      detectedType = sectorQuery as any;
+    } else if (vendorProfile?.business_type) {
       detectedType = vendorProfile.business_type as any;
-    } else if (cat.includes("boutique") || cat.includes("mode") || cat.includes("vente") || cat.includes("tech") || cat.includes("e-commerce")) {
-      detectedType = "ecommerce";
-    } else if (cat.includes("hotel") || cat.includes("hôtel") || cat.includes("auberge")) {
-      detectedType = "hotel";
     }
     setBusinessType(detectedType);
 
-    setFormData(prev => ({
-      ...prev,
-      ...vendorProfile,
-      business_type: detectedType,
-      social_links: vendorProfile.social_links || { instagram: "", facebook: "", tiktok: "" },
-      ordering_modes: vendorProfile.ordering_modes || ["Livraison", "À Emporter", "WhatsApp Direct"],
-      payment_methods: vendorProfile.payment_methods || ["MTN MoMo", "Moov Money", "Espèces"]
-    }));
-    setLocalLogo(vendorProfile.logo_url || null);
-    setLocalCover(vendorProfile.cover_url || null);
+    if (vendorProfile) {
+      setFormData(prev => ({
+        ...prev,
+        ...vendorProfile,
+        business_type: detectedType,
+        social_links: vendorProfile.social_links || { instagram: "", facebook: "", tiktok: "" },
+        ordering_modes: vendorProfile.ordering_modes || (detectedType === "ecommerce" ? ["Livraison Express", "Retrait Point Relais"] : ["Livraison", "À Emporter", "WhatsApp Direct"]),
+        payment_methods: vendorProfile.payment_methods || ["MTN MoMo", "Moov Money", "Espèces"]
+      }));
+      setLocalLogo(vendorProfile.logo_url || null);
+      setLocalCover(vendorProfile.cover_url || null);
+    }
+
+    if (!db || !vendorProfile) {
+      setProducts(getSampleProducts(detectedType, vendorProfile?.id || "demo"));
+      return;
+    }
 
     const unsubscribe = onValue(ref(db, 'products'), snap => {
       const data = snap.val();
@@ -128,7 +142,7 @@ export default function VendorSiteBuilder() {
       }
     });
     return () => unsubscribe();
-  }, [vendorProfile]);
+  }, [vendorProfile, sectorQuery]);
 
   const getSampleProducts = (type: string, vId: string): Product[] => {
     if (type === "ecommerce") {

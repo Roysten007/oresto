@@ -13,8 +13,19 @@ import {
   ExternalLink,
   Plus,
   Tag,
+import {
+  ShoppingBag,
+  Package,
+  Truck,
+  DollarSign,
+  Boxes,
+  AlertTriangle,
+  ExternalLink,
+  Plus,
+  Tag,
   CheckCircle2,
-  TrendingUp
+  TrendingUp,
+  Receipt
 } from "lucide-react";
 import {
   AreaChart,
@@ -27,6 +38,7 @@ import {
 } from "recharts";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import ReceiptModal from "@/components/orders/ReceiptModal";
 
 export default function DashboardEcommerce() {
   const { vendorProfile, user } = useAuth();
@@ -36,6 +48,7 @@ export default function DashboardEcommerce() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [receiptOrder, setReceiptOrder] = useState<Order | null>(null);
 
   const sampleOrders: Order[] = [
     {
@@ -302,7 +315,16 @@ export default function DashboardEcommerce() {
                     {order.total.toLocaleString()} FCFA
                   </span>
 
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <button
+                      onClick={() => setReceiptOrder(order)}
+                      className="px-2.5 py-1 rounded-xl bg-muted hover:bg-black hover:text-white text-muted-foreground text-[10px] font-bold flex items-center gap-1 transition-all"
+                      title="Générer & Télécharger le reçu / facture"
+                    >
+                      <Receipt size={11} />
+                      <span>Reçu</span>
+                    </button>
+
                     {order.status === "preparing" && (
                       <button
                         onClick={() => updateOrderStatus(order.id, "delivering")}
@@ -390,6 +412,15 @@ export default function DashboardEcommerce() {
         </div>
 
       </div>
+
+      {/* Official Receipt Modal for Download & Print */}
+      {receiptOrder && (
+        <ReceiptModal
+          order={receiptOrder}
+          vendorProfile={vendorProfile}
+          onClose={() => setReceiptOrder(null)}
+        />
+      )}
 
     </div>
   );

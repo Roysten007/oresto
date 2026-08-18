@@ -4,9 +4,10 @@ import { ref, onValue, update } from "firebase/database";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Order } from "@/data/mockData";
-import { Clock, Package, CheckCircle2, Truck, MessageCircle, X, MapPin, ChevronRight, CreditCard } from "lucide-react";
+import { Clock, Package, CheckCircle2, Truck, MessageCircle, X, MapPin, ChevronRight, CreditCard, Receipt } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import OrderChat from "@/components/OrderChat";
+import ReceiptModal from "@/components/orders/ReceiptModal";
 
 const STATUS_META: Record<string, { label: string; color: string; bg: string; border: string; icon: any }> = {
   awaiting_payment: { label: "En attente paiement", color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-200", icon: CreditCard },
@@ -23,12 +24,14 @@ function OrderCard({
   nextStatus,
   onAction,
   onOpenChat,
+  onOpenReceipt,
 }: {
   order: Order;
   actionLabel?: string;
   nextStatus?: Order["status"];
   onAction?: () => void;
   onOpenChat: (order: Order) => void;
+  onOpenReceipt: (order: Order) => void;
 }) {
   const [loading, setLoading] = useState(false);
   const meta = STATUS_META[order.status] || STATUS_META.pending;
@@ -91,11 +94,22 @@ function OrderCard({
       {/* Footer */}
       <div className="flex items-center justify-between pt-2 border-t border-border">
         <p className="font-black text-base text-primary">{(order.total || 0).toLocaleString()} F</p>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
+          {/* Receipt Download / Print button */}
+          <button
+            onClick={() => onOpenReceipt(order)}
+            className="px-2.5 py-2 rounded-xl bg-muted hover:bg-black hover:text-white text-muted-foreground font-bold text-[10px] flex items-center gap-1 transition-all"
+            title="Générer & Télécharger le Reçu / Ticket"
+          >
+            <Receipt size={13} />
+            <span className="hidden sm:inline">Reçu</span>
+          </button>
+
           {/* Chat button */}
           <button
             onClick={() => onOpenChat(order)}
             className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center hover:bg-primary hover:text-white transition-all active:scale-90"
+            title="Ouvrir le chat avec le client"
           >
             <MessageCircle size={15} />
           </button>
@@ -104,7 +118,7 @@ function OrderCard({
             <button
               onClick={handleAction}
               disabled={loading}
-              className="px-4 py-2 rounded-xl bg-black text-white text-[10px] font-black uppercase tracking-widest hover:bg-primary transition-colors disabled:opacity-50 flex items-center gap-1.5"
+              className="px-3.5 py-2 rounded-xl bg-black text-white text-[10px] font-black uppercase tracking-widest hover:bg-primary transition-colors disabled:opacity-50 flex items-center gap-1.5"
             >
               {loading ? (
                 <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -120,10 +134,11 @@ function OrderCard({
 }
 
 export default function VendorOrders() {
-  const { user } = useAuth();
+  const { user, vendorProfile } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [chatOrder, setChatOrder] = useState<Order | null>(null);
+  const [receiptOrder, setReceiptOrder] = useState<Order | null>(null);
 
   useEffect(() => {
     if (!db || !user?.vendorId) { setIsLoading(false); return; }
@@ -249,6 +264,7 @@ export default function VendorOrders() {
                     nextStatus={col.nextStatus}
                     onAction={col.nextStatus ? () => updateOrderStatus(order.id, col.nextStatus!) : undefined}
                     onOpenChat={setChatOrder}
+                    onOpenReceipt={setReceiptOrder}
                   />
                 ))
               )}
@@ -256,6 +272,15 @@ export default function VendorOrders() {
           </div>
         ))}
       </div>
+
+      {/* Official Receipt Modal for Download & Print */}
+      {receiptOrder && (
+        <ReceiptModal
+          order={receiptOrder}
+          vendorProfile={vendorProfile}
+          onClose={() => setReceiptOrder(null)}
+        />
+      )}
 
       {/* Chat Drawer — slides in from right */}
       <AnimatePresence>
