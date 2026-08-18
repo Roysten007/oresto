@@ -104,6 +104,22 @@ export interface VendorProfile {
   avg_price_range?: string;
   cuisine_tags?: string[];
   business_type?: "restaurant" | "ecommerce" | "hotel" | "services";
+  about_story?: string;
+  about_concept?: string;
+  about_chef?: string;
+  about_image?: string;
+  gallery_images?: Array<{ id: string; url: string; caption?: string; category?: string }>;
+  faq_items?: Array<{ q: string; a: string }>;
+  reviews_list?: Array<{ id: string; name: string; rating: number; comment: string; date: string }>;
+  points_of_interest?: Array<{ name: string; distance: string; icon?: string }>;
+  hotel_services?: string[];
+  check_in_time?: string;
+  check_out_time?: string;
+  deposit_amount?: string;
+  long_stay_discount?: boolean;
+  long_stay_nights?: string;
+  long_stay_rate?: string;
+  booking_notice?: string;
 }
 
 export interface ProductVariant {

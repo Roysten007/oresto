@@ -394,24 +394,86 @@ export default function StepIdentite({
           </div>
         </div>
 
-        {/* Description / Histoire */}
+        {/* Description / Pitch rapide */}
         <div className="space-y-2">
           <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500">
-            Description & Spécialités
+            Description & Slogan (Visible dans le Hero)
           </label>
           <textarea
-            rows={3}
+            rows={2}
             value={formData.description || ""}
             onChange={e => setFormData({ ...formData, description: e.target.value })}
             className="w-full p-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-xs leading-relaxed outline-none focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none"
             placeholder={
               activeSector === "ecommerce"
-                ? "Présentez vos articles phares, vos collections exclusives et vos délais de livraison express au Bénin..."
+                ? "Présentez vos articles phares, vos collections exclusives et vos délais de livraison express..."
                 : activeSector === "hotel"
-                ? "Présentez vos suites climatisées, les équipements inclus (Wi-Fi, piscine) et les conditions de réservation..."
-                : "Présentez brièvement vos spécialités, vos grillades maison et l'ambiance de votre établissement..."
+                ? "Hôtel de charme et résidence meublée de haut standing avec suites climatisées, piscine et Wi-Fi Fibre..."
+                : "Restaurant gastronomique et grillades au feu de bois. Spécialités africaines et saveurs du terroir..."
             }
           />
+        </div>
+
+        {/* Section À Propos Approfondie (Histoire, Concept, Équipe) */}
+        <div className="p-5 rounded-2xl bg-gray-50 border border-gray-200/80 space-y-4">
+          <div>
+            <h4 className="font-heading font-black text-xs text-gray-900 uppercase tracking-wider flex items-center gap-2">
+              <i className="fa-solid fa-book-open text-primary"></i>
+              <span>Section « À Propos » (Histoire, Concept & Équipe)</span>
+            </h4>
+            <p className="text-[11px] text-gray-500 mt-0.5">
+              Ces informations apparaîtront dans la section dédiée pour raconter l'histoire de votre marque.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                {activeSector === "ecommerce" ? "Histoire & Origine de la Boutique" : activeSector === "hotel" ? "Présentation du Cadre & Standing" : "Histoire du Restaurant & Concept"}
+              </label>
+              <textarea
+                rows={2}
+                value={formData.about_story || ""}
+                onChange={e => setFormData({ ...formData, about_story: e.target.value })}
+                className="w-full p-3 rounded-xl border border-gray-200 bg-white text-xs leading-relaxed outline-none focus:border-primary resize-none"
+                placeholder={
+                  activeSector === "ecommerce"
+                    ? "Fondée avec la volonté d'offrir des articles tendance et authentiques au meilleur prix..."
+                    : activeSector === "hotel"
+                    ? "Niché dans un quartier calme et sécurisé, notre établissement vous accueille pour des séjours inoubliables..."
+                    : "Né de la passion des saveurs authentiques et de la cuisine au feu de bois..."
+                }
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                  {activeSector === "ecommerce" ? "Nos Valeurs & Engagements" : activeSector === "hotel" ? "Ambiance & Atmosphère" : "Le Concept Culinaire"}
+                </label>
+                <input
+                  type="text"
+                  value={formData.about_concept || ""}
+                  onChange={e => setFormData({ ...formData, about_concept: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-xs font-medium outline-none focus:border-primary"
+                  placeholder={activeSector === "ecommerce" ? "100% Qualité & Service après-vente" : activeSector === "hotel" ? "Calme, discrétion et standing" : "Produits frais et recettes traditionnelles"}
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                  {activeSector === "ecommerce" ? "L'Équipe & Service Client" : activeSector === "hotel" ? "L'Accueil & Conciergerie" : "Le Chef & La Brigade"}
+                </label>
+                <input
+                  type="text"
+                  value={formData.about_chef || ""}
+                  onChange={e => setFormData({ ...formData, about_chef: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-xs font-medium outline-none focus:border-primary"
+                  placeholder={activeSector === "ecommerce" ? "Des passionnés de mode à votre écoute" : activeSector === "hotel" ? "Réceptionnistes dévoués 24h/24" : "Un chef passionné avec 10 ans de métier"}
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
       </div>
