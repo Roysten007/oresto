@@ -20,6 +20,25 @@
       }
     },
 
+    "prestataires": {
+      ".read": true,
+      "$uid": {
+        ".write": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).exists() || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+      }
+    },
+
+    "referrals": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+
+    "commissions": {
+      ".read": true,
+      "$commissionId": {
+        ".write": "auth != null"
+      }
+    },
+
     "vendors": {
       ".read": true,
       "$vendorId": {

@@ -469,9 +469,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       let createdVendorProfile: VendorProfile | null = null;
 
       // 4. On crée le profil vendeur
-      if (vendorId) {
-        const { trialStartedAt, trialEndsAt } = calculateTrialDates();
-        const selectedPlan = data.subscriptionPlan === "pro" ? "pro" : "starter";
+        // Recherche du code de parrainage apporteur d'affaires (prestataire)
+        let refCode = data.referral_code || "";
+        if (!refCode && typeof window !== "undefined") {
+          try {
+            refCode = localStorage.getItem("oresto_referral_code") || "";
+          } catch {}
+        }
+
+        let matchedPrestataireId: string | null = null;
+        if (refCode && db) {
+          try {
+            const refSnap = await get(ref(db, `referrals/${refCode.toUpperCase()}`));
+            if (refSnap.exists()) {
+              matchedPrestataireId = refSnap.val().prestataire_id || null;
+            }
+          } catch (refErr) {
+            console.warn("Erreur recherche referral code:", refErr);
+          }
+        }
 
         createdVendorProfile = {
           id: vendorId,
@@ -500,9 +516,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           paymentHistory: [],
           verified: false,
           open: false,
-          deliveryTime: "30-45 min"
+          deliveryTime: "30-45 min",
+          prestataire_id: matchedPrestataireId,
+          referral_code: matchedPrestataireId ? refCode.toUpperCase() : null
         };
         dbUpdates[`vendors/${vendorId}`] = createdVendorProfile;
+
+        // Si apporté par un prestataire : création de la commission 20%
+        if (matchedPrestataireId) {
+          const commId = `comm_${Date.now()}`;
+          const currentMonth = new Date().toISOString().slice(0, 7);
+          const montantAbonnement = selectedPlan === "starter" ? 15000 : 25000;
+          const montantCommission = Math.round(montantAbonnement * 0.20); // 20% récurrents
+
+          dbUpdates[`commissions/${commId}`] = {
+            id: commId,
+            prestataire_id: matchedPrestataireId,
+            client_id: vendorId,
+            client_name: createdVendorProfile.name,
+            client_category: createdVendorProfile.category,
+            client_city: createdVendorProfile.city,
+            mois: currentMonth,
+            montant_abonnement: montantAbonnement,
+            montant_commission: montantCommission,
+            statut: "en_attente",
+            date_paiement: null,
+            created_at: new Date().toISOString()
+          };
+
+          try {
+            localStorage.removeItem("oresto_referral_code");
+          } catch {}
+        }
       }
 
       await update(ref(db), dbUpdates);
