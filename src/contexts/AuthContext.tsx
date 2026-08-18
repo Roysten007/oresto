@@ -469,6 +469,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       let createdVendorProfile: VendorProfile | null = null;
 
       // 4. On crée le profil vendeur
+      if (vendorId) {
+        const { trialStartedAt, trialEndsAt } = calculateTrialDates();
+        const selectedPlan = data.subscriptionPlan === "pro" ? "pro" : "starter";
+
         // Recherche du code de parrainage apporteur d'affaires (prestataire)
         let refCode = data.referral_code || "";
         if (!refCode && typeof window !== "undefined") {
