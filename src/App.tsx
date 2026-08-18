@@ -52,13 +52,14 @@ const App = () => (
         <AdminProvider>
           <BrowserRouter>
             <Routes>
-              {/* Pages de Vente & Secteurs Dédiés */}
+              {/* Page de Vente Unique & Inscription Segmentée */}
               <Route path="/" element={<ProLanding />} />
               <Route path="/pro" element={<Navigate to="/" replace />} />
-              <Route path="/restaurant" element={<LandingRestaurant />} />
-              <Route path="/resto" element={<LandingRestaurant />} />
-              <Route path="/boutique" element={<LandingEcommerce />} />
-              <Route path="/ecommerce" element={<LandingEcommerce />} />
+              <Route path="/restaurant" element={<Navigate to="/register?sector=restaurant" replace />} />
+              <Route path="/resto" element={<Navigate to="/register?sector=restaurant" replace />} />
+              <Route path="/boutique" element={<Navigate to="/register?sector=ecommerce" replace />} />
+              <Route path="/ecommerce" element={<Navigate to="/register?sector=ecommerce" replace />} />
+              <Route path="/hotel" element={<Navigate to="/register?sector=hotel" replace />} />
               <Route path="/decouvrir" element={<Navigate to="/" replace />} />
               
               <Route path="/login" element={<Login />} />
