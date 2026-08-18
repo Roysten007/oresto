@@ -67,7 +67,7 @@ export default function AIChatBot() {
       userName: user?.name || "Chef Restaurateur",
       role: user?.role || "vendor",
       vendorId: vId,
-      vendorName: vendorProfile?.name || "Le Maquis Étoilé",
+      vendorName: vendorProfile?.name || "L'Atelier du Chef & Grill",
       totalRevenue: vendorProfile?.revenue || vendorProfile?.totalSales || 1250000,
       totalOrders: vendorProfile?.totalOrders || 184,
       todayRevenue: 87500,

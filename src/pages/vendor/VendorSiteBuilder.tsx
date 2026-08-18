@@ -249,70 +249,94 @@ export default function VendorSiteBuilder() {
   };
 
   const saveProduct = async (product: Partial<Product>) => {
-    if (!vendorProfile || !db) return;
-    const data = { 
-      ...product, 
-      vendorId: vendorProfile.id, 
+    const vId = vendorProfile?.id || (user as any)?.vendorId || "v_demo";
+    if (!db) return;
+    
+    const data: any = { 
+      name: product.name || "Article", 
+      vendorId: vId, 
       available: true, 
-      price: Number(product.price),
-      originalPrice: product.originalPrice ? Number(product.originalPrice) : undefined,
-      stock: product.stock !== undefined ? Number(product.stock) : 10
+      price: Number(product.price || 0),
+      category: product.category || (isEcommerce ? "Mode & Vêtements" : "Plats"),
+      description: product.description || "",
+      image: product.image || (product.images?.[0] || ""),
+      stock: product.stock !== undefined ? Number(product.stock) : 10,
+      inStock: product.stock !== undefined ? Number(product.stock) > 0 : true
     };
-    if (product.id) {
-      await update(ref(db, `products/${product.id}`), data);
-      toast.success("Produit mis à jour");
-    } else {
-      const newRef = push(ref(db, 'products'));
-      await set(newRef, { ...data, id: newRef.key });
-      toast.success("Produit ajouté à la boutique");
+
+    if (product.originalPrice) data.originalPrice = Number(product.originalPrice);
+    if (product.badge) data.badge = product.badge;
+    if (product.images && product.images.length > 0) data.images = product.images;
+    if (product.variants && product.variants.length > 0) data.variants = product.variants;
+    if (product.features && product.features.length > 0) data.features = product.features;
+
+    try {
+      if (product.id) {
+        await update(ref(db, `products/${product.id}`), data);
+        toast.success("Fiche article mise à jour");
+      } else {
+        const newRef = push(ref(db, 'products'));
+        await set(newRef, { ...data, id: newRef.key });
+        toast.success("Article ajouté à votre vitrine");
+      }
+    } catch (err: any) {
+      console.error("Erreur saveProduct:", err);
+      toast.error(`Erreur d'enregistrement: ${err?.message || 'Vérifiez la connexion'}`);
     }
   };
 
   const deleteProduct = async (id: string) => {
     if (!db) return;
-    await set(ref(db, `products/${id}`), null);
-    toast.success("Article supprimé");
+    try {
+      await set(ref(db, `products/${id}`), null);
+      toast.success("Article supprimé");
+    } catch (err: any) {
+      toast.error("Erreur lors de la suppression");
+    }
   };
 
   const saveChanges = async (publish = false) => {
-    if (!vendorProfile || !db) return;
+    const vId = vendorProfile?.id || (user as any)?.vendorId || "v_demo";
+    if (!db) return;
     setIsSaving(true);
     try {
       const updates: any = {
-        name: formData.name || (isEcommerce ? "Boutique Prestige" : "Le Maquis Étoilé"),
+        name: formData.name || (isEcommerce ? "KiffStyle & Tech Store" : isHotel ? "Palmier Royal" : "L'Atelier du Chef & Grill"),
         description: formData.description || "",
-        slug: formData.slug || (isEcommerce ? "ma-boutique-chic" : "le-maquis-etoile"),
-        category: formData.category || (isEcommerce ? "E-Commerce & Boutiques" : "Restaurant & Grillades"),
+        slug: formData.slug || (isEcommerce ? "kiffstyle-store" : isHotel ? "palmier-royal" : "latelier-du-chef"),
+        category: formData.category || (isEcommerce ? "E-Commerce & Boutiques" : isHotel ? "Hôtels & Hébergements" : "Restaurant & Grillades"),
         business_type: businessType,
         logo_url: formData.logo_url || localLogo || "",
         cover_url: formData.cover_url || localCover || "",
-        primary_color: formData.primary_color || "#EA580C",
+        primary_color: formData.primary_color || (isEcommerce ? "#000000" : "#EA580C"),
         secondary_color: formData.secondary_color || "#FFFFFF",
         font_choice: formData.font_choice || "modern",
         phone: formData.phone || "",
         whatsapp: formData.whatsapp || "",
         city: formData.city || "",
         neighborhood: formData.neighborhood || "",
-        payment_methods: formData.payment_methods || [],
-        ordering_modes: formData.ordering_modes || [],
+        payment_methods: formData.payment_methods || ["MTN MoMo", "Moov Money", "Espèces"],
+        ordering_modes: formData.ordering_modes || ["Livraison"],
       };
       if (publish) updates.is_published = true;
-      await update(ref(db, `vendors/${vendorProfile.id}`), updates);
+      
+      await update(ref(db, `vendors/${vId}`), updates);
       
       if (formData.slug) {
-        await update(ref(db, `slugs/${formData.slug.toLowerCase()}`), { 
-          vendorId: vendorProfile.id 
+        await set(ref(db, `slugs/${formData.slug.toLowerCase()}`), { 
+          vendorId: vId 
         });
       }
 
       if (publish) {
         setFormData(prev => ({ ...prev, is_published: true }));
-        toast.success("🎉 Votre boutique en ligne est publiée avec succès !");
+        toast.success("🎉 Votre vitrine en ligne est publiée avec succès !");
       } else {
-        toast.success("Modifications enregistrées");
+        toast.success("Modifications enregistrées avec succès");
       }
-    } catch { 
-      toast.error("Erreur d'enregistrement"); 
+    } catch (err: any) { 
+      console.error("Erreur saveChanges:", err);
+      toast.error(`Erreur d'enregistrement: ${err?.message || 'Vérifiez la connexion'}`); 
     } finally { 
       setIsSaving(false); 
     }

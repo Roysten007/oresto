@@ -97,26 +97,31 @@ export default function VendorCatalogue() {
     if (!form.name.trim() || !form.price) { toast.error("Nom et prix obligatoires"); return; }
     const price = Number(form.price);
     if (isNaN(price) || price < 0) { toast.error("Prix invalide"); return; }
+    const vId = user?.vendorId || vendorProfile?.id || "v_demo";
+    if (!db) return;
     setSaving(true);
     try {
-      const data = {
+      const data: any = {
         name: form.name.trim(),
         price,
-        category: form.category.trim() || "Plats",
-        description: form.description.trim(),
-        image: form.image.trim(),
+        category: form.category.trim() || "Catalogue",
+        description: form.description.trim() || "",
+        image: form.image.trim() || "",
+        vendorId: vId,
+        available: true
       };
       if (editingId) {
         await update(ref(db, `products/${editingId}`), data);
-        toast.success("Plat mis à jour");
+        toast.success("Article mis à jour");
       } else {
         const newRef = push(ref(db, "products"));
-        await set(newRef, { ...data, vendorId: user?.vendorId || vendorProfile?.id, available: true });
-        toast.success("Plat ajouté");
+        await set(newRef, { ...data, id: newRef.key });
+        toast.success("Article ajouté au catalogue");
       }
       setShowModal(false);
-    } catch {
-      toast.error("Erreur lors de l'enregistrement");
+    } catch (err: any) {
+      console.error("Erreur handleSave:", err);
+      toast.error(`Erreur lors de l'enregistrement: ${err?.message || ''}`);
     } finally {
       setSaving(false);
     }

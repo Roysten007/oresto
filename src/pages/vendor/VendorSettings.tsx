@@ -78,13 +78,18 @@ export default function VendorSettings() {
   }, [vendorProfile]);
 
   const saveSection = async (section: string, data: any) => {
-    if (!vendorProfile?.id) return;
+    const vId = vendorProfile?.id || (user as any)?.vendorId || "v_demo";
+    if (!db) return;
     setIsSaving(true);
     try {
-      await update(ref(db, `vendors/${vendorProfile.id}`), data);
+      const cleanData = Object.fromEntries(
+        Object.entries(data).filter(([_, v]) => v !== undefined)
+      );
+      await update(ref(db, `vendors/${vId}`), cleanData);
       toast.success(`Section ${section} enregistrée !`);
-    } catch (err) {
-      toast.error("Erreur lors de l'enregistrement");
+    } catch (err: any) {
+      console.error("Erreur saveSection:", err);
+      toast.error(`Erreur lors de l'enregistrement: ${err?.message || ''}`);
     } finally {
       setIsSaving(false);
     }

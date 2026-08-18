@@ -81,7 +81,7 @@ export default function StepIdentite({
             value={formData.name || ""}
             onChange={e => setFormData({ ...formData, name: e.target.value })}
             className="w-full px-5 py-3.5 rounded-2xl border border-gray-200 bg-gray-50/50 text-gray-900 font-heading font-bold text-lg focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-            placeholder="Ex: Le Maquis Étoilé"
+            placeholder={formData.business_type === "ecommerce" ? "Ex: KiffStyle & Tech Store" : formData.business_type === "hotel" ? "Ex: Palmier Royal Résidence" : "Ex: L'Atelier du Chef & Grill"}
           />
         </div>
 
@@ -97,7 +97,7 @@ export default function StepIdentite({
               value={formData.slug || ""}
               onChange={e => handleSlugChange(e.target.value)}
               className="flex-1 bg-transparent font-bold text-sm text-gray-900 outline-none"
-              placeholder="le-maquis-etoile"
+              placeholder={formData.business_type === "ecommerce" ? "kiffstyle-store" : formData.business_type === "hotel" ? "palmier-royal" : "latelier-du-chef"}
             />
             {checkingSlug && <i className="fa-solid fa-spinner fa-spin text-primary text-sm"></i>}
           </div>

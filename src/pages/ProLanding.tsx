@@ -310,11 +310,11 @@ export default function ProLanding() {
                     {/* Store Header Banner */}
                     <div className="h-20 bg-primary/90 text-white p-3 flex items-center gap-2.5">
                       <div className="w-10 h-10 rounded-xl bg-white text-primary flex items-center justify-center font-heading font-black text-sm shadow-md">
-                        {activePreviewType === "restaurant" ? "M" : "B"}
+                        {activePreviewType === "restaurant" ? "A" : "K"}
                       </div>
                       <div>
                         <h5 className="font-heading font-black text-xs leading-tight">
-                          {activePreviewType === "restaurant" ? "Le Maquis Étoilé" : "Boutique Prestige"}
+                          {activePreviewType === "restaurant" ? "L'Atelier du Chef & Grill" : "KiffStyle & Tech Store"}
                         </h5>
                         <p className="text-[9px] text-white/80">Cotonou • 0% Commission</p>
                       </div>

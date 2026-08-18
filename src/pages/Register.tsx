@@ -355,7 +355,7 @@ export default function Register() {
                     <input 
                       value={vendorForm.shopName} onChange={e => setVendorForm(p => ({ ...p, shopName: e.target.value }))} required
                       className="w-full px-4 py-3.5 rounded-2xl border border-gray-200 bg-white text-gray-900 focus:border-primary outline-none text-xs font-bold"
-                      placeholder={businessType === "ecommerce" ? "Ex: Boutique Prestige & Tech" : businessType === "hotel" ? "Ex: Résidence La Paix" : "Ex: Le Maquis Étoilé"}
+                      placeholder={businessType === "ecommerce" ? "Ex: KiffStyle & Tech Store" : businessType === "hotel" ? "Ex: Palmier Royal Résidence" : "Ex: L'Atelier du Chef & Grill"}
                     />
                   </div>
 

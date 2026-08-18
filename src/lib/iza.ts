@@ -9,7 +9,7 @@ function getLocalIZIResponse(message: string, contextStr?: string): IZAResponse 
   const msg = message.toLowerCase().trim();
   
   let ctx: any = {
-    vendorName: "Le Maquis Étoilé",
+    vendorName: "L'Atelier du Chef & Grill",
     totalRevenue: 1250000,
     totalOrders: 184,
     todayRevenue: 87500,

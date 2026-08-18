@@ -98,7 +98,11 @@ export default function VendorLayout() {
             <div className="mb-4 p-3 rounded-2xl bg-muted/60 border border-border shadow-sm space-y-1">
               <div className="flex items-center justify-between">
                 <p className="font-heading text-xs font-bold text-foreground truncate max-w-[140px]">
-                  {vendorProfile.name || (businessType === "ecommerce" ? "KiffStyle & Tech Store" : businessType === "hotel" ? "Palmier Royal" : "L'Atelier du Chef & Grill")}
+                  {sectorQuery 
+                    ? (businessType === "ecommerce" ? "KiffStyle & Tech Store" : businessType === "hotel" ? "Palmier Royal" : "L'Atelier du Chef & Grill")
+                    : (vendorProfile.name && !vendorProfile.name.toLowerCase().includes("maquis")
+                        ? vendorProfile.name 
+                        : (businessType === "ecommerce" ? "KiffStyle & Tech Store" : businessType === "hotel" ? "Palmier Royal" : "L'Atelier du Chef & Grill"))}
                 </p>
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               </div>

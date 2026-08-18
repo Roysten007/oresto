@@ -114,7 +114,7 @@ export default function LandingRestaurant() {
                 <div>
                   <h3 className="font-heading font-black text-lg text-white flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                    Le Maquis Étoilé • Command Center Restaurant
+                    L'Atelier du Chef & Grill • Command Center Restaurant
                   </h3>
                   <p className="text-xs text-gray-400">Service du midi • 19 commandes servies aujourd'hui</p>
                 </div>
