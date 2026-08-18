@@ -1,18 +1,23 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 export default function Register() {
   const { register } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const sectorParam = searchParams.get("sector") || searchParams.get("type");
 
   const [step, setStep] = useState(1);
-  const [businessType, setBusinessType] = useState<"restaurant" | "ecommerce">("restaurant");
+  const [businessType, setBusinessType] = useState<"restaurant" | "ecommerce">(() => {
+    if (sectorParam === "ecommerce" || sectorParam === "boutique") return "ecommerce";
+    return "restaurant";
+  });
   const [form, setForm] = useState({ firstName: "", name: "", phone: "", email: "", password: "", confirmPassword: "" });
   const [vendorForm, setVendorForm] = useState({ 
     shopName: "", 
-    category: "Restaurants", 
+    category: (sectorParam === "ecommerce" || sectorParam === "boutique") ? "E-Commerce & Boutiques" : "Restaurants", 
     city: "", 
     neighborhood: "", 
     shopPhone: "", 

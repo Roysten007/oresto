@@ -115,9 +115,29 @@ export default function ProLanding() {
                 <i className="fa-solid fa-arrow-right"></i>
               </Link>
             </div>
+            
             <p className="text-[11px] text-gray-400 font-medium mt-2.5">
               Prêt en 12 minutes • 0% de commission • MTN MoMo, Moov Money & Celtiis direct
             </p>
+
+            {/* Direct Links to Dedicated Sector Pages */}
+            <div className="pt-4 flex flex-wrap items-center justify-center gap-3">
+              <span className="text-xs text-gray-400 font-bold">Découvrir par secteur :</span>
+              <Link
+                to="/restaurant"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white hover:bg-orange-50 hover:border-primary text-xs font-heading font-bold text-gray-800 transition-all border border-gray-200 shadow-sm"
+              >
+                <i className="fa-solid fa-utensils text-primary"></i>
+                <span>🍽️ Espace Restaurant & Maquis</span>
+              </Link>
+              <Link
+                to="/boutique"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white hover:bg-orange-50 hover:border-primary text-xs font-heading font-bold text-gray-800 transition-all border border-gray-200 shadow-sm"
+              >
+                <i className="fa-solid fa-bag-shopping text-primary"></i>
+                <span>🛍️ Espace Boutique E-Commerce</span>
+              </Link>
+            </div>
           </FadeIn>
         </div>
 

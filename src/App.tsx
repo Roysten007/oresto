@@ -9,6 +9,8 @@ import PrivateRoute from "@/components/PrivateRoute";
 import AdminRoute from "@/components/AdminRoute";
 
 import ProLanding from "./pages/ProLanding";
+import LandingRestaurant from "./pages/LandingRestaurant";
+import LandingEcommerce from "./pages/LandingEcommerce";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -50,8 +52,13 @@ const App = () => (
         <AdminProvider>
           <BrowserRouter>
             <Routes>
+              {/* Pages de Vente & Secteurs Dédiés */}
               <Route path="/" element={<ProLanding />} />
               <Route path="/pro" element={<Navigate to="/" replace />} />
+              <Route path="/restaurant" element={<LandingRestaurant />} />
+              <Route path="/resto" element={<LandingRestaurant />} />
+              <Route path="/boutique" element={<LandingEcommerce />} />
+              <Route path="/ecommerce" element={<LandingEcommerce />} />
               <Route path="/decouvrir" element={<Navigate to="/" replace />} />
               
               <Route path="/login" element={<Login />} />

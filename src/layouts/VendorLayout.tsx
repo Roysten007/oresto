@@ -35,41 +35,18 @@ export default function VendorLayout() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [showUnblockModal, setShowUnblockModal] = useState(false);
-
-  // Business workspace switch: 'restaurant' | 'ecommerce'
-  const [businessType, setBusinessType] = useState<"restaurant" | "ecommerce">(() => {
-    if (vendorProfile?.business_type === "ecommerce" || vendorProfile?.business_type === "restaurant") {
-      return vendorProfile.business_type;
-    }
-    const saved = localStorage.getItem("oresto_active_workspace");
-    if (saved === "ecommerce" || saved === "restaurant") return saved;
-    const cat = (vendorProfile?.category || "").toLowerCase();
-    if (cat.includes("boutique") || cat.includes("mode") || cat.includes("vente") || cat.includes("tech") || cat.includes("e-commerce")) return "ecommerce";
-    return "restaurant";
-  });
-
-  useEffect(() => {
-    if (vendorProfile?.business_type && (vendorProfile.business_type === "restaurant" || vendorProfile.business_type === "ecommerce")) {
-      setBusinessType(vendorProfile.business_type);
-      localStorage.setItem("oresto_active_workspace", vendorProfile.business_type);
-    }
-  }, [vendorProfile?.business_type]);
-
-  const handleSwitchWorkspace = async (newType: "restaurant" | "ecommerce") => {
-    setBusinessType(newType);
-    localStorage.setItem("oresto_active_workspace", newType);
-    if (db && vendorProfile?.id) {
-      try {
-        await update(ref(db, `vendors/${vendorProfile.id}`), { business_type: newType });
-      } catch {}
-    }
-    toast.success(`Bascule vers l'${newType === "restaurant" ? "Espace Restaurant Pro 🍽️" : "Espace Boutique E-Commerce Pro 🛍️"}`);
-  };
-
   const isBlocked = vendorProfile?.subscriptionStatus === "blocked" || vendorProfile?.subscriptionStatus === "restricted";
   const isFirstPayment = !vendorProfile?.paymentHistory || vendorProfile.paymentHistory.length === 0;
   const payAmount = isFirstPayment ? FIRST_MONTH_PRICE : STANDARD_PLAN_PRICE;
+
+  // Secteur d'activité fixé par le compte du vendeur (aucune bascule dans l'admin)
+  const businessType = vendorProfile?.business_type === "ecommerce" ||
+    (vendorProfile?.category || "").toLowerCase().includes("boutique") ||
+    (vendorProfile?.category || "").toLowerCase().includes("mode") ||
+    (vendorProfile?.category || "").toLowerCase().includes("tech") ||
+    (vendorProfile?.category || "").toLowerCase().includes("e-commerce")
+      ? "ecommerce"
+      : "restaurant";
 
   const handlePayNow = async () => {
     if (!db || !vendorProfile?.id) return;
@@ -111,50 +88,18 @@ export default function VendorLayout() {
             </button>
           </div>
 
-          {/* Workspace Switcher */}
-          <div className="mb-4 p-1.5 bg-muted rounded-2xl border border-border">
-            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground px-2 py-1">Type d'espace :</p>
-            <div className="grid grid-cols-2 gap-1">
-              <button
-                type="button"
-                onClick={() => handleSwitchWorkspace("restaurant")}
-                className={`py-2 px-1.5 rounded-xl text-[10px] font-heading font-black transition-all flex items-center justify-center gap-1.5 ${
-                  businessType === "restaurant" 
-                    ? "bg-black text-white shadow-sm" 
-                    : "text-muted-foreground hover:text-foreground hover:bg-card"
-                }`}
-              >
-                <i className="fa-solid fa-utensils text-[9px]"></i>
-                <span>Restaurant</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleSwitchWorkspace("ecommerce")}
-                className={`py-2 px-1.5 rounded-xl text-[10px] font-heading font-black transition-all flex items-center justify-center gap-1.5 ${
-                  businessType === "ecommerce" 
-                    ? "bg-primary text-white shadow-sm" 
-                    : "text-muted-foreground hover:text-foreground hover:bg-card"
-                }`}
-              >
-                <i className="fa-solid fa-bag-shopping text-[9px]"></i>
-                <span>Boutique</span>
-              </button>
-            </div>
-          </div>
-
           {/* Profile Card */}
           {vendorProfile && (
-            <div className="mb-4 p-3 rounded-2xl bg-card border border-border shadow-sm space-y-1">
+            <div className="mb-4 p-3 rounded-2xl bg-muted/60 border border-border shadow-sm space-y-1">
               <div className="flex items-center justify-between">
-                <p className="font-heading text-xs font-bold text-foreground truncate max-w-[130px]">
+                <p className="font-heading text-xs font-bold text-foreground truncate max-w-[140px]">
                   {vendorProfile.name || (businessType === "ecommerce" ? "Ma Boutique Chic" : "Le Maquis Étoilé")}
                 </p>
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[8px] font-black uppercase tracking-wider">
-                  {businessType === "ecommerce" ? "BOUTIQUE PRO" : "RESTO PRO"}
+                <span className="px-2 py-0.5 rounded-md bg-primary text-white text-[8px] font-black uppercase tracking-wider">
+                  {businessType === "ecommerce" ? "ESPACE BOUTIQUE" : "ESPACE RESTAURANT"}
                 </span>
                 <span className="text-[9px] text-muted-foreground font-bold">0% Comm</span>
               </div>

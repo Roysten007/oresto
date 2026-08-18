@@ -329,44 +329,20 @@ export default function VendorSiteBuilder() {
   return (
     <div className="space-y-6 font-body pb-16">
       
-      {/* Top Header Bar with Business Type Switcher */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-card p-6 rounded-3xl border border-border shadow-sm">
+      {/* Top Header Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card p-6 rounded-3xl border border-border shadow-sm">
         <div className="flex items-center gap-3.5">
           <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center text-white text-xl shadow-lg shadow-primary/25">
             <i className={`fa-solid ${isEcommerce ? "fa-bag-shopping" : isHotel ? "fa-hotel" : "fa-wand-magic-sparkles"}`}></i>
           </div>
           <div>
             <h1 className="font-heading font-black text-2xl uppercase tracking-tight text-foreground">
-              Site <span className="text-primary">Factory</span>
+              {isEcommerce ? "Boutique" : isHotel ? "Hôtel" : "Site"} <span className="text-primary">Factory</span>
             </h1>
             <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider">
-              {isEcommerce ? "Générateur de Boutique E-Commerce (Style Amazon / Alibaba)" : "Création et personnalisation de votre vitrine web"}
+              {isEcommerce ? "Générateur de Boutique E-Commerce (Fiches multi-photos & Stocks)" : isHotel ? "Gestionnaire de Chambres & Nuitées" : "Création et personnalisation de votre vitrine restaurant"}
             </p>
           </div>
-        </div>
-
-        {/* Business Type Selector Mode */}
-        <div className="flex items-center gap-1.5 p-1 bg-muted rounded-2xl border border-border">
-          {[
-            { id: "restaurant", label: "Restaurant & Maquis", icon: "fa-solid fa-utensils" },
-            { id: "ecommerce", label: "E-Commerce & Boutique", icon: "fa-solid fa-bag-shopping" },
-            { id: "hotel", label: "Hôtel & Résidence", icon: "fa-solid fa-hotel" },
-          ].map(m => {
-            const active = businessType === m.id;
-            return (
-              <button
-                key={m.id}
-                type="button"
-                onClick={() => handleBusinessTypeChange(m.id as any)}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-heading font-bold transition-all ${
-                  active ? "bg-black text-white shadow-sm" : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <i className={m.icon}></i>
-                <span className="hidden sm:inline">{m.label}</span>
-              </button>
-            );
-          })}
         </div>
 
         {/* Action buttons */}
