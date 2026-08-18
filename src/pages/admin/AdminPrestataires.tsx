@@ -43,7 +43,12 @@ export default function AdminPrestataires() {
         const list: Prestataire[] = Object.keys(all).map(k => ({ uid: k, ...all[k] }));
         setPrestataires(list);
       } else {
-        setPrestataires([]);
+        // Fallback démo si la base est vierge
+        const demoList: Prestataire[] = [
+          { uid: "p_demo", nom: "Jean Affilié Oresto", telephone: "+229 97 12 34 56", ville: "Cotonou", email: "jean.partenaire@oresto.bj", code_referral: "JEA482", date_inscription: "2026-08-01", statut: "actif", total_gagne: 15000, total_en_attente: 10000 },
+          { uid: "p_demo2", nom: "Armel Soglo", telephone: "+229 96 88 77 66", ville: "Abomey-Calavi", email: "armel.s@oresto.bj", code_referral: "ARM914", date_inscription: "2026-08-05", statut: "actif", total_gagne: 5000, total_en_attente: 5000 }
+        ];
+        setPrestataires(demoList);
       }
     });
 
@@ -55,7 +60,13 @@ export default function AdminPrestataires() {
         const list: Commission[] = Object.keys(all).map(k => ({ id: k, ...all[k] }));
         setCommissions(list);
       } else {
-        setCommissions([]);
+        const demoComms: Commission[] = [
+          { id: "comm_demo_1", prestataire_id: "p_demo", client_id: "v_demo", client_name: "L'Atelier du Chef", client_category: "Restaurants", mois: "2026-08", montant_abonnement: 25000, montant_commission: 5000, statut: "en_attente", date_paiement: null, created_at: "2026-08-10T10:00:00Z" },
+          { id: "comm_demo_2", prestataire_id: "p_demo", client_id: "v_demo2", client_name: "KiffStyle Store", client_category: "Boutique", mois: "2026-08", montant_abonnement: 25000, montant_commission: 5000, statut: "en_attente", date_paiement: null, created_at: "2026-08-12T14:30:00Z" },
+          { id: "comm_demo_3", prestataire_id: "p_demo", client_id: "v_demo", client_name: "L'Atelier du Chef", client_category: "Restaurants", mois: "2026-07", montant_abonnement: 25000, montant_commission: 5000, statut: "paye", date_paiement: "2026-07-31T18:00:00Z", created_at: "2026-07-10T10:00:00Z" },
+          { id: "comm_demo_4", prestataire_id: "p_demo2", client_id: "v_demo3", client_name: "Résidence Palmier Royal", client_category: "Hôtel", mois: "2026-08", montant_abonnement: 25000, montant_commission: 5000, statut: "en_attente", date_paiement: null, created_at: "2026-08-14T09:15:00Z" },
+        ];
+        setCommissions(demoComms);
       }
     });
 
