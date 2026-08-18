@@ -185,12 +185,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
           setLastActivity(Date.now());
         }, (err) => {
-          console.error("Auth DB Error:", err);
-          setState({ user: DEMO_USER, role: "vendor", vendorProfile: DEMO_VENDOR, isAuthenticated: true, isLoading: false });
-        });
       } else {
-        // Mode ouvert sans blocage pour travailler directement
-        setState({ user: DEMO_USER, role: "vendor", vendorProfile: DEMO_VENDOR, isAuthenticated: true, isLoading: false });
+        // Mode ouvert avec persistance locale et synchronisation Firebase v_demo
+        let localVendor = DEMO_VENDOR;
+        try {
+          const saved = localStorage.getItem("oresto_vendor_profile");
+          if (saved) {
+            localVendor = { ...DEMO_VENDOR, ...JSON.parse(saved) };
+          }
+        } catch {}
+
+        setState({ user: DEMO_USER, role: "vendor", vendorProfile: localVendor, isAuthenticated: true, isLoading: false });
+
+        if (db) {
+          if (unsubVendor) unsubVendor();
+          unsubVendor = onValue(ref(db, "vendors/v_demo"), (snap) => {
+            if (snap.exists()) {
+              const liveVendor = { ...DEMO_VENDOR, ...snap.val() } as VendorProfile;
+              setState(prev => ({ ...prev, vendorProfile: liveVendor }));
+              try { localStorage.setItem("oresto_vendor_profile", JSON.stringify(liveVendor)); } catch {}
+            }
+          });
+        }
       }
     });
 

@@ -328,6 +328,11 @@ export default function VendorSiteBuilder() {
         });
       }
 
+      try {
+        const fullProfile = { ...(vendorProfile || {}), ...updates };
+        localStorage.setItem("oresto_vendor_profile", JSON.stringify(fullProfile));
+      } catch {}
+
       if (publish) {
         setFormData(prev => ({ ...prev, is_published: true }));
         toast.success("🎉 Votre vitrine en ligne est publiée avec succès !");
@@ -345,7 +350,19 @@ export default function VendorSiteBuilder() {
   const renderStep = () => {
     switch (currentStep) {
       case 1: 
-        return <StepIdentite formData={formData} setFormData={setFormData} localLogo={localLogo} localCover={localCover} checkingSlug={checkingSlug} handleSlugChange={handleSlugChange} handleFileUpload={handleFileUpload} />;
+        return (
+          <StepIdentite 
+            formData={formData} 
+            setFormData={setFormData} 
+            localLogo={localLogo} 
+            localCover={localCover} 
+            checkingSlug={checkingSlug} 
+            handleSlugChange={handleSlugChange} 
+            handleFileUpload={handleFileUpload}
+            businessType={businessType}
+            onBusinessTypeChange={handleBusinessTypeChange}
+          />
+        );
       case 2: 
         return isEcommerce 
           ? <StepEcommerceCatalogue products={products} vendorId={vendorProfile?.id || "v_demo"} onSave={saveProduct} onDelete={deleteProduct} />
