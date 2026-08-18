@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import StepEcommerceCatalogue from "./builder/StepEcommerceCatalogue";
+import StepHotelChambres from "./builder/StepHotelChambres";
 
 export default function VendorCatalogue() {
   const { user, vendorProfile } = useAuth();
@@ -29,6 +30,12 @@ export default function VendorCatalogue() {
   const [form, setForm] = useState(emptyForm);
 
   const isEcommerce = vendorProfile?.business_type === "ecommerce" || (typeof window !== 'undefined' && localStorage.getItem("oresto_active_workspace") === "ecommerce");
+  const isHotel = vendorProfile?.business_type === "hotel" || 
+    Boolean(vendorProfile?.category && (
+      vendorProfile.category.toLowerCase().includes("hôtel") || 
+      vendorProfile.category.toLowerCase().includes("hotel") || 
+      vendorProfile.category.toLowerCase().includes("résidence")
+    )) || (typeof window !== 'undefined' && localStorage.getItem("oresto_active_workspace") === "hotel");
 
   // Real-time products from Firebase
   useEffect(() => {
@@ -212,6 +219,22 @@ export default function VendorCatalogue() {
       <div className="space-y-6 pb-12 font-body">
         <div className="p-8 rounded-[36px] bg-card border border-border shadow-sm">
           <StepEcommerceCatalogue
+            products={products}
+            vendorId={user?.vendorId || vendorProfile?.id || "v_demo"}
+            onSave={saveProductEcommerce}
+            onDelete={deleteProductEcommerce}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // If in Hotel mode, render the dedicated Hotel rooms & suites manager
+  if (isHotel) {
+    return (
+      <div className="space-y-6 pb-12 font-body">
+        <div className="p-8 rounded-[36px] bg-card border border-border shadow-sm">
+          <StepHotelChambres
             products={products}
             vendorId={user?.vendorId || vendorProfile?.id || "v_demo"}
             onSave={saveProductEcommerce}

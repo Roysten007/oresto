@@ -88,7 +88,16 @@ export default function AdminVendors() {
                     </span>
                   </td>
                   <td className="p-3">
-                    <div className="flex gap-2">
+                    <div className="flex items-center gap-2">
+                      <a
+                        href={`/r/${s.slug || s.id}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-2.5 py-1 rounded-lg bg-muted text-foreground hover:bg-primary hover:text-white text-[10px] font-sub font-bold transition-colors inline-flex items-center gap-1"
+                      >
+                        <i className="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+                        <span>Vitrine</span>
+                      </a>
                       {s.status !== "active" && (
                         <button onClick={() => setStatus(s.id, "active")} className="px-3 py-1 rounded-lg bg-green-100 text-green-700 text-[10px] font-sub font-bold hover:bg-green-200 transition-colors">
                           {s.status === "pending" ? "Approuver" : "Réactiver"}

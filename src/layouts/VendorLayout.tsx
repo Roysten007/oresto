@@ -29,6 +29,17 @@ const ecommerceNavItems = [
   { path: "/vendor/settings", icon: "fa-solid fa-gear", label: "Paramètres Boutique" },
 ];
 
+const hotelNavItems = [
+  { path: "/vendor/dashboard", icon: "fa-solid fa-chart-pie", label: "Tableau de Bord" },
+  { path: "/vendor/site", icon: "fa-solid fa-wand-magic-sparkles", label: "Hôtel Factory" },
+  { path: "/vendor/catalogue", icon: "fa-solid fa-bed", label: "Chambres & Suites" },
+  { path: "/vendor/orders", icon: "fa-solid fa-calendar-check", label: "Réservations Séjours" },
+  { path: "/vendor/delivery", icon: "fa-solid fa-key", label: "Arrivées & Check-in" },
+  { path: "/vendor/stats", icon: "fa-solid fa-chart-line", label: "Statistiques Séjours" },
+  { path: "/vendor/subscription", icon: "fa-solid fa-crown", label: "Abonnement Pro" },
+  { path: "/vendor/settings", icon: "fa-solid fa-gear", label: "Paramètres Résidence" },
+];
+
 export default function VendorLayout() {
   const { vendorProfile, logout } = useAuth();
   const location = useLocation();
@@ -51,6 +62,10 @@ export default function VendorLayout() {
      (vendorProfile?.category || "").toLowerCase().includes("tech") ||
      (vendorProfile?.category || "").toLowerCase().includes("e-commerce")
       ? "ecommerce"
+      : (vendorProfile?.category || "").toLowerCase().includes("hôtel") ||
+        (vendorProfile?.category || "").toLowerCase().includes("hotel") ||
+        (vendorProfile?.category || "").toLowerCase().includes("résidence")
+      ? "hotel"
       : "restaurant");
 
   const handlePayNow = async () => {
@@ -67,7 +82,7 @@ export default function VendorLayout() {
     }
   };
 
-  const activeNavItems = businessType === "ecommerce" ? ecommerceNavItems : restoNavItems;
+  const activeNavItems = businessType === "hotel" ? hotelNavItems : businessType === "ecommerce" ? ecommerceNavItems : restoNavItems;
 
   return (
     <div className="min-h-screen flex bg-background font-body">
@@ -79,13 +94,13 @@ export default function VendorLayout() {
           <div className="flex items-center justify-between mb-4">
             <Link to="/" className="flex items-center gap-2.5 no-underline">
               <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white text-sm shadow-md shadow-primary/25">
-                <i className={`fa-solid ${businessType === "ecommerce" ? "fa-bag-shopping" : "fa-utensils"}`}></i>
+                <i className={`fa-solid ${businessType === "hotel" ? "fa-hotel" : businessType === "ecommerce" ? "fa-bag-shopping" : "fa-utensils"}`}></i>
               </div>
               <div>
                 <span className="font-heading text-base font-black tracking-tight uppercase text-foreground block leading-tight">
-                  Oresto <span className="text-primary">{businessType === "ecommerce" ? "Boutique" : "Resto"}</span>
+                  Oresto <span className="text-primary">{businessType === "hotel" ? "Hôtel" : businessType === "ecommerce" ? "Boutique" : "Resto"}</span>
                 </span>
-                <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Espace Admin Dédié</span>
+                <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Espace Pro Dédié</span>
               </div>
             </Link>
             <button className="md:hidden text-gray-500 hover:text-black" onClick={() => setSidebarOpen(false)}>

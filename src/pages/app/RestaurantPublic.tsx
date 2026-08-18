@@ -18,6 +18,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { VendorProfile, Product } from "@/data/mockData";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { getDemoShowcaseBySlug } from "@/data/demoShowcaseData";
 
 // Modular Section Components
 import HeroSection from "@/components/showcase/HeroSection";
@@ -128,7 +129,17 @@ export default function RestaurantPublic() {
               }
             });
           } else {
-            // Fallback localStorage si pas encore propagé
+            // 2. Fallback vitrines de démonstration préconfigurées
+            const demoShowcase = getDemoShowcaseBySlug(slug);
+            if (demoShowcase) {
+              setVendor(demoShowcase.vendor);
+              setProducts(demoShowcase.products);
+              setLoading(false);
+              clearTimeout(timeout);
+              return;
+            }
+
+            // 3. Fallback localStorage si pas encore propagé
             try {
               const localSaved = localStorage.getItem("oresto_vendor_profile");
               if (localSaved) {
@@ -140,6 +151,15 @@ export default function RestaurantPublic() {
                 }
               }
             } catch {}
+          }
+        } else {
+          // Si snap vendors n'existe pas du tout, vérifier le fallback démo
+          const demoShowcase = getDemoShowcaseBySlug(slug);
+          if (demoShowcase) {
+            setVendor(demoShowcase.vendor);
+            setProducts(demoShowcase.products);
+            setLoading(false);
+            clearTimeout(timeout);
           }
         }
       });

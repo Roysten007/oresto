@@ -20,7 +20,7 @@ export default function ProLanding() {
   const navBorder = useTransform(scrollY, [0, 50], ["transparent", "rgba(0, 0, 0, 0.05)"]);
 
   const [openFaq, setOpenFaq] = useState<number | null>(0);
-  const [activePreviewType, setActivePreviewType] = useState<"restaurant" | "ecommerce">("restaurant");
+  const [activePreviewType, setActivePreviewType] = useState<"restaurant" | "ecommerce" | "hotel">("restaurant");
 
   const faqs = [
     {
@@ -155,10 +155,19 @@ export default function ProLanding() {
                     type="button"
                     onClick={() => setActivePreviewType("ecommerce")}
                     className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                      activePreviewType === "ecommerce" ? "bg-primary text-white" : "bg-white/10 text-white/60 hover:text-white"
+                      activePreviewType === "ecommerce" ? "bg-purple-600 text-white" : "bg-white/10 text-white/60 hover:text-white"
                     }`}
                   >
-                    🛍️ Vue Boutique E-Commerce
+                    🛍️ Vue Boutique
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActivePreviewType("hotel")}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                      activePreviewType === "hotel" ? "bg-indigo-600 text-white" : "bg-white/10 text-white/60 hover:text-white"
+                    }`}
+                  >
+                    🏨 Vue Hôtel & Auberge
                   </button>
                 </div>
               </div>
@@ -173,15 +182,19 @@ export default function ProLanding() {
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-white/50 block">CA Encaissé (7j)</span>
-                      <p className="font-heading font-black text-lg text-emerald-400">1 250 000 F</p>
+                      <p className="font-heading font-black text-lg text-emerald-400">
+                        {activePreviewType === "hotel" ? "2 450 000 F" : "1 250 000 F"}
+                      </p>
                       <span className="text-[9px] text-emerald-500 font-mono">● 100% MoMo direct</span>
                     </div>
 
                     <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-white/50 block">
-                        {activePreviewType === "restaurant" ? "Repas Servis" : "Colis Validés"}
+                        {activePreviewType === "restaurant" ? "Repas Servis" : activePreviewType === "hotel" ? "Nuits Réservées" : "Colis Validés"}
                       </span>
-                      <p className="font-heading font-black text-lg text-primary">19 du jour</p>
+                      <p className="font-heading font-black text-lg text-primary">
+                        {activePreviewType === "hotel" ? "14 nuitées" : "19 du jour"}
+                      </p>
                       <span className="text-[9px] text-white/60">Sans coupure</span>
                     </div>
 
@@ -192,8 +205,12 @@ export default function ProLanding() {
                     </div>
 
                     <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-white/50 block">Panier Moyen</span>
-                      <p className="font-heading font-black text-lg text-white">4 600 F</p>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-white/50 block">
+                        {activePreviewType === "hotel" ? "Taux Remplissage" : "Panier Moyen"}
+                      </span>
+                      <p className="font-heading font-black text-lg text-white">
+                        {activePreviewType === "hotel" ? "88%" : "4 600 F"}
+                      </p>
                       <span className="text-[9px] text-white/60">Automatisé</span>
                     </div>
                   </div>
@@ -203,7 +220,7 @@ export default function ProLanding() {
                     <div className="flex items-center justify-between">
                       <h4 className="font-heading font-black text-xs uppercase tracking-wider text-white flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                        Commandes Validées & Encaissées en Direct
+                        {activePreviewType === "hotel" ? "Réservations de Séjours en Direct" : "Commandes Validées & Encaissées en Direct"}
                       </h4>
                       <span className="text-[10px] text-emerald-400 font-bold">● Synchronisé MoMo</span>
                     </div>
@@ -239,6 +256,40 @@ export default function ProLanding() {
                               <p className="font-black text-emerald-400">6 000 F</p>
                               <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300">
                                 🛵 En Livraison
+                              </span>
+                            </div>
+                          </div>
+                        </>
+                      ) : activePreviewType === "hotel" ? (
+                        <>
+                          <div className="p-3 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                              <span className="font-mono font-black text-indigo-400 text-xs">#RES-12</span>
+                              <div>
+                                <p className="font-bold text-white">Suite Royale Deluxe (3 nuits)</p>
+                                <p className="text-[10px] text-white/50">Dr. Christian H. • Check-in 14h • Cadjehoun</p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-black text-emerald-400">114 750 F</p>
+                              <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">
+                                ✓ -15% Long Séjour
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="p-3 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                              <span className="font-mono font-black text-indigo-400 text-xs">#RES-11</span>
+                              <div>
+                                <p className="font-bold text-white">Chambre Executive (1 nuit)</p>
+                                <p className="text-[10px] text-white/50">Marc K. • Arrivée aujourd'hui</p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-black text-emerald-400">30 000 F</p>
+                              <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300">
+                                🏨 Confirmé
                               </span>
                             </div>
                           </div>
@@ -291,6 +342,8 @@ export default function ProLanding() {
                       <p className="text-white/80 leading-relaxed">
                         {activePreviewType === "restaurant" 
                           ? "« Chef, vos ventes de midi ont rapporté 87 500 FCFA sur 19 commandes. Vos encaissements MoMo sont validés sans intermédiaire. »"
+                          : activePreviewType === "hotel"
+                          ? "« Réception : 2 nouvelles réservations pour ce week-end (144 750 FCFA encaissés). Climatisation et groupe 24h/24 confirmés. »"
                           : "« Boutique à jour : 8 colis prêts à l'expédition pour 142 000 FCFA encaissés. Zéro commission prélevée sur vos ventes. »"}
                       </p>
                     </div>
@@ -303,18 +356,20 @@ export default function ProLanding() {
                     
                     {/* Phone Status Bar */}
                     <div className="bg-gray-900 text-white p-3 flex justify-between items-center text-[10px]">
-                      <span className="font-mono text-[9px] truncate">oresto.app/r/votre-nom</span>
+                      <span className="font-mono text-[9px] truncate">
+                        {activePreviewType === "hotel" ? "oresto.app/r/palmier-royal" : activePreviewType === "ecommerce" ? "oresto.app/r/kiffstyle-store" : "oresto.app/r/latelier-du-chef"}
+                      </span>
                       <span className="px-2 py-0.5 rounded-full bg-emerald-500 text-white font-black text-[8px]">Ouvert</span>
                     </div>
 
                     {/* Store Header Banner */}
-                    <div className="h-20 bg-primary/90 text-white p-3 flex items-center gap-2.5">
-                      <div className="w-10 h-10 rounded-xl bg-white text-primary flex items-center justify-center font-heading font-black text-sm shadow-md">
-                        {activePreviewType === "restaurant" ? "A" : "K"}
+                    <div className={`h-20 text-white p-3 flex items-center gap-2.5 ${activePreviewType === "hotel" ? "bg-indigo-600" : activePreviewType === "ecommerce" ? "bg-purple-600" : "bg-primary"}`}>
+                      <div className="w-10 h-10 rounded-xl bg-white text-gray-900 flex items-center justify-center font-heading font-black text-sm shadow-md">
+                        {activePreviewType === "restaurant" ? "🍽️" : activePreviewType === "hotel" ? "🏨" : "🛍️"}
                       </div>
                       <div>
                         <h5 className="font-heading font-black text-xs leading-tight">
-                          {activePreviewType === "restaurant" ? "L'Atelier du Chef & Grill" : "KiffStyle & Tech Store"}
+                          {activePreviewType === "restaurant" ? "L'Atelier du Chef" : activePreviewType === "hotel" ? "Palmier Royal Hôtel" : "KiffStyle Store"}
                         </h5>
                         <p className="text-[9px] text-white/80">Cotonou • 0% Commission</p>
                       </div>
@@ -342,6 +397,19 @@ export default function ProLanding() {
                             <span className="w-7 h-7 rounded-lg bg-black text-white flex items-center justify-center text-xs font-bold">+</span>
                           </div>
                         </>
+                      ) : activePreviewType === "hotel" ? (
+                        <div className="space-y-2">
+                          <div className="p-2 bg-white rounded-xl border border-gray-200 space-y-1">
+                            <span className="bg-indigo-600 text-white text-[7px] font-black px-1 py-0.5 rounded">SUITE ROYALE</span>
+                            <p className="font-bold text-[11px] truncate">Suite Vue Piscine (King Size)</p>
+                            <p className="text-[9px] text-gray-500">Wi-Fi Fibre • Clim 24h • Petit-déj</p>
+                            <p className="font-black text-indigo-600 text-xs">45 000 F / nuit</p>
+                          </div>
+                          <div className="p-2 bg-white rounded-xl border border-gray-200 space-y-1">
+                            <p className="font-bold text-[11px] truncate">Chambre Executive Confort</p>
+                            <p className="font-black text-indigo-600 text-xs">30 000 F / nuit</p>
+                          </div>
+                        </div>
                       ) : (
                         <div className="grid grid-cols-2 gap-2">
                           <div className="p-2 bg-white rounded-xl border border-gray-200 space-y-1">
@@ -359,12 +427,15 @@ export default function ProLanding() {
                       )}
                     </div>
 
-                    {/* Instant MoMo Checkout Button */}
+                    {/* Instant Action Button */}
                     <div className="p-2.5 bg-white border-t border-gray-100">
-                      <div className="py-2 rounded-xl bg-primary text-white text-[10px] font-black uppercase text-center flex items-center justify-center gap-1.5 shadow-sm">
-                        <i className="fa-solid fa-mobile-screen"></i>
-                        <span>Payer par Mobile Money</span>
-                      </div>
+                      <Link
+                        to={activePreviewType === "hotel" ? "/r/palmier-royal" : activePreviewType === "ecommerce" ? "/r/kiffstyle-store" : "/r/latelier-du-chef"}
+                        className="py-2 rounded-xl bg-black text-white text-[10px] font-black uppercase text-center flex items-center justify-center gap-1.5 shadow-sm hover:bg-primary transition-colors"
+                      >
+                        <i className="fa-solid fa-eye text-xs"></i>
+                        <span>Tester cette vitrine démo</span>
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -643,8 +714,27 @@ export default function ProLanding() {
       </section>
 
       {/* Footer */}
-      <footer className="py-8 bg-black text-gray-500 text-xs text-center border-t border-white/10">
-        <p>© 2026 Oresto Connect — La tranquillité d'esprit pour les commerçants africains.</p>
+      <footer className="py-12 bg-black text-gray-400 text-xs border-t border-white/10 px-4 sm:px-8">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="text-center md:text-left space-y-1">
+            <p className="font-heading font-black text-white text-sm">Oresto Connect</p>
+            <p className="text-[11px] text-gray-500">La solution tout-en-un pour Restaurants, Boutiques et Hôtels en Afrique.</p>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-4 text-[11px]">
+            <Link to="/r/latelier-du-chef" className="text-gray-400 hover:text-white transition-colors">🍽️ Démo Restaurant</Link>
+            <span>•</span>
+            <Link to="/r/kiffstyle-store" className="text-gray-400 hover:text-white transition-colors">🛍️ Démo Boutique</Link>
+            <span>•</span>
+            <Link to="/r/palmier-royal" className="text-gray-400 hover:text-white transition-colors">🏨 Démo Hôtel</Link>
+            <span>•</span>
+            <Link to="/devenir-prestataire" className="text-primary font-bold hover:underline flex items-center gap-1">
+              <span>🤝 Devenir Apporteur d'Affaires (20%)</span>
+            </Link>
+          </div>
+
+          <p className="text-[11px] text-gray-600">© {new Date().getFullYear()} Oresto Connect.</p>
+        </div>
       </footer>
 
     </div>
