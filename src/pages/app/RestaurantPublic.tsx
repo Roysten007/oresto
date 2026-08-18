@@ -124,13 +124,92 @@ export default function RestaurantPublic() {
             const allVendors = vSnap.val();
             const foundId = Object.keys(allVendors).find(id => allVendors[id].slug?.toLowerCase() === slug.toLowerCase());
             if (foundId) startListeners(foundId);
-            else setLoading(false);
+            else {
+              loadFallbackIfDemo(slug);
+            }
           } else {
-            setLoading(false);
+            loadFallbackIfDemo(slug);
           }
         }, { onlyOnce: true });
       }
     }, { onlyOnce: true });
+
+    const loadFallbackIfDemo = (currentSlug: string) => {
+      const lower = currentSlug.toLowerCase();
+      if (lower.includes("maquis") || lower.includes("etoile") || lower.includes("resto") || lower.includes("restaurant")) {
+        setVendor({
+          id: "v_demo_resto",
+          name: "Le Maquis Étoilé",
+          slug: "le-maquis-etoile",
+          category: "Restaurant & Grillades",
+          business_type: "restaurant",
+          city: "Cotonou",
+          neighborhood: "Haie Vive",
+          phone: "+229 97 00 00 00",
+          whatsapp: "+229 97 00 00 00",
+          description: "Spécialités africaines et grillades au feu de bois. Cuisine authentique et produits frais.",
+          cover_url: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1200",
+          logo_url: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=200",
+          primary_color: "#EA580C",
+          secondary_color: "#FFFFFF",
+          font_choice: "modern",
+          rating: 4.9,
+          reviewCount: 42,
+          open: true,
+          deliveryTime: "30-45 min",
+          plan: "pro",
+          verified: true,
+          status: "active",
+          is_published: true,
+          ordering_modes: ["dine_in", "takeaway", "delivery"],
+          payment_methods: ["momo_mtn", "momo_moov", "cash"]
+        });
+        setProducts([
+          { id: "p1", vendorId: "v_demo_resto", name: "Poulet Braisé & Alloco", price: 4500, category: "Plats", description: "Demi-poulet mariné aux épices du chef, servi avec alloco croustillant et sauce piment.", image: "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=600", available: true },
+          { id: "p2", vendorId: "v_demo_resto", name: "Capitaine Braisé", price: 6000, category: "Plats", description: "Poisson capitaine frais braisé aux herbes locales, accompagné d'attiéké frais.", image: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=600", available: true },
+          { id: "p3", vendorId: "v_demo_resto", name: "Chawarma Viande Spécial", price: 2000, category: "Fast-Food", description: "Pain libanais garni de lamelles de bœuf mariné, sauce blanche et frites.", image: "https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=600", available: true },
+          { id: "p4", vendorId: "v_demo_resto", name: "Jus de Bissap Maison", price: 1000, category: "Boissons", description: "Infusion d'hibiscus frais à la menthe et vanille naturelle.", image: "https://images.unsplash.com/photo-1556881286-fc6915169721?w=600", available: true }
+        ]);
+        setLoading(false);
+      } else if (lower.includes("boutique") || lower.includes("chic") || lower.includes("shop") || lower.includes("mode")) {
+        setVendor({
+          id: "v_demo_shop",
+          name: "Ma Boutique Chic",
+          slug: "ma-boutique-chic",
+          category: "E-Commerce & Boutiques",
+          business_type: "ecommerce",
+          city: "Cotonou",
+          neighborhood: "Ganhi",
+          phone: "+229 96 00 00 00",
+          whatsapp: "+229 96 00 00 00",
+          description: "Prêt-à-porter tendance, sneakers streetwear et accessoires de mode. Livraison rapide partout au Bénin.",
+          cover_url: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200",
+          logo_url: "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=200",
+          primary_color: "#000000",
+          secondary_color: "#FFFFFF",
+          font_choice: "modern",
+          rating: 4.8,
+          reviewCount: 29,
+          open: true,
+          deliveryTime: "24h Express",
+          plan: "pro",
+          verified: true,
+          status: "active",
+          is_published: true,
+          promo_label: "🚚 Livraison offerte dès 20 000 FCFA à Cotonou & Calavi",
+          ordering_modes: ["delivery"],
+          payment_methods: ["momo_mtn", "momo_moov"]
+        });
+        setProducts([
+          { id: "s1", vendorId: "v_demo_shop", name: "Sneakers Streetwear Urban", price: 18500, originalPrice: 25000, category: "Chaussures", badge: "PROMO", description: "Design moderne avec semelle amortissante. Parfaites pour le quotidien.", image: "https://images.unsplash.com/photo-1552346154-21d32810aba3?w=600", images: ["https://images.unsplash.com/photo-1552346154-21d32810aba3?w=600", "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600"], available: true, stock: 12, variants: [{ name: "Pointure", options: ["40", "41", "42", "43", "44"] }] },
+          { id: "s2", vendorId: "v_demo_shop", name: "Smartwatch Ultra Pro 4G", price: 29000, originalPrice: 35000, category: "High-Tech", badge: "BESTSELLER", description: "Écran AMOLED HD, suivi cardiaque, appels Bluetooth et autonomie 7 jours.", image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600", available: true, stock: 5, variants: [{ name: "Bracelet", options: ["Noir", "Orange Titane", "Argent"] }] },
+          { id: "s3", vendorId: "v_demo_shop", name: "Robe Soirée Satin Prestige", price: 15000, category: "Vêtements", badge: "NOUVEAU", description: "Coupe élégante en tissu satiné premium. Idéale pour vos soirées et événements.", image: "https://images.unsplash.com/photo-1539008835657-9e8e9680c956?w=600", available: true, stock: 8, variants: [{ name: "Taille", options: ["S", "M", "L", "XL"] }, { name: "Couleur", options: ["Émeraude", "Noir", "Rouge Rubis"] }] }
+        ]);
+        setLoading(false);
+      } else {
+        setLoading(false);
+      }
+    };
 
     return () => {
       clearTimeout(timeout);
@@ -138,6 +217,90 @@ export default function RestaurantPublic() {
       if (unsubProducts) unsubProducts();
     };
   }, [slug, user]);
+
+  // Dynamic SEO & Structured Data (OpenGraph, Twitter, Schema.org)
+  useEffect(() => {
+    if (!vendor) return;
+
+    // Document Title
+    document.title = `${vendor.name} — ${vendor.category || 'Commander en ligne'} à ${vendor.city || 'Cotonou'} | Oresto`;
+
+    // Meta Description
+    const desc = vendor.description || `Découvrez la vitrine officielle et commandez en direct chez ${vendor.name} à ${vendor.city || 'Cotonou'}. Encaissement Mobile Money direct sans intermédiaire.`;
+    let metaDescription = document.querySelector('meta[name="description"]');
+    if (!metaDescription) {
+      metaDescription = document.createElement("meta");
+      metaDescription.setAttribute("name", "description");
+      document.head.appendChild(metaDescription);
+    }
+    metaDescription.setAttribute("content", desc);
+
+    // OpenGraph Tags
+    const setMetaTag = (property: string, content: string) => {
+      let tag = document.querySelector(`meta[property="${property}"]`);
+      if (!tag) {
+        tag = document.createElement("meta");
+        tag.setAttribute("property", property);
+        document.head.appendChild(tag);
+      }
+      tag.setAttribute("content", content);
+    };
+
+    setMetaTag("og:title", `${vendor.name} — Commander en ligne`);
+    setMetaTag("og:description", desc);
+    setMetaTag("og:image", vendor.cover_url || vendor.logo_url || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800");
+    setMetaTag("og:url", window.location.href);
+    setMetaTag("og:type", isEcommerceMode ? "website" : "restaurant");
+
+    // Schema.org JSON-LD structured data for Google Search Rich Results
+    const existingScript = document.getElementById("jsonld-structured-data");
+    if (existingScript) existingScript.remove();
+
+    const script = document.createElement("script");
+    script.id = "jsonld-structured-data";
+    script.type = "application/ld+json";
+
+    const schemaData = isEcommerceMode ? {
+      "@context": "https://schema.org",
+      "@type": "OnlineStore",
+      "name": vendor.name,
+      "description": desc,
+      "url": window.location.href,
+      "telephone": vendor.phone || vendor.whatsapp || "",
+      "currenciesAccepted": "XOF",
+      "paymentAccepted": "Mobile Money (MTN, Moov, Celtiis)",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": vendor.city || "Cotonou",
+        "streetAddress": vendor.neighborhood || ""
+      }
+    } : {
+      "@context": "https://schema.org",
+      "@type": "Restaurant",
+      "name": vendor.name,
+      "image": vendor.cover_url || "",
+      "description": desc,
+      "servesCuisine": vendor.cuisine_tags || [vendor.category || "Africaine"],
+      "telephone": vendor.phone || vendor.whatsapp || "",
+      "currenciesAccepted": "XOF",
+      "paymentAccepted": "Mobile Money (MTN, Moov, Celtiis), Espèces",
+      "priceRange": "$$",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": vendor.city || "Cotonou",
+        "streetAddress": vendor.neighborhood || ""
+      },
+      "hasMenu": window.location.href
+    };
+
+    script.innerHTML = JSON.stringify(schemaData);
+    document.head.appendChild(script);
+
+    return () => {
+      const s = document.getElementById("jsonld-structured-data");
+      if (s) s.remove();
+    };
+  }, [vendor, isEcommerceMode]);
 
   const isRestricted = vendor?.subscriptionStatus === "restricted" || vendor?.subscriptionStatus === "blocked";
   
