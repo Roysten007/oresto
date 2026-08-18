@@ -185,6 +185,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
           setLastActivity(Date.now());
         }, (err) => {
+          console.error("Auth DB Error:", err);
+          let localVendor = DEMO_VENDOR;
+          try {
+            const saved = localStorage.getItem("oresto_vendor_profile");
+            if (saved) localVendor = { ...DEMO_VENDOR, ...JSON.parse(saved) };
+          } catch {}
+          setState({ user: DEMO_USER, role: "vendor", vendorProfile: localVendor, isAuthenticated: true, isLoading: false });
+        });
       } else {
         // Mode ouvert avec persistance locale et synchronisation Firebase v_demo
         let localVendor = DEMO_VENDOR;
