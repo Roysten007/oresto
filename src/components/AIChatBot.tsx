@@ -417,19 +417,25 @@ export default function AIChatBot() {
         )}
       </AnimatePresence>
 
-      {/* Floating Launcher Button */}
+      {/* Floating Circular Icon Button */}
       {!isOpen && (
         <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.92 }}
           onClick={() => setIsOpen(true)}
-          className="px-4 py-3 rounded-full bg-[#0A0A0A] text-white font-heading font-black text-xs uppercase tracking-wider flex items-center gap-2.5 shadow-2xl hover:bg-primary transition-all border border-white/10"
+          className="relative w-13 h-13 md:w-14 md:h-14 rounded-full bg-[#0A0A0A] hover:bg-primary text-white flex items-center justify-center shadow-2xl shadow-black/35 border-2 border-white/20 transition-all group"
+          title="IZI IA — Assistant Intelligent"
+          aria-label="Ouvrir IZI IA"
         >
-          <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-white text-[10px]">
+          {/* Magic Wand Sparkles Icon */}
+          <div className="w-8 h-8 rounded-full bg-primary/25 group-hover:bg-white/25 flex items-center justify-center text-primary group-hover:text-white text-base md:text-lg transition-colors">
             <i className="fa-solid fa-wand-magic-sparkles"></i>
           </div>
-          <span>IZI IA</span>
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+
+          {/* Online green indicator badge */}
+          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-emerald-500 border-2 border-[#0A0A0A] flex items-center justify-center shadow-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+          </span>
         </motion.button>
       )}
     </div>
