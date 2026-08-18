@@ -106,91 +106,30 @@ export default function StepIdentite({
   return (
     <div className="space-y-8 font-body">
       <div>
-        <h2 className="font-heading font-black text-2xl text-gray-900 mb-1">
-          Identité & Catégorie de votre Activité
+        <div className="flex items-center gap-2 mb-1">
+          <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
+            activeSector === "ecommerce" ? "bg-purple-100 text-purple-700" : activeSector === "hotel" ? "bg-indigo-100 text-indigo-700" : "bg-orange-100 text-primary"
+          }`}>
+            {activeSector === "ecommerce" ? "ESPACE BOUTIQUE E-COMMERCE" : activeSector === "hotel" ? "ESPACE HÔTEL & RÉSIDENCE" : "ESPACE RESTAURANT & GRILLADES"}
+          </span>
+        </div>
+        <h2 className="font-heading font-black text-2xl text-gray-900">
+          Identité & Catégorie
         </h2>
-        <p className="text-xs text-gray-500 font-medium">
-          Personnalisez le secteur, la catégorie précise et les coordonnées visibles sur votre vitrine en ligne.
+        <p className="text-xs text-gray-500 font-medium mt-0.5">
+          Définissez la catégorie précise et les informations visibles sur votre vitrine en ligne.
         </p>
       </div>
 
-      {/* 1. Sélecteur de Secteur / Métier */}
-      <div className="space-y-3">
-        <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500">
-          1. Secteur d'activité principal
-        </label>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <button
-            type="button"
-            onClick={() => onBusinessTypeChange?.("restaurant")}
-            className={`p-4 rounded-2xl border text-left transition-all flex items-start gap-3 ${
-              activeSector === "restaurant"
-                ? "border-primary bg-orange-50/50 shadow-md ring-2 ring-primary/20"
-                : "border-gray-200 bg-white hover:border-gray-300"
-            }`}
-          >
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0 ${
-              activeSector === "restaurant" ? "bg-primary text-white" : "bg-gray-100 text-gray-600"
-            }`}>
-              <i className="fa-solid fa-utensils"></i>
-            </div>
-            <div>
-              <p className="font-heading font-black text-xs text-gray-900">Restaurant & Grillades</p>
-              <p className="text-[10px] text-gray-500 font-medium mt-0.5">Plats, menus du jour, livraisons de repas & KDS.</p>
-            </div>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => onBusinessTypeChange?.("ecommerce")}
-            className={`p-4 rounded-2xl border text-left transition-all flex items-start gap-3 ${
-              activeSector === "ecommerce"
-                ? "border-purple-600 bg-purple-50/50 shadow-md ring-2 ring-purple-600/20"
-                : "border-gray-200 bg-white hover:border-gray-300"
-            }`}
-          >
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0 ${
-              activeSector === "ecommerce" ? "bg-purple-600 text-white" : "bg-gray-100 text-gray-600"
-            }`}>
-              <i className="fa-solid fa-bag-shopping"></i>
-            </div>
-            <div>
-              <p className="font-heading font-black text-xs text-gray-900">Boutique & E-Commerce</p>
-              <p className="text-[10px] text-gray-500 font-medium mt-0.5">Vêtements, sneakers, high-tech, stocks & colis.</p>
-            </div>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => onBusinessTypeChange?.("hotel")}
-            className={`p-4 rounded-2xl border text-left transition-all flex items-start gap-3 ${
-              activeSector === "hotel"
-                ? "border-indigo-600 bg-indigo-50/50 shadow-md ring-2 ring-indigo-600/20"
-                : "border-gray-200 bg-white hover:border-gray-300"
-            }`}
-          >
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0 ${
-              activeSector === "hotel" ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-600"
-            }`}>
-              <i className="fa-solid fa-hotel"></i>
-            </div>
-            <div>
-              <p className="font-heading font-black text-xs text-gray-900">Hôtel & Résidences</p>
-              <p className="text-[10px] text-gray-500 font-medium mt-0.5">Suites, chambres, réservations de nuitées & planning.</p>
-            </div>
-          </button>
-        </div>
-      </div>
-
-      {/* 2. Sélecteur de Catégorie Métier Spécialisée */}
+      {/* Sélecteur de Catégorie Métier Spécialisée */}
       <div className="space-y-3 p-5 rounded-2xl bg-gray-50 border border-gray-200/80">
         <div className="flex items-center justify-between">
           <div>
             <label className="block text-[10px] font-black uppercase tracking-widest text-gray-700">
-              2. Catégorie précise de votre établissement *
+              Catégorie précise de votre {activeSector === "ecommerce" ? "boutique" : activeSector === "hotel" ? "établissement" : "restaurant"} *
             </label>
             <p className="text-[11px] text-gray-500 font-medium mt-0.5">
-              Sélectionnez la catégorie qui correspond le mieux à votre activité :
+              Sélectionnez la catégorie qui correspond exactement à vos produits / services :
             </p>
           </div>
           <button

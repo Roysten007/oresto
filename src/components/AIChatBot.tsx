@@ -21,13 +21,49 @@ const INITIAL_MESSAGE: Message = {
 export default function AIChatBot() {
   const { user, vendorProfile } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([INITIAL_MESSAGE]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<any>(null);
+
+  const searchParams = new URLSearchParams(window.location.search);
+  const sectorParam = searchParams.get("sector");
+  const businessType = sectorParam || vendorProfile?.business_type || 
+    ((vendorProfile?.category || "").toLowerCase().includes("boutique") || (vendorProfile?.category || "").toLowerCase().includes("mode") ? "ecommerce" : 
+     (vendorProfile?.category || "").toLowerCase().includes("hotel") ? "hotel" : "restaurant");
+
+  const isEcommerce = businessType === "ecommerce";
+  const isHotel = businessType === "hotel";
+
+  const defaultVendorName = isEcommerce ? "KiffStyle & Tech Store" : isHotel ? "Palmier Royal Résidence" : "L'Atelier du Chef & Grill";
+  const currentVendorName = vendorProfile?.name && !vendorProfile.name.toLowerCase().includes("maquis") ? vendorProfile.name : defaultVendorName;
+
+  const initialGreeting = isEcommerce
+    ? `Bonjour ! Je suis **IZI IA**, votre assistant e-commerce intelligent. ⚡\n\nJe suis connecté en direct aux données de votre boutique **${currentVendorName}** :\n- 📊 Vos ventes & chiffre d'affaires\n- 📦 Le suivi de vos colis & expéditions\n- ⚠️ Vos alertes de stock faible\n- 🧾 L'impression de reçus de vente & factures\n- 📱 Vos encaissements Mobile Money\n\nQue souhaitez-vous vérifier aujourd'hui ?`
+    : isHotel
+    ? `Bonjour ! Je suis **IZI IA**, votre assistant hôtelier intelligent. ⚡\n\nJe suis connecté en direct aux réservations de **${currentVendorName}** :\n- 📊 Nuitées encaissées & chiffre d'affaires\n- 🛏️ Disponibilité des suites & chambres\n- 📅 Planning des arrivées et séjours\n- 📱 Encaissements MoMo sans intermédiaire\n\nQue souhaitez-vous vérifier aujourd'hui ?`
+    : `Bonjour ! Je suis **IZI IA**, votre assistant restaurant intelligent. ⚡\n\nJe suis connecté en direct aux données de **${currentVendorName}** :\n- 📊 Vos ventes & chiffre d'affaires exact\n- 🍳 Le suivi en direct de vos commandes en cuisine\n- 🍽️ L'optimisation de vos prix et de votre carte\n- 🧾 L'impression des tickets de caisse certifiés\n- 📱 Vos encaissements Mobile Money\n\nQue souhaitez-vous vérifier aujourd'hui ?`;
+
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      role: "assistant",
+      content: initialGreeting,
+      timestamp: new Date().toISOString()
+    }
+  ]);
+
+  // Reset initial message if sector changes
+  useEffect(() => {
+    setMessages([
+      {
+        role: "assistant",
+        content: initialGreeting,
+        timestamp: new Date().toISOString()
+      }
+    ]);
+  }, [businessType, currentVendorName]);
 
   // Speech recognition setup
   useEffect(() => {
@@ -64,22 +100,27 @@ export default function AIChatBot() {
     
     // Données métriques calculées en direct
     let contextData: any = {
-      userName: user?.name || "Chef Restaurateur",
+      userName: user?.name || (isEcommerce ? "Commerçant Pro" : isHotel ? "Gérant Résidence" : "Chef Restaurateur"),
       role: user?.role || "vendor",
       vendorId: vId,
-      vendorName: vendorProfile?.name || "L'Atelier du Chef & Grill",
-      totalRevenue: vendorProfile?.revenue || vendorProfile?.totalSales || 1250000,
-      totalOrders: vendorProfile?.totalOrders || 184,
-      todayRevenue: 87500,
-      todayOrders: 19,
-      avgOrder: 4600,
+      vendorName: currentVendorName,
+      business_type: businessType,
+      totalRevenue: vendorProfile?.revenue || vendorProfile?.totalSales || (isEcommerce ? 1850000 : isHotel ? 2350000 : 1250000),
+      totalOrders: vendorProfile?.totalOrders || (isEcommerce ? 142 : isHotel ? 68 : 184),
+      todayRevenue: isEcommerce ? 125000 : isHotel ? 145000 : 87500,
+      todayOrders: isEcommerce ? 12 : isHotel ? 3 : 19,
+      avgOrder: isEcommerce ? 18500 : isHotel ? 45000 : 4600,
       rating: vendorProfile?.rating || 4.9,
       reviewCount: vendorProfile?.reviewCount || 48,
       isOpen: vendorProfile?.open !== false,
-      recentOrdersList: [
+      recentOrdersList: isEcommerce ? [
+        { id: "#COL-201", items: "Sneakers Streetwear Urban (T.42)", total: 18500, status: "En préparation", payment: "MTN MoMo (Reçu)" },
+        { id: "#COL-202", items: "Smartwatch Ultra Pro 4G AMOLED", total: 29000, status: "En expédition", payment: "Moov Money (Reçu)" },
+        { id: "#COL-203", items: "Robe Soirée Satin Prestige", total: 15000, status: "Livré", payment: "MTN MoMo (Reçu)" }
+      ] : [
         { id: "#042", items: "Poulet Braisé & Alloco", total: 4500, status: "En cuisine", payment: "MTN MoMo (Reçu)" },
-        { id: "#041", items: "Capitaine Braisé", total: 6000, status: "En livraison", payment: "Moov Money (Reçu)" },
-        { id: "#040", items: "Brochettes de Mérou", total: 3500, status: "Livré", payment: "Espèces" }
+        { id: "#041", items: "Capitaine Braisé Royal", total: 6500, status: "En livraison", payment: "Moov Money (Reçu)" },
+        { id: "#040", items: "Chawarma Viande & Frites", total: 2500, status: "Livré", payment: "Espèces" }
       ],
       productsList: []
     };
@@ -97,7 +138,7 @@ export default function AIChatBot() {
 
           const myProducts = Object.entries(data.products || {})
             .filter(([_, p]: any) => p.vendorId === vId)
-            .map(([id, p]: any) => ({ id, name: p.name, price: p.price, category: p.category }));
+            .map(([id, p]: any) => ({ id, name: p.name, price: p.price, category: p.category, stock: p.stock }));
           if (myProducts.length > 0) contextData.productsList = myProducts;
 
           const myOrders = Object.entries(data.orders || {})
@@ -116,14 +157,14 @@ export default function AIChatBot() {
 
             contextData.totalRevenue = totalRev > 0 ? totalRev : contextData.totalRevenue;
             contextData.totalOrders = totalCount > 0 ? totalCount : contextData.totalOrders;
-            contextData.todayRevenue = todayRev > 0 ? todayRev : 87500;
-            contextData.todayOrders = todayOrders.length > 0 ? todayOrders.length : 19;
-            contextData.avgOrder = totalCount > 0 ? Math.round(totalRev / totalCount) : 4600;
+            contextData.todayRevenue = todayRev > 0 ? todayRev : contextData.todayRevenue;
+            contextData.todayOrders = todayOrders.length > 0 ? todayOrders.length : contextData.todayOrders;
+            contextData.avgOrder = totalCount > 0 ? Math.round(totalRev / totalCount) : contextData.avgOrder;
             contextData.recentOrdersList = myOrders.slice(0, 5).map((o: any) => ({
-              id: o.id ? `#${o.id.slice(-3)}` : "#---",
-              items: Array.isArray(o.items) ? o.items.map((i: any) => `${i.quantity || 1}x ${i.name || "Plat"}`).join(", ") : (o.item || "Commande"),
+              id: o.id ? `#${o.id.slice(-4)}` : "#---",
+              items: Array.isArray(o.items) ? o.items.map((i: any) => `${i.qty || i.quantity || 1}x ${i.name || "Article"}`).join(", ") : (o.item || "Commande"),
               total: o.total || 0,
-              status: o.status === "preparing" ? "En cuisine" : o.status === "delivering" ? "En livraison" : o.status === "delivered" ? "Livré" : "Reçue",
+              status: o.status === "preparing" ? "En préparation" : o.status === "delivering" ? "En livraison" : o.status === "delivered" ? "Livré" : "Reçue",
               payment: o.paymentMethod || "MoMo"
             }));
           }
@@ -169,9 +210,9 @@ export default function AIChatBot() {
         else if (call.name === "add_new_product" && db) {
           await push(ref(db, `products`), {
             vendorId: vId, name: call.args.name, price: call.args.price, 
-            category: call.args.category || "Plats", available: true
+            category: call.args.category || (isEcommerce ? "Mode" : "Plats"), available: true
           });
-          results.push(`✅ Produit "${call.args.name}" ajouté à ${call.args.price}F.`);
+          results.push(`✅ Article "${call.args.name}" ajouté à ${call.args.price}F.`);
         }
         else {
           results.push(`⚠️ Action complétée.`);
@@ -214,7 +255,7 @@ export default function AIChatBot() {
     } catch {
       const fallbackMsg: Message = {
         role: "assistant",
-        content: "⚡ **IZI IA :** Je suis là pour vous aider ! Vous pouvez me demander vos ventes du jour, le suivi de vos commandes MoMo ou des conseils pour vos plats.",
+        content: `⚡ **IZI IA :** Je suis là pour vous aider avec **${currentVendorName}** ! Vous pouvez me demander vos ventes, le suivi de vos commandes/colis ou l'impression de vos reçus de vente.`,
         timestamp: new Date().toISOString(),
       };
       setMessages(prev => [...prev, fallbackMsg]);
@@ -222,6 +263,25 @@ export default function AIChatBot() {
       setIsLoading(false);
     }
   };
+
+  const quickButtons = isEcommerce ? [
+    { label: "📊 Ventes du jour", q: "Quel est le chiffre d'affaires de ma boutique aujourd'hui et au total ?" },
+    { label: "📦 Colis à expédier", q: "Fais-moi le point sur mes commandes et colis à livrer" },
+    { label: "⚠️ Alertes stock", q: "Quels sont les articles bientôt en rupture de stock ?" },
+    { label: "🧾 Reçus de vente", q: "Comment imprimer et envoyer un reçu de vente au client ?" },
+    { label: "💡 Conseils E-Commerce", q: "Donne-moi des conseils marketing pour vendre plus sur WhatsApp et les réseaux" }
+  ] : isHotel ? [
+    { label: "📊 CA & Nuitées", q: "Quel est le chiffre d'affaires des réservations et nuitées ?" },
+    { label: "🛏️ Chambres disponibles", q: "Quelles sont les chambres et suites disponibles ?" },
+    { label: "📅 Arrivées du jour", q: "Quelles sont les arrivées et réservations prévues ?" },
+    { label: "💡 Optimiser mes prix", q: "Comment maximiser le taux d'occupation de mon établissement ?" }
+  ] : [
+    { label: "📊 Ventes du jour", q: "Quel est mon chiffre d'affaires exact aujourd'hui et au total ?" },
+    { label: "🍳 Commandes en cuisine", q: "Fais-moi le point exact de mes commandes en cours et servies" },
+    { label: "🍽️ Conseil carte & plats", q: "Comment optimiser mon menu et mes prix pour augmenter mon panier moyen ?" },
+    { label: "🧾 Reçu officiel", q: "Comment générer un reçu de caisse après une vente ?" },
+    { label: "📱 Paiement MoMo", q: "Combien ai-je encaissé par Mobile Money sans commission ?" }
+  ];
 
   const startListening = () => {
     if (!recognitionRef.current) { toast.error("Micro non disponible sur ce navigateur"); return; }
@@ -259,7 +319,7 @@ export default function AIChatBot() {
               </div>
               <div className="flex items-center gap-1">
                 <button
-                  onClick={() => setMessages([INITIAL_MESSAGE])}
+                  onClick={() => setMessages([{ role: "assistant", content: initialGreeting, timestamp: new Date().toISOString() }])}
                   className="w-7 h-7 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-all flex items-center justify-center text-xs"
                   title="Réinitialiser"
                 >
@@ -276,12 +336,7 @@ export default function AIChatBot() {
 
             {/* Quick Actions Bar */}
             <div className="flex gap-2 p-2 bg-gray-50 border-b border-gray-100 overflow-x-auto scrollbar-hide text-xs">
-              {[
-                { label: "📊 Chiffre d'affaires exact", q: "Quel est mon chiffre d'affaires exact aujourd'hui et au total ?" },
-                { label: "📦 Mes commandes réelles", q: "Fais-moi le point exact de mes commandes en cours et servies" },
-                { label: "🍽️ Conseil carte", q: "Comment optimiser mon menu et mes prix pour augmenter mon panier moyen ?" },
-                { label: "📱 Paiement MoMo", q: "Combien ai-je encaissé par Mobile Money sans commission ?" }
-              ].map((btn, i) => (
+              {quickButtons.map((btn, i) => (
                 <button
                   key={i}
                   onClick={() => handleSend(btn.q)}
