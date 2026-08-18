@@ -35,18 +35,23 @@ export default function VendorLayout() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showUnblockModal, setShowUnblockModal] = useState(false);
+  
+  const searchParams = new URLSearchParams(location.search);
+  const sectorQuery = searchParams.get("sector") || searchParams.get("type");
+
   const isBlocked = vendorProfile?.subscriptionStatus === "blocked" || vendorProfile?.subscriptionStatus === "restricted";
   const isFirstPayment = !vendorProfile?.paymentHistory || vendorProfile.paymentHistory.length === 0;
   const payAmount = isFirstPayment ? FIRST_MONTH_PRICE : STANDARD_PLAN_PRICE;
 
-  // Secteur d'activité fixé par le compte du vendeur (aucune bascule dans l'admin)
-  const businessType = vendorProfile?.business_type === "ecommerce" ||
-    (vendorProfile?.category || "").toLowerCase().includes("boutique") ||
-    (vendorProfile?.category || "").toLowerCase().includes("mode") ||
-    (vendorProfile?.category || "").toLowerCase().includes("tech") ||
-    (vendorProfile?.category || "").toLowerCase().includes("e-commerce")
+  // Secteur d'activité fixé par le compte du vendeur ou le test actif
+  const businessType = sectorQuery || vendorProfile?.business_type ||
+    ((vendorProfile?.category || "").toLowerCase().includes("boutique") ||
+     (vendorProfile?.category || "").toLowerCase().includes("mode") ||
+     (vendorProfile?.category || "").toLowerCase().includes("tech") ||
+     (vendorProfile?.category || "").toLowerCase().includes("e-commerce")
       ? "ecommerce"
-      : "restaurant";
+      : "restaurant");
 
   const handlePayNow = async () => {
     if (!db || !vendorProfile?.id) return;
@@ -113,7 +118,7 @@ export default function VendorLayout() {
               return (
                 <Link 
                   key={item.path} 
-                  to={isBlocked ? "/vendor/subscription" : item.path} 
+                  to={isBlocked ? "/vendor/subscription" : `${item.path}${sectorQuery ? `?sector=${sectorQuery}` : ''}`} 
                   onClick={() => setSidebarOpen(false)}
                   className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-sub text-xs font-bold transition-all ${
                     active 
