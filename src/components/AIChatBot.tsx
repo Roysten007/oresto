@@ -308,7 +308,7 @@ export default function AIChatBot() {
             {/* Header */}
             <div className="flex items-center gap-3 px-5 py-4 bg-[#0A0A0A] border-b border-white/10 flex-shrink-0">
               <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white text-sm shadow-md shadow-primary/30">
-                <i className="fa-solid fa-wand-magic-sparkles"></i>
+                <i className="fa-solid fa-robot"></i>
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-heading font-black text-sm text-white uppercase tracking-tight">ORESTO IZI IA</h3>
@@ -356,7 +356,7 @@ export default function AIChatBot() {
                 >
                   {m.role === "assistant" && (
                     <div className="w-7 h-7 rounded-xl bg-primary flex items-center justify-center text-white text-[11px] shrink-0 mt-0.5 shadow-sm">
-                      <i className="fa-solid fa-wand-magic-sparkles"></i>
+                      <i className="fa-solid fa-robot"></i>
                     </div>
                   )}
                   <div
@@ -373,7 +373,7 @@ export default function AIChatBot() {
               {isLoading && (
                 <div className="flex gap-2.5 items-center">
                   <div className="w-7 h-7 rounded-xl bg-primary flex items-center justify-center text-white text-[11px] shrink-0">
-                    <i className="fa-solid fa-spinner fa-spin"></i>
+                    <i className="fa-solid fa-robot fa-bounce"></i>
                   </div>
                   <div className="px-4 py-2.5 rounded-2xl bg-white border border-gray-150 text-gray-500 text-xs flex items-center gap-2 shadow-sm">
                     <span className="animate-pulse">Calcul des statistiques réelles...</span>
@@ -427,9 +427,9 @@ export default function AIChatBot() {
           title="IZI IA — Assistant Intelligent"
           aria-label="Ouvrir IZI IA"
         >
-          {/* Magic Wand Sparkles Icon */}
-          <div className="w-8 h-8 rounded-full bg-primary/25 group-hover:bg-white/25 flex items-center justify-center text-primary group-hover:text-white text-base md:text-lg transition-colors">
-            <i className="fa-solid fa-wand-magic-sparkles"></i>
+          {/* Robot Icon */}
+          <div className="w-8 h-8 rounded-full bg-primary/25 group-hover:bg-white/25 flex items-center justify-center text-primary group-hover:text-white text-lg transition-colors">
+            <i className="fa-solid fa-robot"></i>
           </div>
 
           {/* Online green indicator badge */}
