@@ -1,12 +1,14 @@
 import { useAuth } from "@/contexts/AuthContext";
+import { Navigate, useLocation } from "react-router-dom";
 
 interface PrivateRouteProps {
   children: React.ReactNode;
-  requiredRole?: "client" | "vendor";
+  requiredRole?: "client" | "vendor" | "admin";
 }
 
-export default function PrivateRoute({ children }: PrivateRouteProps) {
-  const { isLoading } = useAuth();
+export default function PrivateRoute({ children, requiredRole }: PrivateRouteProps) {
+  const { isAuthenticated, isLoading, role } = useAuth();
+  const location = useLocation();
   
   if (isLoading) {
     return (
@@ -19,6 +21,13 @@ export default function PrivateRoute({ children }: PrivateRouteProps) {
     );
   }
 
-  // Accès direct et illimité sans blocage d'authentification
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  if (requiredRole && role !== requiredRole && role !== "admin") {
+    return <Navigate to="/unauthorized" replace />;
+  }
+
   return <>{children}</>;
 }

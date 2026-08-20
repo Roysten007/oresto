@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase";
-import { ref, onValue, update } from "firebase/database";
+import { ref, onValue, update, query, orderByChild, equalTo } from "firebase/database";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Order } from "@/data/mockData";
@@ -142,13 +142,12 @@ export default function VendorOrders() {
 
   useEffect(() => {
     if (!db || !user?.vendorId) { setIsLoading(false); return; }
-    const ordersRef = ref(db, "orders");
-    const unsub = onValue(ordersRef, snap => {
+    const ordersQuery = query(ref(db, "orders"), orderByChild("vendorId"), equalTo(user.vendorId));
+    const unsub = onValue(ordersQuery, snap => {
       const data = snap.val();
       if (data) {
         const list = Object.entries(data)
           .map(([id, val]: [string, any]) => ({ id, ...val } as Order))
-          .filter(o => o.vendorId === user.vendorId)
           .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         setOrders(list);
       } else {

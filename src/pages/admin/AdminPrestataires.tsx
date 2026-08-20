@@ -61,10 +61,10 @@ export default function AdminPrestataires() {
         setCommissions(list);
       } else {
         const demoComms: Commission[] = [
-          { id: "comm_demo_1", prestataire_id: "p_demo", client_id: "v_demo", client_name: "L'Atelier du Chef", client_category: "Restaurants", mois: "2026-08", montant_abonnement: 25000, montant_commission: 5000, statut: "en_attente", date_paiement: null, created_at: "2026-08-10T10:00:00Z" },
-          { id: "comm_demo_2", prestataire_id: "p_demo", client_id: "v_demo2", client_name: "KiffStyle Store", client_category: "Boutique", mois: "2026-08", montant_abonnement: 25000, montant_commission: 5000, statut: "en_attente", date_paiement: null, created_at: "2026-08-12T14:30:00Z" },
-          { id: "comm_demo_3", prestataire_id: "p_demo", client_id: "v_demo", client_name: "L'Atelier du Chef", client_category: "Restaurants", mois: "2026-07", montant_abonnement: 25000, montant_commission: 5000, statut: "paye", date_paiement: "2026-07-31T18:00:00Z", created_at: "2026-07-10T10:00:00Z" },
-          { id: "comm_demo_4", prestataire_id: "p_demo2", client_id: "v_demo3", client_name: "Résidence Palmier Royal", client_category: "Hôtel", mois: "2026-08", montant_abonnement: 25000, montant_commission: 5000, statut: "en_attente", date_paiement: null, created_at: "2026-08-14T09:15:00Z" },
+          { id: "comm_demo_1", prestataire_id: "p_demo", client_id: "v_demo", client_name: "L'Atelier du Chef", client_category: "Restaurants", mois: "2026-08", montant_abonnement: 5000, montant_commission: 1000, statut: "en_attente", date_paiement: null, created_at: "2026-08-10T10:00:00Z" },
+          { id: "comm_demo_2", prestataire_id: "p_demo", client_id: "v_demo2", client_name: "KiffStyle Store", client_category: "Boutique", mois: "2026-08", montant_abonnement: 5000, montant_commission: 1000, statut: "en_attente", date_paiement: null, created_at: "2026-08-12T14:30:00Z" },
+          { id: "comm_demo_3", prestataire_id: "p_demo", client_id: "v_demo", client_name: "L'Atelier du Chef", client_category: "Restaurants", mois: "2026-07", montant_abonnement: 5000, montant_commission: 1000, statut: "paye", date_paiement: "2026-07-31T18:00:00Z", created_at: "2026-07-10T10:00:00Z" },
+          { id: "comm_demo_4", prestataire_id: "p_demo2", client_id: "v_demo3", client_name: "Résidence Palmier Royal", client_category: "Hôtel", mois: "2026-08", montant_abonnement: 5000, montant_commission: 1000, statut: "en_attente", date_paiement: null, created_at: "2026-08-14T09:15:00Z" },
         ];
         setCommissions(demoComms);
       }

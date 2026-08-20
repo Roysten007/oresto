@@ -113,6 +113,7 @@ export function PrestataireProvider({ children }: { children: ReactNode }) {
             prestataire_id: uid,
             nom: newPrestataire.nom,
             telephone: newPrestataire.telephone,
+            email: newPrestataire.email,
             code: codeReferral,
           });
         } catch (dbErr) {
@@ -120,19 +121,16 @@ export function PrestataireProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      // 3. Stocker le mot de passe local pour faciliter la reconnexion si offline
-      try {
-        localStorage.setItem(`oresto_p_pw_${cleanPhone}`, data.password);
-        localStorage.setItem(`oresto_p_pw_${email}`, data.password);
-      } catch {}
-
       setPrestataire(newPrestataire);
       try { localStorage.setItem("oresto_prestataire", JSON.stringify(newPrestataire)); } catch {}
 
       return { success: true };
     } catch (err: any) {
       console.error("Erreur registerPrestataire:", err);
-      return { success: false, error: err.message || "Erreur lors de l'inscription." };
+      let errMsg = err.message || "Erreur lors de l'inscription.";
+      if (err.code === "auth/weak-password") errMsg = "Le mot de passe doit contenir au moins 6 caractères.";
+      if (err.code === "auth/email-already-in-use") errMsg = "Ce compte existe déjà. Veuillez vous connecter.";
+      return { success: false, error: errMsg };
     }
   };
 
@@ -140,69 +138,60 @@ export function PrestataireProvider({ children }: { children: ReactNode }) {
     try {
       const cleanIdent = identifier.trim();
       const cleanPhone = cleanIdent.replace(/\D/g, "");
-      const email = cleanIdent.includes("@") ? cleanIdent : `prestataire_${cleanPhone}@oresto.bj`;
+      let email = cleanIdent.includes("@") ? cleanIdent.toLowerCase() : "";
 
-      // 1. Tenter la connexion Firebase Auth
-      if (auth) {
-        try {
-          const cred = await signInWithEmailAndPassword(auth, email, password);
-          const uid = cred.user.uid;
-
-          if (db) {
-            const snap = await get(ref(db, `prestataires/${uid}`));
-            if (snap.exists()) {
-              const pData = snap.val() as Prestataire;
-              setPrestataire(pData);
-              try { localStorage.setItem("oresto_prestataire", JSON.stringify(pData)); } catch {}
-              return { success: true };
-            }
-          }
-        } catch (authErr) {
-          console.warn("Auth direct attempt failed, checking DB lookup...", authErr);
-        }
-      }
-
-      // 2. Recherche directe par numéro de téléphone ou email dans Firebase DB
-      if (db) {
-        try {
-          const pSnap = await get(ref(db, "prestataires"));
-          if (pSnap.exists()) {
-            const allP = pSnap.val();
-            for (const uid of Object.keys(allP)) {
-              const p = allP[uid];
-              const pPhoneClean = (p.telephone || "").replace(/\D/g, "");
-              if (pPhoneClean === cleanPhone || p.email === email || p.code_referral === cleanIdent.toUpperCase()) {
-                setPrestataire({ uid, ...p });
-                try { localStorage.setItem("oresto_prestataire", JSON.stringify({ uid, ...p })); } catch {}
-                return { success: true };
-              }
-            }
-          }
-        } catch (dbErr) {
-          console.warn("DB lookup error:", dbErr);
-        }
-      }
-
-      // 3. Fallback compte démo si identifiant démo
+      // Fallback compte démo
       if (cleanIdent === "demo" || cleanPhone === "97123456" || cleanIdent === "JEA482") {
         setPrestataire(DEMO_PRESTATAIRE);
         try { localStorage.setItem("oresto_prestataire", JSON.stringify(DEMO_PRESTATAIRE)); } catch {}
         return { success: true };
       }
 
-      // 4. Vérification du mot de passe local sauvegardé
-      const savedPw = localStorage.getItem(`oresto_p_pw_${cleanPhone}`) || localStorage.getItem(`oresto_p_pw_${email}`);
-      const savedP = localStorage.getItem("oresto_prestataire");
-      if (savedPw && savedPw === password && savedP) {
-        const parsed = JSON.parse(savedP);
-        setPrestataire(parsed);
-        return { success: true };
+      // Si l'identifiant est un code de parrainage (ex: JEA482), chercher son email
+      if (!email && db && cleanIdent.length >= 4 && !cleanIdent.startsWith("+")) {
+        try {
+          const refSnap = await get(ref(db, `referrals/${cleanIdent.toUpperCase()}`));
+          if (refSnap.exists()) {
+            const refData = refSnap.val();
+            if (refData.email) email = refData.email;
+          }
+        } catch {}
       }
 
-      return { success: false, error: "Numéro/Email ou mot de passe incorrect." };
+      if (!email && cleanPhone) {
+        email = `prestataire_${cleanPhone}@oresto.bj`;
+      }
+
+      if (!email) {
+        return { success: false, error: "Identifiant invalide." };
+      }
+
+      // Authentification Firebase Auth
+      if (!auth) {
+        return { success: false, error: "Service d'authentification indisponible." };
+      }
+
+      const cred = await signInWithEmailAndPassword(auth, email, password);
+      const uid = cred.user.uid;
+
+      if (db) {
+        const snap = await get(ref(db, `prestataires/${uid}`));
+        if (snap.exists()) {
+          const pData = snap.val() as Prestataire;
+          setPrestataire(pData);
+          try { localStorage.setItem("oresto_prestataire", JSON.stringify(pData)); } catch {}
+          return { success: true };
+        }
+      }
+
+      return { success: false, error: "Profil apporteur d'affaires introuvable." };
     } catch (err: any) {
       console.error("Erreur loginPrestataire:", err);
-      return { success: false, error: "Identifiants invalides." };
+      let errMsg = "Email/Téléphone ou mot de passe incorrect.";
+      if (err.code === "auth/user-not-found" || err.code === "auth/wrong-password" || err.code === "auth/invalid-credential") {
+        errMsg = "Identifiants incorrects.";
+      }
+      return { success: false, error: errMsg };
     }
   };
 

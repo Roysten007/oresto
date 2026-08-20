@@ -58,7 +58,7 @@ export default function PrestataireDashboard() {
           const v = allVendors[vId];
           if (v.prestataire_id === pUid || v.referral_code === prestataire.code_referral) {
             const plan = v.subscriptionPlan || "pro";
-            const monthlyComm = plan === "starter" ? 3000 : 5000;
+            const monthlyComm = 1000; // 20% de l'abonnement standard Oresto Pro 5 000 FCFA
             list.push({
               id: vId,
               name: v.name || "Établissement Partenaire",
@@ -73,9 +73,9 @@ export default function PrestataireDashboard() {
         }
         if (list.length === 0 && pUid === "p_demo") {
           setClients([
-            { id: "v_demo", name: "L'Atelier du Chef & Grill", category: "Restaurants", city: "Cotonou", joinedDate: "2026-08-01", subscriptionPlan: "pro", subscriptionStatus: "active", monthlyCommission: 5000 },
-            { id: "v_demo2", name: "KiffStyle Store", category: "Boutique", city: "Cotonou", joinedDate: "2026-08-05", subscriptionPlan: "pro", subscriptionStatus: "active", monthlyCommission: 5000 },
-            { id: "v_demo3", name: "Résidence Palmier Royal", category: "Hôtel", city: "Cotonou", joinedDate: "2026-08-10", subscriptionPlan: "starter", subscriptionStatus: "trial", monthlyCommission: 3000 }
+            { id: "v_demo", name: "L'Atelier du Chef & Grill", category: "Restaurants", city: "Cotonou", joinedDate: "2026-08-01", subscriptionPlan: "pro", subscriptionStatus: "active", monthlyCommission: 1000 },
+            { id: "v_demo2", name: "KiffStyle Store", category: "Boutique", city: "Cotonou", joinedDate: "2026-08-05", subscriptionPlan: "pro", subscriptionStatus: "active", monthlyCommission: 1000 },
+            { id: "v_demo3", name: "Résidence Palmier Royal", category: "Hôtel", city: "Cotonou", joinedDate: "2026-08-10", subscriptionPlan: "starter", subscriptionStatus: "trial", monthlyCommission: 1000 }
           ]);
         } else {
           setClients(list);
@@ -83,8 +83,8 @@ export default function PrestataireDashboard() {
       } else {
         if (pUid === "p_demo") {
           setClients([
-            { id: "v_demo", name: "L'Atelier du Chef & Grill", category: "Restaurants", city: "Cotonou", joinedDate: "2026-08-01", subscriptionPlan: "pro", subscriptionStatus: "active", monthlyCommission: 5000 },
-            { id: "v_demo2", name: "KiffStyle Store", category: "Boutique", city: "Cotonou", joinedDate: "2026-08-05", subscriptionPlan: "pro", subscriptionStatus: "active", monthlyCommission: 5000 }
+            { id: "v_demo", name: "L'Atelier du Chef & Grill", category: "Restaurants", city: "Cotonou", joinedDate: "2026-08-01", subscriptionPlan: "pro", subscriptionStatus: "active", monthlyCommission: 1000 },
+            { id: "v_demo2", name: "KiffStyle Store", category: "Boutique", city: "Cotonou", joinedDate: "2026-08-05", subscriptionPlan: "pro", subscriptionStatus: "active", monthlyCommission: 1000 }
           ]);
         } else {
           setClients([]);
@@ -108,9 +108,9 @@ export default function PrestataireDashboard() {
 
         if (list.length === 0 && pUid === "p_demo") {
           setCommissions([
-            { id: "c1", prestataire_id: "p_demo", client_id: "v_demo", client_name: "L'Atelier du Chef & Grill", mois: "2026-08", montant_abonnement: 25000, montant_commission: 5000, statut: "en_attente", date_paiement: null, created_at: "2026-08-10T10:00:00Z" },
-            { id: "c2", prestataire_id: "p_demo", client_id: "v_demo2", client_name: "KiffStyle Store", mois: "2026-08", montant_abonnement: 25000, montant_commission: 5000, statut: "en_attente", date_paiement: null, created_at: "2026-08-12T14:30:00Z" },
-            { id: "c3", prestataire_id: "p_demo", client_id: "v_demo", client_name: "L'Atelier du Chef & Grill", mois: "2026-07", montant_abonnement: 25000, montant_commission: 5000, statut: "paye", date_paiement: "2026-07-31T18:00:00Z", created_at: "2026-07-10T10:00:00Z" },
+            { id: "c1", prestataire_id: "p_demo", client_id: "v_demo", client_name: "L'Atelier du Chef & Grill", mois: "2026-08", montant_abonnement: 5000, montant_commission: 1000, statut: "en_attente", date_paiement: null, created_at: "2026-08-10T10:00:00Z" },
+            { id: "c2", prestataire_id: "p_demo", client_id: "v_demo2", client_name: "KiffStyle Store", mois: "2026-08", montant_abonnement: 5000, montant_commission: 1000, statut: "en_attente", date_paiement: null, created_at: "2026-08-12T14:30:00Z" },
+            { id: "c3", prestataire_id: "p_demo", client_id: "v_demo", client_name: "L'Atelier du Chef & Grill", mois: "2026-07", montant_abonnement: 5000, montant_commission: 1000, statut: "paye", date_paiement: "2026-07-31T18:00:00Z", created_at: "2026-07-10T10:00:00Z" },
           ]);
         } else {
           setCommissions(list.sort((a, b) => b.created_at.localeCompare(a.created_at)));
@@ -118,9 +118,9 @@ export default function PrestataireDashboard() {
       } else {
         if (pUid === "p_demo") {
           setCommissions([
-            { id: "c1", prestataire_id: "p_demo", client_id: "v_demo", client_name: "L'Atelier du Chef & Grill", mois: "2026-08", montant_abonnement: 25000, montant_commission: 5000, statut: "en_attente", date_paiement: null, created_at: "2026-08-10T10:00:00Z" },
-            { id: "c2", prestataire_id: "p_demo", client_id: "v_demo2", client_name: "KiffStyle Store", mois: "2026-08", montant_abonnement: 25000, montant_commission: 5000, statut: "en_attente", date_paiement: null, created_at: "2026-08-12T14:30:00Z" },
-            { id: "c3", prestataire_id: "p_demo", client_id: "v_demo", client_name: "L'Atelier du Chef & Grill", mois: "2026-07", montant_abonnement: 25000, montant_commission: 5000, statut: "paye", date_paiement: "2026-07-31T18:00:00Z", created_at: "2026-07-10T10:00:00Z" },
+            { id: "c1", prestataire_id: "p_demo", client_id: "v_demo", client_name: "L'Atelier du Chef & Grill", mois: "2026-08", montant_abonnement: 5000, montant_commission: 1000, statut: "en_attente", date_paiement: null, created_at: "2026-08-10T10:00:00Z" },
+            { id: "c2", prestataire_id: "p_demo", client_id: "v_demo2", client_name: "KiffStyle Store", mois: "2026-08", montant_abonnement: 5000, montant_commission: 1000, statut: "en_attente", date_paiement: null, created_at: "2026-08-12T14:30:00Z" },
+            { id: "c3", prestataire_id: "p_demo", client_id: "v_demo", client_name: "L'Atelier du Chef & Grill", mois: "2026-07", montant_abonnement: 5000, montant_commission: 1000, statut: "paye", date_paiement: "2026-07-31T18:00:00Z", created_at: "2026-07-10T10:00:00Z" },
           ]);
         } else {
           setCommissions([]);

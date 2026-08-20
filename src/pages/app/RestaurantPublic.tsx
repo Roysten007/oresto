@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { db } from "@/lib/firebase";
-import { ref, onValue, push, set } from "firebase/database";
+import { ref, onValue, push, set, query, orderByChild, equalTo, get } from "firebase/database";
 import { 
   ShoppingCart, 
   Share2, 
@@ -91,76 +91,73 @@ export default function RestaurantPublic() {
     }, 4500);
 
     const checkVendorBySlug = async () => {
-      // 1. Chercher par index de slug ou fallback sur v_demo si slug match
-      const vendorsRef = ref(db, "vendors");
-      onValue(vendorsRef, (snap) => {
+      // 1. Chercher le vendeur par son slug via query indexée
+      const vendorTargetRef = slug === "demo"
+        ? ref(db, "vendors/v_demo")
+        : query(ref(db, "vendors"), orderByChild("slug"), equalTo(slug));
+
+      unsubVendor = onValue(vendorTargetRef, (snap) => {
+        let matchedVendor: VendorProfile | null = null;
+        let matchedVendorId = "";
+
         if (snap.exists()) {
-          const allVendors = snap.val();
-          let matchedVendor: VendorProfile | null = null;
-          let matchedVendorId = "";
-
-          for (const vId of Object.keys(allVendors)) {
-            const vData = allVendors[vId];
-            if (vData.slug === slug || (slug === "demo" && vId === "v_demo")) {
-              matchedVendor = { id: vId, ...vData };
-              matchedVendorId = vId;
-              break;
-            }
-          }
-
-          if (matchedVendor) {
-            const owner = user?.vendorId === matchedVendorId || user?.id === matchedVendor.userId;
-            setIsOwner(owner);
-            setVendor(matchedVendor);
-            clearTimeout(timeout);
-            setLoading(false);
-
-            // Écouteur des produits pour ce vendeur
-            const productsRef = ref(db, "products");
-            unsubProducts = onValue(productsRef, (prodSnap) => {
-              if (prodSnap.exists()) {
-                const all = prodSnap.val();
-                const list: Product[] = Object.keys(all)
-                  .map(k => ({ id: k, ...all[k] }))
-                  .filter((p: any) => p.vendorId === matchedVendorId && p.available !== false);
-                setProducts(list);
-              } else {
-                setProducts([]);
-              }
-            });
+          const val = snap.val();
+          if (slug === "demo" && val) {
+            matchedVendor = { id: "v_demo", ...val };
+            matchedVendorId = "v_demo";
           } else {
-            // 2. Fallback vitrines de démonstration préconfigurées
-            const demoShowcase = getDemoShowcaseBySlug(slug);
-            if (demoShowcase) {
-              setVendor(demoShowcase.vendor);
-              setProducts(demoShowcase.products);
-              setLoading(false);
-              clearTimeout(timeout);
-              return;
+            const entries = Object.entries(val);
+            if (entries.length > 0) {
+              matchedVendorId = entries[0][0];
+              matchedVendor = { id: matchedVendorId, ...(entries[0][1] as any) };
             }
-
-            // 3. Fallback localStorage si pas encore propagé
-            try {
-              const localSaved = localStorage.getItem("oresto_vendor_profile");
-              if (localSaved) {
-                const parsed = JSON.parse(localSaved);
-                if (parsed.slug === slug || slug === "demo") {
-                  setVendor(parsed);
-                  setLoading(false);
-                  clearTimeout(timeout);
-                }
-              }
-            } catch {}
           }
+        }
+
+        if (matchedVendor) {
+          const owner = user?.vendorId === matchedVendorId || user?.id === matchedVendor.userId;
+          setIsOwner(owner);
+          setVendor(matchedVendor);
+          clearTimeout(timeout);
+          setLoading(false);
+
+          // Écouteur ciblé des produits pour ce vendeur uniquement via index
+          if (unsubProducts) unsubProducts();
+          const productsQuery = query(ref(db, "products"), orderByChild("vendorId"), equalTo(matchedVendorId));
+          unsubProducts = onValue(productsQuery, (prodSnap) => {
+            if (prodSnap.exists()) {
+              const all = prodSnap.val();
+              const list: Product[] = Object.keys(all)
+                .map(k => ({ id: k, ...all[k] }))
+                .filter((p: any) => p.available !== false);
+              setProducts(list);
+            } else {
+              setProducts([]);
+            }
+          });
         } else {
-          // Si snap vendors n'existe pas du tout, vérifier le fallback démo
+          // 2. Fallback vitrines de démonstration préconfigurées
           const demoShowcase = getDemoShowcaseBySlug(slug);
           if (demoShowcase) {
             setVendor(demoShowcase.vendor);
             setProducts(demoShowcase.products);
             setLoading(false);
             clearTimeout(timeout);
+            return;
           }
+
+          // 3. Fallback localStorage si pas encore propagé
+          try {
+            const localSaved = localStorage.getItem("oresto_vendor_profile");
+            if (localSaved) {
+              const parsed = JSON.parse(localSaved);
+              if (parsed.slug === slug || slug === "demo") {
+                setVendor(parsed);
+                setLoading(false);
+                clearTimeout(timeout);
+              }
+            }
+          } catch {}
         }
       });
     };

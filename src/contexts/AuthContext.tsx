@@ -9,7 +9,7 @@ import {
   signInAnonymously,
   sendEmailVerification
 } from "firebase/auth";
-import { ref, get, set, child, onValue } from "firebase/database";
+import { ref, get, set, update, child, onValue } from "firebase/database";
 import { calculateTrialDates } from "@/services/subscriptionService";
 import { dispatchVendorNotification } from "@/services/notificationService";
 
@@ -530,8 +530,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (matchedPrestataireId) {
           const commId = `comm_${Date.now()}`;
           const currentMonth = new Date().toISOString().slice(0, 7);
-          const montantAbonnement = selectedPlan === "starter" ? 15000 : 25000;
-          const montantCommission = Math.round(montantAbonnement * 0.20); // 20% récurrents
+          const montantAbonnement = 5000; // Tarif officiel unique Oresto Pro 5 000 FCFA
+          const montantCommission = Math.round(montantAbonnement * 0.20); // 20% récurrents = 1 000 FCFA
 
           dbUpdates[`commissions/${commId}`] = {
             id: commId,

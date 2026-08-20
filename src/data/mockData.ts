@@ -75,7 +75,6 @@ export interface VendorProfile {
     tiktok?: string;
     website?: string;
   };
-  slug?: string;
   primary_color?: string;
   secondary_color?: string;
   accent_color?: string;

@@ -8,6 +8,7 @@ import { AdminProvider } from "@/contexts/AdminContext";
 import { PrestataireProvider } from "@/contexts/PrestataireContext";
 import PrivateRoute from "@/components/PrivateRoute";
 import AdminRoute from "@/components/AdminRoute";
+import PrestataireRoute from "@/components/PrestataireRoute";
 import ReferralTracker from "@/components/ReferralTracker";
 
 import ProLanding from "./pages/ProLanding";
@@ -80,7 +81,7 @@ const App = () => (
                 {/* Espace Apporteurs d'Affaires / Prestataires */}
                 <Route path="/devenir-prestataire" element={<DevenirPrestataire />} />
                 <Route path="/prestataire/login" element={<PrestataireLogin />} />
-                <Route path="/prestataire/dashboard" element={<PrestataireDashboard />} />
+                <Route path="/prestataire/dashboard" element={<PrestataireRoute><PrestataireDashboard /></PrestataireRoute>} />
 
                 {/* Public Restaurant Site */}
                 <Route path="/r/:slug" element={<RestaurantPublic />} />

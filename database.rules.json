@@ -21,7 +21,8 @@
     },
 
     "prestataires": {
-      ".read": true,
+      ".read": "auth != null",
+      ".indexOn": ["telephone", "email", "code_referral"],
       "$uid": {
         ".write": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).exists() || root.child('users').child(auth.uid).child('role').val() === 'admin')"
       }
@@ -33,7 +34,8 @@
     },
 
     "commissions": {
-      ".read": true,
+      ".read": "auth != null",
+      ".indexOn": ["prestataire_id", "client_id", "mois"],
       "$commissionId": {
         ".write": "auth != null"
       }
@@ -41,9 +43,16 @@
 
     "vendors": {
       ".read": true,
+      ".indexOn": ["slug", "prestataire_id", "userId", "referral_code"],
       "$vendorId": {
-        ".write": true,
+        ".write": "auth != null && (!data.exists() || data.child('userId').val() === auth.uid || newData.child('userId').val() === auth.uid || root.child('admins').child(auth.uid).exists() || root.child('users').child(auth.uid).child('role').val() === 'admin')",
         "totalOrders": {
+          ".write": true
+        },
+        "totalSales": {
+          ".write": true
+        },
+        "revenue": {
           ".write": true
         }
       }
@@ -51,16 +60,22 @@
 
     "products": {
       ".read": true,
-      ".write": true
+      ".indexOn": ["vendorId", "category", "available"],
+      "$productId": {
+        ".write": "auth != null"
+      }
     },
 
     "slugs": {
       ".read": true,
-      ".write": true
+      "$slug": {
+        ".write": "auth != null"
+      }
     },
 
     "orders": {
       ".read": true,
+      ".indexOn": ["vendorId", "clientId", "status", "date"],
       "$orderId": {
         ".write": true
       }
@@ -69,13 +84,14 @@
     "messages": {
       "$orderId": {
         ".read": true,
-        ".write": true
+        ".write": true,
+        ".indexOn": ["timestamp"]
       }
     },
 
     "notifications": {
       "$target": {
-        ".read": true,
+        ".read": "auth != null",
         ".write": true
       }
     }
