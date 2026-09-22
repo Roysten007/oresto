@@ -167,35 +167,39 @@ html {
 
 /* Gradient text utility */
 .text-gradient {
-  background: linear-gradient(135deg, #6633d6, #9470f5);
+  background: linear-gradient(135deg, #FF6B00 0%, #EA580C 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* SasPay Aesthetic Utilities */
+/* Oresto Studio Design System */
 .bg-hero-glow {
-  background: radial-gradient(60% 50% at 18% 8%, rgba(148, 112, 245, 0.20), transparent 60%),
-              radial-gradient(55% 45% at 85% 15%, rgba(123, 77, 232, 0.14), transparent 60%),
-              linear-gradient(180deg, #f4efff 0%, #fbfaff 45%, #ffffff 100%);
+  background: radial-gradient(60% 50% at 20% 8%, rgba(255, 107, 0, 0.08), transparent 60%),
+              radial-gradient(50% 45% at 80% 12%, rgba(234, 88, 12, 0.06), transparent 60%),
+              linear-gradient(180deg, #FFFFFF 0%, #FAFAFA 50%, #F4F4F5 100%);
 }
 
 .bg-dots {
-  background-image: radial-gradient(circle, rgba(124, 77, 232, 0.12) 1.5px, transparent 1.5px);
+  background-image: radial-gradient(circle, rgba(24, 24, 27, 0.07) 1.2px, transparent 1.2px);
+  background-size: 24px 24px;
+}
+
+.bg-dark-dots {
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.08) 1.2px, transparent 1.2px);
   background-size: 24px 24px;
 }
 
 .shadow-float {
-  box-shadow: 0 20px 60px -15px rgba(76, 40, 150, 0.10), 0 8px 20px -8px rgba(76, 40, 150, 0.05);
+  box-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.07), 0 8px 20px -8px rgba(0, 0, 0, 0.04);
 }
 
-.shadow-accent {
-  box-shadow: 0 10px 24px -6px rgba(102, 51, 214, 0.45);
+.shadow-braised {
+  box-shadow: 0 10px 25px -5px rgba(255, 107, 0, 0.40);
 }
 
-.font-accent {
-  font-family: 'Fraunces', serif;
-  font-style: italic;
-  font-weight: 500;
+.shadow-dark-card {
+  box-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
+
 

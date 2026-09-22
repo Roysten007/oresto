@@ -1,6 +1,6 @@
 import React from "react";
 import { BusinessSector } from "./LandingHero";
-import { Wand2, DollarSign, LayoutDashboard, Check, Smartphone, QrCode, BellRing } from "lucide-react";
+import { Wand2, DollarSign, LayoutDashboard, Check } from "lucide-react";
 
 interface LandingSolutionProps {
   activeSector: BusinessSector;
@@ -47,21 +47,21 @@ export default function LandingSolution({ activeSector }: LandingSolutionProps) 
   ];
 
   return (
-    <section id="fonctionnalites" className="py-24 bg-[#fbfaff] relative">
+    <section id="fonctionnalites" className="py-24 bg-[#FAFAFA] relative border-t border-zinc-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-100 text-[#6633d6] text-xs font-bold uppercase tracking-wider mb-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 text-[#EA580C] text-xs font-sub font-black uppercase tracking-wider mb-4">
             LA SOLUTION ORESTO
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0f0a1f] tracking-tight leading-tight">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-black text-zinc-950 tracking-tight leading-tight uppercase">
             Tout ce dont votre établissement a besoin pour{" "}
-            <span className="font-accent italic text-[#6633d6]">
+            <span className="text-[#FF6B00]">
               prospérer en ligne
             </span>
           </h2>
-          <p className="mt-4 text-base sm:text-lg text-slate-600 font-normal">
+          <p className="mt-4 text-base sm:text-lg text-zinc-600 font-sub font-medium">
             Une technologie simple, élégante et redoutablement efficace conçue pour le commerce en Afrique de l'Ouest.
           </p>
         </div>
@@ -73,33 +73,33 @@ export default function LandingSolution({ activeSector }: LandingSolutionProps) 
             return (
               <div
                 key={idx}
-                className="bg-white rounded-3xl p-8 border border-violet-100/90 shadow-[0_8px_30px_rgba(76,40,150,0.04)] hover:shadow-float transition-all duration-300 flex flex-col justify-between"
+                className="bg-white rounded-3xl p-8 border border-zinc-200/90 shadow-sm hover:shadow-float transition-all duration-300 flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-center justify-between mb-6">
-                    <div className="w-12 h-12 rounded-2xl bg-violet-50 text-[#6633d6] flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-2xl bg-orange-50 text-[#FF6B00] flex items-center justify-center border border-orange-100">
                       <Icon className="w-6 h-6" />
                     </div>
-                    <span className="text-xs font-extrabold text-[#6633d6] bg-violet-50 px-2.5 py-1 rounded-lg">
+                    <span className="text-xs font-sub font-black text-[#FF6B00] bg-orange-50 px-2.5 py-1 rounded-lg border border-orange-100">
                       {pillar.num}
                     </span>
                   </div>
 
-                  <h3 className="text-xl font-bold text-[#0f0a1f] tracking-tight mb-2">
+                  <h3 className="text-xl font-heading font-black text-zinc-950 tracking-tight mb-2">
                     {pillar.title}
                   </h3>
-                  <p className="text-xs font-bold text-[#6633d6] mb-4">
+                  <p className="text-xs font-sub font-bold text-[#EA580C] mb-4">
                     {pillar.subtitle}
                   </p>
-                  <p className="text-sm text-slate-600 leading-relaxed font-normal mb-6">
+                  <p className="text-sm text-zinc-600 font-sub leading-relaxed mb-6">
                     {pillar.desc}
                   </p>
                 </div>
 
-                <div className="pt-6 border-t border-slate-100 space-y-2.5">
+                <div className="pt-6 border-t border-zinc-100 space-y-2.5">
                   {pillar.highlights.map((h, i) => (
-                    <div key={i} className="flex items-start gap-2.5 text-xs text-slate-700">
-                      <Check className="w-4 h-4 text-[#6633d6] shrink-0 mt-0.5" />
+                    <div key={i} className="flex items-start gap-2.5 text-xs font-sub font-medium text-zinc-700">
+                      <Check className="w-4 h-4 text-[#FF6B00] shrink-0 mt-0.5" />
                       <span>{h}</span>
                     </div>
                   ))}

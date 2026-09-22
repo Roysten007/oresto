@@ -12,14 +12,14 @@ interface LandingHeroProps {
 export default function LandingHero({ activeSector, onSelectSector }: LandingHeroProps) {
   const sectorData = {
     restaurant: {
-      badge: "RESTAURANTS & MAQUIS",
+      badge: "RESTAURANTS, MAQUIS & FAST-FOODS",
       headline: "la carte digitale de votre restaurant",
       desc: "Menu interactif avec QR Code sur tables, commandes à emporter ou livraison, et encaissement Mobile Money direct sans commission.",
       sampleStore: "L'Atelier du Chef & Grillades",
       sampleLocation: "Haie Vive, Cotonou",
-      kpiToday: "19 commandes servies",
+      kpiToday: "19 repas servis",
       kpiRevenue: "92 500 FCFA",
-      orderItem: "Poulet Braisé & Alloco",
+      orderItem: "Poulet Braisé & Alloco Pimenté",
       orderPrice: "5 500 FCFA",
       orderStatus: "En cuisine • Table 04",
       momoMethod: "MTN MoMo",
@@ -63,31 +63,32 @@ export default function LandingHero({ activeSector, onSelectSector }: LandingHer
         
         {/* Top Centered Header Content */}
         <div className="text-center max-w-4xl mx-auto mb-12 sm:mb-16">
-          {/* SasPay-style Pill Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-100/80 border border-violet-200/70 text-[#6633d6] text-xs font-bold tracking-wide mb-6 shadow-sm">
-            <span className="w-2 h-2 rounded-full bg-[#6633d6] animate-pulse" />
-            <span>NOUVEAU • 14 JOURS D'ESSAI 100% GRATUITS SANS CARTE</span>
+          
+          {/* Badge Pill with Orange Braisé Accent */}
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-50 border border-orange-200 text-[#EA580C] text-xs font-sub font-black uppercase tracking-wider mb-6 shadow-sm">
+            <span className="w-2 h-2 rounded-full bg-[#FF6B00] animate-pulse" />
+            <span>ESSAI 14 JOURS 100% GRATUIT • SANS CARTE BANCAIRE</span>
           </div>
 
-          {/* Main Huge Typography Headline */}
-          <h1 className="text-4xl sm:text-6xl lg:text-[68px] font-black text-[#0f0a1f] tracking-tight leading-[1.08] mb-6">
-            La couche tout-en-un pour{" "}
-            <span className="font-accent italic text-[#6633d6]">
+          {/* Massif & Percutant Montserrat Headline */}
+          <h1 className="text-4xl sm:text-6xl lg:text-[68px] font-heading font-black text-zinc-950 tracking-tight leading-[1.08] mb-6 uppercase">
+            La plateforme tout-en-un pour{" "}
+            <span className="text-[#FF6B00]">
               vendre & encaisser
             </span>{" "}
             sans intermédiaire.
           </h1>
 
-          {/* Subtitle */}
-          <p className="text-lg sm:text-xl text-slate-600 font-normal max-w-2xl mx-auto leading-relaxed mb-8">
-            Créez votre site professionnel en 12 minutes. Vos clients commandent en 3 clics, et vous recevez l'argent directement par Mobile Money (0% de commission).
+          {/* Subtitle with Outfit font */}
+          <p className="text-lg sm:text-xl text-zinc-600 font-sub font-medium max-w-2xl mx-auto leading-relaxed mb-8">
+            Créez votre site professionnel en 12 minutes. Vos clients commandent en 3 clics, et vous recevez 100% de l'argent directement par Mobile Money (0% de commission).
           </p>
 
-          {/* Dual Call To Actions */}
+          {/* Dual Action Buttons (10% Accent Orange Braisé) */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
             <Link
               to="/register"
-              className="w-full sm:w-auto px-8 py-4 rounded-full bg-[#6633d6] hover:bg-[#5727c7] text-white font-extrabold text-sm sm:text-base shadow-[0_10px_24px_-6px_rgba(102,51,214,0.45)] hover:shadow-[0_16px_32px_-6px_rgba(102,51,214,0.6)] transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 group"
+              className="w-full sm:w-auto px-8 py-4 rounded-full bg-[#FF6B00] hover:bg-[#EA580C] text-white font-sub font-black text-sm sm:text-base uppercase tracking-wider shadow-braised hover:shadow-[0_16px_32px_-6px_rgba(255,107,0,0.55)] transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 group"
             >
               <span>Démarrer mes 14 jours gratuits</span>
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
@@ -95,38 +96,38 @@ export default function LandingHero({ activeSector, onSelectSector }: LandingHer
 
             <a
               href="#demo"
-              className="w-full sm:w-auto px-7 py-4 rounded-full bg-white hover:bg-violet-50/60 text-slate-700 font-bold text-sm sm:text-base border border-violet-200/80 shadow-sm transition-all"
+              className="w-full sm:w-auto px-7 py-4 rounded-full bg-white hover:bg-zinc-50 text-zinc-800 font-sub font-bold text-sm sm:text-base border border-zinc-300 shadow-sm transition-all"
             >
               Voir la démo en direct
             </a>
           </div>
 
           {/* Micro Reassurances */}
-          <div className="flex flex-wrap items-center justify-center gap-6 text-xs font-semibold text-slate-500">
+          <div className="flex flex-wrap items-center justify-center gap-6 text-xs font-sub font-bold text-zinc-500 uppercase tracking-wide">
             <div className="flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-[#6633d6]" />
+              <ShieldCheck className="w-4 h-4 text-[#FF6B00]" />
               <span>Aucune carte bancaire requise</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-[#6633d6]" />
-              <span>Mise en ligne en 12 minutes chrono</span>
+              <CheckCircle2 className="w-4 h-4 text-[#FF6B00]" />
+              <span>Mise en ligne en 12 minutes</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <Zap className="w-4 h-4 text-[#6633d6]" />
-              <span>0% commission MoMo</span>
+              <Zap className="w-4 h-4 text-[#FF6B00]" />
+              <span>0% de commission MoMo</span>
             </div>
           </div>
         </div>
 
-        {/* 3-Profile Selector Tabs (SasPay Style) */}
+        {/* 3-Profile Selector Tabs */}
         <div id="solutions" className="max-w-2xl mx-auto mb-10">
-          <div className="p-1.5 rounded-full bg-white border border-violet-100 shadow-[0_4px_20px_-4px_rgba(76,40,150,0.06)] grid grid-cols-3 gap-1">
+          <div className="p-1.5 rounded-full bg-white border border-zinc-200 shadow-sm grid grid-cols-3 gap-1">
             <button
               onClick={() => onSelectSector("restaurant")}
-              className={`py-3 px-3 rounded-full text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+              className={`py-3 px-3 rounded-full text-xs sm:text-sm font-sub font-bold transition-all flex items-center justify-center gap-2 ${
                 activeSector === "restaurant"
-                  ? "bg-[#6633d6] text-white shadow-[0_4px_12px_rgba(102,51,214,0.35)]"
-                  : "text-slate-600 hover:text-[#6633d6] hover:bg-violet-50"
+                  ? "bg-[#FF6B00] text-white shadow-braised font-black"
+                  : "text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50"
               }`}
             >
               <UtensilsCrossed className="w-4 h-4 shrink-0" />
@@ -135,10 +136,10 @@ export default function LandingHero({ activeSector, onSelectSector }: LandingHer
 
             <button
               onClick={() => onSelectSector("ecommerce")}
-              className={`py-3 px-3 rounded-full text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+              className={`py-3 px-3 rounded-full text-xs sm:text-sm font-sub font-bold transition-all flex items-center justify-center gap-2 ${
                 activeSector === "ecommerce"
-                  ? "bg-[#6633d6] text-white shadow-[0_4px_12px_rgba(102,51,214,0.35)]"
-                  : "text-slate-600 hover:text-[#6633d6] hover:bg-violet-50"
+                  ? "bg-[#FF6B00] text-white shadow-braised font-black"
+                  : "text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50"
               }`}
             >
               <Store className="w-4 h-4 shrink-0" />
@@ -147,10 +148,10 @@ export default function LandingHero({ activeSector, onSelectSector }: LandingHer
 
             <button
               onClick={() => onSelectSector("hotel")}
-              className={`py-3 px-3 rounded-full text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+              className={`py-3 px-3 rounded-full text-xs sm:text-sm font-sub font-bold transition-all flex items-center justify-center gap-2 ${
                 activeSector === "hotel"
-                  ? "bg-[#6633d6] text-white shadow-[0_4px_12px_rgba(102,51,214,0.35)]"
-                  : "text-slate-600 hover:text-[#6633d6] hover:bg-violet-50"
+                  ? "bg-[#FF6B00] text-white shadow-braised font-black"
+                  : "text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50"
               }`}
             >
               <Building2 className="w-4 h-4 shrink-0" />
@@ -159,20 +160,22 @@ export default function LandingHero({ activeSector, onSelectSector }: LandingHer
           </div>
         </div>
 
-        {/* Floating High-Fidelity Mockup Container (SasPay Signature) */}
+        {/* Structured Dark Demo Mockup (#0A0A0A) as explicitly requested by user */}
         <div className="max-w-5xl mx-auto">
-          <div className="bg-white rounded-3xl sm:rounded-[32px] border border-violet-100/90 shadow-float p-6 sm:p-10 relative">
+          <div className="bg-[#0A0A0A] rounded-3xl sm:rounded-[36px] border border-zinc-800 shadow-dark-card p-6 sm:p-10 relative text-white">
             
-            {/* Window Top Bar */}
-            <div className="flex items-center justify-between pb-6 mb-6 border-b border-slate-100">
+            {/* Top Bar */}
+            <div className="flex items-center justify-between pb-6 mb-6 border-b border-zinc-800">
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-red-400/80" />
-                <div className="w-3 h-3 rounded-full bg-amber-400/80" />
-                <div className="w-3 h-3 rounded-full bg-emerald-400/80" />
-                <span className="text-xs font-mono text-slate-400 ml-3">oresto.app/{activeSector === 'restaurant' ? 'le-chef' : activeSector === 'ecommerce' ? 'moda-cotonou' : 'villa-oasis'}</span>
+                <div className="w-3 h-3 rounded-full bg-zinc-700" />
+                <div className="w-3 h-3 rounded-full bg-zinc-700" />
+                <div className="w-3 h-3 rounded-full bg-zinc-700" />
+                <span className="text-xs font-mono text-zinc-400 ml-3">
+                  oresto.app/{activeSector === 'restaurant' ? 'le-chef' : activeSector === 'ecommerce' ? 'moda-cotonou' : 'villa-oasis'}
+                </span>
               </div>
-              <div className="flex items-center gap-2 text-xs font-bold text-[#6633d6] bg-violet-50 px-3 py-1 rounded-full border border-violet-100">
-                <span className="w-2 h-2 rounded-full bg-[#6633d6] animate-ping" />
+              <div className="flex items-center gap-2 text-xs font-sub font-bold text-[#FF6B00] bg-orange-950/40 px-3 py-1 rounded-full border border-orange-800/50">
+                <span className="w-2 h-2 rounded-full bg-[#FF6B00] animate-ping" />
                 <span>En direct • Ventes actives</span>
               </div>
             </div>
@@ -180,39 +183,43 @@ export default function LandingHero({ activeSector, onSelectSector }: LandingHer
             {/* Split View Mockup */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
               
-              {/* Left Column: Live Customer Mobile Experience */}
-              <div className="lg:col-span-5 bg-[#fbfaff] rounded-2xl p-5 border border-violet-100/80 space-y-4">
+              {/* Left Column: Live Customer Mobile Experience on dark slate */}
+              <div className="lg:col-span-5 bg-zinc-900/90 rounded-2xl p-5 border border-zinc-800 space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#6633d6]">Vitrine Client</span>
-                    <h3 className="text-base font-extrabold text-[#0f0a1f]">{current.sampleStore}</h3>
-                    <p className="text-[11px] text-slate-500">{current.sampleLocation}</p>
+                    <span className="text-[10px] font-sub font-black uppercase tracking-wider text-[#FF6B00]">
+                      Vitrine Client
+                    </span>
+                    <h3 className="text-base font-heading font-black text-white">{current.sampleStore}</h3>
+                    <p className="text-[11px] text-zinc-400 font-sub">{current.sampleLocation}</p>
                   </div>
-                  <div className="w-8 h-8 rounded-xl bg-violet-100 text-[#6633d6] flex items-center justify-center text-xs font-bold">
+                  <div className="w-8 h-8 rounded-xl bg-zinc-800 text-[#FF6B00] flex items-center justify-center text-xs font-bold border border-zinc-700">
                     QR
                   </div>
                 </div>
 
-                <div className="bg-white rounded-xl p-3.5 border border-violet-100 shadow-sm flex items-center justify-between">
+                <div className="bg-zinc-950 rounded-xl p-3.5 border border-zinc-800 shadow-sm flex items-center justify-between">
                   <div>
-                    <h4 className="text-xs font-bold text-slate-900">{current.orderItem}</h4>
-                    <span className="text-xs font-extrabold text-[#6633d6]">{current.orderPrice}</span>
+                    <h4 className="text-xs font-sub font-bold text-white">{current.orderItem}</h4>
+                    <span className="text-xs font-heading font-black text-[#FF6B00]">{current.orderPrice}</span>
                   </div>
-                  <span className="text-[10px] font-bold px-2 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-100">
+                  <span className="text-[10px] font-sub font-bold px-2 py-1 rounded-lg bg-emerald-950 text-emerald-400 border border-emerald-800/60">
                     Ajouté au panier
                   </span>
                 </div>
 
                 {/* Instant Mobile Money checkout simulator */}
-                <div className="bg-white rounded-xl p-4 border border-violet-100 shadow-sm space-y-3">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-slate-500 font-medium">Paiement direct sécurisé :</span>
-                    <span className="font-extrabold text-slate-900">{current.momoMethod}</span>
+                <div className="bg-zinc-950 rounded-xl p-4 border border-zinc-800 shadow-sm space-y-3">
+                  <div className="flex items-center justify-between text-xs font-sub">
+                    <span className="text-zinc-400 font-medium">Paiement direct sécurisé :</span>
+                    <span className="font-bold text-white bg-zinc-800 px-2 py-0.5 rounded border border-zinc-700">
+                      {current.momoMethod}
+                    </span>
                   </div>
-                  <div className="flex items-center gap-2 p-2.5 rounded-lg bg-violet-50/70 border border-violet-100 text-xs">
-                    <ShieldCheck className="w-4 h-4 text-[#6633d6] shrink-0" />
-                    <span className="text-slate-700 text-[11px] leading-tight">
-                      Paiement validé immédiatement sur le compte du propriétaire.
+                  <div className="flex items-center gap-2 p-2.5 rounded-lg bg-orange-950/20 border border-orange-900/40 text-xs">
+                    <ShieldCheck className="w-4 h-4 text-[#FF6B00] shrink-0" />
+                    <span className="text-zinc-300 text-[11px] font-sub leading-tight">
+                      Paiement versé directement sur le compte MoMo du gérant.
                     </span>
                   </div>
                 </div>
@@ -223,40 +230,40 @@ export default function LandingHero({ activeSector, onSelectSector }: LandingHer
                 
                 {/* Real-time KPIs Banner */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 rounded-2xl bg-[#fbfaff] border border-violet-100">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Activité du jour</span>
-                    <p className="text-lg sm:text-xl font-extrabold text-[#0f0a1f] mt-1">{current.kpiToday}</p>
+                  <div className="p-4 rounded-2xl bg-zinc-900/80 border border-zinc-800">
+                    <span className="text-[10px] font-sub font-bold uppercase tracking-wider text-zinc-400">Activité du jour</span>
+                    <p className="text-lg sm:text-xl font-heading font-black text-white mt-1">{current.kpiToday}</p>
                   </div>
-                  <div className="p-4 rounded-2xl bg-[#fbfaff] border border-violet-100">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#6633d6]">Encaissé (0% frais)</span>
-                    <p className="text-lg sm:text-xl font-extrabold text-[#6633d6] mt-1">{current.kpiRevenue}</p>
+                  <div className="p-4 rounded-2xl bg-zinc-900/80 border border-zinc-800">
+                    <span className="text-[10px] font-sub font-bold uppercase tracking-wider text-[#FF6B00]">Encaissé (0% frais)</span>
+                    <p className="text-lg sm:text-xl font-heading font-black text-[#FF6B00] mt-1">{current.kpiRevenue}</p>
                   </div>
                 </div>
 
                 {/* Live Order Card in merchant dashboard */}
-                <div className="p-5 rounded-2xl bg-white border-2 border-violet-200/80 shadow-sm space-y-3">
+                <div className="p-5 rounded-2xl bg-zinc-900 border-2 border-orange-500/40 shadow-sm space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
-                      <span className="text-xs font-bold text-slate-900">Nouvelle commande confirmée</span>
+                      <span className="text-xs font-sub font-bold text-white">Nouvelle commande confirmée</span>
                     </div>
-                    <span className="text-[11px] font-mono text-slate-400">À l'instant</span>
+                    <span className="text-[11px] font-mono text-zinc-400">À l'instant</span>
                   </div>
 
-                  <div className="flex items-center justify-between py-2 border-y border-slate-100">
+                  <div className="flex items-center justify-between py-2 border-y border-zinc-800">
                     <div>
-                      <p className="text-sm font-bold text-[#0f0a1f]">{current.orderItem}</p>
-                      <p className="text-xs text-slate-500">{current.orderStatus}</p>
+                      <p className="text-sm font-heading font-bold text-white">{current.orderItem}</p>
+                      <p className="text-xs text-zinc-400 font-sub">{current.orderStatus}</p>
                     </div>
                     <div className="text-right">
-                      <span className="text-sm font-extrabold text-[#6633d6]">{current.orderPrice}</span>
-                      <p className="text-[10px] font-bold text-emerald-600">Reçu via {current.momoMethod}</p>
+                      <span className="text-sm font-heading font-black text-[#FF6B00]">{current.orderPrice}</span>
+                      <p className="text-[10px] font-sub font-bold text-emerald-400">Reçu via {current.momoMethod}</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between text-xs text-slate-500">
+                  <div className="flex items-center justify-between text-xs font-sub text-zinc-400">
                     <span>Réf : {current.momoRef}</span>
-                    <span className="font-bold text-[#6633d6]">Commission prélevée : 0 FCFA</span>
+                    <span className="font-bold text-white">Commission prélevée : 0 FCFA</span>
                   </div>
                 </div>
 
@@ -271,3 +278,5 @@ export default function LandingHero({ activeSector, onSelectSector }: LandingHer
     </section>
   );
 }
+
+export { LandingHero };

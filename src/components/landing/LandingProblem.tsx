@@ -1,6 +1,6 @@
 import React from "react";
 import { BusinessSector } from "./LandingHero";
-import { AlertCircle, Clock, DollarSign, MessageSquare, ArrowRight } from "lucide-react";
+import { AlertCircle, Clock, DollarSign, MessageSquare } from "lucide-react";
 
 interface LandingProblemProps {
   activeSector: BusinessSector;
@@ -79,19 +79,19 @@ export default function LandingProblem({ activeSector }: LandingProblemProps) {
   const current = problemContent[activeSector];
 
   return (
-    <section className="py-24 bg-[#fbfaff] relative">
+    <section className="py-24 bg-[#FAFAFA] relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
         <div className="max-w-3xl mb-16">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-100 text-[#6633d6] text-xs font-bold uppercase tracking-wider mb-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 text-[#EA580C] text-xs font-sub font-black uppercase tracking-wider mb-4">
             <AlertCircle className="w-3.5 h-3.5" />
             {current.tag}
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0f0a1f] tracking-tight leading-tight">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-black text-zinc-950 tracking-tight leading-tight uppercase">
             {current.title}
           </h2>
-          <p className="mt-4 text-base sm:text-lg text-slate-600 font-normal leading-relaxed">
+          <p className="mt-4 text-base sm:text-lg text-zinc-600 font-sub font-normal leading-relaxed">
             {current.desc}
           </p>
         </div>
@@ -103,16 +103,16 @@ export default function LandingProblem({ activeSector }: LandingProblemProps) {
             return (
               <div
                 key={idx}
-                className="bg-white rounded-3xl p-8 border border-violet-100/90 shadow-[0_8px_30px_rgba(76,40,150,0.04)] hover:shadow-float transition-all duration-300 flex flex-col justify-between group"
+                className="bg-white rounded-3xl p-8 border border-zinc-200/90 shadow-sm hover:shadow-float transition-all duration-300 flex flex-col justify-between group"
               >
                 <div>
-                  <div className="w-12 h-12 rounded-2xl bg-violet-50 text-[#6633d6] flex items-center justify-center mb-6 group-hover:scale-105 transition-transform">
+                  <div className="w-12 h-12 rounded-2xl bg-orange-50 text-[#FF6B00] flex items-center justify-center mb-6 group-hover:scale-105 transition-transform border border-orange-100">
                     <Icon className="w-6 h-6" />
                   </div>
-                  <h3 className="text-lg sm:text-xl font-bold text-[#0f0a1f] tracking-tight mb-3">
+                  <h3 className="text-lg sm:text-xl font-heading font-black text-zinc-950 tracking-tight mb-3">
                     {card.title}
                   </h3>
-                  <p className="text-sm text-slate-600 leading-relaxed font-normal">
+                  <p className="text-sm text-zinc-600 font-sub leading-relaxed">
                     {card.desc}
                   </p>
                 </div>

@@ -36,22 +36,22 @@ export function LandingFAQ() {
   };
 
   return (
-    <section id="faq" className="py-24 bg-[#fbfaff] relative border-t border-violet-100/60">
+    <section id="faq" className="py-24 bg-[#FAFAFA] relative border-t border-zinc-200">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-100 text-[#6633d6] text-xs font-bold uppercase tracking-wider mb-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 text-[#EA580C] text-xs font-sub font-black uppercase tracking-wider mb-4">
             <HelpCircle className="w-3.5 h-3.5" />
             QUESTIONS FRÉQUENTES
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0f0a1f] tracking-tight leading-tight">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-black text-zinc-950 tracking-tight leading-tight uppercase">
             Tout ce que vous devez savoir avant de{" "}
-            <span className="font-accent italic text-[#6633d6]">
+            <span className="text-[#FF6B00]">
               commencer
             </span>
           </h2>
-          <p className="mt-4 text-base sm:text-lg text-slate-600 font-normal">
+          <p className="mt-4 text-base sm:text-lg text-zinc-600 font-sub font-medium">
             Des réponses claires et sans jargon sur le fonctionnement de la plateforme.
           </p>
         </div>
@@ -65,20 +65,20 @@ export function LandingFAQ() {
                 key={index}
                 className={`rounded-2xl transition-all duration-200 overflow-hidden bg-white border ${
                   isOpen
-                    ? "border-[#6633d6]/40 shadow-[0_8px_30px_rgba(102,51,214,0.08)]"
-                    : "border-violet-100 hover:border-violet-200"
+                    ? "border-orange-500/50 shadow-md"
+                    : "border-zinc-200 hover:border-zinc-300"
                 }`}
               >
                 <button
                   onClick={() => toggleFAQ(index)}
                   className="w-full py-5 px-6 text-left flex items-center justify-between gap-4 focus:outline-none"
                 >
-                  <span className="font-bold text-base sm:text-lg text-[#0f0a1f]">
+                  <span className="font-heading font-bold text-base sm:text-lg text-zinc-950">
                     {faq.q}
                   </span>
                   <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-transform duration-200 ${
-                      isOpen ? "rotate-180 bg-[#6633d6] text-white" : "bg-violet-50 text-slate-600"
+                      isOpen ? "rotate-180 bg-[#FF6B00] text-white" : "bg-zinc-100 text-zinc-500"
                     }`}
                   >
                     <ChevronDown className="w-4 h-4" />
@@ -86,7 +86,7 @@ export function LandingFAQ() {
                 </button>
 
                 {isOpen && (
-                  <div className="px-6 pb-6 pt-1 text-slate-600 text-sm sm:text-base leading-relaxed border-t border-slate-100 mt-1 font-normal">
+                  <div className="px-6 pb-6 pt-1 text-zinc-600 font-sub text-sm sm:text-base leading-relaxed border-t border-zinc-100 mt-1">
                     {faq.a}
                   </div>
                 )}
@@ -95,15 +95,15 @@ export function LandingFAQ() {
           })}
         </div>
 
-        {/* WhatsApp Callout Card (SasPay style) */}
-        <div className="p-6 sm:p-8 rounded-3xl bg-white border border-violet-100/90 shadow-[0_8px_30px_rgba(76,40,150,0.04)] flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
+        {/* WhatsApp Callout Card */}
+        <div className="p-6 sm:p-8 rounded-3xl bg-white border border-zinc-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-violet-50 text-[#6633d6] flex items-center justify-center shrink-0">
+            <div className="w-12 h-12 rounded-2xl bg-orange-50 text-[#FF6B00] flex items-center justify-center shrink-0 border border-orange-100">
               <MessageCircle className="w-6 h-6" />
             </div>
             <div>
-              <h4 className="font-bold text-[#0f0a1f] text-base sm:text-lg">Vous avez une question spécifique ?</h4>
-              <p className="text-xs sm:text-sm text-slate-500 font-medium">Échangez directement avec un conseiller Oresto au Bénin sur WhatsApp.</p>
+              <h4 className="font-heading font-black text-zinc-950 text-base sm:text-lg uppercase">Vous avez une question spécifique ?</h4>
+              <p className="text-xs sm:text-sm text-zinc-500 font-sub">Échangez directement avec un conseiller Oresto au Bénin sur WhatsApp.</p>
             </div>
           </div>
 
@@ -111,7 +111,7 @@ export function LandingFAQ() {
             href="https://wa.me/2290143405361?text=Bonjour%20Oresto%2C%20j'ai%20une%20question%20sur%20la%20plateforme"
             target="_blank"
             rel="noopener noreferrer"
-            className="px-6 py-3 rounded-full bg-[#6633d6] hover:bg-[#5727c7] text-white font-bold text-sm flex items-center gap-2 shadow-[0_4px_14px_rgba(102,51,214,0.35)] transition-all shrink-0"
+            className="px-6 py-3 rounded-full bg-[#FF6B00] hover:bg-[#EA580C] text-white font-sub font-black text-sm uppercase tracking-wider flex items-center gap-2 shadow-braised transition-all shrink-0"
           >
             <PhoneCall className="w-4 h-4" />
             <span>+229 01 43 40 53 61</span>

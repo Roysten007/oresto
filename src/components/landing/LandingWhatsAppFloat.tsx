@@ -14,16 +14,16 @@ export function LandingWhatsAppFloat() {
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2 pointer-events-auto">
       {/* Welcome Tooltip */}
       {showTooltip && (
-        <div className="relative bg-white text-slate-800 text-xs py-2.5 px-3.5 rounded-2xl shadow-float border border-violet-100 max-w-[230px] flex items-start justify-between gap-2 animate-bounce-slow">
+        <div className="relative bg-white text-zinc-900 text-xs py-2.5 px-3.5 rounded-2xl shadow-float border border-zinc-200 max-w-[230px] flex items-start justify-between gap-2 animate-bounce-slow">
           <div>
-            <p className="font-bold text-[#6633d6]">Besoin d'aide ?</p>
-            <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">
-              Échangez directement avec un conseiller local au Bénin sur WhatsApp !
+            <p className="font-heading font-black text-[#EA580C] uppercase tracking-wide">Besoin d'aide ?</p>
+            <p className="text-[11px] text-zinc-500 font-sub mt-0.5 leading-snug">
+              Échangez directement avec notre équipe locale au Bénin sur WhatsApp !
             </p>
           </div>
           <button
             onClick={() => setShowTooltip(false)}
-            className="text-slate-400 hover:text-slate-600 p-0.5"
+            className="text-zinc-400 hover:text-zinc-600 p-0.5"
             aria-label="Fermer"
           >
             <X className="w-3.5 h-3.5" />
@@ -36,11 +36,11 @@ export function LandingWhatsAppFloat() {
         href={whatsappUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="group relative flex items-center justify-center w-14 h-14 rounded-full bg-[#6633d6] hover:bg-[#5727c7] text-white shadow-[0_10px_25px_-5px_rgba(102,51,214,0.5)] hover:scale-105 active:scale-95 transition-all duration-300"
+        className="group relative flex items-center justify-center w-14 h-14 rounded-full bg-[#FF6B00] hover:bg-[#EA580C] text-white shadow-braised hover:scale-105 active:scale-95 transition-all duration-300"
         aria-label="Contacter le support Oresto sur WhatsApp"
       >
         {/* Pulsing ring */}
-        <span className="absolute -inset-1 rounded-full bg-violet-400/30 animate-ping pointer-events-none" />
+        <span className="absolute -inset-1 rounded-full bg-orange-400/30 animate-ping pointer-events-none" />
 
         {/* WhatsApp Icon */}
         <MessageCircle className="w-7 h-7 fill-current relative z-10" />

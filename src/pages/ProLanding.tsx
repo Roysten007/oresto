@@ -16,12 +16,12 @@ export default function ProLanding() {
   const [activeSector, setActiveSector] = useState<BusinessSector>('restaurant');
 
   return (
-    <div className="min-h-screen bg-[#fbfaff] text-[#0f0a1f] font-jakarta selection:bg-violet-200 selection:text-[#6633d6] overflow-x-hidden">
+    <div className="min-h-screen bg-[#FAFAFA] text-zinc-900 font-sub selection:bg-orange-100 selection:text-[#EA580C] overflow-x-hidden">
       {/* Sticky Navigation Flottante */}
       <Navbar />
 
       <main>
-        {/* 1. Hero Section with Sector Switcher & Live Command Center (SasPay Style) */}
+        {/* 1. Hero Section with Sector Switcher & Structured Dark (#0A0A0A) Command Center */}
         <LandingHero
           activeSector={activeSector}
           onSelectSector={setActiveSector}
@@ -43,7 +43,7 @@ export default function ProLanding() {
           <LandingSolution activeSector={activeSector} />
         </div>
 
-        {/* 6. Interactive Demo (Customer Experience + Instant Merchant Alert) */}
+        {/* 6. Interactive Structured Dark Demo (#0A0A0A) */}
         <div id="demo">
           <LandingInteractiveDemo
             activeSector={activeSector}
@@ -68,7 +68,7 @@ export default function ProLanding() {
       {/* Floating WhatsApp Action (+229 01 43 40 53 61) */}
       <LandingWhatsAppFloat />
 
-      {/* Modernized SasPay-Style Footer */}
+      {/* Modernized Footer */}
       <Footer />
     </div>
   );
