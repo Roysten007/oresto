@@ -1,5 +1,6 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { BusinessSector } from "./LandingHero";
+import { Smartphone, Bell, Check, ShoppingBag, ArrowRight, Zap, RefreshCw } from "lucide-react";
 
 interface LandingInteractiveDemoProps {
   activeSector: BusinessSector;
@@ -7,232 +8,186 @@ interface LandingInteractiveDemoProps {
 }
 
 export default function LandingInteractiveDemo({ activeSector, onSelectSector }: LandingInteractiveDemoProps) {
-  const [cartCount, setCartCount] = useState(1);
-  const [orderSent, setOrderSent] = useState(false);
-  const [demoOrders, setDemoOrders] = useState([
-    { id: "#042", item: "Poulet Braisé & Alloco", total: "4 500 F", status: "En cuisine", time: "À l'instant" }
-  ]);
+  const [orderPlaced, setOrderPlaced] = useState(false);
+  const [alertBeep, setAlertBeep] = useState(false);
 
-  const demoCatalogs = {
+  const demoItems = {
     restaurant: {
-      name: "Restaurant Le Bénin & Grillades",
-      slug: "restaurant-le-benin",
-      category: "Cuisine & Grillades",
-      item: {
-        name: "Poulet Braisé Signature du Chef",
-        desc: "Mariné 24h aux épices béninoises, braisé au charbon de bois. Servi avec alloco.",
-        price: 4500,
-        image: "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?q=80&w=600&auto=format&fit=crop"
-      }
+      name: "Poulet Braisé & Alloco Pimenté",
+      desc: "Spécialité marinée aux épices du Bénin, banane plantain frite dorée.",
+      price: 4500,
+      customer: "Amina K. (Table 04)",
+      tag: "Restaurant",
     },
     ecommerce: {
-      name: "KiffStyle Fashion Store",
-      slug: "kiffstyle-store",
-      category: "Sneakers & Vêtements",
-      item: {
-        name: "Sneakers Streetwear Urban Pro",
-        desc: "Cuir respirant, semelle confort amortissante. Pointures 40 à 45 disponibles.",
-        price: 18500,
-        image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=600&auto=format&fit=crop"
-      }
+      name: "Ensemble Wax Moderne (Taille L)",
+      desc: "Coton 100% supérieur, finitions haute couture faites main à Cotonou.",
+      price: 22000,
+      customer: "Marcelle D. (Livraison Haie Vive)",
+      tag: "Boutique",
     },
     hotel: {
-      name: "Palmier Royal Résidence",
-      slug: "palmier-royal",
-      category: "Chambres & Suites",
-      item: {
-        name: "Suite Junior Deluxe Vue Jardin",
-        desc: "Lit King Size, climatisation, Smart TV, Wi-Fi haut débit et petit déjeuner inclus.",
-        price: 25000,
-        image: "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=600&auto=format&fit=crop"
-      }
-    }
+      name: "Suite Vue Lagune (2 Nuitées)",
+      desc: "Climatisation, lit King size, petit-déjeuner inclus et terrasse privée.",
+      price: 80000,
+      customer: "Jean-Paul E. (Réservation Directe)",
+      tag: "Hôtel",
+    },
   };
 
-  const current = demoCatalogs[activeSector];
+  const item = demoItems[activeSector];
 
   const handleSimulateOrder = () => {
-    setOrderSent(true);
-    const newOrd = {
-      id: `#0${Math.floor(50 + Math.random() * 40)}`,
-      item: `${cartCount}x ${current.item.name.split(" ")[0]}`,
-      total: `${(current.item.price * cartCount).toLocaleString()} F`,
-      status: "MoMo Direct",
-      time: "À l'instant"
-    };
-    setDemoOrders(prev => [newOrd, ...prev.slice(0, 3)]);
+    setOrderPlaced(true);
+    setAlertBeep(true);
     setTimeout(() => {
-      setOrderSent(false);
-    }, 4000);
+      setAlertBeep(false);
+    }, 2500);
+  };
+
+  const handleReset = () => {
+    setOrderPlaced(false);
+    setAlertBeep(false);
   };
 
   return (
-    <section id="demo" className="py-20 sm:py-28 bg-[#090909] text-white relative border-t border-white/5">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="demo" className="py-24 bg-[#fbfaff] relative border-t border-violet-100/60">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-14 space-y-4">
-          <span className="px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-black uppercase tracking-widest inline-flex items-center gap-2">
-            <i className="fa-solid fa-flask"></i>
+        {/* Section Header */}
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-100 text-[#6633d6] text-xs font-bold uppercase tracking-wider mb-4">
+            <Zap className="w-3.5 h-3.5" />
             SIMULATION EN DIRECT
-          </span>
-          <h2 className="font-heading font-black text-3xl sm:text-4xl lg:text-5xl text-white tracking-tight">
-            Ne nous croyez pas sur parole. Testez l'expérience en temps réel.
+          </div>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0f0a1f] tracking-tight leading-tight">
+            Voyez comment une vente se passe en{" "}
+            <span className="font-accent italic text-[#6633d6]">
+              temps réel
+            </span>
           </h2>
-          <p className="text-white/60 text-sm sm:text-base font-medium">
-            Passez une commande test à gauche et observez la notification instantanée arriver sur le tableau de bord commerçant à droite :
+          <p className="mt-4 text-base sm:text-lg text-slate-600 font-normal">
+            Passez une commande test à gauche et observez instantanément la notification sonore et le ticket apparaître dans le tableau de bord gérant à droite.
           </p>
         </div>
 
-        {/* Sector Tabs Switcher */}
-        <div className="flex justify-center gap-2 mb-10">
-          {(["restaurant", "ecommerce", "hotel"] as BusinessSector[]).map((sec) => (
-            <button
-              key={sec}
-              type="button"
-              onClick={() => onSelectSector(sec)}
-              className={`px-4 py-2 rounded-xl text-xs font-heading font-black uppercase tracking-wider transition-all flex items-center gap-2 ${
-                activeSector === sec
-                  ? "bg-primary text-white shadow-lg shadow-primary/25"
-                  : "bg-white/5 text-white/50 hover:text-white"
-              }`}
-            >
-              <i className={`fa-solid ${sec === 'restaurant' ? 'fa-utensils' : sec === 'ecommerce' ? 'fa-bag-shopping' : 'fa-hotel'}`}></i>
-              <span className="capitalize">{sec}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Interactive Dual-Panel Mockup */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        {/* The Interactive Dual-Panel Demo Container (30% Surface, 10% Accent) */}
+        <div className="bg-white rounded-3xl sm:rounded-[36px] border border-violet-100/90 shadow-float p-6 sm:p-10 max-w-5xl mx-auto">
           
-          {/* Left Panel: The Customer View (Smartphone screen) */}
-          <div className="p-6 sm:p-8 rounded-[36px] bg-[#141414] border border-white/10 space-y-6 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white text-sm shadow-md shadow-primary/30">
-                  <i className="fa-solid fa-mobile-screen"></i>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+            
+            {/* Left: Customer View Phone Simulator */}
+            <div className="lg:col-span-6 bg-[#fbfaff] rounded-2xl p-6 border border-violet-100 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between pb-4 mb-4 border-b border-violet-100">
+                  <div className="flex items-center gap-2">
+                    <Smartphone className="w-4 h-4 text-[#6633d6]" />
+                    <span className="text-xs font-bold text-slate-800">Écran de votre client</span>
+                  </div>
+                  <span className="text-[10px] font-semibold text-slate-400">Sans application</span>
                 </div>
-                <div>
-                  <h4 className="font-heading font-black text-sm text-white">{current.name}</h4>
-                  <p className="text-[11px] text-white/50">Vue Client • Lien WhatsApp / QR Code</p>
+
+                <div className="bg-white rounded-2xl p-4 border border-violet-100 shadow-sm mb-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="text-sm font-bold text-[#0f0a1f]">{item.name}</h4>
+                    <span className="text-sm font-extrabold text-[#6633d6]">
+                      {item.price.toLocaleString("fr-FR")} FCFA
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 leading-relaxed mb-4">
+                    {item.desc}
+                  </p>
+                  
+                  <div className="flex items-center gap-2 p-2.5 rounded-xl bg-violet-50/70 border border-violet-100 text-xs">
+                    <Check className="w-3.5 h-3.5 text-[#6633d6] shrink-0" />
+                    <span className="text-slate-700 text-[11px] font-medium">
+                      Paiement Mobile Money direct sélectionné (MTN / Moov / Celtiis)
+                    </span>
+                  </div>
                 </div>
               </div>
-              <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-mono font-bold">
-                ● En ligne
-              </span>
+
+              <div>
+                {!orderPlaced ? (
+                  <button
+                    onClick={handleSimulateOrder}
+                    className="w-full py-3.5 px-4 rounded-full bg-[#6633d6] hover:bg-[#5727c7] text-white font-extrabold text-sm shadow-[0_8px_20px_-4px_rgba(102,51,214,0.45)] transition-all flex items-center justify-center gap-2 group"
+                  >
+                    <span>Valider ma commande test (Gratuit)</span>
+                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                  </button>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold text-center">
+                      ✅ Commande transmise & paiement MoMo validé !
+                    </div>
+                    <button
+                      onClick={handleReset}
+                      className="w-full py-2.5 px-4 rounded-full bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs border border-violet-200 flex items-center justify-center gap-2"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      <span>Recommencer la simulation</span>
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Product Card */}
-            <div className="rounded-2xl overflow-hidden bg-white/5 border border-white/5">
-              <img
-                src={current.item.image}
-                alt={current.item.name}
-                className="w-full h-44 object-cover"
-              />
-              <div className="p-5 space-y-2">
-                <div className="flex justify-between items-start">
-                  <h5 className="font-heading font-black text-base text-white">{current.item.name}</h5>
-                  <span className="font-heading font-black text-primary text-lg">
-                    {current.item.price.toLocaleString()} F
+            {/* Right: Merchant Command Dashboard Simulator */}
+            <div className="lg:col-span-6 bg-[#fbfaff] rounded-2xl p-6 border border-violet-100 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between pb-4 mb-4 border-b border-violet-100">
+                  <div className="flex items-center gap-2">
+                    <Bell className={`w-4 h-4 ${alertBeep ? "text-[#6633d6] animate-bounce" : "text-slate-400"}`} />
+                    <span className="text-xs font-bold text-slate-800">Votre tableau de bord gérant</span>
+                  </div>
+                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                    En ligne
                   </span>
                 </div>
-                <p className="text-xs text-white/60 leading-relaxed">{current.item.desc}</p>
-                
-                {/* Quantity */}
-                <div className="pt-3 flex items-center justify-between border-t border-white/5">
-                  <span className="text-xs font-bold text-white/70">Quantité :</span>
-                  <div className="flex items-center gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setCartCount(Math.max(1, cartCount - 1))}
-                      className="w-8 h-8 rounded-lg bg-white/10 text-white font-bold flex items-center justify-center hover:bg-white/20"
-                    >
-                      -
-                    </button>
-                    <span className="font-heading font-black text-sm text-white">{cartCount}</span>
-                    <button
-                      type="button"
-                      onClick={() => setCartCount(cartCount + 1)}
-                      className="w-8 h-8 rounded-lg bg-white/10 text-white font-bold flex items-center justify-center hover:bg-white/20"
-                    >
-                      +
-                    </button>
+
+                {alertBeep && (
+                  <div className="mb-4 p-3 rounded-xl bg-violet-100 border border-violet-200 text-[#6633d6] text-xs font-extrabold flex items-center gap-2 animate-pulse">
+                    <Bell className="w-4 h-4" />
+                    <span>DING ! Nouvelle commande reçue à l'instant</span>
                   </div>
-                </div>
-              </div>
-            </div>
+                )}
 
-            {/* Action Simulator Button */}
-            <button
-              type="button"
-              onClick={handleSimulateOrder}
-              disabled={orderSent}
-              className="w-full py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-heading font-black text-xs uppercase tracking-widest shadow-xl shadow-emerald-600/30 transition-all active:scale-95 flex items-center justify-center gap-2"
-            >
-              {orderSent ? (
-                <>
-                  <i className="fa-solid fa-circle-check text-sm animate-bounce"></i>
-                  <span>Paiement MoMo envoyé avec succès !</span>
-                </>
-              ) : (
-                <>
-                  <i className="fa-solid fa-bolt text-sm"></i>
-                  <span>Commander maintenant ({(current.item.price * cartCount).toLocaleString()} FCFA via MoMo)</span>
-                </>
-              )}
-            </button>
-          </div>
-
-          {/* Right Panel: The Merchant Command Center */}
-          <div className="p-6 sm:p-8 rounded-[36px] bg-[#141414] border border-white/10 space-y-6 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-primary/20 text-primary flex items-center justify-center text-sm shadow-md">
-                  <i className="fa-solid fa-chart-line"></i>
-                </div>
-                <div>
-                  <h4 className="font-heading font-black text-sm text-white">Tableau de Bord Marchand</h4>
-                  <p className="text-[11px] text-white/50">Réception immédiate sans intermédiaire</p>
-                </div>
-              </div>
-              <span className="px-3 py-1 rounded-full bg-primary/20 text-primary text-[10px] font-black uppercase font-mono">
-                0% COMMISSION
-              </span>
-            </div>
-
-            {/* Incoming Orders Stream */}
-            <div className="space-y-3">
-              <p className="text-xs font-bold text-white/50 uppercase tracking-wider">
-                Flux des commandes en direct :
-              </p>
-
-              {demoOrders.map((ord, i) => (
-                <div
-                  key={i}
-                  className="p-4 rounded-2xl bg-white/[0.04] border border-white/5 flex items-center justify-between gap-4 animate-in fade-in duration-300"
-                >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-xs font-bold text-primary">{ord.id}</span>
-                      <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-md">
-                        {ord.status}
+                {orderPlaced ? (
+                  <div className="bg-white rounded-2xl p-5 border-2 border-violet-300 shadow-sm space-y-3">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-mono text-slate-400">Commande #TEST-01</span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
+                        Payé par MTN MoMo
                       </span>
                     </div>
-                    <p className="font-heading font-bold text-xs text-white">{ord.item}</p>
-                    <p className="text-[10px] text-white/40">{ord.time}</p>
+                    <div className="py-2 border-y border-slate-100">
+                      <p className="text-sm font-bold text-[#0f0a1f]">{item.name}</p>
+                      <p className="text-xs text-slate-500">Client : {item.customer}</p>
+                    </div>
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-slate-500 font-medium">Net perçu par vous :</span>
+                      <span className="text-base font-extrabold text-[#6633d6]">
+                        {item.price.toLocaleString("fr-FR")} FCFA (0% frais)
+                      </span>
+                    </div>
                   </div>
-                  <span className="font-heading font-black text-sm text-white">{ord.total}</span>
-                </div>
-              ))}
+                ) : (
+                  <div className="h-44 flex flex-col items-center justify-center text-center p-6 bg-white/60 rounded-2xl border border-dashed border-violet-200 text-slate-400">
+                    <Bell className="w-8 h-8 text-violet-300 mb-2" />
+                    <p className="text-xs font-semibold">En attente d'une commande...</p>
+                    <p className="text-[11px] text-slate-400 mt-1">Cliquez sur « Valider ma commande test » à gauche</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="pt-4 border-t border-violet-100 text-center">
+                <span className="text-[11px] text-slate-500 font-medium">
+                  Les fonds arrivent à 100% sur votre propre compte Mobile Money.
+                </span>
+              </div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 text-xs text-white/60 flex items-center gap-3">
-              <i className="fa-solid fa-shield-check text-emerald-400 text-lg"></i>
-              <span>
-                <strong>Zéro faux avis :</strong> Vous testez ici le moteur réel. L'argent de chaque commande arrive directement sur votre propre numéro Mobile Money.
-              </span>
-            </div>
           </div>
 
         </div>
@@ -241,3 +196,5 @@ export default function LandingInteractiveDemo({ activeSector, onSelectSector }:
     </section>
   );
 }
+
+export { LandingInteractiveDemo };

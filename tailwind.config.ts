@@ -14,11 +14,15 @@ export default {
     },
     extend: {
       fontFamily: {
-        heading: ["Montserrat", "sans-serif"],
+        heading: ["'Plus Jakarta Sans'", "Montserrat", "sans-serif"],
         sub: ["Outfit", "sans-serif"],
-        body: ["Nunito", "sans-serif"],
+        body: ["'Plus Jakarta Sans'", "Nunito", "sans-serif"],
+        jakarta: ["'Plus Jakarta Sans'", "sans-serif"],
+        accent: ["'Fraunces'", "serif"],
       },
       colors: {
+        ink: "#0f0a1f",
+        canvas: "#fbfaff",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
