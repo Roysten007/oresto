@@ -116,7 +116,12 @@
 }
 
 .animate-scroll-left {
-  animation: scroll-left 20s linear infinite;
+  animation: scroll-left 32s linear infinite;
+  will-change: transform;
+}
+
+.animate-scroll-left:hover {
+  animation-play-state: paused;
 }
 
 .card-hover {
