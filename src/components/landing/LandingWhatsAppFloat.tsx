@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { MessageCircle, X } from "lucide-react";
 
 export function LandingWhatsAppFloat() {
   const [showTooltip, setShowTooltip] = useState(true);
@@ -23,10 +22,10 @@ export function LandingWhatsAppFloat() {
           </div>
           <button
             onClick={() => setShowTooltip(false)}
-            className="text-zinc-400 hover:text-zinc-600 p-0.5"
+            className="text-zinc-400 hover:text-zinc-600 p-0.5 text-xs"
             aria-label="Fermer"
           >
-            <X className="w-3.5 h-3.5" />
+            <i className="fa-solid fa-xmark"></i>
           </button>
         </div>
       )}
@@ -42,8 +41,8 @@ export function LandingWhatsAppFloat() {
         {/* Pulsing ring */}
         <span className="absolute -inset-1 rounded-full bg-orange-400/30 animate-ping pointer-events-none" />
 
-        {/* WhatsApp Icon */}
-        <MessageCircle className="w-7 h-7 fill-current relative z-10" />
+        {/* WhatsApp Font Awesome Icon */}
+        <i className="fa-brands fa-whatsapp text-2xl relative z-10"></i>
 
         {/* Online Indicator Badge */}
         <span className="absolute top-0 right-0 w-3.5 h-3.5 bg-emerald-400 border-2 border-white rounded-full" />

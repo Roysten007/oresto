@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Check, ShieldCheck, Zap, Sparkles, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { BusinessSector } from "./LandingHero";
 
@@ -57,9 +56,9 @@ export function LandingValueStack({ activeSector }: LandingValueStackProps) {
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 text-[#EA580C] text-xs font-sub font-black uppercase tracking-wider mb-4">
-            <Sparkles className="w-3.5 h-3.5" />
-            TARIFICATION TRANSPARENTE
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-100 text-[#EA580C] text-xs font-sub font-black uppercase tracking-wider mb-4">
+            <i className="fa-solid fa-wand-magic-sparkles"></i>
+            <span>TARIFICATION TRANSPARENTE</span>
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-black text-zinc-950 tracking-tight leading-tight uppercase">
             Une formule simple,{" "}
@@ -122,7 +121,7 @@ export function LandingValueStack({ activeSector }: LandingValueStackProps) {
                 {includedItems.map((item, idx) => (
                   <div key={idx} className="flex items-start gap-3.5">
                     <div className="w-5 h-5 rounded-full bg-orange-100 text-[#EA580C] flex items-center justify-center shrink-0 mt-0.5">
-                      <Check className="w-3 h-3 stroke-[3]" />
+                      <i className="fa-solid fa-check text-[10px]"></i>
                     </div>
                     <div className="flex-1">
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
@@ -137,7 +136,7 @@ export function LandingValueStack({ activeSector }: LandingValueStackProps) {
             </div>
 
             <div className="mt-8 pt-6 border-t border-zinc-100 flex items-center gap-2.5 text-xs text-zinc-600 font-sub">
-              <ShieldCheck className="w-4 h-4 text-[#FF6B00] shrink-0" />
+              <i className="fa-solid fa-shield-halved text-[#FF6B00] shrink-0 text-sm"></i>
               <span>
                 <strong>Garantie 14 jours d'essai sans frais</strong> : testez toutes les fonctionnalités en conditions réelles.
               </span>
@@ -191,18 +190,18 @@ export function LandingValueStack({ activeSector }: LandingValueStackProps) {
                 </p>
               </div>
 
-              {/* Bullets */}
+              {/* Bullets with Font Awesome checkmarks */}
               <ul className="space-y-3 mb-8 text-xs font-sub font-semibold text-zinc-700">
-                <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-[#FF6B00] shrink-0" />
+                <li className="flex items-center gap-2.5">
+                  <i className="fa-solid fa-check text-[#FF6B00] text-xs shrink-0"></i>
                   <span>Activation immédiate sans carte bancaire</span>
                 </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-[#FF6B00] shrink-0" />
+                <li className="flex items-center gap-2.5">
+                  <i className="fa-solid fa-check text-[#FF6B00] text-xs shrink-0"></i>
                   <span>Encaissement MTN, Moov et Celtiis direct</span>
                 </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-[#FF6B00] shrink-0" />
+                <li className="flex items-center gap-2.5">
+                  <i className="fa-solid fa-check text-[#FF6B00] text-xs shrink-0"></i>
                   <span>Assistance humaine WhatsApp au Bénin</span>
                 </li>
               </ul>
@@ -214,7 +213,7 @@ export function LandingValueStack({ activeSector }: LandingValueStackProps) {
                 className="w-full py-4 px-6 rounded-full bg-[#FF6B00] hover:bg-[#EA580C] text-white font-sub font-black text-sm uppercase tracking-wider shadow-braised transition-all flex items-center justify-center gap-2 group"
               >
                 <span>Démarrer mes 14 jours gratuits</span>
-                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                <i className="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
               </Link>
               <p className="text-center text-[11px] text-zinc-400 mt-3 font-sub font-medium">
                 Sans engagement • Annulation en 1 clic

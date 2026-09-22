@@ -8,6 +8,7 @@ import LandingPivot from '../components/landing/LandingPivot';
 import LandingSolution from '../components/landing/LandingSolution';
 import LandingInteractiveDemo from '../components/landing/LandingInteractiveDemo';
 import LandingValueStack from '../components/landing/LandingValueStack';
+import LandingAffiliateSection from '../components/landing/LandingAffiliateSection';
 import LandingFAQ from '../components/landing/LandingFAQ';
 import LandingFinalCTA from '../components/landing/LandingFinalCTA';
 import LandingWhatsAppFloat from '../components/landing/LandingWhatsAppFloat';
@@ -56,12 +57,15 @@ export default function ProLanding() {
           <LandingValueStack activeSector={activeSector} />
         </div>
 
-        {/* 8. FAQ & Objection Handling */}
+        {/* 8. Devenir Partenaire & Affiliation (Revenus passifs) */}
+        <LandingAffiliateSection />
+
+        {/* 9. FAQ & Objection Handling */}
         <div id="faq">
           <LandingFAQ />
         </div>
 
-        {/* 9. Final Contrast & High-Intent CTA */}
+        {/* 10. Final Contrast & High-Intent CTA */}
         <LandingFinalCTA />
       </main>
 

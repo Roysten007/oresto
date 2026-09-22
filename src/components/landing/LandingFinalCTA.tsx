@@ -1,5 +1,4 @@
 import React from "react";
-import { ArrowRight, CheckCircle2, XCircle, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export function LandingFinalCTA() {
@@ -28,7 +27,7 @@ export function LandingFinalCTA() {
           <div className="p-8 rounded-3xl bg-white border border-zinc-200 shadow-sm flex flex-col justify-between">
             <div>
               <div className="flex items-center gap-2 text-zinc-500 font-sub font-bold text-xs uppercase tracking-wider mb-5">
-                <XCircle className="w-4 h-4 text-red-500 shrink-0" />
+                <i className="fa-solid fa-circle-xmark text-red-500 text-sm"></i>
                 Option 1 : Le statu quo épuisant
               </div>
               <ul className="space-y-4 text-xs sm:text-sm text-zinc-600 font-sub">
@@ -59,20 +58,20 @@ export function LandingFinalCTA() {
 
             <div>
               <div className="flex items-center gap-2 text-[#EA580C] font-sub font-black text-xs uppercase tracking-wider mb-5">
-                <CheckCircle2 className="w-4 h-4 text-[#FF6B00] shrink-0" />
+                <i className="fa-solid fa-circle-check text-[#FF6B00] text-sm"></i>
                 Option 2 : Automatiser avec Oresto
               </div>
               <ul className="space-y-4 text-xs sm:text-sm text-zinc-800 font-sub font-medium">
                 <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-4 h-4 text-[#FF6B00] shrink-0 mt-0.5" />
+                  <i className="fa-solid fa-circle-check text-[#FF6B00] shrink-0 mt-0.5 text-xs"></i>
                   <span>Un site vitrine pro & vos QR codes opérationnels en 12 minutes chrono</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-4 h-4 text-[#FF6B00] shrink-0 mt-0.5" />
+                  <i className="fa-solid fa-circle-check text-[#FF6B00] shrink-0 mt-0.5 text-xs"></i>
                   <span>Les commandes arrivent avec adresses et paiements MoMo déjà validés à 100%</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-4 h-4 text-[#FF6B00] shrink-0 mt-0.5" />
+                  <i className="fa-solid fa-circle-check text-[#FF6B00] shrink-0 mt-0.5 text-xs"></i>
                   <span>Un assistant IA 24h/24 et un support humain local dédié par WhatsApp</span>
                 </li>
               </ul>
@@ -98,24 +97,24 @@ export function LandingFinalCTA() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 to="/register"
-                className="w-full sm:w-auto px-9 py-4 rounded-full bg-[#FF6B00] hover:bg-[#EA580C] text-white font-sub font-black text-sm uppercase tracking-wider shadow-braised transition-all flex items-center justify-center gap-2 group active:scale-95"
+                className="w-full sm:w-auto px-9 py-4 rounded-full bg-[#FF6B00] hover:bg-[#EA580C] text-white font-sub font-black text-sm uppercase tracking-wider shadow-braised transition-all flex items-center justify-center gap-2.5 group active:scale-95"
               >
                 <span>Activer mes 14 jours d'essai gratuit</span>
-                <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                <i className="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
               </Link>
             </div>
 
             <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-xs font-sub font-semibold text-zinc-400 uppercase tracking-wide">
               <div className="flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-[#FF6B00]" />
+                <i className="fa-solid fa-shield-halved text-[#FF6B00]"></i>
                 <span>Sans carte bancaire</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-[#FF6B00]" />
+                <i className="fa-solid fa-circle-check text-[#FF6B00]"></i>
                 <span>Résiliation en 1 clic</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-[#FF6B00]" />
+                <i className="fa-solid fa-phone text-[#FF6B00]"></i>
                 <span>Assistance Bénin au +229 01 43 40 53 61</span>
               </div>
             </div>

@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { ChevronDown, HelpCircle, MessageCircle, PhoneCall } from "lucide-react";
 
 export function LandingFAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
@@ -41,9 +40,9 @@ export function LandingFAQ() {
         
         {/* Section Header */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 text-[#EA580C] text-xs font-sub font-black uppercase tracking-wider mb-4">
-            <HelpCircle className="w-3.5 h-3.5" />
-            QUESTIONS FRÉQUENTES
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-100 text-[#EA580C] text-xs font-sub font-black uppercase tracking-wider mb-4">
+            <i className="fa-solid fa-circle-question"></i>
+            <span>QUESTIONS FRÉQUENTES</span>
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-black text-zinc-950 tracking-tight leading-tight uppercase">
             Tout ce que vous devez savoir avant de{" "}
@@ -81,7 +80,7 @@ export function LandingFAQ() {
                       isOpen ? "rotate-180 bg-[#FF6B00] text-white" : "bg-zinc-100 text-zinc-500"
                     }`}
                   >
-                    <ChevronDown className="w-4 h-4" />
+                    <i className="fa-solid fa-chevron-down text-xs"></i>
                   </div>
                 </button>
 
@@ -98,8 +97,8 @@ export function LandingFAQ() {
         {/* WhatsApp Callout Card */}
         <div className="p-6 sm:p-8 rounded-3xl bg-white border border-zinc-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-orange-50 text-[#FF6B00] flex items-center justify-center shrink-0 border border-orange-100">
-              <MessageCircle className="w-6 h-6" />
+            <div className="w-12 h-12 rounded-2xl bg-orange-50 text-[#FF6B00] flex items-center justify-center shrink-0 border border-orange-100 text-xl">
+              <i className="fa-brands fa-whatsapp"></i>
             </div>
             <div>
               <h4 className="font-heading font-black text-zinc-950 text-base sm:text-lg uppercase">Vous avez une question spécifique ?</h4>
@@ -111,9 +110,9 @@ export function LandingFAQ() {
             href="https://wa.me/2290143405361?text=Bonjour%20Oresto%2C%20j'ai%20une%20question%20sur%20la%20plateforme"
             target="_blank"
             rel="noopener noreferrer"
-            className="px-6 py-3 rounded-full bg-[#FF6B00] hover:bg-[#EA580C] text-white font-sub font-black text-sm uppercase tracking-wider flex items-center gap-2 shadow-braised transition-all shrink-0"
+            className="px-6 py-3 rounded-full bg-[#FF6B00] hover:bg-[#EA580C] text-white font-sub font-black text-sm uppercase tracking-wider flex items-center gap-2.5 shadow-braised transition-all shrink-0"
           >
-            <PhoneCall className="w-4 h-4" />
+            <i className="fa-solid fa-phone text-xs"></i>
             <span>+229 01 43 40 53 61</span>
           </a>
         </div>

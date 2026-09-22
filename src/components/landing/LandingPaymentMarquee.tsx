@@ -1,5 +1,4 @@
 import React from "react";
-import { Zap, ShieldCheck } from "lucide-react";
 
 export function LandingPaymentMarquee() {
   const operators = [
@@ -17,7 +16,7 @@ export function LandingPaymentMarquee() {
           
           <div className="max-w-md">
             <div className="flex items-center justify-center lg:justify-start gap-2 text-xs font-sub font-black uppercase tracking-wider text-[#FF6B00] mb-1">
-              <Zap className="w-3.5 h-3.5" />
+              <i className="fa-solid fa-bolt"></i>
               Paiements 100% Locaux & Directs
             </div>
             <p className="text-sm font-sub font-bold text-zinc-800">

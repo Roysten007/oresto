@@ -1,6 +1,5 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Sparkles, CheckCircle2, ShieldCheck, Smartphone, Zap, Store, UtensilsCrossed, Building2 } from "lucide-react";
 
 export type BusinessSector = "restaurant" | "ecommerce" | "hotel";
 
@@ -84,42 +83,43 @@ export default function LandingHero({ activeSector, onSelectSector }: LandingHer
             Créez votre site professionnel en 12 minutes. Vos clients commandent en 3 clics, et vous recevez 100% de l'argent directement par Mobile Money (0% de commission).
           </p>
 
-          {/* Dual Action Buttons (10% Accent Orange Braisé) */}
+          {/* Dual Action Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
             <Link
               to="/register"
-              className="w-full sm:w-auto px-8 py-4 rounded-full bg-[#FF6B00] hover:bg-[#EA580C] text-white font-sub font-black text-sm sm:text-base uppercase tracking-wider shadow-braised hover:shadow-[0_16px_32px_-6px_rgba(255,107,0,0.55)] transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 group"
+              className="w-full sm:w-auto px-8 py-4 rounded-full bg-[#FF6B00] hover:bg-[#EA580C] text-white font-sub font-black text-sm sm:text-base uppercase tracking-wider shadow-braised hover:shadow-[0_16px_32px_-6px_rgba(255,107,0,0.55)] transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2.5 group"
             >
               <span>Démarrer mes 14 jours gratuits</span>
-              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+              <i className="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
             </Link>
 
             <a
               href="#demo"
-              className="w-full sm:w-auto px-7 py-4 rounded-full bg-white hover:bg-zinc-50 text-zinc-800 font-sub font-bold text-sm sm:text-base border border-zinc-300 shadow-sm transition-all"
+              className="w-full sm:w-auto px-7 py-4 rounded-full bg-white hover:bg-zinc-50 text-zinc-800 font-sub font-bold text-sm sm:text-base border border-zinc-300 shadow-sm transition-all flex items-center justify-center gap-2"
             >
-              Voir la démo en direct
+              <i className="fa-solid fa-play text-xs text-[#FF6B00]"></i>
+              <span>Voir la démo en direct</span>
             </a>
           </div>
 
-          {/* Micro Reassurances */}
+          {/* Micro Reassurances with Font Awesome icons */}
           <div className="flex flex-wrap items-center justify-center gap-6 text-xs font-sub font-bold text-zinc-500 uppercase tracking-wide">
             <div className="flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-[#FF6B00]" />
+              <i className="fa-solid fa-shield-halved text-[#FF6B00]"></i>
               <span>Aucune carte bancaire requise</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-[#FF6B00]" />
+              <i className="fa-solid fa-circle-check text-[#FF6B00]"></i>
               <span>Mise en ligne en 12 minutes</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <Zap className="w-4 h-4 text-[#FF6B00]" />
+              <i className="fa-solid fa-bolt text-[#FF6B00]"></i>
               <span>0% de commission MoMo</span>
             </div>
           </div>
         </div>
 
-        {/* 3-Profile Selector Tabs */}
+        {/* 3-Profile Selector Tabs with Font Awesome icons */}
         <div id="solutions" className="max-w-2xl mx-auto mb-10">
           <div className="p-1.5 rounded-full bg-white border border-zinc-200 shadow-sm grid grid-cols-3 gap-1">
             <button
@@ -130,7 +130,7 @@ export default function LandingHero({ activeSector, onSelectSector }: LandingHer
                   : "text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50"
               }`}
             >
-              <UtensilsCrossed className="w-4 h-4 shrink-0" />
+              <i className="fa-solid fa-utensils"></i>
               <span>Restaurant</span>
             </button>
 
@@ -142,7 +142,7 @@ export default function LandingHero({ activeSector, onSelectSector }: LandingHer
                   : "text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50"
               }`}
             >
-              <Store className="w-4 h-4 shrink-0" />
+              <i className="fa-solid fa-bag-shopping"></i>
               <span>Boutique</span>
             </button>
 
@@ -154,13 +154,13 @@ export default function LandingHero({ activeSector, onSelectSector }: LandingHer
                   : "text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50"
               }`}
             >
-              <Building2 className="w-4 h-4 shrink-0" />
+              <i className="fa-solid fa-hotel"></i>
               <span>Hôtel</span>
             </button>
           </div>
         </div>
 
-        {/* Structured Dark Demo Mockup (#0A0A0A) as explicitly requested by user */}
+        {/* Structured Dark Demo Mockup (#0A0A0A) */}
         <div className="max-w-5xl mx-auto">
           <div className="bg-[#0A0A0A] rounded-3xl sm:rounded-[36px] border border-zinc-800 shadow-dark-card p-6 sm:p-10 relative text-white">
             
@@ -194,7 +194,7 @@ export default function LandingHero({ activeSector, onSelectSector }: LandingHer
                     <p className="text-[11px] text-zinc-400 font-sub">{current.sampleLocation}</p>
                   </div>
                   <div className="w-8 h-8 rounded-xl bg-zinc-800 text-[#FF6B00] flex items-center justify-center text-xs font-bold border border-zinc-700">
-                    QR
+                    <i className="fa-solid fa-qrcode"></i>
                   </div>
                 </div>
 
@@ -203,8 +203,9 @@ export default function LandingHero({ activeSector, onSelectSector }: LandingHer
                     <h4 className="text-xs font-sub font-bold text-white">{current.orderItem}</h4>
                     <span className="text-xs font-heading font-black text-[#FF6B00]">{current.orderPrice}</span>
                   </div>
-                  <span className="text-[10px] font-sub font-bold px-2 py-1 rounded-lg bg-emerald-950 text-emerald-400 border border-emerald-800/60">
-                    Ajouté au panier
+                  <span className="text-[10px] font-sub font-bold px-2 py-1 rounded-lg bg-emerald-950 text-emerald-400 border border-emerald-800/60 flex items-center gap-1">
+                    <i className="fa-solid fa-check text-[9px]"></i>
+                    <span>Ajouté</span>
                   </span>
                 </div>
 
@@ -216,8 +217,8 @@ export default function LandingHero({ activeSector, onSelectSector }: LandingHer
                       {current.momoMethod}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 p-2.5 rounded-lg bg-orange-950/20 border border-orange-900/40 text-xs">
-                    <ShieldCheck className="w-4 h-4 text-[#FF6B00] shrink-0" />
+                  <div className="flex items-center gap-2.5 p-2.5 rounded-lg bg-orange-950/20 border border-orange-900/40 text-xs">
+                    <i className="fa-solid fa-shield-halved text-[#FF6B00] shrink-0"></i>
                     <span className="text-zinc-300 text-[11px] font-sub leading-tight">
                       Paiement versé directement sur le compte MoMo du gérant.
                     </span>
@@ -257,7 +258,10 @@ export default function LandingHero({ activeSector, onSelectSector }: LandingHer
                     </div>
                     <div className="text-right">
                       <span className="text-sm font-heading font-black text-[#FF6B00]">{current.orderPrice}</span>
-                      <p className="text-[10px] font-sub font-bold text-emerald-400">Reçu via {current.momoMethod}</p>
+                      <p className="text-[10px] font-sub font-bold text-emerald-400 flex items-center justify-end gap-1">
+                        <i className="fa-solid fa-circle-check text-[9px]"></i>
+                        <span>Reçu via {current.momoMethod}</span>
+                      </p>
                     </div>
                   </div>
 

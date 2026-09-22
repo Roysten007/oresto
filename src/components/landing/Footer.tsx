@@ -1,6 +1,5 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Phone, Mail, MapPin, ShieldCheck, Heart } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -22,7 +21,7 @@ export default function Footer() {
               La plateforme tout-en-un pour créer votre vitrine professionnelle, digitaliser vos commandes et encaisser par Mobile Money sans commission.
             </p>
             <div className="mt-6 flex items-center gap-2 text-xs font-sub font-bold text-[#EA580C] bg-orange-50 border border-orange-200 px-3.5 py-1.5 rounded-full w-fit">
-              <ShieldCheck className="w-4 h-4 text-[#FF6B00]" />
+              <i className="fa-solid fa-shield-halved text-[#FF6B00]"></i>
               <span>14 jours d'essai gratuit • 0% de commission</span>
             </div>
           </div>
@@ -39,14 +38,20 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Espace Pro Column */}
+          {/* Espace Pro & Affilié Column */}
           <div>
             <h4 className="font-heading font-black text-zinc-950 mb-4 text-xs uppercase tracking-wider">Espace Pro</h4>
             <ul className="space-y-2.5 text-sm font-sub">
               <li><Link to="/register" className="hover:text-[#FF6B00] transition-colors font-medium">Créer un compte (14j gratuits)</Link></li>
               <li><Link to="/login" className="hover:text-[#FF6B00] transition-colors font-medium">Connexion Espace Vendeur</Link></li>
+              <li>
+                <Link to="/devenir-prestataire" className="text-[#EA580C] hover:text-[#FF6B00] transition-colors font-bold flex items-center gap-1.5">
+                  <i className="fa-solid fa-handshake text-xs"></i>
+                  <span>Devenir Affilié (Revenus Passifs)</span>
+                </Link>
+              </li>
+              <li><Link to="/prestataire/login" className="hover:text-[#FF6B00] transition-colors font-medium">Connexion Espace Affilié</Link></li>
               <li><Link to="/admin/login" className="hover:text-[#FF6B00] transition-colors font-medium">Back-office Admin</Link></li>
-              <li><a href="#faq" className="hover:text-[#FF6B00] transition-colors font-medium">Foire Aux Questions</a></li>
             </ul>
           </div>
 
@@ -55,19 +60,19 @@ export default function Footer() {
             <h4 className="font-heading font-black text-zinc-950 mb-4 text-xs uppercase tracking-wider">Assistance Locale</h4>
             <ul className="space-y-3 text-sm font-sub">
               <li className="flex items-center gap-2.5">
-                <Phone className="w-4 h-4 text-[#FF6B00] shrink-0" />
+                <i className="fa-solid fa-phone text-[#FF6B00] text-xs"></i>
                 <a href="https://wa.me/2290143405361" target="_blank" rel="noopener noreferrer" className="hover:text-[#FF6B00] transition-colors font-bold">
                   +229 01 43 40 53 61
                 </a>
               </li>
               <li className="flex items-center gap-2.5">
-                <Mail className="w-4 h-4 text-[#FF6B00] shrink-0" />
+                <i className="fa-solid fa-envelope text-[#FF6B00] text-xs"></i>
                 <a href="mailto:contact@oresto.bj" className="hover:text-[#FF6B00] transition-colors font-medium">
                   contact@oresto.bj
                 </a>
               </li>
               <li className="flex items-start gap-2.5">
-                <MapPin className="w-4 h-4 text-zinc-400 shrink-0 mt-0.5" />
+                <i className="fa-solid fa-location-dot text-zinc-400 text-xs mt-0.5"></i>
                 <span>Cotonou, Bénin</span>
               </li>
             </ul>
@@ -78,7 +83,7 @@ export default function Footer() {
         <div className="mt-12 pt-8 border-t border-zinc-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-sub text-zinc-400">
           <p>© {new Date().getFullYear()} Oresto. Tous droits réservés.</p>
           <p className="flex items-center gap-1.5">
-            Fait avec <Heart className="w-3.5 h-3.5 text-red-500 fill-current" /> pour les entrepreneurs du Bénin & d'Afrique de l'Ouest
+            Fait avec <i className="fa-solid fa-heart text-red-500"></i> pour les entrepreneurs du Bénin & d'Afrique de l'Ouest
           </p>
         </div>
       </div>

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, ArrowRight } from "lucide-react";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -25,7 +24,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           
-          {/* Brand Logo with Montserrat font-heading font-black */}
+          {/* Brand Logo with Montserrat */}
           <Link to="/" className="flex items-center gap-2.5 group">
             <div className="w-9 h-9 rounded-xl bg-[#FF6B00] text-white flex items-center justify-center font-heading font-black text-base shadow-braised group-hover:scale-105 transition-transform">
               O
@@ -54,12 +53,16 @@ export default function Navbar() {
             <a href="#tarifs" className="hover:text-[#FF6B00] transition-colors">
               Tarifs
             </a>
+            <Link to="/devenir-prestataire" className="text-[#EA580C] hover:text-[#FF6B00] transition-colors flex items-center gap-1.5 font-black">
+              <i className="fa-solid fa-handshake text-xs"></i>
+              <span>Affiliation</span>
+            </Link>
             <a href="#faq" className="hover:text-[#FF6B00] transition-colors">
               FAQ
             </a>
           </nav>
 
-          {/* Action Buttons (10% Accent Orange Braisé) */}
+          {/* Action Buttons */}
           <div className="hidden md:flex items-center gap-4">
             <Link
               to="/login"
@@ -72,17 +75,17 @@ export default function Navbar() {
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#FF6B00] hover:bg-[#EA580C] text-white text-xs font-sub font-black uppercase tracking-wider shadow-braised hover:shadow-[0_12px_28px_-4px_rgba(255,107,0,0.5)] transition-all transform hover:-translate-y-0.5"
             >
               <span>Essai gratuit 14 jours</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <i className="fa-solid fa-arrow-right text-[10px]"></i>
             </Link>
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu Button with Font Awesome */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-xl text-zinc-700 hover:text-[#FF6B00] hover:bg-zinc-100 transition-colors"
+            className="md:hidden p-2 rounded-xl text-zinc-700 hover:text-[#FF6B00] hover:bg-zinc-100 transition-colors text-lg"
             aria-label="Menu"
           >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {mobileMenuOpen ? <i className="fa-solid fa-xmark"></i> : <i className="fa-solid fa-bars"></i>}
           </button>
         </div>
       </div>
@@ -119,6 +122,14 @@ export default function Navbar() {
             >
               Tarifs (5 000 FCFA / mois)
             </a>
+            <Link
+              to="/devenir-prestataire"
+              onClick={() => setMobileMenuOpen(false)}
+              className="py-2 text-[#EA580C] hover:text-[#FF6B00] flex items-center gap-2 font-black"
+            >
+              <i className="fa-solid fa-handshake"></i>
+              <span>Devenir Affilié (Revenus Passifs)</span>
+            </Link>
             <a
               href="#faq"
               onClick={() => setMobileMenuOpen(false)}
