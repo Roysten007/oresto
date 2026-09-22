@@ -133,21 +133,47 @@ export default function Login() {
             </p>
           </div>
 
-          {import.meta.env.DEV && (
-            <div className="mt-12 p-6 rounded-3xl bg-[#F8F8F8] border border-[#EEEEEE]">
-              <p className="text-[10px] font-bold text-[#BBB] uppercase tracking-widest mb-4">Accès rapides (Démo · dev uniquement)</p>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-[#777]">Vendeur 1: <b className="text-[#0A0A0A]">kofi@test.com</b></span>
-                  <span className="text-[#BBB]">password</span>
+          <div className="mt-8 p-5 rounded-2xl bg-[#F8F9FA] border border-[#EEEEEE] space-y-2.5">
+            <p className="text-[10px] font-bold text-[#888] uppercase tracking-wider mb-2">Comptes de test (cliquez pour remplir)</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail("kofi@test.com");
+                  setPassword("vendor123");
+                }}
+                className="text-left p-2.5 rounded-xl bg-white border border-[#E5E5E5] hover:border-[#FF6B00] transition-colors"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-[#0A0A0A]">🍽️ Vendeur Resto</span>
+                  <span className="text-[10px] font-semibold text-[#888]">Kofi</span>
                 </div>
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-[#777]">Vendeur 2: <b className="text-[#0A0A0A]">aminat@test.com</b></span>
-                  <span className="text-[#BBB]">password</span>
+                <div className="text-[11px] text-[#666] truncate">kofi@test.com</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail("aminata@test.com");
+                  setPassword("client123");
+                }}
+                className="text-left p-2.5 rounded-xl bg-white border border-[#E5E5E5] hover:border-[#FF6B00] transition-colors"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-[#0A0A0A]">🛍️ Boutique</span>
+                  <span className="text-[10px] font-semibold text-[#888]">Aminata</span>
                 </div>
-              </div>
+                <div className="text-[11px] text-[#666] truncate">aminata@test.com</div>
+              </button>
             </div>
-          )}
+
+            <div className="pt-1 flex items-center justify-between text-xs text-[#777]">
+              <span>Vous êtes administrateur ?</span>
+              <Link to="/oresto-admin/login" className="text-[#FF6B00] font-bold hover:underline">
+                Connexion Admin →
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
 

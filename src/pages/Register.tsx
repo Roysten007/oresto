@@ -122,7 +122,7 @@ export default function Register() {
           {[
             { t: "Espaces Dédiés", d: "Tableau de bord adapté à votre métier", icon: "fa-solid fa-layer-group" },
             { t: "0% Commission", d: "100% de vos recettes restent sur votre MoMo", icon: "fa-solid fa-money-bill-wave" },
-            { t: "Offre -25% Immédiate", d: "3 750 FCFA le premier mois", icon: "fa-solid fa-tag" }
+            { t: "14 Jours d'Essai", d: "Testez sans carte bancaire, zéro risque", icon: "fa-solid fa-calendar-check" }
           ].map((item, i) => (
             <div key={i} className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-xl bg-primary/20 text-primary flex items-center justify-center text-xs">
@@ -388,21 +388,21 @@ export default function Register() {
                   </div>
 
                   {/* Formule info */}
-                  <div className="p-4 rounded-2xl bg-orange-50/80 border border-orange-200 space-y-2 text-xs">
+                  <div className="p-4 rounded-2xl bg-amber-50/80 border border-amber-200 space-y-2 text-xs">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-primary">
-                        ✨ Formule Unique Oresto Pro
+                      <span className="text-[10px] font-black uppercase tracking-widest text-amber-700">
+                        ✨ Formule Oresto Pro
                       </span>
-                      <span className="text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-emerald-500 text-white shadow-sm">
-                        -25% 1er mois (3 750 F)
+                      <span className="text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-emerald-600 text-white shadow-sm font-bold">
+                        14 JOURS D'ESSAI GRATUITS
                       </span>
                     </div>
                     <div className="flex items-baseline gap-2">
-                      <span className="font-heading font-black text-2xl text-gray-900">3 750 FCFA</span>
-                      <span className="text-xs font-bold text-gray-500">le 1er mois (puis 5 000 F/mois)</span>
+                      <span className="font-heading font-black text-2xl text-emerald-600">0 FCFA</span>
+                      <span className="text-xs font-bold text-gray-500">pendant 14 jours (puis 5 000 F/mois)</span>
                     </div>
                     <p className="text-[11px] text-gray-600 leading-relaxed">
-                      🎉 <strong>Réduction immédiate de 25% activée</strong>. 0% de commission sur vos encaissements, Vitrine Web autonome et Assistant IA IZI inclus.
+                      🎉 <strong>Aucune carte bancaire requise</strong>. Accès immédiat à toutes les fonctionnalités : Vitrine Web autonome, QR Codes et encaissement Mobile Money direct (0% de commission).
                     </p>
                   </div>
                 </div>
@@ -425,7 +425,7 @@ export default function Register() {
                       <span>Création de votre espace en cours...</span>
                     </>
                   ) : (
-                    <span>{step === 2 ? "Continuer" : "Lancer mon espace Pro"}</span>
+                    <span>{step === 2 ? "Continuer" : "Démarrer mes 14 jours gratuits"}</span>
                   )}
                 </button>
               </div>

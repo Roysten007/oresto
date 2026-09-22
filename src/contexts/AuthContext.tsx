@@ -93,11 +93,11 @@ const DEMO_USER: User = {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({ 
-    user: DEMO_USER, 
-    role: "vendor", 
-    vendorProfile: DEMO_VENDOR, 
-    isAuthenticated: true, 
-    isLoading: false 
+    user: null, 
+    role: null, 
+    vendorProfile: null, 
+    isAuthenticated: false, 
+    isLoading: true 
   });
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
@@ -107,51 +107,101 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Écouteur global de Firebase Auth
   useEffect(() => {
     if (!auth) {
-      setState({ user: DEMO_USER, role: "vendor", vendorProfile: DEMO_VENDOR, isAuthenticated: true, isLoading: false });
+      setState({ user: null, role: null, vendorProfile: null, isAuthenticated: false, isLoading: false });
       return;
     }
     let unsubUser: (() => void) | null = null;
     let unsubVendor: (() => void) | null = null;
 
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       // Clean up previous listeners
       if (unsubUser) { unsubUser(); unsubUser = null; }
       if (unsubVendor) { unsubVendor(); unsubVendor = null; }
 
       if (firebaseUser) {
         if (!db) {
-          setState({ user: DEMO_USER, role: "vendor", vendorProfile: DEMO_VENDOR, isAuthenticated: true, isLoading: false });
+          setState({ 
+            user: { id: firebaseUser.uid, name: firebaseUser.email || "Utilisateur", firstName: "", email: firebaseUser.email || "", password: "", role: "vendor" }, 
+            role: "vendor", 
+            vendorProfile: null, 
+            isAuthenticated: true, 
+            isLoading: false 
+          });
           return;
         }
 
+        // 1. Vérification Admin prioritaire
+        const isSuperAdminEmail = (firebaseUser.email || "").toLowerCase() === "roystendesign@gmail.com";
+        let isConfirmedAdmin = isSuperAdminEmail;
+
+        if (!isConfirmedAdmin) {
+          try {
+            const adminSnap = await get(ref(db, `admins/${firebaseUser.uid}`));
+            if (adminSnap.exists() && adminSnap.val() !== false) isConfirmedAdmin = true;
+          } catch {}
+        }
+
+        if (isConfirmedAdmin) {
+          const adminUser: User = {
+            id: firebaseUser.uid,
+            name: "Super Administrateur",
+            firstName: "Admin",
+            email: firebaseUser.email || "roystendesign@gmail.com",
+            role: "admin" as any,
+            created_at: new Date().toISOString()
+          };
+          setState({
+            user: adminUser,
+            role: "admin" as any,
+            vendorProfile: null,
+            isAuthenticated: true,
+            isLoading: false
+          });
+          setLastActivity(Date.now());
+          return;
+        }
+
+        // 2. Utilisateur Vendeur ou Client
         const userRef = ref(db, `users/${firebaseUser.uid}`);
         unsubUser = onValue(userRef, async (userSnap) => {
           if (!userSnap.exists()) {
-            // Vérifier si c'est un compte admin
-            const adminSnap = await get(ref(db, `admins/${firebaseUser.uid}`));
-            if (adminSnap.exists()) {
-              const adminUser: User = {
-                id: firebaseUser.uid,
-                name: "Administrateur",
-                email: firebaseUser.email || "",
-                role: "admin" as any,
-                created_at: new Date().toISOString()
-              };
-              setState({
-                user: adminUser,
-                role: "admin" as any,
-                vendorProfile: null,
-                isAuthenticated: true,
-                isLoading: false
-              });
-              return;
-            }
+            // Vérifier encore une fois admin
+            try {
+              const aSnap = await get(ref(db, `admins/${firebaseUser.uid}`));
+              if (aSnap.exists()) {
+                const adminUser: User = {
+                  id: firebaseUser.uid,
+                  name: "Administrateur",
+                  email: firebaseUser.email || "",
+                  role: "admin" as any,
+                  created_at: new Date().toISOString()
+                };
+                setState({
+                  user: adminUser,
+                  role: "admin" as any,
+                  vendorProfile: null,
+                  isAuthenticated: true,
+                  isLoading: false
+                });
+                return;
+              }
+            } catch {}
 
-            // Fallback sur profil vendeur par défaut
-            setState({
-              user: { ...DEMO_USER, id: firebaseUser.uid, email: firebaseUser.email || DEMO_USER.email },
+            // Fallback profil vendeur pour ce nouvel inscrit
+            const defaultVendorId = `v_${firebaseUser.uid}`;
+            const fallbackUser: User = {
+              id: firebaseUser.uid,
+              name: (firebaseUser.email || "").split("@")[0] || "Restaurateur",
+              firstName: "",
+              email: firebaseUser.email || "",
+              password: "",
               role: "vendor",
-              vendorProfile: { ...DEMO_VENDOR, userId: firebaseUser.uid },
+              vendorId: defaultVendorId
+            };
+            setState({
+              user: fallbackUser,
+              role: "vendor",
+              vendorProfile: { ...DEMO_VENDOR, id: defaultVendorId, userId: firebaseUser.uid },
               isAuthenticated: true,
               isLoading: false
             });
@@ -162,13 +212,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const effectiveRole = userData.role === "admin" ? "admin" : "vendor";
           const effectiveVendorId = userData.vendorId || `v_${firebaseUser.uid}`;
           
+          if (effectiveRole === "admin") {
+            setState({
+              user: userData,
+              role: "admin" as any,
+              vendorProfile: null,
+              isAuthenticated: true,
+              isLoading: false
+            });
+            return;
+          }
+
           if (effectiveVendorId) {
             if (unsubVendor) unsubVendor();
             unsubVendor = onValue(ref(db, `vendors/${effectiveVendorId}`), (vendorSnap) => {
               const vendorData = vendorSnap.exists() ? vendorSnap.val() as VendorProfile : DEMO_VENDOR;
               setState({
-                user: { ...userData, role: effectiveRole as any, vendorId: effectiveVendorId },
-                role: effectiveRole as any,
+                user: { ...userData, role: "vendor", vendorId: effectiveVendorId },
+                role: "vendor",
                 vendorProfile: vendorData,
                 isAuthenticated: true,
                 isLoading: false
@@ -176,8 +237,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             });
           } else {
             setState({
-              user: { ...userData, role: effectiveRole as any },
-              role: effectiveRole as any,
+              user: { ...userData, role: "vendor" },
+              role: "vendor",
               vendorProfile: DEMO_VENDOR,
               isAuthenticated: true,
               isLoading: false
@@ -186,35 +247,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setLastActivity(Date.now());
         }, (err) => {
           console.error("Auth DB Error:", err);
-          let localVendor = DEMO_VENDOR;
-          try {
-            const saved = localStorage.getItem("oresto_vendor_profile");
-            if (saved) localVendor = { ...DEMO_VENDOR, ...JSON.parse(saved) };
-          } catch {}
-          setState({ user: DEMO_USER, role: "vendor", vendorProfile: localVendor, isAuthenticated: true, isLoading: false });
+          setState({ 
+            user: { id: firebaseUser.uid, name: firebaseUser.email || "Utilisateur", firstName: "", email: firebaseUser.email || "", password: "", role: "vendor" }, 
+            role: "vendor", 
+            vendorProfile: DEMO_VENDOR, 
+            isAuthenticated: true, 
+            isLoading: false 
+          });
         });
       } else {
-        // Mode ouvert avec persistance locale et synchronisation Firebase v_demo
-        let localVendor = DEMO_VENDOR;
-        try {
-          const saved = localStorage.getItem("oresto_vendor_profile");
-          if (saved) {
-            localVendor = { ...DEMO_VENDOR, ...JSON.parse(saved) };
-          }
-        } catch {}
-
-        setState({ user: DEMO_USER, role: "vendor", vendorProfile: localVendor, isAuthenticated: true, isLoading: false });
-
-        if (db) {
-          if (unsubVendor) unsubVendor();
-          unsubVendor = onValue(ref(db, "vendors/v_demo"), (snap) => {
-            if (snap.exists()) {
-              const liveVendor = { ...DEMO_VENDOR, ...snap.val() } as VendorProfile;
-              setState(prev => ({ ...prev, vendorProfile: liveVendor }));
-              try { localStorage.setItem("oresto_vendor_profile", JSON.stringify(liveVendor)); } catch {}
-            }
-          });
-        }
+        // Déconnecté propre : aucun utilisateur actif
+        setState({ user: null, role: null, vendorProfile: null, isAuthenticated: false, isLoading: false });
       }
     });
 
@@ -318,7 +361,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const userCredential = await signInWithEmailAndPassword(auth, cleanEmail, cleanPassword);
       const uid = userCredential.user.uid;
 
-      // Fetch user data
+      // 1. Détection Admin immédiate
+      let isAdminAccount = cleanEmail === "roystendesign@gmail.com";
+      if (!isAdminAccount) {
+        try {
+          const adminSnap = await get(ref(db, `admins/${uid}`));
+          if (adminSnap.exists() && adminSnap.val() !== false) isAdminAccount = true;
+        } catch {}
+      }
+
+      if (isAdminAccount) {
+        const adminUser: User = {
+          id: uid,
+          name: "Super Administrateur",
+          firstName: "Admin",
+          email: cleanEmail,
+          role: "admin" as any,
+          created_at: new Date().toISOString()
+        };
+        try {
+          await set(ref(db, `admins/${uid}`), {
+            email: cleanEmail,
+            role: "super_admin",
+            createdAt: new Date().toISOString()
+          });
+          await set(ref(db, `users/${uid}`), adminUser);
+        } catch {}
+
+        setState({
+          user: adminUser,
+          role: "admin" as any,
+          vendorProfile: null,
+          isAuthenticated: true,
+          isLoading: false
+        });
+        setFailedAttempts(0);
+        setLastActivity(Date.now());
+        return { success: true, role: "admin" };
+      }
+
+      // 2. Fetch user data pour Vendeur / Client
       let userSnap = await get(child(ref(db), `users/${uid}`));
       const defaultVendorId = `v_${uid}`;
       
@@ -364,7 +446,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               id: vendorId,
               userId: uid,
               name: userData.name || cleanEmail.split("@")[0],
-              description: "Mon Restaurant",
+              description: "Mon Établissement",
               category: "Restaurants",
               status: "active",
               joinedDate: new Date().toISOString().split("T")[0],
@@ -422,7 +504,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = useCallback(async () => {
-    if (auth) await signOut(auth);
+    if (auth) {
+      try {
+        await signOut(auth);
+      } catch (e) {
+        console.warn("SignOut error:", e);
+      }
+    }
+    setState({
+      user: null,
+      role: null,
+      vendorProfile: null,
+      isAuthenticated: false,
+      isLoading: false
+    });
     setSessionWarning(false);
   }, []);
 
