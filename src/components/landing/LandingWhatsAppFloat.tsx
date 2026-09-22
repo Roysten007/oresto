@@ -1,8 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
 
 export function LandingWhatsAppFloat() {
-  const [showTooltip, setShowTooltip] = useState(true);
-
   const whatsappNumber = "2290143405361";
   const defaultMessage = encodeURIComponent(
     "Bonjour Oresto ! Je souhaite avoir des informations pour mettre en ligne mon établissement (Restaurant / Boutique / Hôtel)."
@@ -10,26 +8,7 @@ export function LandingWhatsAppFloat() {
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${defaultMessage}`;
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2 pointer-events-auto">
-      {/* Welcome Tooltip */}
-      {showTooltip && (
-        <div className="relative bg-white text-zinc-900 text-xs py-2.5 px-3.5 rounded-2xl shadow-float border border-zinc-200 max-w-[230px] flex items-start justify-between gap-2 animate-bounce-slow">
-          <div>
-            <p className="font-heading font-black text-[#EA580C] uppercase tracking-wide">Besoin d'aide ?</p>
-            <p className="text-[11px] text-zinc-500 font-sub mt-0.5 leading-snug">
-              Échangez directement avec notre équipe locale au Bénin sur WhatsApp !
-            </p>
-          </div>
-          <button
-            onClick={() => setShowTooltip(false)}
-            className="text-zinc-400 hover:text-zinc-600 p-0.5 text-xs"
-            aria-label="Fermer"
-          >
-            <i className="fa-solid fa-xmark"></i>
-          </button>
-        </div>
-      )}
-
+    <div className="fixed bottom-6 right-6 z-50 flex items-center pointer-events-auto">
       {/* Floating Action Button */}
       <a
         href={whatsappUrl}

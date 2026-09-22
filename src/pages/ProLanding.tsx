@@ -6,7 +6,6 @@ import LandingPaymentMarquee from '../components/landing/LandingPaymentMarquee';
 import LandingProblem from '../components/landing/LandingProblem';
 import LandingPivot from '../components/landing/LandingPivot';
 import LandingSolution from '../components/landing/LandingSolution';
-import LandingInteractiveDemo from '../components/landing/LandingInteractiveDemo';
 import LandingValueStack from '../components/landing/LandingValueStack';
 import LandingAffiliateSection from '../components/landing/LandingAffiliateSection';
 import LandingFAQ from '../components/landing/LandingFAQ';
@@ -44,15 +43,7 @@ export default function ProLanding() {
           <LandingSolution activeSector={activeSector} />
         </div>
 
-        {/* 6. Interactive Structured Dark Demo (#0A0A0A) */}
-        <div id="demo">
-          <LandingInteractiveDemo
-            activeSector={activeSector}
-            onSelectSector={setActiveSector}
-          />
-        </div>
-
-        {/* 7. Value Stack & Honest Pricing (14 days free trial -> 5,000 FCFA/mo, 0% commission) */}
+        {/* 6. Value Stack & Honest Pricing (14 days free trial -> 5,000 FCFA/mo, 0% commission) */}
         <div id="tarifs">
           <LandingValueStack activeSector={activeSector} />
         </div>

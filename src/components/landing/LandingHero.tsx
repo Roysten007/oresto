@@ -63,12 +63,6 @@ export default function LandingHero({ activeSector, onSelectSector }: LandingHer
         {/* Top Centered Header Content */}
         <div className="text-center max-w-4xl mx-auto mb-12 sm:mb-16">
           
-          {/* Badge Pill with Orange Braisé Accent */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-50 border border-orange-200 text-[#EA580C] text-xs font-sub font-black uppercase tracking-wider mb-6 shadow-sm">
-            <span className="w-2 h-2 rounded-full bg-[#FF6B00] animate-pulse" />
-            <span>ESSAI 14 JOURS 100% GRATUIT • SANS CARTE BANCAIRE</span>
-          </div>
-
           {/* Massif & Percutant Montserrat Headline */}
           <h1 className="text-4xl sm:text-6xl lg:text-[68px] font-heading font-black text-zinc-950 tracking-tight leading-[1.08] mb-6 uppercase">
             La plateforme tout-en-un pour{" "}
@@ -94,11 +88,11 @@ export default function LandingHero({ activeSector, onSelectSector }: LandingHer
             </Link>
 
             <a
-              href="#demo"
+              href="#tarifs"
               className="w-full sm:w-auto px-7 py-4 rounded-full bg-white hover:bg-zinc-50 text-zinc-800 font-sub font-bold text-sm sm:text-base border border-zinc-300 shadow-sm transition-all flex items-center justify-center gap-2"
             >
-              <i className="fa-solid fa-play text-xs text-[#FF6B00]"></i>
-              <span>Voir la démo en direct</span>
+              <i className="fa-solid fa-arrow-down text-xs text-[#FF6B00]"></i>
+              <span>Voir les formules & tarifs</span>
             </a>
           </div>
 

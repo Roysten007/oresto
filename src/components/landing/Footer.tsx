@@ -30,11 +30,19 @@ export default function Footer() {
           <div>
             <h4 className="font-heading font-black text-zinc-950 mb-4 text-xs uppercase tracking-wider">Solutions</h4>
             <ul className="space-y-2.5 text-sm font-sub">
-              <li><span className="text-zinc-800 font-semibold">🍽️ Restaurants & Maquis</span></li>
-              <li><span className="text-zinc-800 font-semibold">🛍️ Boutiques & E-Commerce</span></li>
-              <li><span className="text-zinc-800 font-semibold">🏨 Hôtels & Résidences</span></li>
-              <li><a href="#demo" className="hover:text-[#FF6B00] transition-colors">Démo en direct</a></li>
-              <li><a href="#tarifs" className="hover:text-[#FF6B00] transition-colors">Tarifs (5 000 F/mois)</a></li>
+              <li className="flex items-center gap-2 text-zinc-800 font-semibold">
+                <i className="fa-solid fa-utensils text-[#FF6B00] text-xs"></i>
+                <span>Restaurants & Maquis</span>
+              </li>
+              <li className="flex items-center gap-2 text-zinc-800 font-semibold">
+                <i className="fa-solid fa-bag-shopping text-[#FF6B00] text-xs"></i>
+                <span>Boutiques & E-Commerce</span>
+              </li>
+              <li className="flex items-center gap-2 text-zinc-800 font-semibold">
+                <i className="fa-solid fa-hotel text-[#FF6B00] text-xs"></i>
+                <span>Hôtels & Résidences</span>
+              </li>
+              <li><a href="#tarifs" className="hover:text-[#FF6B00] transition-colors">Tarifs & Formules</a></li>
             </ul>
           </div>
 

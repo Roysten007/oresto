@@ -29,14 +29,9 @@ export default function Navbar() {
             <div className="w-9 h-9 rounded-xl bg-[#FF6B00] text-white flex items-center justify-center font-heading font-black text-base shadow-braised group-hover:scale-105 transition-transform">
               O
             </div>
-            <div className="flex items-center gap-2">
-              <span className="font-heading font-black text-xl tracking-tight text-zinc-950 uppercase">
-                Oresto
-              </span>
-              <span className="text-[10px] font-sub font-black uppercase px-2 py-0.5 rounded-full bg-orange-100 text-[#EA580C]">
-                Pro
-              </span>
-            </div>
+            <span className="font-heading font-black text-xl tracking-tight text-zinc-950 uppercase">
+              Oresto
+            </span>
           </Link>
 
           {/* Desktop Navigation Links */}
@@ -46,9 +41,6 @@ export default function Navbar() {
             </a>
             <a href="#fonctionnalites" className="hover:text-[#FF6B00] transition-colors">
               Fonctionnalités
-            </a>
-            <a href="#demo" className="hover:text-[#FF6B00] transition-colors">
-              Démo en direct
             </a>
             <a href="#tarifs" className="hover:text-[#FF6B00] transition-colors">
               Tarifs
@@ -107,13 +99,6 @@ export default function Navbar() {
               className="py-2 hover:text-[#FF6B00]"
             >
               Fonctionnalités
-            </a>
-            <a
-              href="#demo"
-              onClick={() => setMobileMenuOpen(false)}
-              className="py-2 hover:text-[#FF6B00]"
-            >
-              Démo en direct
             </a>
             <a
               href="#tarifs"
