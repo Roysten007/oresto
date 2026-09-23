@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSearchParams } from "react-router-dom";
 import { db } from "@/lib/firebase";
 import { ref, onValue, push, set, remove, update } from "firebase/database";
 import { Product } from "@/data/mockData";
+import { getVendorSector } from "@/lib/vendorSector";
 import { 
   Plus, 
   Pencil, 
@@ -11,7 +13,7 @@ import {
   Filter, 
   UtensilsCrossed, 
   Check, 
-  X,
+  X, 
   Package
 } from "lucide-react";
 import { toast } from "sonner";
@@ -20,6 +22,10 @@ import StepHotelChambres from "./builder/StepHotelChambres";
 
 export default function VendorCatalogue() {
   const { user, vendorProfile } = useAuth();
+  const [searchParams] = useSearchParams();
+  const sectorQuery = searchParams.get("sector") || searchParams.get("type");
+  const sector = getVendorSector(vendorProfile, sectorQuery);
+
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -29,13 +35,8 @@ export default function VendorCatalogue() {
   const emptyForm = { name: "", price: "", category: "", description: "", image: "" };
   const [form, setForm] = useState(emptyForm);
 
-  const isEcommerce = vendorProfile?.business_type === "ecommerce" || (typeof window !== 'undefined' && localStorage.getItem("oresto_active_workspace") === "ecommerce");
-  const isHotel = vendorProfile?.business_type === "hotel" || 
-    Boolean(vendorProfile?.category && (
-      vendorProfile.category.toLowerCase().includes("hôtel") || 
-      vendorProfile.category.toLowerCase().includes("hotel") || 
-      vendorProfile.category.toLowerCase().includes("résidence")
-    )) || (typeof window !== 'undefined' && localStorage.getItem("oresto_active_workspace") === "hotel");
+  const isEcommerce = sector === "ecommerce";
+  const isHotel = sector === "hotel";
 
   // Real-time products from Firebase
   useEffect(() => {

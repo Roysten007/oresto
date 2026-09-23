@@ -5,21 +5,26 @@ import { ref, update } from "firebase/database";
 import MapComponent from "@/components/MapComponent";
 import { toast } from "sonner";
 
-const tabs = [
-  { id: 0, label: "Ma Boutique", icon: "fa-solid fa-store" },
-  { id: 1, label: "Localisation", icon: "fa-solid fa-location-dot" },
-  { id: 2, label: "Horaires", icon: "fa-solid fa-clock" },
-  { id: 3, label: "Livraison", icon: "fa-solid fa-truck-fast" },
-  { id: 4, label: "Paiements", icon: "fa-solid fa-credit-card" },
-  { id: 5, label: "Offres", icon: "fa-solid fa-tag" },
-  { id: 6, label: "Sécurité", icon: "fa-solid fa-shield-halved" }
-];
-
 export default function VendorSettings() {
   const { vendorProfile, user } = useAuth();
   const [activeTab, setActiveTab] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
   const [markerPos, setMarkerPos] = useState({ lat: 6.3654, lng: 2.4183 });
+
+  const isHotel = (vendorProfile?.business_type === "hotel") || (vendorProfile?.category || "").toLowerCase().includes("hôtel");
+  const isEcommerce = (vendorProfile?.business_type === "ecommerce") || (vendorProfile?.category || "").toLowerCase().includes("boutique");
+
+  const establishmentLabel = isHotel ? "Mon Hôtel" : isEcommerce ? "Ma Boutique" : "Mon Restaurant";
+
+  const tabs = [
+    { id: 0, label: establishmentLabel, icon: isHotel ? "fa-solid fa-hotel" : isEcommerce ? "fa-solid fa-store" : "fa-solid fa-utensils" },
+    { id: 1, label: "Localisation", icon: "fa-solid fa-location-dot" },
+    { id: 2, label: "Horaires", icon: "fa-solid fa-clock" },
+    { id: 3, label: isHotel ? "Arrivées & Séjours" : "Livraison", icon: isHotel ? "fa-solid fa-key" : "fa-solid fa-truck-fast" },
+    { id: 4, label: "Paiements", icon: "fa-solid fa-credit-card" },
+    { id: 5, label: "Offres", icon: "fa-solid fa-tag" },
+    { id: 6, label: "Sécurité", icon: "fa-solid fa-shield-halved" }
+  ];
 
   // Form states
   const [shopData, setShopData] = useState({
@@ -78,7 +83,7 @@ export default function VendorSettings() {
   }, [vendorProfile]);
 
   const saveSection = async (section: string, data: any) => {
-    const vId = vendorProfile?.id || (user as any)?.vendorId || "v_demo";
+    const vId = vendorProfile?.id || (user as any)?.vendorId || (user as any)?.uid || "";
     setIsSaving(true);
     try {
       const cleanData = Object.fromEntries(

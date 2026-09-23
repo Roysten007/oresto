@@ -1,43 +1,46 @@
 import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase";
-import { ref, onValue, update, query, orderByChild, equalTo } from "firebase/database";
+import { ref, onValue, update } from "firebase/database";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSearchParams } from "react-router-dom";
+import { getVendorSector } from "@/lib/vendorSector";
 import { toast } from "sonner";
 import { Order } from "@/data/mockData";
-import { Clock, Package, CheckCircle2, Truck, MessageCircle, X, MapPin, ChevronRight, CreditCard, Receipt } from "lucide-react";
+import { 
+  Clock, 
+  Package, 
+  CheckCircle2, 
+  Truck, 
+  MessageCircle, 
+  X, 
+  ChevronRight, 
+  CreditCard, 
+  Receipt,
+  Utensils,
+  Hotel,
+  ShoppingBag,
+  ExternalLink
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import OrderChat from "@/components/OrderChat";
 import ReceiptModal from "@/components/orders/ReceiptModal";
 
-const STATUS_META: Record<string, { label: string; color: string; bg: string; border: string; icon: any }> = {
-  awaiting_payment: { label: "En attente paiement", color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-200", icon: CreditCard },
-  payment_sent: { label: "Paiement envoyé (MoMo)", color: "text-blue-700 font-black", bg: "bg-blue-100", border: "border-blue-300", icon: CreditCard },
-  pending:   { label: "En attente",    color: "text-orange-600",  bg: "bg-orange-50",  border: "border-orange-200", icon: Clock },
-  preparing: { label: "Préparation",   color: "text-blue-600",    bg: "bg-blue-50",    border: "border-blue-200",   icon: Package },
-  delivering:{ label: "En route",      color: "text-purple-600",  bg: "bg-purple-50",  border: "border-purple-200", icon: Truck },
-  delivered: { label: "Livré",         color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-200",icon: CheckCircle2 },
-};
-
 function OrderCard({
   order,
   actionLabel,
-  nextStatus,
   onAction,
   onOpenChat,
   onOpenReceipt,
+  sector
 }: {
   order: Order;
   actionLabel?: string;
-  nextStatus?: Order["status"];
   onAction?: () => void;
   onOpenChat: (order: Order) => void;
   onOpenReceipt: (order: Order) => void;
+  sector: "restaurant" | "ecommerce" | "hotel";
 }) {
   const [loading, setLoading] = useState(false);
-  const meta = STATUS_META[order.status] || STATUS_META.pending;
-  const Icon = meta.icon;
-  const deliveryMode = (order as any).deliveryMode as string | undefined;
-  const distanceKm = (order as any).distanceKm as number | undefined;
 
   const handleAction = async () => {
     if (!onAction) return;
@@ -46,88 +49,115 @@ function OrderCard({
     setLoading(false);
   };
 
+  const checkIn = (order as any).checkIn;
+  const checkOut = (order as any).checkOut;
+  const nights = (order as any).nights;
+  const guests = (order as any).guests;
+
   return (
     <motion.div
       layout
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className="bg-card border border-border rounded-[28px] p-5 space-y-4 hover:shadow-md transition-all"
+      className="bg-white border border-zinc-200/90 rounded-3xl p-5 space-y-4 hover:shadow-md transition-all font-sub"
     >
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between gap-2">
         <div className="space-y-0.5">
           <div className="flex items-center gap-2">
-            <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${meta.bg} ${meta.color}`}>
-              {meta.label}
+            <span className="font-mono font-bold text-xs text-zinc-900 bg-zinc-100 px-2 py-0.5 rounded-lg border border-zinc-200">
+              #{order.id.slice(-5)}
             </span>
-            <span className="text-[9px] font-bold text-muted-foreground">
-              {order.date ? new Date(order.date).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : "--:--"}
+            <span className="font-heading font-bold text-sm text-zinc-950">
+              {order.clientName || "Client"}
             </span>
           </div>
-          <p className="font-black text-sm text-foreground">{order.clientName}</p>
-          <p className="text-[10px] text-muted-foreground">#{order.id.slice(-8)}</p>
-        </div>
-        <div className={`w-11 h-11 rounded-2xl ${meta.bg} flex items-center justify-center`}>
-          <Icon size={20} className={meta.color} />
-        </div>
-      </div>
-
-      {/* Items */}
-      <div className="space-y-1.5 p-3 rounded-2xl bg-muted/50">
-        {order.items?.map((item, i) => (
-          <div key={i} className="flex justify-between text-[10px] font-bold uppercase tracking-tight text-muted-foreground">
-            <span>{item.qty}× {item.name}</span>
-            <span className="text-foreground">{(item.price || 0).toLocaleString()} F</span>
-          </div>
-        ))}
-      </div>
-
-      {/* Delivery info */}
-      {deliveryMode && (
-        <div className="flex items-center gap-2 text-[9px] font-bold text-muted-foreground">
-          <MapPin size={11} className="text-primary flex-shrink-0" />
-          <span className="truncate">{deliveryMode === "pickup" ? "Retrait sur place" : `Livraison · ${distanceKm || "?"}km · ${order.address || ""}`}</span>
-        </div>
-      )}
-
-      {/* Footer */}
-      <div className="flex items-center justify-between pt-2 border-t border-border">
-        <p className="font-black text-base text-primary">{(order.total || 0).toLocaleString()} F</p>
-        <div className="flex items-center gap-1.5">
-          {/* Receipt Download / Print button */}
-          <button
-            onClick={() => onOpenReceipt(order)}
-            className="px-2.5 py-2 rounded-xl bg-muted hover:bg-black hover:text-white text-muted-foreground font-bold text-[10px] flex items-center gap-1 transition-all"
-            title="Générer & Télécharger le Reçu / Ticket"
-          >
-            <Receipt size={13} />
-            <span className="hidden sm:inline">Reçu</span>
-          </button>
-
-          {/* Chat button */}
-          <button
-            onClick={() => onOpenChat(order)}
-            className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center hover:bg-primary hover:text-white transition-all active:scale-90"
-            title="Ouvrir le chat avec le client"
-          >
-            <MessageCircle size={15} />
-          </button>
-          {/* Action button */}
-          {actionLabel && onAction && (
-            <button
-              onClick={handleAction}
-              disabled={loading}
-              className="px-3.5 py-2 rounded-xl bg-black text-white text-[10px] font-black uppercase tracking-widest hover:bg-primary transition-colors disabled:opacity-50 flex items-center gap-1.5"
-            >
-              {loading ? (
-                <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <>{actionLabel} <ChevronRight size={12} /></>
-              )}
-            </button>
+          {order.clientPhone && (
+            <p className="text-[11px] text-zinc-500 font-mono">
+              {order.clientPhone}
+            </p>
           )}
         </div>
+
+        <span className="font-heading font-black text-sm text-zinc-950 whitespace-nowrap">
+          {Number(order.total || 0).toLocaleString("fr-FR")} F
+        </span>
+      </div>
+
+      {/* Détails articles ou séjour */}
+      <div className="bg-zinc-50 p-3 rounded-2xl border border-zinc-100 space-y-1 text-xs">
+        {sector === "hotel" && (checkIn || checkOut) ? (
+          <div className="space-y-1 text-[11px] text-zinc-700">
+            <p className="font-bold text-indigo-700">
+              {(order.items || []).map(i => i.name).join(", ") || "Hébergement"}
+            </p>
+            <p className="text-zinc-500">
+              Du <strong>{checkIn || "Aujourd'hui"}</strong> au <strong>{checkOut || "Demain"}</strong>
+              {nights && ` (${nights} nuit${nights > 1 ? "s" : ""})`}
+            </p>
+            {guests && <p className="text-zinc-500">{guests} voyageur{guests > 1 ? "s" : ""}</p>}
+          </div>
+        ) : (
+          (order.items || []).map((it, idx) => (
+            <div key={idx} className="flex justify-between items-center text-zinc-700">
+              <span className="font-medium truncate max-w-[180px]">
+                <strong className="text-zinc-900">{it.qty || 1}x</strong> {it.name}
+              </span>
+              <span className="font-mono text-[11px] text-zinc-500">
+                {Number((it.price || 0) * (it.qty || 1)).toLocaleString("fr-FR")} F
+              </span>
+            </div>
+          ))
+        )}
+
+        {order.address && (
+          <p className="text-[11px] text-zinc-500 pt-1 border-t border-zinc-200/50">
+            📍 {order.address}
+          </p>
+        )}
+      </div>
+
+      {/* Meta & Actions */}
+      <div className="flex items-center justify-between gap-2 pt-1 border-t border-zinc-100 text-xs">
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => onOpenReceipt(order)}
+            className="p-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-700 transition-colors"
+            title="Télécharger le reçu / bon"
+          >
+            <Receipt size={14} />
+          </button>
+
+          {order.clientPhone && (
+            <a
+              href={`https://wa.me/${order.clientPhone.replace(/\D/g, '')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 transition-colors"
+              title="Contacter sur WhatsApp"
+            >
+              <i className="fa-brands fa-whatsapp text-sm"></i>
+            </a>
+          )}
+        </div>
+
+        {actionLabel && (
+          <button
+            onClick={handleAction}
+            disabled={loading}
+            className="px-3.5 py-2 rounded-xl bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-sub font-bold transition-all disabled:opacity-50 flex items-center gap-1.5 shadow-xs"
+          >
+            {loading ? (
+              <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <>
+                <span>{actionLabel}</span>
+                <ChevronRight size={13} />
+              </>
+            )}
+          </button>
+        )}
       </div>
     </motion.div>
   );
@@ -135,144 +165,179 @@ function OrderCard({
 
 export default function VendorOrders() {
   const { user, vendorProfile } = useAuth();
+  const [searchParams] = useSearchParams();
+  const sectorQuery = searchParams.get("sector") || searchParams.get("type");
+  const sector = getVendorSector(vendorProfile, sectorQuery);
+
+  const vendorId = vendorProfile?.id || user?.vendorId || user?.uid || "";
+
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [chatOrder, setChatOrder] = useState<Order | null>(null);
   const [receiptOrder, setReceiptOrder] = useState<Order | null>(null);
 
   useEffect(() => {
-    if (!db || !user?.vendorId) { setIsLoading(false); return; }
-    const ordersQuery = query(ref(db, "orders"), orderByChild("vendorId"), equalTo(user.vendorId));
-    const unsub = onValue(ordersQuery, snap => {
+    if (!db || !vendorId) {
+      setOrders([]);
+      setIsLoading(false);
+      return;
+    }
+
+    const ordersRef = ref(db, "orders");
+    const unsub = onValue(ordersRef, snap => {
       const data = snap.val();
       if (data) {
         const list = Object.entries(data)
           .map(([id, val]: [string, any]) => ({ id, ...val } as Order))
-          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+          .filter(o => 
+            o.vendorId === vendorId || 
+            (user?.vendorId && o.vendorId === user.vendorId) ||
+            (user?.uid && o.vendorId === user.uid)
+          )
+          .sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime());
         setOrders(list);
       } else {
         setOrders([]);
       }
       setIsLoading(false);
     });
+
     return () => unsub();
-  }, [user]);
+  }, [vendorId, user]);
 
   const updateOrderStatus = async (orderId: string, status: Order["status"]) => {
     if (!db) return;
     try {
       await update(ref(db, `orders/${orderId}`), { status });
-      toast.info(`Commande mise à jour`);
-    } catch (err) {
-      console.error(err);
+      toast.success("Statut de la commande mis à jour");
+    } catch {
       toast.error("Erreur de mise à jour");
     }
   };
 
-  if (isLoading) return (
-    <div className="min-h-[60vh] flex items-center justify-center">
-      <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-    </div>
-  );
+  if (isLoading) {
+    return (
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <div className="w-8 h-8 border-3 border-[#FF6B00] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   const awaitingPayment = orders.filter(o => o.status === "awaiting_payment" || o.status === "payment_sent");
-  const pending   = orders.filter(o => o.status === "pending");
-  const preparing = orders.filter(o => o.status === "preparing" || o.status === "delivering");
-  const delivered = orders.filter(o => o.status === "delivered");
+  const pending = orders.filter(o => o.status === "pending");
+  const inProgress = orders.filter(o => o.status === "preparing" || o.status === "delivering");
+  const completed = orders.filter(o => o.status === "delivered" || o.status === "paid");
 
+  // Définition des 4 colonnes selon le profil métier
   const columns = [
     {
-      emoji: "💳", title: "Paiement MoMo", orders: awaitingPayment,
-      accent: "border-amber-300 bg-amber-50/50",
-      headerColor: "text-amber-600",
-      actionLabel: "✅ Valider paiement",
+      title: "Paiement MoMo à valider",
+      count: awaitingPayment.length,
+      orders: awaitingPayment,
+      badgeColor: "bg-amber-100 text-amber-800",
+      actionLabel: "Valider paiement",
       nextStatus: "preparing" as Order["status"],
     },
     {
-      emoji: "⏳", title: "En attente", orders: pending,
-      accent: "border-orange-300 bg-orange-50/50",
-      headerColor: "text-orange-600",
-      actionLabel: "Accepter →",
+      title: sector === "hotel" ? "Demandes de séjour" : sector === "ecommerce" ? "Commandes reçues" : "Nouvelles commandes",
+      count: pending.length,
+      orders: pending,
+      badgeColor: "bg-orange-100 text-orange-800",
+      actionLabel: sector === "hotel" ? "Valider le séjour" : sector === "ecommerce" ? "Préparer colis" : "En cuisine ➔",
       nextStatus: "preparing" as Order["status"],
     },
     {
-      emoji: "🍳", title: "Préparation", orders: preparing,
-      accent: "border-blue-300 bg-blue-50/50",
-      headerColor: "text-blue-600",
-      actionLabel: "Marquer livré ✓",
+      title: sector === "hotel" ? "Séjours en cours" : sector === "ecommerce" ? "En cours d'expédition" : "En cuisine / Livraison",
+      count: inProgress.length,
+      orders: inProgress,
+      badgeColor: "bg-blue-100 text-blue-800",
+      actionLabel: sector === "hotel" ? "Check-out (Libérer)" : sector === "ecommerce" ? "Marquer livré ✓" : "Marquer livré ✓",
       nextStatus: "delivered" as Order["status"],
     },
     {
-      emoji: "✅", title: "Livrés", orders: delivered,
-      accent: "border-emerald-300 bg-emerald-50/50",
-      headerColor: "text-emerald-600",
+      title: sector === "hotel" ? "Séjours clôturés" : sector === "ecommerce" ? "Colis livrés" : "Commandes servies",
+      count: completed.length,
+      orders: completed,
+      badgeColor: "bg-emerald-100 text-emerald-800",
       actionLabel: undefined,
       nextStatus: undefined,
-    },
+    }
   ];
 
+  const totalRevenue = orders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+
   return (
-    <div className="space-y-8 pb-12">
-      {/* Page header */}
-      <div className="flex items-end justify-between">
-        <div>
-          <h1 className="font-heading text-3xl font-black text-foreground tracking-tight uppercase">
-            Flux des <span className="text-primary">Commandes</span>
-          </h1>
-          <p className="text-xs text-muted-foreground font-medium mt-1 uppercase tracking-widest">
-            {orders.length} commande{orders.length !== 1 ? "s" : ""} au total
-          </p>
+    <div className="space-y-8 pb-16 font-sub">
+      
+      {/* En-tête */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-zinc-200/90 shadow-sm">
+        <div className="flex items-center gap-3.5">
+          <div className="w-12 h-12 rounded-2xl bg-orange-50 text-[#FF6B00] flex items-center justify-center text-xl shadow-xs border border-orange-100">
+            {sector === "hotel" ? <Hotel size={22} /> : sector === "ecommerce" ? <ShoppingBag size={22} /> : <Utensils size={22} />}
+          </div>
+          <div>
+            <h1 className="font-heading font-black text-xl sm:text-2xl text-zinc-950 tracking-tight">
+              Gestion des <span className="text-[#FF6B00]">{sector === "hotel" ? "réservations" : "commandes"}</span>
+            </h1>
+            <p className="text-xs text-zinc-500 font-sub mt-0.5">
+              Suivi en temps réel des encaissements Mobile Money et des livraisons
+            </p>
+          </div>
         </div>
-        <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-emerald-500">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          Temps réel
+
+        <div className="flex items-center gap-3">
+          <div className="px-4 py-2 rounded-2xl bg-zinc-50 border border-zinc-200 text-right">
+            <span className="text-[10px] text-zinc-400 font-sub block">Total encaissé</span>
+            <span className="font-heading font-black text-sm text-zinc-950">
+              {totalRevenue.toLocaleString("fr-FR")} FCFA
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Kanban columns */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {columns.map(col => (
-          <div key={col.title} className={`rounded-[32px] border-2 ${col.accent} p-5 space-y-4`}>
-            <div className="flex items-center justify-between">
-              <h2 className={`font-heading font-black text-sm uppercase tracking-tight ${col.headerColor}`}>
-                {col.emoji} {col.title}
-              </h2>
-              <span className={`px-2.5 py-1 rounded-full text-[10px] font-black ${col.accent} ${col.headerColor} border border-current/20`}>
-                {col.orders.length}
+      {/* Kanban des commandes / réservations */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
+        {columns.map((col, idx) => (
+          <div key={idx} className="space-y-4">
+            
+            {/* Column header */}
+            <div className="flex items-center justify-between p-3.5 bg-white rounded-2xl border border-zinc-200/80 shadow-xs">
+              <span className="font-heading font-bold text-xs text-zinc-900">
+                {col.title}
+              </span>
+              <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${col.badgeColor}`}>
+                {col.count}
               </span>
             </div>
 
-            <AnimatePresence mode="popLayout">
-              {col.orders.length === 0 ? (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="py-12 text-center space-y-2"
-                >
-                  <p className="text-2xl">🍽️</p>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                    Aucune commande
-                  </p>
-                </motion.div>
-              ) : (
-                col.orders.map(order => (
-                  <OrderCard
-                    key={order.id}
-                    order={order}
-                    actionLabel={col.actionLabel}
-                    nextStatus={col.nextStatus}
-                    onAction={col.nextStatus ? () => updateOrderStatus(order.id, col.nextStatus!) : undefined}
-                    onOpenChat={setChatOrder}
-                    onOpenReceipt={setReceiptOrder}
-                  />
-                ))
-              )}
-            </AnimatePresence>
+            {/* Orders list */}
+            <div className="space-y-3">
+              <AnimatePresence>
+                {col.orders.length === 0 ? (
+                  <div className="p-6 rounded-2xl bg-zinc-50 border border-dashed border-zinc-200 text-center">
+                    <p className="text-xs text-zinc-400 font-sub">Aucun élément</p>
+                  </div>
+                ) : (
+                  col.orders.map(order => (
+                    <OrderCard
+                      key={order.id}
+                      order={order}
+                      actionLabel={col.actionLabel}
+                      onAction={col.nextStatus ? () => updateOrderStatus(order.id, col.nextStatus!) : undefined}
+                      onOpenChat={setChatOrder}
+                      onOpenReceipt={setReceiptOrder}
+                      sector={sector}
+                    />
+                  ))
+                )}
+              </AnimatePresence>
+            </div>
+
           </div>
         ))}
       </div>
 
-      {/* Official Receipt Modal for Download & Print */}
+      {/* Modal du reçu officiel */}
       {receiptOrder && (
         <ReceiptModal
           order={receiptOrder}
@@ -281,55 +346,28 @@ export default function VendorOrders() {
         />
       )}
 
-      {/* Chat Drawer — slides in from right */}
-      <AnimatePresence>
-        {chatOrder && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setChatOrder(null)}
-              className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
-            />
-            {/* Drawer */}
-            <motion.div
-              initial={{ x: "100%", opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: "100%", opacity: 0 }}
-              transition={{ type: "spring", stiffness: 300, damping: 32 }}
-              className="fixed top-0 right-0 h-full w-full max-w-md bg-background shadow-2xl z-50 flex flex-col"
-            >
-              {/* Drawer header */}
-              <div className="flex items-center gap-4 p-6 border-b border-border bg-card">
-                <button
-                  onClick={() => setChatOrder(null)}
-                  className="w-10 h-10 rounded-2xl bg-muted flex items-center justify-center hover:bg-border transition-colors"
-                >
-                  <X size={18} />
-                </button>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-black text-sm uppercase tracking-tight truncate">
-                    Discussion · {chatOrder.clientName}
-                  </h3>
-                  <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
-                    Commande #{chatOrder.id.slice(-8)} · {chatOrder.total.toLocaleString()} F
-                  </p>
-                </div>
+      {/* Chat avec client si besoin */}
+      {chatOrder && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex justify-end">
+          <div className="w-full max-w-md bg-white h-full shadow-2xl p-6 flex flex-col justify-between">
+            <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
+              <div>
+                <h3 className="font-heading font-bold text-sm text-zinc-900">
+                  {chatOrder.clientName || "Client"}
+                </h3>
+                <p className="text-xs text-zinc-500 font-sub">Commande #{chatOrder.id.slice(-5)}</p>
               </div>
+              <button onClick={() => setChatOrder(null)} className="p-2 text-zinc-400 hover:text-zinc-600">
+                <X size={18} />
+              </button>
+            </div>
+            <div className="flex-1 py-4">
+              <OrderChat orderId={chatOrder.id} />
+            </div>
+          </div>
+        </div>
+      )}
 
-              {/* Chat fills the rest */}
-              <div className="flex-1 overflow-hidden p-4">
-                <OrderChat
-                  orderId={chatOrder.id}
-                  clientName={chatOrder.clientName}
-                />
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

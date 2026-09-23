@@ -6,6 +6,7 @@ import { ref, update, onValue, set, push, query, orderByChild, equalTo, get } fr
 import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 import { toast } from "sonner";
 import { VendorProfile, Product } from "@/data/mockData";
+import { getVendorSector } from "@/lib/vendorSector";
 import StepIdentite from "./builder/StepIdentite";
 import StepCarte from "./builder/StepCarte";
 import StepEcommerceCatalogue from "./builder/StepEcommerceCatalogue";
@@ -113,13 +114,8 @@ export default function VendorSiteBuilder() {
   ];
 
   useEffect(() => {
-    // Déterminer le business type initial
-    let detectedType: "restaurant" | "ecommerce" | "hotel" = initialType;
-    if (sectorQuery) {
-      detectedType = sectorQuery as any;
-    } else if (vendorProfile?.business_type) {
-      detectedType = vendorProfile.business_type as any;
-    }
+    // Déterminer le business type de façon unifiée
+    const detectedType = getVendorSector(vendorProfile, sectorQuery);
     setBusinessType(detectedType);
 
     // Charger les données sauvegardées en priorité depuis localStorage ou vendorProfile
