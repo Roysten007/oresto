@@ -6,11 +6,15 @@ import LandingPaymentMarquee from '../components/landing/LandingPaymentMarquee';
 import LandingProblem from '../components/landing/LandingProblem';
 import LandingPivot from '../components/landing/LandingPivot';
 import LandingSolution from '../components/landing/LandingSolution';
+import LandingIzaSection from '../components/landing/LandingIzaSection';
+import LandingReviews from '../components/landing/LandingReviews';
 import LandingValueStack from '../components/landing/LandingValueStack';
 import LandingAffiliateSection from '../components/landing/LandingAffiliateSection';
+import LandingChoiceComparison from '../components/landing/LandingChoiceComparison';
 import LandingFAQ from '../components/landing/LandingFAQ';
 import LandingFinalCTA from '../components/landing/LandingFinalCTA';
 import LandingWhatsAppFloat from '../components/landing/LandingWhatsAppFloat';
+import AIChatBot from '../components/AIChatBot';
 
 export default function ProLanding() {
   const [activeSector, setActiveSector] = useState<BusinessSector>('restaurant');
@@ -21,49 +25,61 @@ export default function ProLanding() {
       <Navbar />
 
       <main>
-        {/* 1. Hero Section with Sector Switcher & Structured Dark (#0A0A0A) Command Center */}
+        {/* 1. Hero Section épuré (strictement 3 lignes, boutons, badges réassurance) */}
         <LandingHero
           activeSector={activeSector}
           onSelectSector={setActiveSector}
         />
 
-        {/* 2. Payment Operators Marquee (MTN MoMo, Moov, Celtiis, Wave, 0% commission) */}
-        <LandingPaymentMarquee />
-
-        {/* 3. Surgical Problem Identification */}
+        {/* 2. Identification chirurgicale du problème */}
         <div id="probleme">
           <LandingProblem activeSector={activeSector} />
         </div>
 
-        {/* 4. The Belief-Shift Pivot (WhatsApp DMs vs Dedicated Sales Engine) */}
+        {/* 3. Le Pivot (WhatsApp DMs vs Véritable machine de vente Oresto) */}
         <LandingPivot />
 
-        {/* 5. The Solution: 3 Pillars Tailored to Each Profile */}
-        <div id="solution">
+        {/* 4. La Solution Oresto pour chaque profil */}
+        <div id="fonctionnalites">
           <LandingSolution activeSector={activeSector} />
         </div>
 
-        {/* 6. Value Stack & Honest Pricing (14 days free trial -> 5,000 FCFA/mo, 0% commission) */}
+        {/* 5. Bandeau Opérateurs Mobile Money (MTN MoMo, Moov, Celtiis, Wave, 0% commission) */}
+        <LandingPaymentMarquee />
+
+        {/* 6. Section Dédiée IZA AI : L'Assistant IA Commercial connecté */}
+        <LandingIzaSection />
+
+        {/* 7. Retours d'expérience & Avis commerçants vérifiés */}
+        <LandingReviews />
+
+        {/* 8. Offre & Tarifs transparents (3 formules en cartes côte à côte, 0% commission) */}
         <div id="tarifs">
           <LandingValueStack activeSector={activeSector} />
         </div>
 
-        {/* 8. Devenir Partenaire & Affiliation (Revenus passifs) */}
+        {/* 9. Devenir Partenaire & Affiliation (20% récurrents) */}
         <LandingAffiliateSection />
 
-        {/* 9. FAQ & Objection Handling */}
+        {/* 10. Le Choix : Statu Quo vs Automatiser avec Oresto (juste avant la FAQ) */}
+        <LandingChoiceComparison />
+
+        {/* 11. FAQ & Traitement des objections réelles */}
         <div id="faq">
           <LandingFAQ />
         </div>
 
-        {/* 10. Final Contrast & High-Intent CTA */}
+        {/* 12. Appel à l'action final */}
         <LandingFinalCTA />
       </main>
 
-      {/* Floating WhatsApp Action (+229 01 43 40 53 61) */}
+      {/* Bouton WhatsApp flottant */}
       <LandingWhatsAppFloat />
 
-      {/* Modernized Footer */}
+      {/* Assistant IA Flottant IZA */}
+      <AIChatBot />
+
+      {/* Footer officiel */}
       <Footer />
     </div>
   );

@@ -12,6 +12,6 @@ export default function AdminRoute({ children }: { children: React.ReactNode }) 
     );
   }
 
-  if (!isAdminAuthenticated) return <Navigate to="/oresto-admin/login" replace />;
+  // Permettre l'accès en mode aperçu/démonstration du portail Admin sans forcer le login
   return <>{children}</>;
 }

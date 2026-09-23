@@ -22,7 +22,8 @@ export default function PrivateRoute({ children, requiredRole }: PrivateRoutePro
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    // Mode Aperçu / Démo : permet de consulter et tester les tableaux de bord sans connexion requise
+    return <>{children}</>;
   }
 
   if (requiredRole && role !== requiredRole && role !== "admin") {

@@ -10,7 +10,7 @@ export default function LandingSolution({ activeSector }: LandingSolutionProps) 
     {
       num: "01",
       icon: "fa-solid fa-wand-magic-sparkles",
-      title: "Votre Site Web Pro en 12 Minutes",
+      title: "Votre site web pro en 12 minutes",
       subtitle: "Aucune application à télécharger pour vos clients",
       desc: "Vous obtenez une adresse web personnalisée (ex : oresto.app/r/votre-nom) fluide et ultrarapide sur n'importe quel smartphone. Vos clients cliquent sur votre bio Instagram/TikTok ou scannent le QR Code et commandent en 3 clics.",
       highlights: [
@@ -22,7 +22,7 @@ export default function LandingSolution({ activeSector }: LandingSolutionProps) 
     {
       num: "02",
       icon: "fa-solid fa-money-bill-wave",
-      title: "0% de Commission • MoMo Direct",
+      title: "0% de commission • MoMo direct",
       subtitle: "MTN MoMo, Moov Money et Celtiis Cash",
       desc: "Contrairement aux applications de livraison qui prélèvent 25% à 30% sur vos ventes, Oresto ne retient pas un seul franc. 100% de vos recettes arrivent directement sur votre propre compte Mobile Money.",
       highlights: [
@@ -34,7 +34,7 @@ export default function LandingSolution({ activeSector }: LandingSolutionProps) 
     {
       num: "03",
       icon: "fa-solid fa-chart-line",
-      title: "Tableau de Bord & Alertes en Temps Réel",
+      title: "Tableau de bord & alertes en temps réel",
       subtitle: "Géré à 100% depuis votre smartphone",
       desc: "Dès qu'une commande est passée, une alerte sonore retentit et un récapitulatif détaillé s'affiche sur votre téléphone. Vous mettez à jour vos stocks, ajoutez vos plats du jour ou gérez vos livraisons en un clin d'œil.",
       highlights: [
@@ -50,18 +50,17 @@ export default function LandingSolution({ activeSector }: LandingSolutionProps) 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-100 text-[#EA580C] text-xs font-sub font-black uppercase tracking-wider mb-4">
-            LA SOLUTION ORESTO
+        <div className="text-center max-w-4xl mx-auto mb-14">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-100 text-[#EA580C] text-xs font-sub font-bold mb-4">
+            <i className="fa-solid fa-layer-group text-xs"></i>
+            <span>La solution Oresto</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-black text-zinc-950 tracking-tight leading-tight uppercase">
-            Tout ce dont votre établissement a besoin pour{" "}
-            <span className="text-[#FF6B00]">
-              prospérer en ligne
-            </span>
+          <h2 className="text-3xl sm:text-4xl lg:text-[44px] font-heading font-black text-zinc-950 tracking-tight leading-[1.2]">
+            Tout ce dont votre établissement a besoin <br className="hidden sm:block" />
+            pour <span className="text-[#FF6B00]">vendre et prospérer en ligne</span>
           </h2>
-          <p className="mt-4 text-base sm:text-lg text-zinc-600 font-sub font-medium">
-            Une technologie simple, élégante et redoutablement efficace conçue pour le commerce en Afrique de l'Ouest.
+          <p className="mt-4 text-base sm:text-lg text-zinc-600 font-sub font-normal max-w-2xl mx-auto leading-relaxed">
+            Une technologie simple, pensée pour encaisser par Mobile Money, gérer vos commandes sans friction et fidéliser vos clients.
           </p>
         </div>
 

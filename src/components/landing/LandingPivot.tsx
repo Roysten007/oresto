@@ -13,17 +13,14 @@ export default function LandingPivot() {
           <div className="absolute top-0 right-0 w-80 h-80 bg-orange-100/40 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
 
           <div className="relative z-10 max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-50 text-[#EA580C] text-xs font-sub font-black uppercase tracking-wider mb-6 border border-orange-200">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-50 text-[#EA580C] text-xs font-sub font-bold mb-6 border border-orange-200">
               <i className="fa-solid fa-lightbulb"></i>
               <span>La vérité sur votre commerce</span>
             </div>
 
-            <h2 className="text-2xl sm:text-4xl lg:text-[42px] font-heading font-black text-zinc-950 tracking-tight leading-snug mb-6 uppercase">
-              Le problème ne vient ni de vos produits, ni de vos clients. Le problème est d'utiliser une{" "}
-              <span className="text-[#FF6B00]">
-                application de discussion
-              </span>{" "}
-              pour faire tourner un commerce.
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-black text-zinc-950 tracking-tight leading-tight mb-6">
+              Une messagerie sert à discuter, <br className="hidden sm:block" />
+              pas à <span className="text-[#FF6B00]">faire tourner un commerce</span>.
             </h2>
 
             <div className="space-y-4 text-zinc-600 font-sub text-sm sm:text-base leading-relaxed mb-8">
@@ -38,12 +35,12 @@ export default function LandingPivot() {
             <div className="flex flex-col sm:flex-row items-center gap-4">
               <Link
                 to="/register"
-                className="w-full sm:w-auto px-8 py-4 rounded-full bg-[#FF6B00] hover:bg-[#EA580C] text-white font-sub font-black text-sm uppercase tracking-wider shadow-braised transition-all flex items-center justify-center gap-2 group"
+                className="w-full sm:w-auto px-8 py-4 rounded-full bg-[#FF6B00] hover:bg-[#EA580C] text-white font-sub font-bold text-sm shadow-braised transition-all flex items-center justify-center gap-2 group"
               >
                 <span>Passer au moteur automatisé</span>
                 <i className="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
               </Link>
-              <span className="text-xs font-sub font-bold text-zinc-500 uppercase tracking-wide">
+              <span className="text-xs font-sub font-semibold text-zinc-500">
                 14 jours d'essai gratuit • Sans engagement
               </span>
             </div>

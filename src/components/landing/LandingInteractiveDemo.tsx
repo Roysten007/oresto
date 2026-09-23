@@ -55,11 +55,11 @@ export default function LandingInteractiveDemo({ activeSector, onSelectSector }:
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-100 text-[#EA580C] text-xs font-sub font-black uppercase tracking-wider mb-4">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-100 text-[#EA580C] text-xs font-sub font-bold mb-4">
             <i className="fa-solid fa-bolt"></i>
-            <span>SIMULATION EN DIRECT</span>
+            <span>Simulation en direct</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-black text-zinc-950 tracking-tight leading-tight uppercase">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-black text-zinc-950 tracking-tight leading-tight">
             Voyez comment une vente se passe en{" "}
             <span className="text-[#FF6B00]">
               temps réel
@@ -81,7 +81,7 @@ export default function LandingInteractiveDemo({ activeSector, onSelectSector }:
                 <div className="flex items-center justify-between pb-4 mb-4 border-b border-zinc-800">
                   <div className="flex items-center gap-2">
                     <i className="fa-solid fa-mobile-screen-button text-[#FF6B00]"></i>
-                    <span className="text-xs font-sub font-bold text-white uppercase tracking-wider">Écran de votre client</span>
+                    <span className="text-xs font-sub font-bold text-white">Écran de votre client</span>
                   </div>
                   <span className="text-[10px] font-sub font-semibold text-zinc-400">Sans application à installer</span>
                 </div>
@@ -110,7 +110,7 @@ export default function LandingInteractiveDemo({ activeSector, onSelectSector }:
                 {!orderPlaced ? (
                   <button
                     onClick={handleSimulateOrder}
-                    className="w-full py-4 px-4 rounded-full bg-[#FF6B00] hover:bg-[#EA580C] text-white font-sub font-black text-sm uppercase tracking-wider shadow-braised transition-all flex items-center justify-center gap-2.5 group active:scale-95"
+                    className="w-full py-4 px-4 rounded-full bg-[#FF6B00] hover:bg-[#EA580C] text-white font-sub font-bold text-sm shadow-braised transition-all flex items-center justify-center gap-2.5 group active:scale-95"
                   >
                     <span>Valider ma commande test (Gratuit)</span>
                     <i className="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
@@ -139,7 +139,7 @@ export default function LandingInteractiveDemo({ activeSector, onSelectSector }:
                 <div className="flex items-center justify-between pb-4 mb-4 border-b border-zinc-800">
                   <div className="flex items-center gap-2">
                     <i className={`fa-solid fa-bell ${alertBeep ? "text-[#FF6B00] animate-bounce" : "text-zinc-400"}`}></i>
-                    <span className="text-xs font-sub font-bold text-white uppercase tracking-wider">Votre tableau de bord gérant</span>
+                    <span className="text-xs font-sub font-bold text-white">Votre tableau de bord gérant</span>
                   </div>
                   <span className="text-[10px] font-sub font-bold text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded-full border border-emerald-800/50">
                     En direct

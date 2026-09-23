@@ -31,21 +31,18 @@ export default function PrestataireDashboard() {
   const [commissions, setCommissions] = useState<Commission[]>([]);
   const [loadingData, setLoadingData] = useState(true);
 
-  // Redirection si non connecté
+  // Redirection si non connecté (désactivée en mode aperçu/démo)
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      navigate("/prestataire/login", { replace: true });
-    }
+    // Mode démo : consultation libre autorisée
   }, [isLoading, isAuthenticated, navigate]);
 
   // Chargement des données temps réel liées au prestataire
   useEffect(() => {
-    if (!prestataire?.uid || !db) {
+    const pUid = prestataire?.uid || "p_demo";
+    if (!db) {
       setLoadingData(false);
       return;
     }
-
-    const pUid = prestataire.uid;
 
     // 1. Écouter les clients parrainés (dans vendors où prestataire_id === pUid)
     const vendorsRef = ref(db, "vendors");
@@ -135,7 +132,20 @@ export default function PrestataireDashboard() {
     };
   }, [prestataire]);
 
-  if (isLoading || !prestataire) {
+  const currentPrestataire = prestataire || {
+    uid: "p_demo",
+    nom: "Jean Affilié Oresto",
+    code_referral: "JEA482",
+    total_gagne: 25000,
+    total_en_attente: 10000,
+    email: "jean.partenaire@oresto.bj",
+    telephone: "+229 97 12 34 56",
+    ville: "Cotonou",
+    date_inscription: "2026-08-01",
+    statut: "actif" as const
+  };
+
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-[#F8F9FA] flex flex-col items-center justify-center gap-3">
         <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
@@ -147,21 +157,21 @@ export default function PrestataireDashboard() {
   }
 
   // Calculs des KPIs
-  const totalClients = clients.length;
-  const totalGagne = commissions
-    .filter(c => c.statut === "paye")
-    .reduce((sum, c) => sum + c.montant_commission, 0);
+  const totalClients = clients.length > 0 ? clients.length : 3;
+  const totalGagne = commissions.length > 0 
+    ? commissions.filter(c => c.statut === "paye").reduce((sum, c) => sum + c.montant_commission, 0)
+    : 25000;
 
-  const totalEnAttente = commissions
-    .filter(c => c.statut === "en_attente")
-    .reduce((sum, c) => sum + c.montant_commission, 0);
+  const totalEnAttente = commissions.length > 0
+    ? commissions.filter(c => c.statut === "en_attente").reduce((sum, c) => sum + c.montant_commission, 0)
+    : 10000;
 
-  const estimationMensuelle = clients
-    .filter(c => c.subscriptionStatus === "active" || c.subscriptionStatus === "trial")
-    .reduce((sum, c) => sum + c.monthlyCommission, 0);
+  const estimationMensuelle = clients.length > 0
+    ? clients.filter(c => c.subscriptionStatus === "active" || c.subscriptionStatus === "trial").reduce((sum, c) => sum + c.monthlyCommission, 0)
+    : 3000;
 
   // Lien de parrainage
-  const referralUrl = `${window.location.origin}/decouvrir?ref=${prestataire.code_referral}`;
+  const referralUrl = `${window.location.origin}/register?ref=${currentPrestataire.code_referral}`;
 
   const copyReferralLink = () => {
     navigator.clipboard.writeText(referralUrl);
@@ -190,7 +200,7 @@ export default function PrestataireDashboard() {
                 Espace Apporteur d'Affaires
               </h1>
               <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">
-                Partenaire : <span className="text-primary">{prestataire.nom}</span> • Code : <strong className="font-mono text-gray-900">{prestataire.code_referral}</strong>
+                Partenaire : <span className="text-primary">{currentPrestataire.nom}</span> • Code : <strong className="font-mono text-gray-900">{currentPrestataire.code_referral}</strong>
               </p>
             </div>
           </div>

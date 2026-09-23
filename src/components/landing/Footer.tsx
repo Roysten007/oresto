@@ -13,7 +13,7 @@ export default function Footer() {
               <div className="w-8 h-8 rounded-xl bg-[#FF6B00] text-white flex items-center justify-center font-heading font-black text-sm shadow-braised">
                 O
               </div>
-              <span className="font-heading font-black text-xl tracking-tight text-zinc-950 uppercase">
+              <span className="font-heading font-black text-xl tracking-tight text-zinc-950">
                 Oresto
               </span>
             </Link>
@@ -28,27 +28,27 @@ export default function Footer() {
 
           {/* Solutions Column */}
           <div>
-            <h4 className="font-heading font-black text-zinc-950 mb-4 text-xs uppercase tracking-wider">Solutions</h4>
+            <h4 className="font-heading font-black text-zinc-950 mb-4 text-xs">Solutions</h4>
             <ul className="space-y-2.5 text-sm font-sub">
               <li className="flex items-center gap-2 text-zinc-800 font-semibold">
                 <i className="fa-solid fa-utensils text-[#FF6B00] text-xs"></i>
-                <span>Restaurants & Maquis</span>
+                <span>Restaurants &amp; Maquis</span>
               </li>
               <li className="flex items-center gap-2 text-zinc-800 font-semibold">
                 <i className="fa-solid fa-bag-shopping text-[#FF6B00] text-xs"></i>
-                <span>Boutiques & E-Commerce</span>
+                <span>Boutiques &amp; E-Commerce</span>
               </li>
               <li className="flex items-center gap-2 text-zinc-800 font-semibold">
                 <i className="fa-solid fa-hotel text-[#FF6B00] text-xs"></i>
-                <span>Hôtels & Résidences</span>
+                <span>Hôtels &amp; Résidences</span>
               </li>
-              <li><a href="#tarifs" className="hover:text-[#FF6B00] transition-colors">Tarifs & Formules</a></li>
+              <li><a href="#tarifs" className="hover:text-[#FF6B00] transition-colors">Tarifs &amp; Formules</a></li>
             </ul>
           </div>
 
           {/* Espace Pro & Affilié Column */}
           <div>
-            <h4 className="font-heading font-black text-zinc-950 mb-4 text-xs uppercase tracking-wider">Espace Pro</h4>
+            <h4 className="font-heading font-black text-zinc-950 mb-4 text-xs">Espace Pro</h4>
             <ul className="space-y-2.5 text-sm font-sub">
               <li><Link to="/register" className="hover:text-[#FF6B00] transition-colors font-medium">Créer un compte (14j gratuits)</Link></li>
               <li><Link to="/login" className="hover:text-[#FF6B00] transition-colors font-medium">Connexion Espace Vendeur</Link></li>
@@ -65,7 +65,7 @@ export default function Footer() {
 
           {/* Contact Column */}
           <div>
-            <h4 className="font-heading font-black text-zinc-950 mb-4 text-xs uppercase tracking-wider">Assistance Locale</h4>
+            <h4 className="font-heading font-black text-zinc-950 mb-4 text-xs">Assistance Locale</h4>
             <ul className="space-y-3 text-sm font-sub">
               <li className="flex items-center gap-2.5">
                 <i className="fa-solid fa-phone text-[#FF6B00] text-xs"></i>

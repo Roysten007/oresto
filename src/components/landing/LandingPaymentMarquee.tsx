@@ -122,10 +122,10 @@ export function LandingPaymentMarquee() {
         
         {/* En-tête centré façon saaspay.me */}
         <div className="text-center">
-          <p className="text-xs sm:text-sm font-sub font-bold text-zinc-500 uppercase tracking-widest mb-1.5">
-            Adopté pour les paiements locaux et paiement international
+          <p className="text-xs sm:text-sm font-sub font-semibold text-zinc-500 mb-1.5">
+            Adopté pour les paiements locaux et internationaux
           </p>
-          <h2 className="text-lg sm:text-2xl font-heading font-black text-zinc-950 tracking-tight uppercase">
+          <h2 className="text-lg sm:text-2xl font-heading font-black text-zinc-950 tracking-tight">
             Encaissez directement sans intermédiaire, de Cotonou à l'international
           </h2>
           <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mt-3 text-xs font-sub font-semibold text-zinc-600">

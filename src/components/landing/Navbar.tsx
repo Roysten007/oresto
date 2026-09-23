@@ -29,18 +29,22 @@ export default function Navbar() {
             <div className="w-9 h-9 rounded-xl bg-[#FF6B00] text-white flex items-center justify-center font-heading font-black text-base shadow-braised group-hover:scale-105 transition-transform">
               O
             </div>
-            <span className="font-heading font-black text-xl tracking-tight text-zinc-950 uppercase">
+            <span className="font-heading font-black text-xl tracking-tight text-zinc-950">
               Oresto
             </span>
           </Link>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-8 text-sm font-sub font-bold text-zinc-600">
-            <a href="#solutions" className="hover:text-[#FF6B00] transition-colors">
-              Solutions
-            </a>
+          <nav className="hidden md:flex items-center gap-7 text-sm font-sub font-bold text-zinc-600">
             <a href="#fonctionnalites" className="hover:text-[#FF6B00] transition-colors">
               Fonctionnalités
+            </a>
+            <a href="#iza" className="hover:text-[#FF6B00] transition-colors flex items-center gap-1.5 text-zinc-900 font-black">
+              <span className="w-2 h-2 rounded-full bg-[#FF6B00] animate-pulse"></span>
+              <span>IZA AI</span>
+            </a>
+            <a href="#avis" className="hover:text-[#FF6B00] transition-colors">
+              Avis
             </a>
             <a href="#tarifs" className="hover:text-[#FF6B00] transition-colors">
               Tarifs
@@ -64,7 +68,7 @@ export default function Navbar() {
             </Link>
             <Link
               to="/register"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#FF6B00] hover:bg-[#EA580C] text-white text-xs font-sub font-black uppercase tracking-wider shadow-braised hover:shadow-[0_12px_28px_-4px_rgba(255,107,0,0.5)] transition-all transform hover:-translate-y-0.5"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#FF6B00] hover:bg-[#EA580C] text-white text-xs font-sub font-bold shadow-braised hover:shadow-[0_12px_28px_-4px_rgba(255,107,0,0.5)] transition-all transform hover:-translate-y-0.5"
             >
               <span>Essai gratuit 14 jours</span>
               <i className="fa-solid fa-arrow-right text-[10px]"></i>
@@ -87,18 +91,26 @@ export default function Navbar() {
         <div className="md:hidden bg-[#FAFAFA]/98 backdrop-blur-xl border-b border-zinc-200 px-6 py-6 shadow-xl space-y-4">
           <nav className="flex flex-col space-y-3 text-base font-sub font-bold text-zinc-700">
             <a
-              href="#solutions"
-              onClick={() => setMobileMenuOpen(false)}
-              className="py-2 hover:text-[#FF6B00]"
-            >
-              Solutions (3 Profils)
-            </a>
-            <a
               href="#fonctionnalites"
               onClick={() => setMobileMenuOpen(false)}
               className="py-2 hover:text-[#FF6B00]"
             >
               Fonctionnalités
+            </a>
+            <a
+              href="#iza"
+              onClick={() => setMobileMenuOpen(false)}
+              className="py-2 text-[#FF6B00] font-black flex items-center gap-2"
+            >
+              <span className="w-2 h-2 rounded-full bg-[#FF6B00] animate-pulse"></span>
+              <span>IZA AI (Copilote Intelligent)</span>
+            </a>
+            <a
+              href="#avis"
+              onClick={() => setMobileMenuOpen(false)}
+              className="py-2 hover:text-[#FF6B00]"
+            >
+              Avis Clients
             </a>
             <a
               href="#tarifs"
@@ -135,7 +147,7 @@ export default function Navbar() {
             <Link
               to="/register"
               onClick={() => setMobileMenuOpen(false)}
-              className="text-center py-3 rounded-full bg-[#FF6B00] text-white font-sub font-black text-sm uppercase tracking-wider shadow-braised"
+              className="text-center py-3 rounded-full bg-[#FF6B00] text-white font-sub font-bold text-sm shadow-braised"
             >
               Démarrer l'essai 14 jours
             </Link>

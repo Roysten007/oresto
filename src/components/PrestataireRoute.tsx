@@ -23,7 +23,8 @@ export default function PrestataireRoute({ children }: PrestataireRouteProps) {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/prestataire/login" state={{ from: location }} replace />;
+    // Mode Aperçu / Démo sans connexion obligatoire
+    return <>{children}</>;
   }
 
   return <>{children}</>;

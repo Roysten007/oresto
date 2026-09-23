@@ -6,7 +6,7 @@ export function LandingFAQ() {
   const faqs = [
     {
       q: "Comment je reçois l'argent de mes clients ?",
-      a: "Directement sur votre propre compte Mobile Money (MTN MoMo, Moov Money ou Celtiis Cash). Oresto ne touche jamais à votre argent et ne prélève aucune commission sur vos ventes (0%). Dès qu'un client valide son paiement, les fonds arrivent immédiatement sur votre numéro marchand ou personnel.",
+      a: "L'argent de vos ventes arrive directement sur votre compte Mobile Money ou bancaire, sans jamais passer par Oresto. Les 0% de commission concernent uniquement Oresto : nous ne prélevons aucun pourcentage sur vos ventes, contrairement aux applications de livraison classiques. Comme pour tout encaissement digital, votre opérateur de paiement applique ses propres frais de transaction (dès 2,2% en Mobile Money, 5% par carte bancaire) — ces frais ne reviennent jamais à Oresto, c'est la norme du secteur pour tout paiement Mobile Money ou carte.",
     },
     {
       q: "Mes clients doivent-ils télécharger une application pour commander ?",
@@ -40,11 +40,11 @@ export function LandingFAQ() {
         
         {/* Section Header */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-100 text-[#EA580C] text-xs font-sub font-black uppercase tracking-wider mb-4">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-100 text-[#EA580C] text-xs font-sub font-bold mb-4">
             <i className="fa-solid fa-circle-question"></i>
-            <span>QUESTIONS FRÉQUENTES</span>
+            <span>Questions fréquentes</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-black text-zinc-950 tracking-tight leading-tight uppercase">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-black text-zinc-950 tracking-tight leading-tight">
             Tout ce que vous devez savoir avant de{" "}
             <span className="text-[#FF6B00]">
               commencer
@@ -101,7 +101,7 @@ export function LandingFAQ() {
               <i className="fa-brands fa-whatsapp"></i>
             </div>
             <div>
-              <h4 className="font-heading font-black text-zinc-950 text-base sm:text-lg uppercase">Vous avez une question spécifique ?</h4>
+              <h4 className="font-heading font-black text-zinc-950 text-base sm:text-lg">Vous avez une question spécifique ?</h4>
               <p className="text-xs sm:text-sm text-zinc-500 font-sub">Échangez directement avec un conseiller Oresto au Bénin sur WhatsApp.</p>
             </div>
           </div>
@@ -110,7 +110,7 @@ export function LandingFAQ() {
             href="https://wa.me/2290143405361?text=Bonjour%20Oresto%2C%20j'ai%20une%20question%20sur%20la%20plateforme"
             target="_blank"
             rel="noopener noreferrer"
-            className="px-6 py-3 rounded-full bg-[#FF6B00] hover:bg-[#EA580C] text-white font-sub font-black text-sm uppercase tracking-wider flex items-center gap-2.5 shadow-braised transition-all shrink-0"
+            className="px-6 py-3 rounded-full bg-[#FF6B00] hover:bg-[#EA580C] text-white font-sub font-bold text-sm flex items-center gap-2.5 shadow-braised transition-all shrink-0"
           >
             <i className="fa-solid fa-phone text-xs"></i>
             <span>+229 01 43 40 53 61</span>
