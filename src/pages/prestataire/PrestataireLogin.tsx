@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { usePrestataire } from "@/contexts/PrestataireContext";
 import { toast } from "sonner";
-import { Zap, ArrowRight, Lock, Phone, User } from "lucide-react";
+import { Lock, Phone, ArrowRight } from "lucide-react";
 
 export default function PrestataireLogin() {
   const { loginPrestataire } = usePrestataire();
@@ -37,23 +37,28 @@ export default function PrestataireLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] flex flex-col justify-between font-body text-gray-900 selection:bg-primary selection:text-white">
+    <div className="min-h-screen bg-[#FAFAFA] flex flex-col justify-between font-sub text-zinc-900 selection:bg-orange-100 selection:text-[#EA580C]">
       
       {/* Top Header */}
-      <header className="bg-white border-b border-gray-150 px-4 sm:px-8 py-4 shadow-xs">
+      <header className="bg-white/95 backdrop-blur-md border-b border-zinc-200/80 px-4 sm:px-8 py-3.5 shadow-xs">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2.5 no-underline">
-            <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center text-white shadow-md shadow-primary/25">
-              <Zap size={18} fill="currentColor" />
+          <Link to="/" className="flex items-center gap-2.5">
+            <div className="w-9 h-9 bg-[#FF6B00] rounded-xl flex items-center justify-center text-white font-heading font-black text-base shadow-braised">
+              O
             </div>
-            <span className="font-heading text-xl font-black tracking-tighter uppercase text-gray-900">
-              Oresto <span className="text-primary">Affiliation</span>
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="font-heading text-xl font-black tracking-tight text-zinc-950">
+                Oresto
+              </span>
+              <span className="text-[11px] font-sub font-bold px-2 py-0.5 rounded-full bg-orange-100 text-[#EA580C]">
+                Partenaires
+              </span>
+            </div>
           </Link>
 
           <Link
             to="/devenir-prestataire"
-            className="px-4 py-2 rounded-xl text-xs font-heading font-bold text-primary hover:bg-orange-50 transition-colors border border-orange-200"
+            className="px-4 py-2 rounded-xl text-xs font-sub font-bold text-[#EA580C] hover:bg-orange-50 transition-colors border border-orange-200"
           >
             Créer un compte
           </Link>
@@ -62,32 +67,32 @@ export default function PrestataireLogin() {
 
       {/* Main Login Form */}
       <main className="max-w-md mx-auto px-4 py-12 w-full">
-        <div className="bg-white rounded-[32px] p-6 sm:p-10 border border-gray-200 shadow-xl space-y-6">
+        <div className="bg-white rounded-3xl sm:rounded-[36px] p-6 sm:p-10 border border-zinc-200/90 shadow-float space-y-6">
           
           <div className="text-center space-y-1">
-            <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto text-xl mb-3 shadow-xs">
+            <div className="w-12 h-12 rounded-2xl bg-orange-50 text-[#FF6B00] flex items-center justify-center mx-auto text-xl mb-3 border border-orange-100">
               <i className="fa-solid fa-handshake"></i>
             </div>
-            <h1 className="font-heading font-black text-2xl text-gray-900">
+            <h1 className="font-heading font-black text-2xl text-zinc-950 tracking-tight">
               Espace Apporteur d'Affaires
             </h1>
-            <p className="text-xs text-gray-500 font-medium">
-              Accédez à vos statistiques de parrainage et vos commissions en temps réel.
+            <p className="text-xs text-zinc-500 font-sub">
+              Accédez à votre lien de parrainage et vos commissions en temps réel.
             </p>
           </div>
 
           {error && (
-            <div className="p-3.5 rounded-2xl bg-red-50 border border-red-200 text-red-600 text-xs font-bold flex items-center gap-2">
+            <div className="p-3.5 rounded-2xl bg-red-50 border border-red-200 text-red-600 text-xs font-sub font-bold flex items-center gap-2">
               <i className="fa-solid fa-circle-exclamation"></i>
               <span>{error}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+          <form onSubmit={handleSubmit} className="space-y-4 text-xs font-sub">
             
             <div className="space-y-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-gray-500 flex items-center gap-1.5">
-                <Phone size={12} className="text-primary" />
+              <label className="text-xs font-sub font-bold text-zinc-700 flex items-center gap-1.5">
+                <Phone size={12} className="text-[#FF6B00]" />
                 Numéro WhatsApp ou Email *
               </label>
               <input
@@ -96,13 +101,13 @@ export default function PrestataireLogin() {
                 onChange={e => setIdentifier(e.target.value)}
                 placeholder="+229 97 00 00 00"
                 required
-                className="w-full px-4 py-3.5 rounded-xl border border-gray-200 bg-gray-50/50 font-bold text-sm outline-none focus:border-primary focus:bg-white transition-all"
+                className="w-full px-4 py-3 rounded-2xl border border-zinc-200 bg-[#FAFAFA] font-sub font-medium text-sm outline-none focus:border-[#FF6B00] focus:bg-white transition-all"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-gray-500 flex items-center gap-1.5">
-                <Lock size={12} className="text-primary" />
+              <label className="text-xs font-sub font-bold text-zinc-700 flex items-center gap-1.5">
+                <Lock size={12} className="text-[#FF6B00]" />
                 Mot de passe *
               </label>
               <input
@@ -111,22 +116,22 @@ export default function PrestataireLogin() {
                 onChange={e => setPassword(e.target.value)}
                 placeholder="Votre mot de passe"
                 required
-                className="w-full px-4 py-3.5 rounded-xl border border-gray-200 bg-gray-50/50 font-bold text-sm outline-none focus:border-primary focus:bg-white transition-all"
+                className="w-full px-4 py-3 rounded-2xl border border-zinc-200 bg-[#FAFAFA] font-sub font-medium text-sm outline-none focus:border-[#FF6B00] focus:bg-white transition-all"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 rounded-2xl bg-primary hover:bg-primary/90 text-white font-heading font-black text-xs uppercase tracking-widest shadow-xl shadow-primary/30 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-4 rounded-full bg-[#FF6B00] hover:bg-[#EA580C] text-white font-sub font-bold text-sm shadow-braised transition-all flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              <span>{loading ? "Connexion en cours..." : "Accéder à mon Tableau de Bord"}</span>
+              <span>{loading ? "Connexion en cours..." : "Accéder à mon tableau de bord"}</span>
               <ArrowRight size={15} />
             </button>
 
-            <div className="pt-2 text-center text-xs text-gray-500">
+            <div className="pt-2 text-center text-xs text-zinc-500 font-sub">
               <span>Pas encore partenaire ? </span>
-              <Link to="/devenir-prestataire" className="text-primary font-bold hover:underline">
+              <Link to="/devenir-prestataire" className="text-[#EA580C] font-bold hover:underline">
                 Inscrivez-vous ici
               </Link>
             </div>
@@ -137,8 +142,8 @@ export default function PrestataireLogin() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-150 py-6 px-4 text-center text-xs text-gray-500 font-medium">
-        <p>© {new Date().getFullYear()} Oresto Connect • Programme d'Apporteurs d'Affaires</p>
+      <footer className="bg-white border-t border-zinc-200 py-6 px-4 text-center text-xs text-zinc-500 font-sub">
+        <p>© {new Date().getFullYear()} Oresto • Programme d'Apporteurs d'Affaires</p>
       </footer>
 
     </div>

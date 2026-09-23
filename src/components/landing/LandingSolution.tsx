@@ -50,14 +50,14 @@ export default function LandingSolution({ activeSector }: LandingSolutionProps) 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="text-center max-w-4xl mx-auto mb-14">
+        <div className="text-center max-w-5xl mx-auto mb-14">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-100 text-[#EA580C] text-xs font-sub font-bold mb-4">
             <i className="fa-solid fa-layer-group text-xs"></i>
             <span>La solution Oresto</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-[44px] font-heading font-black text-zinc-950 tracking-tight leading-[1.2]">
-            Tout ce dont votre établissement a besoin <br className="hidden sm:block" />
-            pour <span className="text-[#FF6B00]">vendre et prospérer en ligne</span>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[40px] font-heading font-black text-zinc-950 tracking-tight leading-[1.2]">
+            <span className="block sm:whitespace-nowrap">Tout ce dont votre établissement a besoin</span>
+            <span className="block sm:whitespace-nowrap">pour <span className="text-[#FF6B00]">vendre et prospérer en ligne</span></span>
           </h2>
           <p className="mt-4 text-base sm:text-lg text-zinc-600 font-sub font-normal max-w-2xl mx-auto leading-relaxed">
             Une technologie simple, pensée pour encaisser par Mobile Money, gérer vos commandes sans friction et fidéliser vos clients.

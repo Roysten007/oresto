@@ -1,5 +1,4 @@
 import React from "react";
-import { Link } from "react-router-dom";
 
 export interface DashboardScreenshot {
   id: string;
@@ -11,61 +10,56 @@ export interface DashboardScreenshot {
   statusBadge: string;
   src: string;
   alt: string;
-  route: string;
   description: string;
 }
 
 const DASHBOARDS: DashboardScreenshot[] = [
   {
     id: "restaurant",
-    title: "Tableau de Bord Restaurant & Fast-Food",
+    title: "Tableau de bord restaurant & fast-food",
     sectorBadge: "Restaurant",
     badgeColor: "bg-orange-500/10 text-orange-600 border-orange-200/60",
     sectorIcon: "fa-utensils",
     urlPill: "oresto.app/resto/commandes-live",
-    statusBadge: "Cuisine Ouverte • Synchronisé MoMo",
+    statusBadge: "Cuisine ouverte • Synchronisé MoMo",
     src: "/screenshots/dashboard-restaurant.png",
     alt: "Tableau de bord Restaurant Oresto - Commandes en direct, suivi cuisine et encaissements Mobile Money",
-    route: "/dashboard/prestataire",
     description: "Commandes cuisine en direct, livreurs, recettes 100% MoMo sans commission et QR codes de table.",
   },
   {
     id: "boutique",
-    title: "Tableau de Bord E-commerce & Vente en Ligne",
+    title: "Tableau de bord e-commerce & vente en ligne",
     sectorBadge: "Boutique",
     badgeColor: "bg-purple-500/10 text-purple-600 border-purple-200/60",
     sectorIcon: "fa-bag-shopping",
     urlPill: "oresto.app/boutique/expeditions",
-    statusBadge: "Boutique Ouverte • 0% Commission",
+    statusBadge: "Boutique ouverte • 0% commission",
     src: "/screenshots/dashboard-boutique.png",
     alt: "Tableau de bord E-commerce Oresto - Ventes boutique, suivi des colis, alertes stock critique",
-    route: "/dashboard/prestataire",
     description: "Gestion des commandes, colis à expédier, alertes de stock critique et paiements MoMo automatiques.",
   },
   {
     id: "hotel",
-    title: "Tableau de Bord Hôtel & Résidences Meublées",
-    sectorBadge: "Hôtel & Résidence",
+    title: "Tableau de bord hôtel & résidences meublées",
+    sectorBadge: "Hôtel & résidence",
     badgeColor: "bg-blue-500/10 text-blue-600 border-blue-200/60",
     sectorIcon: "fa-hotel",
     urlPill: "oresto.app/hotel/reservations",
-    statusBadge: "Réception Ouverte • 75% Occupé",
+    statusBadge: "Réception ouverte • 75% occupé",
     src: "/screenshots/dashboard-hotel.png",
     alt: "Tableau de bord Hôtel Oresto - Gestion des nuitées, arrivées check-in et état des chambres en direct",
-    route: "/dashboard/prestataire",
     description: "Suivi des réservations et arrivées en temps réel, calendrier des nuitées et encaissements directs.",
   },
   {
     id: "partenaire",
-    title: "Espace Apporteur d'Affaires & Affiliation",
+    title: "Espace apporteur d'affaires & affiliation",
     sectorBadge: "Partenaire",
     badgeColor: "bg-emerald-500/10 text-emerald-600 border-emerald-200/60",
     sectorIcon: "fa-handshake",
     urlPill: "oresto.app/partenaire/commissions",
-    statusBadge: "Commission Permanente 20%",
+    statusBadge: "Commission permanente 20%",
     src: "/screenshots/dashboard-apporteur.png",
     alt: "Espace Apporteur d'Affaires Oresto - Lien de parrainage personnel et commissions récurrentes MoMo",
-    route: "/partenaire",
     description: "Lien de parrainage WhatsApp, 20% de commissions récurrentes chaque mois sur chaque client parrainé.",
   },
 ];
@@ -90,13 +84,11 @@ export default function HeroDashboardCarousel() {
       />
 
       {/* Marquee Track à défilement fluide infini */}
-      <div className="flex w-max items-center gap-6 sm:gap-8 lg:gap-10 animate-scroll-left hover:[animation-play-state:paused] py-4 px-4 cursor-grab active:cursor-grabbing">
+      <div className="flex w-max items-center gap-6 sm:gap-8 lg:gap-10 animate-scroll-left hover:[animation-play-state:paused] py-4 px-4">
         {loopedDashboards.map((item, index) => (
-          <Link
+          <div
             key={`${item.id}-${index}`}
-            to={item.route}
-            title={`Ouvrir le ${item.title}`}
-            className="group relative flex-shrink-0 w-[330px] sm:w-[500px] md:w-[600px] lg:w-[660px] rounded-2xl sm:rounded-3xl bg-white/95 backdrop-blur-md border border-zinc-200/90 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.12),0_0_0_1px_rgba(0,0,0,0.03)] hover:shadow-[0_30px_70px_-12px_rgba(255,107,0,0.25)] hover:border-orange-300/80 transition-all duration-300 transform hover:-translate-y-1.5 overflow-hidden flex flex-col text-left"
+            className="relative flex-shrink-0 w-[330px] sm:w-[500px] md:w-[600px] lg:w-[660px] rounded-2xl sm:rounded-3xl bg-white/95 backdrop-blur-md border border-zinc-200/90 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.12),0_0_0_1px_rgba(0,0,0,0.03)] overflow-hidden flex flex-col text-left transition-transform duration-300"
           >
             {/* Header façon Navigateur Mac / App Dashboard */}
             <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-3.5 bg-zinc-50/90 border-b border-zinc-200/80">
@@ -134,26 +126,8 @@ export default function HeroDashboardCarousel() {
                 alt={item.alt}
                 loading="eager"
                 decoding="async"
-                className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.01]"
+                className="w-full h-full object-cover object-top"
               />
-
-              {/* Overlay discret au hover invitant à cliquer */}
-              <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/70 via-zinc-950/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4 sm:p-6">
-                <div className="flex items-center justify-between w-full text-white">
-                  <div>
-                    <p className="text-xs sm:text-sm font-sub font-bold text-orange-400">
-                      {item.title}
-                    </p>
-                    <p className="text-[11px] sm:text-xs text-zinc-200 line-clamp-1">
-                      {item.description}
-                    </p>
-                  </div>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#FF6B00] text-white text-xs font-sub font-bold shadow-md shrink-0 ml-3">
-                    <span>Explorer</span>
-                    <i className="fa-solid fa-arrow-right text-[10px]"></i>
-                  </span>
-                </div>
-              </div>
             </div>
 
             {/* Sous-barre descriptive avec micro-stats */}
@@ -168,14 +142,14 @@ export default function HeroDashboardCarousel() {
                 {item.statusBadge}
               </span>
             </div>
-          </Link>
+          </div>
         ))}
       </div>
 
       {/* Petit indicateur d'interaction discret */}
-      <div className="flex items-center justify-center gap-2 mt-2 text-[11px] font-sub font-semibold text-zinc-400 tracking-wide">
+      <div className="flex items-center justify-center gap-2 mt-2 text-[11px] font-sub font-medium text-zinc-400">
         <i className="fa-solid fa-arrows-left-right text-[10px] text-zinc-400"></i>
-        <span>Défilement automatique • Survolez pour figer ou cliquez pour explorer le tableau de bord</span>
+        <span>Défilement automatique • Survolez pour mettre en pause</span>
       </div>
     </div>
   );
