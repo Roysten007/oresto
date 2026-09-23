@@ -10,11 +10,11 @@ import {
 } from "../services/subscriptionService";
 
 describe("Subscription Service & Pricing Rules", () => {
-  it("should define Oresto Pro plan at 5 000 FCFA and first month at 3 750 FCFA", () => {
+  it("should define Oresto Pro plan at 5 000 FCFA and first month at 2 500 FCFA", () => {
     expect(STANDARD_PLAN_PRICE).toBe(5000);
-    expect(FIRST_MONTH_PRICE).toBe(3750);
+    expect(FIRST_MONTH_PRICE).toBe(2500);
     expect(PLANS.pro.price).toBe(5000);
-    expect(PLANS.pro.firstMonthPrice).toBe(3750);
+    expect(PLANS.pro.firstMonthPrice).toBe(2500);
   });
 
   it("should calculate exact 14-day trial period", () => {

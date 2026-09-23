@@ -22,8 +22,10 @@ const PRICING_TIERS: PricingTier[] = [
   {
     id: "solo",
     name: "1 Établissement",
+    badge: "Offre de lancement • -50% 1er mois",
     desc: "Idéal pour lancer et digitaliser 1 restaurant, 1 boutique ou 1 résidence.",
     price: 5000,
+    perStoreText: "1er mois à 2 500 FCFA (-50%), puis 5 000 F/mois",
     features: [
       "1 Vitrine web & QR Codes HD prêts à imprimer",
       "Encaissements MoMo 100% directs (0% de commission)",

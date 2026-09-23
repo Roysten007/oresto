@@ -399,7 +399,7 @@ export default function Register() {
                     </div>
                     <div className="flex items-baseline gap-2">
                       <span className="font-heading font-black text-2xl text-emerald-600">0 FCFA</span>
-                      <span className="text-xs font-bold text-gray-500">pendant 14 jours (puis 5 000 F/mois)</span>
+                      <span className="text-xs font-bold text-gray-500">pendant 14 jours (1er mois à 2 500 F avec -50%, puis 5 000 F/mois)</span>
                     </div>
                     <p className="text-[11px] text-gray-600 leading-relaxed">
                       🎉 <strong>Aucune carte bancaire requise</strong>. Accès immédiat à toutes les fonctionnalités : Vitrine Web autonome, QR Codes et encaissement Mobile Money direct (0% de commission).

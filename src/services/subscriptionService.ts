@@ -6,7 +6,7 @@ export const MAKETOU_SIMULATION_MODE = true;
 
 // Prix officiel unique Oresto Pro
 export const STANDARD_PLAN_PRICE = 5000;
-export const FIRST_MONTH_PRICE = 3750; // -25% de réduction immédiate dès le 1er mois
+export const FIRST_MONTH_PRICE = 2500; // -50% de réduction immédiate de lancement dès le 1er mois (2 500 F au lieu de 5 000 F)
 
 export const PLANS: Record<string, { name: string; price: number; firstMonthPrice: number; features: string[] }> = {
   pro: {

@@ -6,7 +6,8 @@ import { ref, update, onValue, set, push, query, orderByChild, equalTo, get } fr
 import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 import { toast } from "sonner";
 import { VendorProfile, Product } from "@/data/mockData";
-import { getVendorSector } from "@/lib/vendorSector";
+import { getVendorSector, getStarterProducts } from "@/lib/vendorSector";
+import { slugify } from "@/lib/slugify";
 import StepIdentite from "./builder/StepIdentite";
 import StepCarte from "./builder/StepCarte";
 import StepEcommerceCatalogue from "./builder/StepEcommerceCatalogue";
@@ -19,7 +20,7 @@ import StepDesign from "./builder/StepDesign";
 import StepLancement from "./builder/StepLancement";
 
 export default function VendorSiteBuilder() {
-  const { vendorProfile } = useAuth();
+  const { vendorProfile, user } = useAuth();
   const [searchParams] = useSearchParams();
   const sectorQuery = searchParams.get("sector") || searchParams.get("type");
 
@@ -32,42 +33,38 @@ export default function VendorSiteBuilder() {
   const [showLivePreview, setShowLivePreview] = useState(true);
 
   // Business Type : 'restaurant' | 'ecommerce' | 'hotel'
-  const initialType = (sectorQuery as any) || vendorProfile?.business_type || 
-    ((vendorProfile?.category || "").toLowerCase().includes("boutique") ||
-     (vendorProfile?.category || "").toLowerCase().includes("mode") ||
-     (vendorProfile?.category || "").toLowerCase().includes("tech") ||
-     (vendorProfile?.category || "").toLowerCase().includes("e-commerce") ? "ecommerce" : 
-     (vendorProfile?.category || "").toLowerCase().includes("hotel") ||
-     (vendorProfile?.category || "").toLowerCase().includes("hôtel") ||
-     (vendorProfile?.category || "").toLowerCase().includes("résidence") ? "hotel" : "restaurant");
-
+  const initialType = getVendorSector(vendorProfile, sectorQuery);
   const [businessType, setBusinessType] = useState<"restaurant" | "ecommerce" | "hotel">(initialType);
 
+  const vId = vendorProfile?.id || (user as any)?.vendorId || user?.id || "v_demo";
+  const defaultShopName = vendorProfile?.name || (initialType === "ecommerce" ? "KiffStyle & Tech Store" : initialType === "hotel" ? "Palmier Royal Résidence & Suites" : "L'Atelier du Chef & Grill");
+  const defaultSlug = vendorProfile?.slug || slugify(defaultShopName) || (initialType === "ecommerce" ? "kiffstyle-store" : initialType === "hotel" ? "palmier-royal" : "latelier-du-chef");
+
   const [formData, setFormData] = useState<Partial<VendorProfile>>({
-    name: initialType === "ecommerce" ? "KiffStyle & Tech Store" : initialType === "hotel" ? "Palmier Royal Résidence & Suites" : "L'Atelier du Chef & Grill",
-    category: initialType === "ecommerce" ? "Mode, Vêtements & Prêt-à-porter" : initialType === "hotel" ? "Hôtel & Suites de Luxe" : "Restaurant & Grillades",
-    categories: [initialType === "ecommerce" ? "Mode, Vêtements & Prêt-à-porter" : initialType === "hotel" ? "Hôtel & Suites de Luxe" : "Restaurant & Grillades"],
-    description: initialType === "ecommerce" 
+    name: defaultShopName,
+    category: vendorProfile?.category || (initialType === "ecommerce" ? "Mode, Vêtements & Prêt-à-porter" : initialType === "hotel" ? "Hôtel & Suites de Luxe" : "Restaurant & Grillades"),
+    categories: vendorProfile?.categories || [vendorProfile?.category || (initialType === "ecommerce" ? "Mode, Vêtements & Prêt-à-porter" : initialType === "hotel" ? "Hôtel & Suites de Luxe" : "Restaurant & Grillades")],
+    description: vendorProfile?.description || (initialType === "ecommerce" 
       ? "Boutique en ligne spécialisée en sneakers streetwear, vêtements de marque et accessoires high-tech."
       : initialType === "hotel"
       ? "Hôtel de charme et résidence meublée de haut standing avec suites climatisées, piscine et Wi-Fi Fibre."
-      : "Restaurant gastronomique et grillades au feu de bois. Spécialités africaines et saveurs du terroir.",
-    slug: initialType === "ecommerce" ? "kiffstyle-store" : initialType === "hotel" ? "palmier-royal" : "latelier-du-chef",
+      : "Restaurant gastronomique et grillades au feu de bois. Spécialités africaines et saveurs du terroir."),
+    slug: defaultSlug,
     business_type: initialType,
-    logo_url: "",
-    cover_url: "",
-    primary_color: initialType === "ecommerce" ? "#000000" : initialType === "hotel" ? "#4F46E5" : "#EA580C",
+    logo_url: vendorProfile?.logo_url || "",
+    cover_url: vendorProfile?.cover_url || "",
+    primary_color: vendorProfile?.primary_color || (initialType === "ecommerce" ? "#000000" : initialType === "hotel" ? "#4F46E5" : "#EA580C"),
     secondary_color: "#FFFFFF",
-    font_choice: "modern",
+    font_choice: vendorProfile?.font_choice || "modern",
     sections_config: { hero: true, menu: true, daily: true, footer: true },
     daily_menus: {},
-    phone: "+229 97 00 00 00",
-    whatsapp: "+229 97 00 00 00",
-    city: "Cotonou",
-    neighborhood: initialType === "ecommerce" ? "Ganhi" : initialType === "hotel" ? "Haie Vive" : "Cadjehoun",
-    social_links: { instagram: "", facebook: "", tiktok: "" },
-    payment_methods: ["MTN MoMo", "Moov Money", "Espèces"],
-    ordering_modes: initialType === "ecommerce" ? ["Livraison Express", "Retrait Point Relais"] : initialType === "hotel" ? ["Réservation Directe", "Paiement à l'arrivée"] : ["Livraison", "À Emporter", "WhatsApp Direct"],
+    phone: vendorProfile?.phone || "+229 97 00 00 00",
+    whatsapp: vendorProfile?.whatsapp || vendorProfile?.phone || "+229 97 00 00 00",
+    city: vendorProfile?.city || "Cotonou",
+    neighborhood: vendorProfile?.neighborhood || (initialType === "ecommerce" ? "Ganhi" : initialType === "hotel" ? "Haie Vive" : "Cadjehoun"),
+    social_links: vendorProfile?.social_links || { instagram: "", facebook: "", tiktok: "" },
+    payment_methods: vendorProfile?.payment_methods || ["MTN MoMo", "Moov Money", "Espèces"],
+    ordering_modes: vendorProfile?.ordering_modes || (initialType === "ecommerce" ? ["Livraison Express", "Retrait Point Relais"] : initialType === "hotel" ? ["Réservation Directe", "Paiement à l'arrivée"] : ["Livraison", "À Emporter", "WhatsApp Direct"]),
     is_published: true,
   });
 
@@ -127,9 +124,15 @@ export default function VendorSiteBuilder() {
       }
     } catch {}
 
+    const activeId = mergedProfile.id || vendorProfile?.id || (user as any)?.vendorId || user?.id || "v_demo";
+    const shopName = mergedProfile.name || defaultShopName;
+    const computedSlug = mergedProfile.slug || slugify(shopName) || defaultSlug;
+
     setFormData(prev => ({
       ...prev,
       ...mergedProfile,
+      name: shopName,
+      slug: computedSlug,
       business_type: detectedType,
       social_links: mergedProfile.social_links || { instagram: "", facebook: "", tiktok: "" },
       ordering_modes: mergedProfile.ordering_modes || (detectedType === "ecommerce" ? ["Livraison Express", "Retrait Point Relais"] : ["Livraison", "À Emporter", "WhatsApp Direct"]),
@@ -138,12 +141,10 @@ export default function VendorSiteBuilder() {
     setLocalLogo(mergedProfile.logo_url || null);
     setLocalCover(mergedProfile.cover_url || null);
 
-    const vId = mergedProfile.id || (user as any)?.vendorId || "v_demo";
-
     // Charger les produits depuis localStorage d'abord
     let localProducts: Product[] = [];
     try {
-      const savedProds = localStorage.getItem(`oresto_products_${vId}`);
+      const savedProds = localStorage.getItem(`oresto_products_${activeId}`);
       if (savedProds) {
         localProducts = JSON.parse(savedProds);
       }
@@ -152,10 +153,10 @@ export default function VendorSiteBuilder() {
     if (localProducts.length > 0) {
       setProducts(localProducts);
     } else {
-      const defaultSamples = getSampleProducts(detectedType, vId);
+      const defaultSamples = getStarterProducts(detectedType, activeId);
       setProducts(defaultSamples);
       try {
-        localStorage.setItem(`oresto_products_${vId}`, JSON.stringify(defaultSamples));
+        localStorage.setItem(`oresto_products_${activeId}`, JSON.stringify(defaultSamples));
       } catch {}
     }
 
@@ -164,11 +165,11 @@ export default function VendorSiteBuilder() {
     const unsubscribe = onValue(ref(db, 'products'), snap => {
       const data = snap.val();
       if (data) {
-        const list = Object.keys(data).map(k => ({ id: k, ...data[k] })).filter((p: any) => p.vendorId === vId) as Product[];
+        const list = Object.keys(data).map(k => ({ id: k, ...data[k] })).filter((p: any) => p.vendorId === activeId) as Product[];
         if (list.length > 0) {
           setProducts(list);
           try {
-            localStorage.setItem(`oresto_products_${vId}`, JSON.stringify(list));
+            localStorage.setItem(`oresto_products_${activeId}`, JSON.stringify(list));
           } catch {}
           return;
         }
@@ -178,77 +179,7 @@ export default function VendorSiteBuilder() {
   }, [vendorProfile, sectorQuery]);
 
   const getSampleProducts = (type: string, vId: string): Product[] => {
-    if (type === "ecommerce") {
-      return [
-        {
-          id: "ec1", vendorId: vId, name: "Sneakers Streetwear Urban", price: 18500, originalPrice: 25000, category: "Chaussures & Baskets",
-          image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&auto=format&fit=crop&q=80",
-          images: [
-            "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&auto=format&fit=crop&q=80",
-            "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=600&auto=format&fit=crop&q=80"
-          ],
-          available: true, stock: 15, badge: "PROMO",
-          variants: [{ name: "Pointure", options: ["40", "41", "42", "43", "44"] }, { name: "Couleur", options: ["Rouge/Noir", "Blanc/Gris"] }],
-          features: ["Semelle amortissante haute qualité", "Livraison offerte dès 2 paires"],
-          description: "Baskets ultra-confortables au design streetwear contemporain."
-        },
-        {
-          id: "ec2", vendorId: vId, name: "Smartwatch Ultra Pro 4G", price: 29000, originalPrice: 38000, category: "Téléphones & High-Tech",
-          image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop&q=80",
-          images: [
-            "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop&q=80"
-          ],
-          available: true, stock: 8, badge: "BESTSELLER",
-          variants: [{ name: "Bracelet", options: ["Silicone Noir", "Cuir Marron"] }],
-          features: ["Autonomie 7 jours", "Cardiofréquencemètre & GPS intégré", "Garantie 1 an"],
-          description: "Montre connectée étanche avec écran AMOLED HD et suivi santé complet."
-        },
-        {
-          id: "ec3", vendorId: vId, name: "Chemise Lin Authentique", price: 12500, originalPrice: 16000, category: "Mode & Vêtements",
-          image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600&auto=format&fit=crop&q=80",
-          available: true, stock: 20, badge: "NOUVEAU",
-          variants: [{ name: "Taille", options: ["M", "L", "XL", "XXL"] }, { name: "Couleur", options: ["Blanc", "Beige", "Bleu Ciel"] }],
-          features: ["100% Lin naturel respirant", "Coupe moderne slim-fit"],
-          description: "Chemise élégante idéale pour les fortes chaleurs et réceptions."
-        }
-      ];
-    } else if (type === "hotel") {
-      return [
-        {
-          id: "h1", vendorId: vId, name: "Suite Exécutive King & Balcon", price: 65000, originalPrice: 80000, category: "Suite Exécutive King",
-          image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&auto=format&fit=crop&q=80",
-          images: [
-            "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&auto=format&fit=crop&q=80",
-            "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800&auto=format&fit=crop&q=80"
-          ],
-          available: true, stock: 2, badge: "SUITE VIP",
-          features: ["Lit King Size Confort Palace", "Wi-Fi Fibre 100 Mbps", "Climatisation Split 24h", "Baignoire & Eau chaude", "Petit-déjeuner inclus"],
-          description: "Suite spacieuse de 45m² avec grand balcon privé, literie d'exception et salon privé."
-        },
-        {
-          id: "h2", vendorId: vId, name: "Chambre Prestige Deluxe", price: 35000, originalPrice: 45000, category: "Chambre Deluxe",
-          image: "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800&auto=format&fit=crop&q=80",
-          images: [
-            "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800&auto=format&fit=crop&q=80"
-          ],
-          available: true, stock: 4, badge: "PETIT-DÉJ INCLUS",
-          features: ["Lit Queen Size", "Climatisation 24h", "Smart TV Canal+", "Salle de bain privée", "Wi-Fi Gratuit"],
-          description: "Chambre lumineuse tout confort pour séjours d'affaires et escapades à deux."
-        },
-        {
-          id: "h3", vendorId: vId, name: "Appartement Meublé 2 Pièces", price: 45000, originalPrice: 55000, category: "Appartement Meublé",
-          image: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&auto=format&fit=crop&q=80",
-          available: true, stock: 2, badge: "RÉDUCTION LONG SÉJOUR",
-          features: ["Cuisine équipée", "Salon & Table à manger", "Machine à laver", "Wi-Fi Fibre", "Gardiennage 24h"],
-          description: "Appartement meublé autonome avec cuisine équipée pour courts et longs séjours."
-        }
-      ];
-    }
-    return [
-      { id: "p1", vendorId: vId, name: "Poulet Braisé & Alloco", price: 4500, category: "Plats Principaux & Grillades", description: "Cuisiné aux épices du terroir, alloco doré", available: true },
-      { id: "p2", vendorId: vId, name: "Capitaine Braisé Royal", price: 6500, category: "Plats Principaux & Grillades", description: "Poisson frais du jour, sauce pimentée maison", available: true },
-      { id: "p3", vendorId: vId, name: "Brochettes de Filet de Bœuf", price: 3500, category: "Plats Principaux & Grillades", description: "Viande tendre marinée au kankankan", available: true }
-    ];
+    return getStarterProducts((type as any) || "restaurant", vId);
   };
 
   const handleBusinessTypeChange = (newType: "restaurant" | "ecommerce" | "hotel") => {
@@ -266,17 +197,21 @@ export default function VendorSiteBuilder() {
   };
 
   const handleSlugChange = async (val: string) => {
-    const slug = val.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    const slug = slugify(val);
     setFormData(prev => ({ ...prev, slug }));
     if (!db || slug.length < 3) return;
     setCheckingSlug(true);
     try {
-      const snap = await get(query(ref(db, 'vendors'), orderByChild('slug'), equalTo(slug)));
+      const snap = await get(ref(db, `slugs/${slug}`));
       if (snap.exists()) {
-        const ownerId = Object.keys(snap.val())[0];
-        if (ownerId !== vendorProfile?.id) toast.warning("Ce lien est déjà pris.");
+        const ownerId = snap.val()?.vendorId || snap.val();
+        if (ownerId && ownerId !== vId) {
+          toast.warning("Ce lien est déjà réservé par un autre établissement.");
+        }
       }
-    } finally { setCheckingSlug(false); }
+    } catch {} finally { 
+      setCheckingSlug(false); 
+    }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'cover') => {
@@ -312,13 +247,13 @@ export default function VendorSiteBuilder() {
   };
 
   const saveProduct = async (product: Partial<Product>) => {
-    const vId = vendorProfile?.id || (user as any)?.vendorId || "v_demo";
-    const productId = product.id || `prod_${Date.now()}`;
+    const activeVId = vendorProfile?.id || (user as any)?.vendorId || user?.id || "v_demo";
+    const productId = product.id || `prod_${activeVId}_${Date.now()}`;
     
     const data: any = { 
       id: productId,
       name: product.name || (isHotel ? "Chambre Deluxe" : isEcommerce ? "Article" : "Plat"), 
-      vendorId: vId, 
+      vendorId: activeVId, 
       available: true, 
       price: Number(product.price || 0),
       category: product.category || (isEcommerce ? "Mode, Vêtements & Prêt-à-porter" : isHotel ? "Chambre Deluxe" : "Plats Principaux & Grillades"),
@@ -347,14 +282,14 @@ export default function VendorSiteBuilder() {
 
     // Sauvegarde immédiate dans localStorage pour persistance garantie
     try {
-      const savedProducts = JSON.parse(localStorage.getItem(`oresto_products_${vId}`) || "[]");
+      const savedProducts = JSON.parse(localStorage.getItem(`oresto_products_${activeVId}`) || "[]");
       const pIdx = savedProducts.findIndex((p: any) => p.id === productId);
       if (pIdx >= 0) {
         savedProducts[pIdx] = data;
       } else {
         savedProducts.unshift(data);
       }
-      localStorage.setItem(`oresto_products_${vId}`, JSON.stringify(savedProducts));
+      localStorage.setItem(`oresto_products_${activeVId}`, JSON.stringify(savedProducts));
     } catch {}
 
     // Sauvegarde en ligne Firebase
@@ -375,14 +310,14 @@ export default function VendorSiteBuilder() {
   };
 
   const deleteProduct = async (id: string) => {
-    const vId = vendorProfile?.id || (user as any)?.vendorId || "v_demo";
+    const activeVId = vendorProfile?.id || (user as any)?.vendorId || user?.id || "v_demo";
     // Suppression locale immédiate
     setProducts(prev => prev.filter(p => p.id !== id));
 
     try {
-      const savedProducts = JSON.parse(localStorage.getItem(`oresto_products_${vId}`) || "[]");
+      const savedProducts = JSON.parse(localStorage.getItem(`oresto_products_${activeVId}`) || "[]");
       const filtered = savedProducts.filter((p: any) => p.id !== id);
-      localStorage.setItem(`oresto_products_${vId}`, JSON.stringify(filtered));
+      localStorage.setItem(`oresto_products_${activeVId}`, JSON.stringify(filtered));
     } catch {}
 
     if (db) {
@@ -396,13 +331,17 @@ export default function VendorSiteBuilder() {
   };
 
   const saveChanges = async (publish = false) => {
-    const vId = vendorProfile?.id || (user as any)?.vendorId || "v_demo";
+    const activeVId = vendorProfile?.id || (user as any)?.vendorId || user?.id || "v_demo";
     setIsSaving(true);
     try {
+      const shopTitle = (formData.name || defaultShopName).trim();
+      const cleanSlug = slugify(formData.slug || shopTitle) || `vitrine-${Date.now().toString().slice(-4)}`;
+
       const updates: any = {
-        name: formData.name || (isEcommerce ? "KiffStyle & Tech Store" : isHotel ? "Palmier Royal Résidence & Suites" : "L'Atelier du Chef & Grill"),
+        id: activeVId,
+        name: shopTitle,
         description: formData.description || "",
-        slug: formData.slug || (isEcommerce ? "kiffstyle-store" : isHotel ? "palmier-royal" : "latelier-du-chef"),
+        slug: cleanSlug,
         category: formData.category || (isEcommerce ? "Mode, Vêtements & Prêt-à-porter" : isHotel ? "Hôtel & Suites de Luxe" : "Restaurant & Grillades"),
         categories: formData.categories && formData.categories.length > 0 
           ? formData.categories 
@@ -413,31 +352,42 @@ export default function VendorSiteBuilder() {
         primary_color: formData.primary_color || (isEcommerce ? "#000000" : isHotel ? "#4F46E5" : "#EA580C"),
         secondary_color: formData.secondary_color || "#FFFFFF",
         font_choice: formData.font_choice || "modern",
-        phone: formData.phone || "",
-        whatsapp: formData.whatsapp || "",
-        city: formData.city || "",
-        neighborhood: formData.neighborhood || "",
+        phone: formData.phone || "+229 97 00 00 00",
+        whatsapp: formData.whatsapp || formData.phone || "+229 97 00 00 00",
+        city: formData.city || "Cotonou",
+        neighborhood: formData.neighborhood || "Haie Vive",
         payment_methods: formData.payment_methods || ["MTN MoMo", "Moov Money", "Espèces"],
         ordering_modes: formData.ordering_modes || (isEcommerce ? ["Livraison Express", "Retrait Point Relais"] : isHotel ? ["Réservation Directe", "Paiement à l'arrivée"] : ["Livraison", "À Emporter", "WhatsApp Direct"]),
+        open: true,
+        is_published: true,
+        status: "active"
       };
-      if (publish) updates.is_published = true;
-      
-      // 1. Sauvegarde locale immédiate (garantie 100% zéro perte de données)
+
+      // 1. Sauvegarde locale immédiate (garantie zéro perte de données)
+      const fullProfile = { ...(vendorProfile || {}), ...updates };
+      setFormData(prev => ({ ...prev, ...updates }));
       try {
-        const fullProfile = { ...(vendorProfile || {}), ...updates };
         localStorage.setItem("oresto_vendor_profile", JSON.stringify(fullProfile));
+        localStorage.setItem(`oresto_products_${activeVId}`, JSON.stringify(products));
       } catch {}
 
       // 2. Synchronisation Firebase Realtime Database
       if (db) {
         try {
-          await update(ref(db, `vendors/${vId}`), updates);
-          if (formData.slug) {
-            try {
-              await set(ref(db, `slugs/${formData.slug.toLowerCase()}`), { vendorId: vId });
-            } catch (slugErr) {
-              console.warn("Slugs sync warning:", slugErr);
-            }
+          await update(ref(db, `vendors/${activeVId}`), updates);
+          await set(ref(db, `slugs/${cleanSlug}`), { vendorId: activeVId });
+
+          // SAUVEGARDE EN LOT DE TOUS LES PRODUITS DU CATALOGUE
+          for (const prod of products) {
+            const prodId = prod.id || `prod_${activeVId}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
+            const prodData = {
+              ...prod,
+              id: prodId,
+              vendorId: activeVId,
+              available: prod.available !== false,
+              inStock: prod.stock !== undefined ? Number(prod.stock) > 0 : true
+            };
+            await set(ref(db, `products/${prodId}`), prodData);
           }
         } catch (dbErr: any) {
           console.warn("Firebase sync warning (données sécurisées en local):", dbErr);
@@ -445,14 +395,18 @@ export default function VendorSiteBuilder() {
       }
 
       if (publish) {
-        setFormData(prev => ({ ...prev, is_published: true }));
-        toast.success("🎉 Votre vitrine en ligne est publiée avec succès !");
+        toast.success("🎉 Votre vitrine en ligne est publiée avec succès !", {
+          action: {
+            label: "Voir le site",
+            onClick: () => window.open(`/r/${cleanSlug}`, "_blank")
+          }
+        });
       } else {
         toast.success("Modifications enregistrées avec succès");
       }
     } catch (err: any) { 
       console.error("Erreur saveChanges:", err);
-      toast.success("Modifications enregistrées avec succès");
+      toast.error("Erreur lors de l'enregistrement");
     } finally { 
       setIsSaving(false); 
     }

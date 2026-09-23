@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { VendorProfile } from "@/data/mockData";
+import { slugify } from "@/lib/slugify";
 
 interface Props {
   formData: Partial<VendorProfile>;
@@ -280,7 +281,15 @@ export default function StepIdentite({
           <input
             type="text"
             value={formData.name || ""}
-            onChange={e => setFormData({ ...formData, name: e.target.value })}
+            onChange={e => {
+              const val = e.target.value;
+              const autoSlug = slugify(val);
+              setFormData({ 
+                ...formData, 
+                name: val,
+                slug: !formData.slug || formData.slug === slugify(formData.name || "") ? autoSlug : formData.slug
+              });
+            }}
             className="w-full px-5 py-3.5 rounded-2xl border border-gray-200 bg-gray-50/50 text-gray-900 font-heading font-bold text-lg focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
             placeholder={activeSector === "ecommerce" ? "Ex: KiffStyle & Tech Store" : activeSector === "hotel" ? "Ex: Palmier Royal Résidence" : "Ex: L'Atelier du Chef & Grill"}
           />

@@ -113,3 +113,150 @@ export function setVendorSector(sector: BusinessSector): void {
     } catch {}
   }
 }
+
+export function getStarterProducts(type: BusinessSector, vId: string): any[] {
+  if (type === "ecommerce") {
+    return [
+      {
+        id: `prod_${vId}_ec1`,
+        vendorId: vId,
+        name: "Sneakers Streetwear Urban",
+        price: 18500,
+        originalPrice: 25000,
+        category: "Chaussures & Baskets",
+        image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&auto=format&fit=crop&q=80",
+        images: [
+          "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&auto=format&fit=crop&q=80",
+          "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=600&auto=format&fit=crop&q=80"
+        ],
+        available: true,
+        stock: 15,
+        badge: "PROMO",
+        variants: [{ name: "Pointure", options: ["40", "41", "42", "43", "44"] }, { name: "Couleur", options: ["Rouge/Noir", "Blanc/Gris"] }],
+        features: ["Semelle amortissante haute qualité", "Livraison offerte dès 2 paires"],
+        description: "Baskets ultra-confortables au design streetwear contemporain."
+      },
+      {
+        id: `prod_${vId}_ec2`,
+        vendorId: vId,
+        name: "Smartwatch Ultra Pro 4G",
+        price: 29000,
+        originalPrice: 38000,
+        category: "Téléphones & High-Tech",
+        image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop&q=80",
+        images: [
+          "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop&q=80"
+        ],
+        available: true,
+        stock: 8,
+        badge: "BESTSELLER",
+        variants: [{ name: "Bracelet", options: ["Silicone Noir", "Cuir Marron"] }],
+        features: ["Autonomie 7 jours", "Cardiofréquencemètre & GPS", "Garantie 1 an"],
+        description: "Montre connectée étanche avec écran AMOLED HD et suivi santé complet."
+      },
+      {
+        id: `prod_${vId}_ec3`,
+        vendorId: vId,
+        name: "Chemise Lin Authentique",
+        price: 12500,
+        originalPrice: 16000,
+        category: "Mode & Vêtements",
+        image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600&auto=format&fit=crop&q=80",
+        available: true,
+        stock: 20,
+        badge: "NOUVEAU",
+        variants: [{ name: "Taille", options: ["M", "L", "XL", "XXL"] }, { name: "Couleur", options: ["Blanc", "Beige", "Bleu Ciel"] }],
+        features: ["100% Lin naturel respirant", "Coupe moderne slim-fit"],
+        description: "Chemise élégante idéale pour les fortes chaleurs et réceptions."
+      }
+    ];
+  }
+  if (type === "hotel") {
+    return [
+      {
+        id: `prod_${vId}_h1`,
+        vendorId: vId,
+        name: "Suite Exécutive King & Balcon",
+        price: 65000,
+        originalPrice: 80000,
+        category: "Suite Exécutive King",
+        image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&auto=format&fit=crop&q=80",
+        images: [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&auto=format&fit=crop&q=80",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800&auto=format&fit=crop&q=80"
+        ],
+        available: true,
+        stock: 2,
+        badge: "SUITE VIP",
+        features: ["Lit King Size Confort Palace", "Wi-Fi Fibre 100 Mbps", "Climatisation Split 24h", "Baignoire & Eau chaude", "Petit-déjeuner inclus"],
+        description: "Suite spacieuse de 45m² avec grand balcon privé, literie d'exception et salon privé."
+      },
+      {
+        id: `prod_${vId}_h2`,
+        vendorId: vId,
+        name: "Chambre Prestige Deluxe",
+        price: 35000,
+        originalPrice: 45000,
+        category: "Chambre Deluxe",
+        image: "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800&auto=format&fit=crop&q=80",
+        images: [
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800&auto=format&fit=crop&q=80"
+        ],
+        available: true,
+        stock: 4,
+        badge: "PETIT-DÉJ INCLUS",
+        features: ["Lit Queen Size", "Climatisation 24h", "Smart TV Canal+", "Salle de bain privée", "Wi-Fi Gratuit"],
+        description: "Chambre lumineuse tout confort pour séjours d'affaires et escapades à deux."
+      },
+      {
+        id: `prod_${vId}_h3`,
+        vendorId: vId,
+        name: "Appartement Meublé 2 Pièces",
+        price: 45000,
+        originalPrice: 55000,
+        category: "Appartement Meublé",
+        image: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&auto=format&fit=crop&q=80",
+        available: true,
+        stock: 2,
+        badge: "RÉDUCTION LONG SÉJOUR",
+        features: ["Cuisine équipée", "Salon & Table à manger", "Machine à laver", "Wi-Fi Fibre", "Gardiennage 24h"],
+        description: "Appartement meublé autonome avec cuisine équipée pour courts et longs séjours."
+      }
+    ];
+  }
+  return [
+    {
+      id: `prod_${vId}_p1`,
+      vendorId: vId,
+      name: "Poulet Braisé & Alloco",
+      price: 4500,
+      category: "Plats Principaux & Grillades",
+      description: "Cuisiné aux épices du terroir, alloco doré et piment vert maison",
+      image: "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=800&q=80",
+      available: true,
+      badge: "RECOMMANDÉ"
+    },
+    {
+      id: `prod_${vId}_p2`,
+      vendorId: vId,
+      name: "Capitaine Braisé Royal",
+      price: 6500,
+      originalPrice: 7500,
+      category: "Plats Principaux & Grillades",
+      description: "Poisson frais du jour mariné aux herbes aromatiques, sauce pimentée maison",
+      image: "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=800&q=80",
+      available: true,
+      badge: "BESTSELLER"
+    },
+    {
+      id: `prod_${vId}_p3`,
+      vendorId: vId,
+      name: "Brochettes de Filet de Bœuf",
+      price: 3500,
+      category: "Plats Principaux & Grillades",
+      description: "Viande tendre marinée au kankankan et grillée à la braise",
+      image: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
+      available: true
+    }
+  ];
+}

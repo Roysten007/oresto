@@ -19,6 +19,7 @@ import { VendorProfile, Product } from "@/data/mockData";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { getDemoShowcaseBySlug } from "@/data/demoShowcaseData";
+import { slugify } from "@/lib/slugify";
 
 // Modular Section Components
 import HeroSection from "@/components/showcase/HeroSection";
@@ -91,75 +92,153 @@ export default function RestaurantPublic() {
     }, 4500);
 
     const checkVendorBySlug = async () => {
-      // 1. Chercher le vendeur par son slug via query indexée
-      const vendorTargetRef = slug === "demo"
-        ? ref(db, "vendors/v_demo")
-        : query(ref(db, "vendors"), orderByChild("slug"), equalTo(slug));
+      const cleanSlug = (slug || "").toLowerCase().trim();
+      const demoCandidate = getDemoShowcaseBySlug(cleanSlug);
 
-      unsubVendor = onValue(vendorTargetRef, (snap) => {
-        let matchedVendor: VendorProfile | null = null;
-        let matchedVendorId = "";
+      let matchedVendorId = "";
+      let matchedVendor: VendorProfile | null = null;
 
-        if (snap.exists()) {
-          const val = snap.val();
-          if (slug === "demo" && val) {
-            matchedVendor = { id: "v_demo", ...val };
-            matchedVendorId = "v_demo";
-          } else {
-            const entries = Object.entries(val);
-            if (entries.length > 0) {
-              matchedVendorId = entries[0][0];
-              matchedVendor = { id: matchedVendorId, ...(entries[0][1] as any) };
-            }
+      // 1. Recherche directe dans slugs/${cleanSlug}
+      try {
+        const slugSnap = await get(ref(db, `slugs/${cleanSlug}`));
+        if (slugSnap.exists()) {
+          const val = slugSnap.val();
+          const targetId = typeof val === "object" ? val?.vendorId : val;
+          if (targetId) {
+            matchedVendorId = targetId;
           }
         }
+      } catch (e) {
+        console.warn("Slugs lookup warning:", e);
+      }
 
-        if (matchedVendor) {
-          const owner = user?.vendorId === matchedVendorId || user?.id === matchedVendor.userId;
-          setIsOwner(owner);
-          setVendor(matchedVendor);
-          clearTimeout(timeout);
-          setLoading(false);
+      // 2. Recherche par ID direct vendors/${cleanSlug}
+      if (!matchedVendorId) {
+        try {
+          const directSnap = await get(ref(db, `vendors/${cleanSlug}`));
+          if (directSnap.exists()) {
+            matchedVendorId = cleanSlug;
+            matchedVendor = { id: cleanSlug, ...directSnap.val() };
+          }
+        } catch (e) {
+          console.warn("Direct vendor check warning:", e);
+        }
+      }
 
-          // Écouteur ciblé des produits pour ce vendeur uniquement via index
-          if (unsubProducts) unsubProducts();
-          const productsQuery = query(ref(db, "products"), orderByChild("vendorId"), equalTo(matchedVendorId));
-          unsubProducts = onValue(productsQuery, (prodSnap) => {
-            if (prodSnap.exists()) {
-              const all = prodSnap.val();
-              const list: Product[] = Object.keys(all)
-                .map(k => ({ id: k, ...all[k] }))
-                .filter((p: any) => p.available !== false);
-              setProducts(list);
-            } else {
-              setProducts([]);
+      // 3. Recherche en scannant la liste vendors si pas encore trouvé
+      if (!matchedVendorId) {
+        try {
+          const allVendorsSnap = await get(ref(db, "vendors"));
+          if (allVendorsSnap.exists()) {
+            const all = allVendorsSnap.val();
+            const found = Object.entries(all).find(([id, v]: [string, any]) => {
+              if (!v) return false;
+              const vSlug = (v.slug || "").toLowerCase().trim();
+              const vNameSlug = slugify(v.name || "");
+              return vSlug === cleanSlug || id.toLowerCase() === cleanSlug || vNameSlug === cleanSlug;
+            });
+            if (found) {
+              matchedVendorId = found[0];
+              matchedVendor = { id: matchedVendorId, ...(found[1] as any) };
             }
-          });
-        } else {
-          // 2. Fallback vitrines de démonstration préconfigurées
-          const demoShowcase = getDemoShowcaseBySlug(slug);
-          if (demoShowcase) {
-            setVendor(demoShowcase.vendor);
-            setProducts(demoShowcase.products);
-            setLoading(false);
+          }
+        } catch (e) {
+          console.warn("All vendors scan warning:", e);
+        }
+      }
+
+      // 4. Si un matchedVendorId a été trouvé, écouter en temps réel vendors/${matchedVendorId}
+      if (matchedVendorId) {
+        unsubVendor = onValue(ref(db, `vendors/${matchedVendorId}`), (snap) => {
+          if (snap.exists()) {
+            const val = snap.val();
+            const vData: VendorProfile = { id: matchedVendorId, ...val };
+            const owner = user?.vendorId === matchedVendorId || user?.id === vData.userId;
+            setIsOwner(owner);
+            setVendor(vData);
             clearTimeout(timeout);
+            setLoading(false);
+          } else if (matchedVendor) {
+            setVendor(matchedVendor);
+            clearTimeout(timeout);
+            setLoading(false);
+          }
+        });
+
+        // Écouter les produits pour ce vendeur (filtrage en mémoire fiable à 100%)
+        if (unsubProducts) unsubProducts();
+        unsubProducts = onValue(ref(db, "products"), (prodSnap) => {
+          let list: Product[] = [];
+          if (prodSnap.exists()) {
+            const all = prodSnap.val();
+            list = Object.keys(all)
+              .map(k => ({ id: k, ...all[k] }))
+              .filter((p: any) => p.vendorId === matchedVendorId && p.available !== false);
+          }
+
+          if (list.length > 0) {
+            setProducts(list);
             return;
           }
 
-          // 3. Fallback localStorage si pas encore propagé
+          // Fallback localStorage pour ce vendeur
           try {
-            const localSaved = localStorage.getItem("oresto_vendor_profile");
+            const localSaved = localStorage.getItem(`oresto_products_${matchedVendorId}`);
             if (localSaved) {
               const parsed = JSON.parse(localSaved);
-              if (parsed.slug === slug || slug === "demo") {
-                setVendor(parsed);
-                setLoading(false);
-                clearTimeout(timeout);
+              if (Array.isArray(parsed) && parsed.length > 0) {
+                setProducts(parsed);
+                return;
               }
             }
           } catch {}
+
+          // Fallback démo si disponible
+          if (demoCandidate && demoCandidate.products.length > 0) {
+            setProducts(demoCandidate.products);
+          }
+        });
+        return;
+      }
+
+      // 5. Fallback localStorage pour prévisualisation immédiate sans latence réseau
+      try {
+        const localSaved = localStorage.getItem("oresto_vendor_profile");
+        if (localSaved) {
+          const parsed = JSON.parse(localSaved);
+          const parsedSlug = (parsed.slug || slugify(parsed.name || "")).toLowerCase().trim();
+          if (parsedSlug === cleanSlug || parsed.id === cleanSlug || cleanSlug === "demo") {
+            const owner = user?.vendorId === parsed.id || user?.id === parsed.userId;
+            setIsOwner(owner);
+            setVendor(parsed);
+            clearTimeout(timeout);
+            setLoading(false);
+
+            // Charger les produits locaux
+            const localProds = localStorage.getItem(`oresto_products_${parsed.id || "v_demo"}`);
+            if (localProds) {
+              const pList = JSON.parse(localProds);
+              if (Array.isArray(pList) && pList.length > 0) {
+                setProducts(pList);
+                return;
+              }
+            }
+          }
         }
-      });
+      } catch {}
+
+      // 6. Fallback vitrines de démonstration préconfigurées
+      if (demoCandidate) {
+        setVendor(demoCandidate.vendor);
+        setProducts(demoCandidate.products);
+        clearTimeout(timeout);
+        setLoading(false);
+        return;
+      }
+
+      // 7. Si vraiment introuvable
+      clearTimeout(timeout);
+      setLoading(false);
     };
 
     checkVendorBySlug();

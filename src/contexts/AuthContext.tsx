@@ -12,6 +12,8 @@ import {
 import { ref, get, set, update, child, onValue } from "firebase/database";
 import { calculateTrialDates } from "@/services/subscriptionService";
 import { dispatchVendorNotification } from "@/services/notificationService";
+import { slugify } from "@/lib/slugify";
+import { getStarterProducts, BusinessSector } from "@/lib/vendorSector";
 
 interface AuthState {
   user: User | null;
@@ -588,23 +590,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         }
 
+        const shopTitle = (data.shopName || `${data.firstName || "Mon"} Commerce`).trim();
+        const rawSlug = slugify(shopTitle);
+        const cleanSlug = rawSlug && rawSlug.length >= 3 ? rawSlug : `boutique-${Date.now().toString().slice(-5)}`;
+        const bType = (data.business_type || "restaurant") as BusinessSector;
+
         createdVendorProfile = {
           id: vendorId,
           userId: uid,
-          name: data.shopName || `${data.firstName} Store`,
-          description: data.business_type === "ecommerce" ? "Boutique en ligne" : data.business_type === "hotel" ? "Hôtel & Résidence" : "Restaurant & Saveurs",
-          category: data.category || (data.business_type === "ecommerce" ? "E-Commerce & Boutiques" : data.business_type === "hotel" ? "Hôtels & Résidences" : "Restaurants"),
-          business_type: data.business_type || "restaurant",
-          rating: 0,
-          reviewCount: 0,
+          name: shopTitle,
+          slug: cleanSlug,
+          description: bType === "ecommerce" 
+            ? "Boutique en ligne officielle. Articles de qualité, livraison rapide et service client réactif." 
+            : bType === "hotel" 
+            ? "Hôtel de charme et résidence de haut standing. Chambres confortables et services personnalisés." 
+            : "Restaurant et saveurs authentiques. Cuisine raffinée, grillades braisées et spécialités du terroir.",
+          category: data.category || (bType === "ecommerce" ? "Mode, Vêtements & Prêt-à-porter" : bType === "hotel" ? "Hôtel & Suites de Luxe" : "Restaurant & Grillades"),
+          categories: [data.category || (bType === "ecommerce" ? "Mode, Vêtements & Prêt-à-porter" : bType === "hotel" ? "Hôtel & Suites de Luxe" : "Restaurant & Grillades")],
+          business_type: bType,
+          rating: 4.9,
+          reviewCount: 3,
           totalSales: 0,
           totalOrders: 0,
           revenue: 0,
-          phone: data.shopPhone || data.phone || "",
-          whatsapp: data.shopPhone || data.phone || "",
-          city: data.city || "",
-          neighborhood: data.neighborhood || "",
-          status: "pending",
+          phone: data.shopPhone || data.phone || "+229 97 00 00 00",
+          whatsapp: data.shopPhone || data.phone || "+229 97 00 00 00",
+          city: data.city || "Cotonou",
+          neighborhood: data.neighborhood || "Haie Vive",
+          status: "active",
           joinedDate: new Date().toISOString().split("T")[0],
           plan: selectedPlan,
           subscriptionPlan: selectedPlan,
@@ -614,13 +627,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           nextBillingDate: trialEndsAt,
           pendingInvoice: null,
           paymentHistory: [],
-          verified: false,
-          open: false,
+          verified: true,
+          open: true,
+          is_published: true,
+          primary_color: bType === "ecommerce" ? "#000000" : bType === "hotel" ? "#4F46E5" : "#EA580C",
+          secondary_color: "#FFFFFF",
+          font_choice: "modern",
+          payment_methods: ["MTN MoMo", "Moov Money", "Espèces"],
+          ordering_modes: bType === "ecommerce" 
+            ? ["Livraison Express", "Retrait Point Relais"] 
+            : bType === "hotel" 
+            ? ["Réservation Directe", "Paiement à l'arrivée"] 
+            : ["Livraison", "À Emporter", "WhatsApp Direct"],
           deliveryTime: "30-45 min",
           prestataire_id: matchedPrestataireId,
           referral_code: matchedPrestataireId ? refCode.toUpperCase() : null
         };
         dbUpdates[`vendors/${vendorId}`] = createdVendorProfile;
+        dbUpdates[`slugs/${cleanSlug}`] = { vendorId: vendorId };
+
+        // Génération et insertion des 3 premiers articles/chambres de démonstration
+        const starterProducts = getStarterProducts(bType, vendorId);
+        for (const p of starterProducts) {
+          dbUpdates[`products/${p.id}`] = p;
+        }
+
+        // Sauvegarde immédiate dans le stockage local pour affichage instantané
+        if (typeof window !== "undefined") {
+          try {
+            localStorage.setItem("oresto_vendor_profile", JSON.stringify(createdVendorProfile));
+            localStorage.setItem(`oresto_products_${vendorId}`, JSON.stringify(starterProducts));
+          } catch {}
+        }
 
         // Si apporté par un prestataire : création de la commission 20%
         if (matchedPrestataireId) {

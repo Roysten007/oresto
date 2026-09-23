@@ -97,7 +97,13 @@ export default function StepLancement({ formData, products, isSaving, onPublish 
             className="w-full py-3.5 rounded-2xl border-2 border-gray-200 text-gray-900 font-bold text-xs hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
           >
             <i className="fa-solid fa-arrow-up-right-from-square"></i>
-            <span>Ouvrir la vitrine publique du restaurant</span>
+            <span>
+              {formData.business_type === "ecommerce" 
+                ? "Ouvrir la vitrine de ma boutique" 
+                : formData.business_type === "hotel" 
+                ? "Ouvrir la vitrine de mon hôtel / résidence" 
+                : "Ouvrir la vitrine de mon restaurant"}
+            </span>
           </button>
         )}
       </div>
