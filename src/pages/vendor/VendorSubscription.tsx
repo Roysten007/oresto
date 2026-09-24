@@ -3,7 +3,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase";
 import { 
   confirmVendorSubscriptionPayment, 
-  FIRST_MONTH_PRICE,
   STANDARD_PLAN_PRICE
 } from "@/services/subscriptionService";
 import { 
@@ -38,7 +37,7 @@ export default function VendorSubscription() {
   const paymentHistory = vendorProfile?.paymentHistory || [];
 
   const isFirstPayment = !paymentHistory || paymentHistory.length === 0;
-  const payAmount = isFirstPayment ? FIRST_MONTH_PRICE : STANDARD_PLAN_PRICE;
+  const payAmount = STANDARD_PLAN_PRICE;
 
   const daysLeftInTrial = Math.max(0, Math.ceil((trialEndsTime - Date.now()) / (1000 * 60 * 60 * 24)));
   const daysUntilDue = Math.max(0, Math.ceil((nextBillingTime - Date.now()) / (1000 * 60 * 60 * 24)));
@@ -113,7 +112,7 @@ export default function VendorSubscription() {
 
             <p className="text-xs text-zinc-500 font-sub max-w-xl leading-relaxed">
               {subStatus === "trial" 
-                ? `Profitez de toutes les fonctionnalités d'Oresto Pro sans frais. Votre premier mois sera à ${FIRST_MONTH_PRICE.toLocaleString("fr-FR")} FCFA (-50%).`
+                ? `Profitez de toutes les fonctionnalités d'Oresto Pro sans frais pendant vos 14 jours d'essai. Formule à ${STANDARD_PLAN_PRICE.toLocaleString("fr-FR")} FCFA/mois sans engagement.`
                 : `Abonnement mensuel de ${STANDARD_PLAN_PRICE.toLocaleString("fr-FR")} FCFA/mois payable directement par Mobile Money.`}
             </p>
           </div>
@@ -190,7 +189,7 @@ export default function VendorSubscription() {
             <span className="font-heading font-black text-3xl text-zinc-950">5 000</span>
             <span className="text-xs font-bold text-zinc-500">FCFA / mois</span>
             <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full ml-2 border border-emerald-100">
-              -50% 1er mois = 2 500 F
+              Sans engagement
             </span>
           </div>
         </div>
@@ -280,13 +279,11 @@ export default function VendorSubscription() {
             <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200/70 space-y-2 text-xs">
               <div className="flex justify-between">
                 <span className="text-zinc-500">Formule</span>
-                <span className="font-bold text-zinc-900">Oresto Pro</span>
+                <span className="font-bold text-zinc-900">Oresto Pro (Tout inclus)</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-500">Offre appliquée</span>
-                <span className="font-bold text-emerald-700">
-                  {isFirstPayment ? "50% de réduction (1er mois)" : "Tarif standard"}
-                </span>
+                <span className="text-zinc-500">Engagement</span>
+                <span className="font-bold text-emerald-700">Sans engagement (0% commission)</span>
               </div>
               <div className="flex justify-between font-heading font-black text-sm pt-2 border-t border-zinc-200">
                 <span>Montant à régler</span>

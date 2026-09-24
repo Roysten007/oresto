@@ -14,7 +14,6 @@ interface PricingTier {
   desc: string;
   price: number;
   perStoreText?: string;
-  strikedPrice?: string;
   features: string[];
 }
 
@@ -22,10 +21,9 @@ const PRICING_TIERS: PricingTier[] = [
   {
     id: "solo",
     name: "1 Établissement",
-    badge: "Offre de lancement • -50% 1er mois",
     desc: "Idéal pour lancer et digitaliser 1 restaurant, 1 boutique ou 1 résidence.",
     price: 5000,
-    perStoreText: "1er mois à 2 500 FCFA (-50%), puis 5 000 F/mois",
+    perStoreText: "Tout inclus • Sans engagement",
     features: [
       "1 Vitrine web & QR Codes HD prêts à imprimer",
       "Encaissements MoMo 100% directs (0% de commission)",
@@ -38,12 +36,11 @@ const PRICING_TIERS: PricingTier[] = [
   {
     id: "duo",
     name: "2 Établissements",
-    badge: "Le plus populaire • -10%",
+    badge: "Le plus populaire",
     isPopular: true,
     desc: "Pour les gérants ayant 2 points de vente ou 2 activités distinctes.",
     price: 9000,
-    perStoreText: "Soit 4 500 FCFA / mois par profil (-10%)",
-    strikedPrice: "10 000 FCFA",
+    perStoreText: "Soit 4 500 FCFA / mois par établissement",
     features: [
       "2 Vitrines web & QR Codes distincts",
       "2 Espaces de gestion totalement indépendants",
@@ -56,11 +53,10 @@ const PRICING_TIERS: PricingTier[] = [
   {
     id: "trio",
     name: "3 Établissements",
-    badge: "Pack complet • -20%",
+    badge: "Pack multi-activités",
     desc: "Pack multi-activités (ex : Restaurant + Boutique + Résidence meublée).",
     price: 12000,
-    perStoreText: "Soit 4 000 FCFA / mois par profil (-20%)",
-    strikedPrice: "15 000 FCFA",
+    perStoreText: "Soit 4 000 FCFA / mois par établissement",
     features: [
       "3 Vitrines web & QR Codes dédiés",
       "3 Espaces de gestion totalement indépendants",
@@ -137,12 +133,6 @@ export function LandingValueStack({ activeSector }: LandingValueStackProps) {
                       FCFA / mois
                     </span>
                   </div>
-
-                  {tier.strikedPrice && (
-                    <span className="text-[11px] text-zinc-400 line-through mr-1.5">
-                      {tier.strikedPrice}
-                    </span>
-                  )}
 
                   {tier.perStoreText && (
                     <p className="text-xs font-sub font-bold text-[#EA580C] mt-1">

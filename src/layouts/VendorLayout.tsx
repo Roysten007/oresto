@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase";
-import { confirmVendorSubscriptionPayment, FIRST_MONTH_PRICE, STANDARD_PLAN_PRICE } from "@/services/subscriptionService";
+import { confirmVendorSubscriptionPayment, STANDARD_PLAN_PRICE } from "@/services/subscriptionService";
 import { getVendorSector, setVendorSector, BusinessSector, SECTORS } from "@/lib/vendorSector";
 import AIChatBot from "@/components/AIChatBot";
 import { toast } from "sonner";
@@ -52,8 +52,7 @@ export default function VendorLayout() {
   const sectorQuery = searchParams.get("sector") || searchParams.get("type");
 
   const isBlocked = vendorProfile?.subscriptionStatus === "blocked" || vendorProfile?.subscriptionStatus === "restricted";
-  const isFirstPayment = !vendorProfile?.paymentHistory || vendorProfile.paymentHistory.length === 0;
-  const payAmount = isFirstPayment ? FIRST_MONTH_PRICE : STANDARD_PLAN_PRICE;
+  const payAmount = STANDARD_PLAN_PRICE;
 
   // Secteur d'activité unifié
   const currentSector: BusinessSector = getVendorSector(vendorProfile, sectorQuery);

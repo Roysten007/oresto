@@ -32,7 +32,7 @@ export default function LandingEcommerce() {
     },
     {
       q: "Quel est le tarif de l'abonnement Boutique Pro ?",
-      a: "La formule unique est à 5 000 FCFA / mois tout inclus. Vous profitez de -25% immédiats dès votre inscription (soit 3 750 FCFA le premier mois)."
+      a: "La formule unique est à 5 000 FCFA / mois tout inclus, sans engagement ni commission. Vous profitez de 14 jours d'essai gratuit sans carte bancaire."
     }
   ];
 
@@ -62,7 +62,7 @@ export default function LandingEcommerce() {
               to="/register?sector=ecommerce"
               className="px-5 py-2.5 rounded-2xl bg-primary text-white font-heading font-black text-xs uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md shadow-primary/20"
             >
-              Lancer ma Boutique (-25%)
+              Lancer ma Boutique
             </Link>
           </div>
         </div>
@@ -96,7 +96,7 @@ export default function LandingEcommerce() {
                 to="/register?sector=ecommerce"
                 className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-primary text-white font-heading font-black text-xs sm:text-sm uppercase tracking-widest hover:bg-primary/90 transition-all shadow-xl shadow-primary/25 flex items-center justify-center gap-3"
               >
-                <span>Créer ma Boutique E-Commerce (-25% : 3 750 F)</span>
+                <span>Créer ma Boutique E-Commerce (14 jours offerts)</span>
                 <i className="fa-solid fa-arrow-right"></i>
               </Link>
             </div>
@@ -220,7 +220,7 @@ export default function LandingEcommerce() {
             to="/register?sector=ecommerce"
             className="inline-flex items-center justify-center gap-3 px-10 py-4 rounded-2xl bg-primary text-white font-heading font-black text-xs uppercase tracking-widest hover:bg-primary/90 shadow-xl shadow-primary/25"
           >
-            <span>Lancer ma boutique à 3 750 FCFA (-25%)</span>
+            <span>Lancer ma boutique à 5 000 FCFA / mois</span>
             <i className="fa-solid fa-arrow-right"></i>
           </Link>
         </div>

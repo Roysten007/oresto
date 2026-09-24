@@ -63,12 +63,12 @@ export async function dispatchVendorNotification(
   switch (type) {
     case "welcome_trial":
       title = "🎉 Bienvenue sur Oresto Pro !";
-      message = `Votre essai gratuit est actif jusqu'au ${formattedDate(data.trialEndsAt)}. Profitez de 50% de réduction (2 500 F au lieu de 5 000 F) sur votre 1er mois !`;
+      message = `Votre essai gratuit est actif jusqu'au ${formattedDate(data.trialEndsAt)}. Votre formule Oresto Pro est à 5 000 FCFA / mois sans engagement.`;
       break;
 
     case "j_minus_7":
       title = "⏳ Échéance dans 1 semaine (J-7)";
-      message = `Votre abonnement Oresto Pro arrive à échéance dans 7 jours. ${data.isFirstPayment !== false ? "Profitez de 50% de réduction sur votre 1er mois (2 500 FCFA)." : "Montant : 5 000 FCFA."} Réglez dès maintenant pour continuer sans interruption.`;
+      message = `Votre abonnement Oresto Pro arrive à échéance dans 7 jours (Montant : 5 000 FCFA). Réglez dès maintenant pour continuer sans interruption.`;
       break;
 
     case "j_minus_3":

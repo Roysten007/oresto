@@ -6,13 +6,11 @@ export const MAKETOU_SIMULATION_MODE = true;
 
 // Prix officiel unique Oresto Pro
 export const STANDARD_PLAN_PRICE = 5000;
-export const FIRST_MONTH_PRICE = 2500; // -50% de réduction immédiate de lancement dès le 1er mois (2 500 F au lieu de 5 000 F)
 
-export const PLANS: Record<string, { name: string; price: number; firstMonthPrice: number; features: string[] }> = {
+export const PLANS: Record<string, { name: string; price: number; features: string[] }> = {
   pro: {
     name: "Oresto Pro",
     price: STANDARD_PLAN_PRICE,
-    firstMonthPrice: FIRST_MONTH_PRICE,
     features: [
       "Site Web autonome sur-mesure (Site Factory)",
       "0% de commission sur vos ventes (100% pour vous)",
@@ -27,7 +25,6 @@ export const PLANS: Record<string, { name: string; price: number; firstMonthPric
   starter: {
     name: "Oresto Pro",
     price: STANDARD_PLAN_PRICE,
-    firstMonthPrice: FIRST_MONTH_PRICE,
     features: [
       "Site Web autonome sur-mesure (Site Factory)",
       "0% de commission sur vos ventes",
@@ -52,10 +49,10 @@ export function calculateTrialDates(registrationTime = Date.now()): { trialStart
 }
 
 /**
- * Génère un lien ou panier Maketou pour le renouvellement avec -50% si 1er mois
+ * Génère un lien ou panier Maketou pour le renouvellement
  */
 export function generateMaketouInvoice(vendorId: string, isFirstPayment = false) {
-  const amount = isFirstPayment ? FIRST_MONTH_PRICE : STANDARD_PLAN_PRICE;
+  const amount = STANDARD_PLAN_PRICE;
   const invoiceId = `inv_mkt_${vendorId}_${Date.now()}`;
   const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000; // Valide 7 jours
 
@@ -73,7 +70,7 @@ export function generateMaketouInvoice(vendorId: string, isFirstPayment = false)
 /**
  * Exécute la vérification quotidienne du cycle d'abonnement pour tous les vendeurs
  * Règles :
- * - J-7 : Début des notifications et émission facture (-50% si premier mois)
+ * - J-7 : Début des notifications et émission facture
  * - Jour J : Passage en pending_payment avec 3 jours de grâce
  * - J+3 : Blocage complet de la boutique (statut "blocked") si non payé
  */
@@ -161,7 +158,7 @@ export async function confirmVendorSubscriptionPayment(
 
   const v = snap.val() as VendorProfile;
   const isFirstPayment = !v.paymentHistory || v.paymentHistory.length === 0;
-  const amount = isFirstPayment ? FIRST_MONTH_PRICE : STANDARD_PLAN_PRICE;
+  const amount = STANDARD_PLAN_PRICE;
   const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
   const newNextBillingDate = Date.now() + THIRTY_DAYS_MS;
 

@@ -31,7 +31,7 @@ export default function AdminSubscriptions() {
     <div className="space-y-6">
       <div>
         <h1 className="font-heading text-2xl font-bold text-foreground">Abonnements SaaS Commerçants</h1>
-        <p className="font-body text-muted-foreground text-sm">Formule unique Oresto Pro (5 000 FCFA/mois — -50% 1er mois = 2 500 F).</p>
+        <p className="font-body text-muted-foreground text-sm">Formule unique Oresto Pro (5 000 FCFA/mois sans engagement).</p>
       </div>
 
       {/* Stats */}
@@ -84,12 +84,12 @@ export default function AdminSubscriptions() {
                       </span>
                     </td>
                     <td className="p-4 font-heading font-bold text-foreground">
-                      {isFirst ? "2 500 F (1er mois)" : "5 000 F/mois"}
+                      5 000 F/mois
                     </td>
                     <td className="p-4 font-body">
                       {subStatus === "trial" && (
                         <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 font-bold text-xs">
-                          🎉 Essai gratuit (Oct. 2026)
+                          🎉 Essai gratuit (14 jours)
                         </span>
                       )}
                       {subStatus === "active" && (
