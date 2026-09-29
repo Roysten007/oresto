@@ -1,19 +1,14 @@
 import React, { lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { AdminProvider } from "@/contexts/AdminContext";
-import { PrestataireProvider } from "@/contexts/PrestataireContext";
-import PrivateRoute from "@/components/PrivateRoute";
-import AdminRoute from "@/components/AdminRoute";
-import PrestataireRoute from "@/components/PrestataireRoute";
 import ReferralTracker from "@/components/ReferralTracker";
 
-// Critical landing page loaded synchronously for instant FCP/LCP
+// Critical landing page loaded directly without Firebase for fastest LCP & 0 KB unused JS
 import ProLanding from "./pages/ProLanding";
+
+// Lazy-loaded App Providers (AuthProvider, AdminProvider, PrestataireProvider, Toaster)
+// Only loaded when navigating to authenticated/app sections, keeping landing page ultra-light
+const AppProvidersLayout = lazy(() => import("./layouts/AppProvidersLayout"));
 
 // Secondary and dashboard pages code-split with lazy loading
 const Login = lazy(() => import("./pages/Login"));
@@ -26,8 +21,10 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const DevenirPrestataire = lazy(() => import("./pages/prestataire/DevenirPrestataire"));
 const PrestataireLogin = lazy(() => import("./pages/prestataire/PrestataireLogin"));
 const PrestataireDashboard = lazy(() => import("./pages/prestataire/PrestataireDashboard"));
+const PrestataireRoute = lazy(() => import("@/components/PrestataireRoute"));
 
 // Vendor routes
+const PrivateRoute = lazy(() => import("@/components/PrivateRoute"));
 const VendorLayout = lazy(() => import("./layouts/VendorLayout"));
 const VendorDashboard = lazy(() => import("./pages/vendor/VendorDashboard"));
 const VendorCatalogue = lazy(() => import("./pages/vendor/VendorCatalogue"));
@@ -39,6 +36,7 @@ const VendorSettings = lazy(() => import("./pages/vendor/VendorSettings"));
 const VendorSiteBuilder = lazy(() => import("./pages/vendor/VendorSiteBuilder"));
 
 // Admin routes
+const AdminRoute = lazy(() => import("@/components/AdminRoute"));
 const AdminLayout = lazy(() => import("./layouts/AdminLayout"));
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
@@ -72,76 +70,69 @@ const RouteLoader = () => (
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <AuthProvider>
-        <AdminProvider>
-          <PrestataireProvider>
-            <BrowserRouter>
-              <ReferralTracker />
-              <Suspense fallback={<RouteLoader />}>
-                <Routes>
-                  {/* Page de Vente Unique & Inscription Segmentée */}
-                  <Route path="/" element={<ProLanding />} />
-                  <Route path="/pro" element={<Navigate to="/" replace />} />
-                  <Route path="/restaurant" element={<Navigate to="/register?sector=restaurant" replace />} />
-                  <Route path="/resto" element={<Navigate to="/register?sector=restaurant" replace />} />
-                  <Route path="/boutique" element={<Navigate to="/register?sector=ecommerce" replace />} />
-                  <Route path="/ecommerce" element={<Navigate to="/register?sector=ecommerce" replace />} />
-                  <Route path="/hotel" element={<Navigate to="/register?sector=hotel" replace />} />
-                  <Route path="/decouvrir" element={<ProLanding />} />
-                  
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/register" element={<Register />} />
-                  <Route path="/forgot-password" element={<ForgotPassword />} />
-                  <Route path="/unauthorized" element={<Unauthorized />} />
+    <BrowserRouter>
+      <ReferralTracker />
+      <Suspense fallback={<RouteLoader />}>
+        <Routes>
+          {/* Public Landing Routes — 100% Free of Firebase, Admin & Prestataire bundle overhead */}
+          <Route path="/" element={<ProLanding />} />
+          <Route path="/pro" element={<Navigate to="/" replace />} />
+          <Route path="/restaurant" element={<Navigate to="/register?sector=restaurant" replace />} />
+          <Route path="/resto" element={<Navigate to="/register?sector=restaurant" replace />} />
+          <Route path="/boutique" element={<Navigate to="/register?sector=ecommerce" replace />} />
+          <Route path="/ecommerce" element={<Navigate to="/register?sector=ecommerce" replace />} />
+          <Route path="/hotel" element={<Navigate to="/register?sector=hotel" replace />} />
+          <Route path="/decouvrir" element={<ProLanding />} />
 
-                  {/* Espace Apporteurs d'Affaires / Prestataires */}
-                  <Route path="/devenir-prestataire" element={<DevenirPrestataire />} />
-                  <Route path="/prestataire/login" element={<PrestataireLogin />} />
-                  <Route path="/prestataire/dashboard" element={<PrestataireRoute><PrestataireDashboard /></PrestataireRoute>} />
+          {/* App & Authenticated Routes — Lazy-loads AuthProvider, Firebase & Toasts on demand */}
+          <Route element={<AppProvidersLayout />}>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/unauthorized" element={<Unauthorized />} />
 
-                  {/* Public Restaurant Site */}
-                  <Route path="/r/:slug" element={<RestaurantPublic />} />
+            {/* Espace Apporteurs d'Affaires / Prestataires */}
+            <Route path="/devenir-prestataire" element={<DevenirPrestataire />} />
+            <Route path="/prestataire/login" element={<PrestataireLogin />} />
+            <Route path="/prestataire/dashboard" element={<PrestataireRoute><PrestataireDashboard /></PrestataireRoute>} />
 
-                  {/* Vendor routes */}
-                  <Route path="/vendor" element={<PrivateRoute requiredRole="vendor"><VendorLayout /></PrivateRoute>}>
-                    <Route path="dashboard" element={<VendorDashboard />} />
-                    <Route path="site" element={<VendorSiteBuilder />} />
-                    <Route path="builder" element={<Navigate to="/vendor/site" replace />} />
-                    <Route path="catalogue" element={<VendorCatalogue />} />
-                    <Route path="menu" element={<Navigate to="/vendor/catalogue" replace />} />
-                    <Route path="orders" element={<VendorOrders />} />
-                    <Route path="delivery" element={<VendorDelivery />} />
-                    <Route path="stats" element={<VendorStats />} />
-                    <Route path="subscription" element={<VendorSubscription />} />
-                    <Route path="settings" element={<VendorSettings />} />
-                  </Route>
+            {/* Public Restaurant Site */}
+            <Route path="/r/:slug" element={<RestaurantPublic />} />
 
-                  {/* Admin routes */}
-                  <Route path="/oresto-admin/login" element={<AdminLogin />} />
-                  <Route path="/oresto-admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
-                    <Route path="dashboard" element={<AdminDashboard />} />
-                    <Route path="prestataires" element={<AdminPrestataires />} />
-                    <Route path="vendors" element={<AdminVendors />} />
-                    <Route path="clients" element={<AdminClients />} />
-                    <Route path="subscriptions" element={<AdminSubscriptions />} />
-                    <Route path="revenues" element={<AdminRevenues />} />
-                    <Route path="orders" element={<AdminOrders />} />
-                    <Route path="categories" element={<AdminCategories />} />
-                    <Route path="notifications" element={<AdminNotifications />} />
-                    <Route path="settings" element={<AdminSettings />} />
-                  </Route>
+            {/* Vendor routes */}
+            <Route path="/vendor" element={<PrivateRoute requiredRole="vendor"><VendorLayout /></PrivateRoute>}>
+              <Route path="dashboard" element={<VendorDashboard />} />
+              <Route path="site" element={<VendorSiteBuilder />} />
+              <Route path="builder" element={<Navigate to="/vendor/site" replace />} />
+              <Route path="catalogue" element={<VendorCatalogue />} />
+              <Route path="menu" element={<Navigate to="/vendor/catalogue" replace />} />
+              <Route path="orders" element={<VendorOrders />} />
+              <Route path="delivery" element={<VendorDelivery />} />
+              <Route path="stats" element={<VendorStats />} />
+              <Route path="subscription" element={<VendorSubscription />} />
+              <Route path="settings" element={<VendorSettings />} />
+            </Route>
 
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
-            </BrowserRouter>
-          </PrestataireProvider>
-        </AdminProvider>
-      </AuthProvider>
-    </TooltipProvider>
+            {/* Admin routes */}
+            <Route path="/oresto-admin/login" element={<AdminLogin />} />
+            <Route path="/oresto-admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+              <Route path="dashboard" element={<AdminDashboard />} />
+              <Route path="prestataires" element={<AdminPrestataires />} />
+              <Route path="vendors" element={<AdminVendors />} />
+              <Route path="clients" element={<AdminClients />} />
+              <Route path="subscriptions" element={<AdminSubscriptions />} />
+              <Route path="revenues" element={<AdminRevenues />} />
+              <Route path="orders" element={<AdminOrders />} />
+              <Route path="categories" element={<AdminCategories />} />
+              <Route path="notifications" element={<AdminNotifications />} />
+              <Route path="settings" element={<AdminSettings />} />
+            </Route>
+          </Route>
+
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
+    </BrowserRouter>
   </QueryClientProvider>
 );
 

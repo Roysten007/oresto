@@ -809,9 +809,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useAuth() {
+export function useAuth(): AuthContextType {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+  if (!ctx) {
+    return {
+      user: null,
+      role: null,
+      vendorProfile: null,
+      isAuthenticated: false,
+      isLoading: false,
+      login: async () => ({ success: false }),
+      loginAsGuest: async () => ({ success: false }),
+      logout: async () => {},
+      register: async () => ({ success: false }),
+      failedAttempts: 0,
+      lockedUntil: null,
+      sessionWarning: false,
+      dismissWarning: () => {},
+    };
+  }
   return ctx;
 }
 

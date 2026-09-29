@@ -9,6 +9,7 @@ export interface DashboardScreenshot {
   urlPill: string;
   statusBadge: string;
   src: string;
+  mobileSrc: string;
   alt: string;
   description: string;
 }
@@ -23,6 +24,7 @@ const DASHBOARDS: DashboardScreenshot[] = [
     urlPill: "oresto.app/resto/commandes-live",
     statusBadge: "Cuisine ouverte • Synchronisé MoMo",
     src: "/screenshots/dashboard-restaurant.jpg",
+    mobileSrc: "/screenshots/dashboard-restaurant-mobile.jpg",
     alt: "Tableau de bord Restaurant Oresto - Commandes en direct, suivi cuisine et encaissements Mobile Money",
     description: "Commandes cuisine en direct, livreurs, recettes 100% MoMo sans commission et QR codes de table.",
   },
@@ -35,6 +37,7 @@ const DASHBOARDS: DashboardScreenshot[] = [
     urlPill: "oresto.app/boutique/expeditions",
     statusBadge: "Boutique ouverte • 0% commission",
     src: "/screenshots/dashboard-boutique.jpg",
+    mobileSrc: "/screenshots/dashboard-boutique-mobile.jpg",
     alt: "Tableau de bord E-commerce Oresto - Ventes boutique, suivi des colis, alertes stock critique",
     description: "Gestion des commandes, colis à expédier, alertes de stock critique et paiements MoMo automatiques.",
   },
@@ -47,6 +50,7 @@ const DASHBOARDS: DashboardScreenshot[] = [
     urlPill: "oresto.app/hotel/reservations",
     statusBadge: "Réception ouverte • 75% occupé",
     src: "/screenshots/dashboard-hotel.jpg",
+    mobileSrc: "/screenshots/dashboard-hotel-mobile.jpg",
     alt: "Tableau de bord Hôtel Oresto - Gestion des nuitées, arrivées check-in et état des chambres en direct",
     description: "Suivi des réservations et arrivées en temps réel, calendrier des nuitées et encaissements directs.",
   },
@@ -59,6 +63,7 @@ const DASHBOARDS: DashboardScreenshot[] = [
     urlPill: "oresto.app/partenaire/commissions",
     statusBadge: "Commission permanente 20%",
     src: "/screenshots/dashboard-apporteur.jpg",
+    mobileSrc: "/screenshots/dashboard-apporteur-mobile.jpg",
     alt: "Espace Apporteur d'Affaires Oresto - Lien de parrainage personnel et commissions récurrentes MoMo",
     description: "Lien de parrainage WhatsApp, 20% de commissions récurrentes chaque mois sur chaque client parrainé.",
   },
@@ -123,6 +128,8 @@ export default function HeroDashboardCarousel() {
             <div className="relative w-full bg-zinc-100 overflow-hidden aspect-[16/9.4]">
               <img
                 src={item.src}
+                srcSet={`${item.mobileSrc} 400w, ${item.src} 720w`}
+                sizes="(max-width: 640px) 330px, 660px"
                 alt={item.alt}
                 width="720"
                 height="410"
