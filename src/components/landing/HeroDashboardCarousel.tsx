@@ -22,7 +22,7 @@ const DASHBOARDS: DashboardScreenshot[] = [
     sectorIcon: "fa-utensils",
     urlPill: "oresto.app/resto/commandes-live",
     statusBadge: "Cuisine ouverte • Synchronisé MoMo",
-    src: "/screenshots/dashboard-restaurant.png",
+    src: "/screenshots/dashboard-restaurant.jpg",
     alt: "Tableau de bord Restaurant Oresto - Commandes en direct, suivi cuisine et encaissements Mobile Money",
     description: "Commandes cuisine en direct, livreurs, recettes 100% MoMo sans commission et QR codes de table.",
   },
@@ -34,7 +34,7 @@ const DASHBOARDS: DashboardScreenshot[] = [
     sectorIcon: "fa-bag-shopping",
     urlPill: "oresto.app/boutique/expeditions",
     statusBadge: "Boutique ouverte • 0% commission",
-    src: "/screenshots/dashboard-boutique.png",
+    src: "/screenshots/dashboard-boutique.jpg",
     alt: "Tableau de bord E-commerce Oresto - Ventes boutique, suivi des colis, alertes stock critique",
     description: "Gestion des commandes, colis à expédier, alertes de stock critique et paiements MoMo automatiques.",
   },
@@ -46,7 +46,7 @@ const DASHBOARDS: DashboardScreenshot[] = [
     sectorIcon: "fa-hotel",
     urlPill: "oresto.app/hotel/reservations",
     statusBadge: "Réception ouverte • 75% occupé",
-    src: "/screenshots/dashboard-hotel.png",
+    src: "/screenshots/dashboard-hotel.jpg",
     alt: "Tableau de bord Hôtel Oresto - Gestion des nuitées, arrivées check-in et état des chambres en direct",
     description: "Suivi des réservations et arrivées en temps réel, calendrier des nuitées et encaissements directs.",
   },
@@ -58,7 +58,7 @@ const DASHBOARDS: DashboardScreenshot[] = [
     sectorIcon: "fa-handshake",
     urlPill: "oresto.app/partenaire/commissions",
     statusBadge: "Commission permanente 20%",
-    src: "/screenshots/dashboard-apporteur.png",
+    src: "/screenshots/dashboard-apporteur.jpg",
     alt: "Espace Apporteur d'Affaires Oresto - Lien de parrainage personnel et commissions récurrentes MoMo",
     description: "Lien de parrainage WhatsApp, 20% de commissions récurrentes chaque mois sur chaque client parrainé.",
   },
@@ -124,8 +124,11 @@ export default function HeroDashboardCarousel() {
               <img
                 src={item.src}
                 alt={item.alt}
-                loading="eager"
+                width="720"
+                height="410"
+                loading={index === 0 ? "eager" : "lazy"}
                 decoding="async"
+                fetchPriority={index === 0 ? "high" : "auto"}
                 className="w-full h-full object-cover object-top"
               />
             </div>

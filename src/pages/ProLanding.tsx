@@ -14,7 +14,8 @@ import LandingChoiceComparison from '../components/landing/LandingChoiceComparis
 import LandingFAQ from '../components/landing/LandingFAQ';
 import LandingFinalCTA from '../components/landing/LandingFinalCTA';
 import LandingWhatsAppFloat from '../components/landing/LandingWhatsAppFloat';
-import AIChatBot from '../components/AIChatBot';
+
+const AIChatBot = React.lazy(() => import('../components/AIChatBot'));
 
 export default function ProLanding() {
   const [activeSector, setActiveSector] = useState<BusinessSector>('restaurant');
@@ -77,7 +78,9 @@ export default function ProLanding() {
       <LandingWhatsAppFloat />
 
       {/* Assistant IA Flottant IZA */}
-      <AIChatBot />
+      <React.Suspense fallback={null}>
+        <AIChatBot />
+      </React.Suspense>
 
       {/* Footer officiel */}
       <Footer />

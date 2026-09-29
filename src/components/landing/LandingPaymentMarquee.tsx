@@ -9,6 +9,10 @@ export function LandingPaymentMarquee() {
         <img
           src="/celtiis-logo.svg"
           alt="Celtiis Cash Bénin"
+          width="36"
+          height="36"
+          loading="lazy"
+          decoding="async"
           className="w-9 h-9 rounded-lg object-contain shadow-xs shrink-0"
         />
       ),
@@ -20,6 +24,10 @@ export function LandingPaymentMarquee() {
         <img
           src="/mtn-momo-logo.svg"
           alt="MTN MoMo"
+          width="36"
+          height="36"
+          loading="lazy"
+          decoding="async"
           className="w-9 h-9 rounded-lg object-contain shrink-0"
         />
       ),
