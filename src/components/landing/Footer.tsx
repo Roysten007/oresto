@@ -60,6 +60,16 @@ export default function Footer() {
               </li>
               <li><Link to="/prestataire/login" className="hover:text-[#FF6B00] transition-colors font-medium">Connexion Espace Affilié</Link></li>
               <li><Link to="/admin/login" className="hover:text-[#FF6B00] transition-colors font-medium">Back-office Admin</Link></li>
+              <li className="pt-1">
+                <button 
+                  type="button"
+                  onClick={() => window.dispatchEvent(new CustomEvent('open-pwa-install'))}
+                  className="text-[#FF6B00] hover:underline font-bold flex items-center gap-1.5 text-left text-xs bg-orange-50 px-2.5 py-1.5 rounded-lg border border-orange-200/70"
+                >
+                  <i className="fa-solid fa-mobile-screen-button text-xs"></i>
+                  <span>Installer l'app mobile (0 Mo Play Store)</span>
+                </button>
+              </li>
             </ul>
           </div>
 

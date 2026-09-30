@@ -113,7 +113,7 @@ export default function VendorLayout() {
           </div>
 
           {/* Sélecteur et basculeur multi-établissements */}
-          <EstablishmentSwitcher />
+          <EstablishmentSwitcher currentSector={currentSector} />
 
           {/* Dedicated Nav Items */}
           <nav className="flex-1 space-y-1 overflow-y-auto pr-1">

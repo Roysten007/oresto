@@ -260,3 +260,35 @@ export function getStarterProducts(type: BusinessSector, vId: string): any[] {
     }
   ];
 }
+
+/**
+ * Valide strictement qu'un produit correspond bien au secteur actif.
+ * Empêche qu'une chambre d'hôtel n'apparaisse dans une boutique ou qu'un burger ne figure dans un hôtel.
+ */
+export function isProductMatchingSector(product: any, sector: BusinessSector): boolean {
+  if (!product) return false;
+  const cat = `${product.category || ""} ${product.name || ""} ${product.description || ""}`.toLowerCase();
+  
+  if (sector === "ecommerce") {
+    // Rejeter formellement les chambres d'hôtel et plats de restaurant
+    const isHotel = cat.includes("chambre") || cat.includes("suite") || cat.includes("nuitée") || cat.includes("balcon palace") || cat.includes("king size") || cat.includes("lit double") || cat.includes("hôtel");
+    const isResto = cat.includes("poisson braisé") || cat.includes("poulet") || cat.includes("burger") || cat.includes("grillade") || cat.includes("brochette") || cat.includes("alloco") || cat.includes("sauce") || cat.includes("kankankan") || cat.includes("plat");
+    return !isHotel && !isResto;
+  }
+  
+  if (sector === "hotel") {
+    // Rejeter formellement les sneakers/vêtements et les plats cuisinés
+    const isEcom = cat.includes("sneaker") || cat.includes("chemise") || cat.includes("smartwatch") || cat.includes("streetwear") || cat.includes("chaussure") || cat.includes("pantalon") || cat.includes("t-shirt");
+    const isResto = cat.includes("poisson braisé") || cat.includes("poulet") || cat.includes("burger") || cat.includes("grillade") || cat.includes("brochette") || cat.includes("alloco");
+    return !isEcom && !isResto;
+  }
+  
+  if (sector === "restaurant") {
+    // Rejeter chambres d'hôtel et articles e-commerce
+    const isHotel = cat.includes("chambre") || cat.includes("suite") || cat.includes("nuitée") || cat.includes("balcon palace") || cat.includes("king size") || cat.includes("hôtel");
+    const isEcom = cat.includes("sneaker") || cat.includes("smartwatch") || cat.includes("chemise lin") || cat.includes("streetwear") || cat.includes("chaussure");
+    return !isHotel && !isEcom;
+  }
+  
+  return true;
+}

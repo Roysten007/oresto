@@ -15,9 +15,13 @@ import {
   ExternalLink,
   X
 } from "lucide-react";
-import { BusinessSector, setVendorSector } from "@/lib/vendorSector";
+import { BusinessSector, getVendorSector, setVendorSector } from "@/lib/vendorSector";
 
-export default function EstablishmentSwitcher() {
+interface EstablishmentSwitcherProps {
+  currentSector?: BusinessSector;
+}
+
+export default function EstablishmentSwitcher({ currentSector }: EstablishmentSwitcherProps) {
   const { vendorProfile, userVendors = [], switchVendor, createEstablishment } = useAuth();
   const navigate = useNavigate();
 
@@ -25,11 +29,17 @@ export default function EstablishmentSwitcher() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [newStore, setNewStore] = useState({
     name: "",
-    business_type: "restaurant" as BusinessSector,
+    business_type: (currentSector || "restaurant") as BusinessSector,
     city: "Cotonou",
     category: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Secteur effectif (priorité au workspace actif puis au profil)
+  const effectiveSector: BusinessSector = currentSector || getVendorSector(vendorProfile);
+
+  // Chercher si l'utilisateur possède déjà un établissement de ce secteur
+  const matchingVendor = userVendors.find(v => v.business_type === effectiveSector);
 
   const currentVendorId = vendorProfile?.id || "";
   const currentPlan = (vendorProfile?.subscriptionPlan || "solo").toLowerCase();
@@ -38,7 +48,8 @@ export default function EstablishmentSwitcher() {
 
   // Format de l'icône selon le secteur
   const getSectorIcon = (type?: string) => {
-    switch (type) {
+    const s = type || effectiveSector;
+    switch (s) {
       case "ecommerce":
         return <ShoppingBag size={14} className="text-purple-600" />;
       case "hotel":
@@ -99,6 +110,20 @@ export default function EstablishmentSwitcher() {
     }
   };
 
+  // Nom affiché selon le secteur effectif pour éviter les incohérences de libellé
+  let activeDisplayName = vendorProfile?.name || "";
+  if (effectiveSector === "ecommerce") {
+    if (!activeDisplayName || activeDisplayName === "L'Atelier du Chef & Grill" || activeDisplayName === "Mon établissement") {
+      activeDisplayName = matchingVendor?.name || "Ma Boutique";
+    }
+  } else if (effectiveSector === "hotel") {
+    if (!activeDisplayName || activeDisplayName === "L'Atelier du Chef & Grill" || activeDisplayName === "Mon établissement") {
+      activeDisplayName = matchingVendor?.name || "Mon Hôtel";
+    }
+  } else {
+    activeDisplayName = activeDisplayName || "L'Atelier du Chef & Grill";
+  }
+
   return (
     <>
       <div className="relative mb-3">
@@ -110,16 +135,16 @@ export default function EstablishmentSwitcher() {
         >
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-8 h-8 rounded-xl bg-zinc-100 flex items-center justify-center shrink-0 border border-zinc-200/70 group-hover:scale-105 transition-transform">
-              {getSectorIcon(vendorProfile?.business_type)}
+              {getSectorIcon(effectiveSector)}
             </div>
             <div className="min-w-0 flex-1">
               <p className="font-heading text-xs font-bold text-zinc-950 truncate leading-tight">
-                {vendorProfile?.name || "Mon établissement"}
+                {activeDisplayName}
               </p>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
                 <span className="text-[10px] font-sub text-zinc-500 capitalize truncate">
-                  {vendorProfile?.business_type === "ecommerce" ? "Boutique" : vendorProfile?.business_type === "hotel" ? "Hôtel" : "Restaurant"} • {vendorProfile?.city || "Bénin"}
+                  {effectiveSector === "ecommerce" ? "Boutique" : effectiveSector === "hotel" ? "Hôtel" : "Restaurant"} • {vendorProfile?.city || "Bénin"}
                 </span>
               </div>
             </div>

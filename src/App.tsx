@@ -2,6 +2,7 @@ import React, { lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import ReferralTracker from "@/components/ReferralTracker";
+import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 
 // Critical landing page loaded directly without Firebase for fastest LCP & 0 KB unused JS
 import ProLanding from "./pages/ProLanding";
@@ -73,6 +74,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <BrowserRouter>
       <ReferralTracker />
+      <PWAInstallPrompt />
       <Suspense fallback={<RouteLoader />}>
         <Routes>
           {/* Public Landing Routes — 100% Free of Firebase, Admin & Prestataire bundle overhead */}

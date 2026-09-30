@@ -6,7 +6,7 @@ import { ref, update, onValue, set, push, query, orderByChild, equalTo, get } fr
 import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 import { toast } from "sonner";
 import { VendorProfile, Product } from "@/data/mockData";
-import { getVendorSector, getStarterProducts } from "@/lib/vendorSector";
+import { getVendorSector, getStarterProducts, isProductMatchingSector } from "@/lib/vendorSector";
 import { slugify } from "@/lib/slugify";
 import StepIdentite from "./builder/StepIdentite";
 import StepCarte from "./builder/StepCarte";
@@ -37,23 +37,50 @@ export default function VendorSiteBuilder() {
   const [businessType, setBusinessType] = useState<"restaurant" | "ecommerce" | "hotel">(initialType);
 
   const vId = vendorProfile?.id || (user as any)?.vendorId || user?.id || "v_demo";
-  const defaultShopName = vendorProfile?.name || (initialType === "ecommerce" ? "KiffStyle & Tech Store" : initialType === "hotel" ? "Palmier Royal Résidence & Suites" : "L'Atelier du Chef & Grill");
-  const defaultSlug = vendorProfile?.slug || slugify(defaultShopName) || (initialType === "ecommerce" ? "kiffstyle-store" : initialType === "hotel" ? "palmier-royal" : "latelier-du-chef");
+  
+  // Nom & Visuels adaptés au secteur (ne jamais hériter d'un nom de restaurant pour une boutique)
+  const isProfileRestaurantOnly = !vendorProfile?.business_type || vendorProfile?.business_type === "restaurant" || vendorProfile?.name === "L'Atelier du Chef & Grill";
+  
+  const defaultShopName = initialType === "ecommerce"
+    ? (vendorProfile?.business_type === "ecommerce" && vendorProfile?.name ? vendorProfile.name : "KiffStyle & Tech Store")
+    : initialType === "hotel"
+    ? (vendorProfile?.business_type === "hotel" && vendorProfile?.name ? vendorProfile.name : "Palmier Royal Résidence & Suites")
+    : (vendorProfile?.name || "L'Atelier du Chef & Grill");
+
+  const defaultSlug = initialType === "ecommerce"
+    ? (vendorProfile?.business_type === "ecommerce" && vendorProfile?.slug ? vendorProfile.slug : "kiffstyle-store")
+    : initialType === "hotel"
+    ? (vendorProfile?.business_type === "hotel" && vendorProfile?.slug ? vendorProfile.slug : "palmier-royal")
+    : (vendorProfile?.slug || "latelier-du-chef");
+
+  const defaultCover = initialType === "ecommerce"
+    ? "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80"
+    : initialType === "hotel"
+    ? "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80"
+    : "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80";
 
   const [formData, setFormData] = useState<Partial<VendorProfile>>({
     name: defaultShopName,
-    category: vendorProfile?.category || (initialType === "ecommerce" ? "Mode, Vêtements & Prêt-à-porter" : initialType === "hotel" ? "Hôtel & Suites de Luxe" : "Restaurant & Grillades"),
-    categories: vendorProfile?.categories || [vendorProfile?.category || (initialType === "ecommerce" ? "Mode, Vêtements & Prêt-à-porter" : initialType === "hotel" ? "Hôtel & Suites de Luxe" : "Restaurant & Grillades")],
-    description: vendorProfile?.description || (initialType === "ecommerce" 
+    category: initialType === "ecommerce" 
+      ? "Mode, Vêtements & Prêt-à-porter" 
+      : initialType === "hotel" 
+      ? "Hôtel & Suites de Luxe" 
+      : "Restaurant & Grillades",
+    categories: initialType === "ecommerce" 
+      ? ["Mode, Vêtements & Prêt-à-porter", "Chaussures & Sneakers Streetwear", "High-Tech, Smartphones & Gadgets"] 
+      : initialType === "hotel" 
+      ? ["Hôtel & Suites de Luxe", "Résidence Meublée & Appartements"] 
+      : ["Restaurant & Grillades", "Maquis & Saveurs Africaines"],
+    description: initialType === "ecommerce" 
       ? "Boutique en ligne spécialisée en sneakers streetwear, vêtements de marque et accessoires high-tech."
       : initialType === "hotel"
       ? "Hôtel de charme et résidence meublée de haut standing avec suites climatisées, piscine et Wi-Fi Fibre."
-      : "Restaurant gastronomique et grillades au feu de bois. Spécialités africaines et saveurs du terroir."),
+      : "Restaurant gastronomique et grillades au feu de bois. Spécialités africaines et saveurs du terroir.",
     slug: defaultSlug,
     business_type: initialType,
-    logo_url: vendorProfile?.logo_url || "",
-    cover_url: vendorProfile?.cover_url || "",
-    primary_color: vendorProfile?.primary_color || (initialType === "ecommerce" ? "#000000" : initialType === "hotel" ? "#4F46E5" : "#EA580C"),
+    logo_url: isProfileRestaurantOnly && initialType !== "restaurant" ? "" : (vendorProfile?.logo_url || ""),
+    cover_url: isProfileRestaurantOnly && initialType !== "restaurant" ? defaultCover : (vendorProfile?.cover_url || defaultCover),
+    primary_color: initialType === "ecommerce" ? "#9333EA" : initialType === "hotel" ? "#4F46E5" : "#EA580C",
     secondary_color: "#FFFFFF",
     font_choice: vendorProfile?.font_choice || "modern",
     sections_config: { hero: true, menu: true, daily: true, footer: true },
@@ -64,7 +91,11 @@ export default function VendorSiteBuilder() {
     neighborhood: vendorProfile?.neighborhood || (initialType === "ecommerce" ? "Ganhi" : initialType === "hotel" ? "Haie Vive" : "Cadjehoun"),
     social_links: vendorProfile?.social_links || { instagram: "", facebook: "", tiktok: "" },
     payment_methods: vendorProfile?.payment_methods || ["MTN MoMo", "Moov Money", "Espèces"],
-    ordering_modes: vendorProfile?.ordering_modes || (initialType === "ecommerce" ? ["Livraison Express", "Retrait Point Relais"] : initialType === "hotel" ? ["Réservation Directe", "Paiement à l'arrivée"] : ["Livraison", "À Emporter", "WhatsApp Direct"]),
+    ordering_modes: initialType === "ecommerce" 
+      ? ["Livraison Express", "Retrait Point Relais"] 
+      : initialType === "hotel" 
+      ? ["Réservation Directe", "Paiement à l'arrivée"] 
+      : ["Livraison", "À Emporter", "WhatsApp Direct"],
     is_published: true,
   });
 
@@ -115,48 +146,84 @@ export default function VendorSiteBuilder() {
     const detectedType = getVendorSector(vendorProfile, sectorQuery);
     setBusinessType(detectedType);
 
-    // Charger les données sauvegardées en priorité depuis localStorage ou vendorProfile
+    const activeId = vendorProfile?.id || (user as any)?.vendorId || user?.id || "v_demo";
+
+    // Charger les données sauvegardées en priorité depuis localStorage par secteur ou vendorProfile
     let mergedProfile = vendorProfile || {};
     try {
-      const localSaved = localStorage.getItem("oresto_vendor_profile");
+      const scopedSaved = localStorage.getItem(`oresto_vendor_profile_${activeId}_${detectedType}`);
+      const globalSaved = localStorage.getItem("oresto_vendor_profile");
+      const localSaved = scopedSaved || globalSaved;
       if (localSaved) {
-        mergedProfile = { ...mergedProfile, ...JSON.parse(localSaved) };
+        const parsed = JSON.parse(localSaved);
+        // Ne charger le cache global que s'il correspond au secteur actif
+        if (!parsed.business_type || parsed.business_type === detectedType) {
+          mergedProfile = { ...mergedProfile, ...parsed };
+        }
       }
     } catch {}
 
-    const activeId = mergedProfile.id || vendorProfile?.id || (user as any)?.vendorId || user?.id || "v_demo";
-    const shopName = mergedProfile.name || defaultShopName;
-    const computedSlug = mergedProfile.slug || slugify(shopName) || defaultSlug;
+    // Adapter l'identité au secteur si le profil est resté sur la démo restaurant
+    const isProfileRestoMismatch = (!mergedProfile.business_type || mergedProfile.business_type === "restaurant" || mergedProfile.name === "L'Atelier du Chef & Grill") && detectedType !== "restaurant";
+
+    const shopName = isProfileRestoMismatch
+      ? (detectedType === "ecommerce" ? "KiffStyle & Tech Store" : "Palmier Royal Résidence & Suites")
+      : (mergedProfile.name || defaultShopName);
+
+    const computedSlug = isProfileRestoMismatch
+      ? (detectedType === "ecommerce" ? "kiffstyle-store" : "palmier-royal")
+      : (mergedProfile.slug || slugify(shopName) || defaultSlug);
+
+    const sectorCover = isProfileRestoMismatch
+      ? defaultCover
+      : (mergedProfile.cover_url || defaultCover);
+
+    const sectorCategory = isProfileRestoMismatch
+      ? (detectedType === "ecommerce" ? "Mode, Vêtements & Prêt-à-porter" : "Hôtel & Suites de Luxe")
+      : (mergedProfile.category || (detectedType === "ecommerce" ? "Mode, Vêtements & Prêt-à-porter" : detectedType === "hotel" ? "Hôtel & Suites de Luxe" : "Restaurant & Grillades"));
+
+    const sectorCategories = isProfileRestoMismatch
+      ? (detectedType === "ecommerce" 
+          ? ["Mode, Vêtements & Prêt-à-porter", "Chaussures & Sneakers Streetwear", "High-Tech, Smartphones & Gadgets"] 
+          : ["Hôtel & Suites de Luxe", "Résidence Meublée & Appartements"])
+      : (mergedProfile.categories || [sectorCategory]);
 
     setFormData(prev => ({
       ...prev,
       ...mergedProfile,
       name: shopName,
       slug: computedSlug,
+      cover_url: sectorCover,
+      category: sectorCategory,
+      categories: sectorCategories,
       business_type: detectedType,
+      primary_color: detectedType === "ecommerce" ? "#9333EA" : detectedType === "hotel" ? "#4F46E5" : "#EA580C",
       social_links: mergedProfile.social_links || { instagram: "", facebook: "", tiktok: "" },
-      ordering_modes: mergedProfile.ordering_modes || (detectedType === "ecommerce" ? ["Livraison Express", "Retrait Point Relais"] : ["Livraison", "À Emporter", "WhatsApp Direct"]),
+      ordering_modes: mergedProfile.ordering_modes || (detectedType === "ecommerce" ? ["Livraison Express", "Retrait Point Relais"] : detectedType === "hotel" ? ["Réservation Directe", "Paiement à l'arrivée"] : ["Livraison", "À Emporter", "WhatsApp Direct"]),
       payment_methods: mergedProfile.payment_methods || ["MTN MoMo", "Moov Money", "Espèces"]
     }));
-    setLocalLogo(mergedProfile.logo_url || null);
-    setLocalCover(mergedProfile.cover_url || null);
+    setLocalLogo(isProfileRestoMismatch ? null : (mergedProfile.logo_url || null));
+    setLocalCover(sectorCover || null);
 
-    // Charger les produits depuis localStorage d'abord
+    // Charger les produits spécifiquement pour ce vendeur et CE SECTEUR
     let localProducts: Product[] = [];
     try {
-      const savedProds = localStorage.getItem(`oresto_products_${activeId}`);
+      const savedProds = localStorage.getItem(`oresto_products_${activeId}_${detectedType}`);
       if (savedProds) {
         localProducts = JSON.parse(savedProds);
       }
     } catch {}
 
-    if (localProducts.length > 0) {
-      setProducts(localProducts);
+    // Filtrer pour éliminer rigoureusement tout produit d'un autre secteur (ex: chambres d'hôtel dans une boutique)
+    const validLocal = localProducts.filter(p => isProductMatchingSector(p, detectedType));
+
+    if (validLocal.length > 0) {
+      setProducts(validLocal);
     } else {
       const defaultSamples = getStarterProducts(detectedType, activeId);
       setProducts(defaultSamples);
       try {
-        localStorage.setItem(`oresto_products_${activeId}`, JSON.stringify(defaultSamples));
+        localStorage.setItem(`oresto_products_${activeId}_${detectedType}`, JSON.stringify(defaultSamples));
       } catch {}
     }
 
@@ -165,13 +232,15 @@ export default function VendorSiteBuilder() {
     const unsubscribe = onValue(ref(db, 'products'), snap => {
       const data = snap.val();
       if (data) {
-        const list = Object.keys(data).map(k => ({ id: k, ...data[k] })).filter((p: any) => p.vendorId === activeId) as Product[];
+        const list = Object.keys(data)
+          .map(k => ({ id: k, ...data[k] }))
+          .filter((p: any) => p.vendorId === activeId && isProductMatchingSector(p, detectedType)) as Product[];
+        
         if (list.length > 0) {
           setProducts(list);
           try {
-            localStorage.setItem(`oresto_products_${activeId}`, JSON.stringify(list));
+            localStorage.setItem(`oresto_products_${activeId}_${detectedType}`, JSON.stringify(list));
           } catch {}
-          return;
         }
       }
     });
@@ -693,94 +762,105 @@ export default function VendorSiteBuilder() {
 
                   {/* Products Grid (2 columns for e-commerce, list for restaurant) */}
                   <div className="p-3 space-y-2.5">
-                    <div className="flex items-center justify-between font-heading font-black text-xs text-gray-900 border-b border-gray-100 pb-1.5">
-                      <span>{isEcommerce ? "Rayon Tendance & Nouveautés" : isHotel ? "Chambres disponibles" : "La Carte du Chef"}</span>
-                      <span className="text-[10px] text-gray-400 font-normal">{products.length} article{products.length > 1 ? "s" : ""}</span>
-                    </div>
+                    {(() => {
+                      const sectorFilteredProducts = products.filter(p => isProductMatchingSector(p, businessType));
+                      const previewItems = sectorFilteredProducts.length > 0 
+                        ? sectorFilteredProducts 
+                        : getStarterProducts(businessType, vId);
 
-                    {products.length === 0 ? (
-                      <div className="p-6 text-center text-gray-400 space-y-1.5 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                        <i className={`fa-solid ${isEcommerce ? "fa-bag-shopping" : isHotel ? "fa-bed" : "fa-utensils"} text-xl text-gray-300`}></i>
-                        <p className="text-[10px]">Vos articles ajoutés s'afficheront ici.</p>
-                      </div>
-                    ) : isEcommerce ? (
-                      /* E-COMMERCE 2-COLUMNS GRID (Style Amazon / Alibaba) */
-                      <div className="grid grid-cols-2 gap-2">
-                        {products.slice(0, 4).map((p) => {
-                          const discount = p.originalPrice && p.originalPrice > p.price
-                            ? Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100)
-                            : 0;
-
-                          return (
-                            <div key={p.id} className="bg-white rounded-2xl border border-gray-200 p-2 flex flex-col justify-between shadow-sm space-y-1.5">
-                              <div className="relative aspect-square rounded-xl bg-gray-100 overflow-hidden">
-                                {p.image ? (
-                                  <img src={p.image} className="w-full h-full object-cover" alt="" />
-                                ) : (
-                                  <div className="w-full h-full flex items-center justify-center text-gray-300">
-                                    <i className="fa-solid fa-box"></i>
-                                  </div>
-                                )}
-                                {discount > 0 && (
-                                  <span className="absolute top-1 left-1 bg-red-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded-md">
-                                    -{discount}%
-                                  </span>
-                                )}
-                              </div>
-
-                              <div className="space-y-0.5">
-                                <p className="font-bold text-[10px] text-gray-900 truncate">{p.name}</p>
-                                <div className="flex items-baseline gap-1">
-                                  <span className="font-heading font-black text-xs text-primary">
-                                    {Number(p.price).toLocaleString()} F
-                                  </span>
-                                  {p.originalPrice && (
-                                    <span className="text-[8px] text-gray-400 line-through">
-                                      {Number(p.originalPrice).toLocaleString()} F
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-
-                              <button 
-                                type="button"
-                                className="w-full py-1 rounded-lg bg-black text-white text-[9px] font-black uppercase tracking-wider flex items-center justify-center gap-1"
-                              >
-                                <i className="fa-solid fa-cart-plus text-[8px]"></i>
-                                <span>Ajouter</span>
-                              </button>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    ) : (
-                      /* RESTAURANT LIST */
-                      <div className="space-y-2">
-                        {products.slice(0, 4).map((p) => (
-                          <div key={p.id} className="p-2 rounded-2xl bg-white border border-gray-150 shadow-sm flex items-center justify-between gap-2.5">
-                            <div className="w-11 h-11 rounded-xl bg-gray-100 overflow-hidden shrink-0">
-                              {p.image ? (
-                                <img src={p.image} className="w-full h-full object-cover" alt="" />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs">
-                                  <i className={`fa-solid ${isHotel ? "fa-bed" : "fa-utensils"}`}></i>
-                                </div>
-                              )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-bold text-[11px] text-gray-900 truncate">{p.name}</p>
-                              <p className="text-[9px] text-gray-500 truncate">{p.description || "Spécialité maison"}</p>
-                            </div>
-                            <span 
-                              className="font-heading font-black text-xs shrink-0" 
-                              style={{ color: formData.primary_color || "#EA580C" }}
-                            >
-                              {p.price.toLocaleString()} F
-                            </span>
+                      return (
+                        <>
+                          <div className="flex items-center justify-between font-heading font-black text-xs text-gray-900 border-b border-gray-100 pb-1.5">
+                            <span>{isEcommerce ? "Rayon Tendance & Nouveautés" : isHotel ? "Chambres disponibles" : "La Carte du Chef"}</span>
+                            <span className="text-[10px] text-gray-400 font-normal">{previewItems.length} article{previewItems.length > 1 ? "s" : ""}</span>
                           </div>
-                        ))}
-                      </div>
-                    )}
+
+                          {previewItems.length === 0 ? (
+                            <div className="p-6 text-center text-gray-400 space-y-1.5 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                              <i className={`fa-solid ${isEcommerce ? "fa-bag-shopping" : isHotel ? "fa-bed" : "fa-utensils"} text-xl text-gray-300`}></i>
+                              <p className="text-[10px]">Vos articles ajoutés s'afficheront ici.</p>
+                            </div>
+                          ) : isEcommerce ? (
+                            /* E-COMMERCE 2-COLUMNS GRID (Style Amazon / Alibaba) */
+                            <div className="grid grid-cols-2 gap-2">
+                              {previewItems.slice(0, 4).map((p) => {
+                                const discount = p.originalPrice && p.originalPrice > p.price
+                                  ? Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100)
+                                  : 0;
+
+                                return (
+                                  <div key={p.id} className="bg-white rounded-2xl border border-gray-200 p-2 flex flex-col justify-between shadow-sm space-y-1.5">
+                                    <div className="relative aspect-square rounded-xl bg-gray-100 overflow-hidden">
+                                      {p.image ? (
+                                        <img src={p.image} className="w-full h-full object-cover" alt="" />
+                                      ) : (
+                                        <div className="w-full h-full flex items-center justify-center text-gray-300">
+                                          <i className="fa-solid fa-box"></i>
+                                        </div>
+                                      )}
+                                      {discount > 0 && (
+                                        <span className="absolute top-1 left-1 bg-red-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded-md">
+                                          -{discount}%
+                                        </span>
+                                      )}
+                                    </div>
+
+                                    <div className="space-y-0.5">
+                                      <p className="font-bold text-[10px] text-gray-900 truncate">{p.name}</p>
+                                      <div className="flex items-baseline gap-1">
+                                        <span className="font-heading font-black text-xs text-primary">
+                                          {Number(p.price).toLocaleString()} F
+                                        </span>
+                                        {p.originalPrice && (
+                                          <span className="text-[8px] text-gray-400 line-through">
+                                            {Number(p.originalPrice).toLocaleString()} F
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+
+                                    <button 
+                                      type="button"
+                                      className="w-full py-1 rounded-lg bg-black text-white text-[9px] font-black uppercase tracking-wider flex items-center justify-center gap-1"
+                                    >
+                                      <i className="fa-solid fa-cart-plus text-[8px]"></i>
+                                      <span>Ajouter</span>
+                                    </button>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            /* RESTAURANT / HOTEL LIST */
+                            <div className="space-y-2">
+                              {previewItems.slice(0, 4).map((p) => (
+                                <div key={p.id} className="p-2 rounded-2xl bg-white border border-gray-150 shadow-sm flex items-center justify-between gap-2.5">
+                                  <div className="w-11 h-11 rounded-xl bg-gray-100 overflow-hidden shrink-0">
+                                    {p.image ? (
+                                      <img src={p.image} className="w-full h-full object-cover" alt="" />
+                                    ) : (
+                                      <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs">
+                                        <i className={`fa-solid ${isHotel ? "fa-bed" : "fa-utensils"}`}></i>
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="font-bold text-[11px] text-gray-900 truncate">{p.name}</p>
+                                    <p className="text-[9px] text-gray-500 truncate">{p.description || (isHotel ? "Chambre tout confort" : "Spécialité maison")}</p>
+                                  </div>
+                                  <span 
+                                    className="font-heading font-black text-xs shrink-0" 
+                                    style={{ color: formData.primary_color || "#EA580C" }}
+                                  >
+                                    {p.price.toLocaleString()} F
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
                   </div>
 
                   {/* Modes de paiement */}

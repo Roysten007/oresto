@@ -564,6 +564,26 @@ export default function VendorSettings() {
             </div>
           </div>
 
+          <div className="p-6 rounded-[32px] bg-gradient-to-br from-orange-500/10 via-card to-card border border-orange-500/20 shadow-sm">
+            <div className="w-10 h-10 rounded-2xl bg-[#FF6B00] text-white flex items-center justify-center mb-3 shadow-md">
+              <i className="fa-solid fa-mobile-screen-button text-base"></i>
+            </div>
+            <h4 className="font-heading font-black text-sm text-foreground mb-1">
+              Application Mobile Oresto
+            </h4>
+            <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
+              Installez l'application directement sur votre smartphone en 1 clic pour gérer vos commandes et vos stocks sans passer par le Play Store.
+            </p>
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new CustomEvent('open-pwa-install'))}
+              className="w-full py-2.5 px-4 rounded-xl bg-[#FF6B00] hover:bg-[#EA580C] text-white font-heading font-bold text-xs shadow-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+            >
+              <i className="fa-solid fa-download text-xs"></i>
+              <span>Installer sur mon mobile</span>
+            </button>
+          </div>
+
           <div className="p-8 rounded-[40px] bg-card border border-border shadow-sm text-center">
              <div className="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center mx-auto text-primary mb-4 text-lg">
                 <i className="fa-solid fa-headset"></i>
