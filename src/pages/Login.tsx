@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
+import SEOHead from "@/components/SEOHead";
 
 export default function Login() {
   const { login, loginAsGuest, lockedUntil } = useAuth();
@@ -32,6 +33,10 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col lg:flex-row" style={{ fontFamily: "'Outfit', sans-serif" }}>
+      <SEOHead
+        title="Connexion Espace Commerçant & Partenaire"
+        description="Connectez-vous à votre espace Oresto pour gérer vos vitrines, commandes et encaissements Mobile Money."
+      />
       {/* Left Panel - Brand / Hero */}
       <div className="hidden lg:flex lg:w-1/2 bg-[#0A0A0A] p-10 lg:p-20 flex-col justify-between relative overflow-hidden">
         {/* Subtle orange glow */}

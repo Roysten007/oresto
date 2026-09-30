@@ -4,35 +4,53 @@ import { dispatchVendorNotification } from "./notificationService";
 
 export const MAKETOU_SIMULATION_MODE = true;
 
-// Prix officiel unique Oresto Pro
-export const STANDARD_PLAN_PRICE = 5000;
+// Tarifs officiels Oresto
+export const MONTHLY_PLAN_PRICE = 5000;
+export const ANNUAL_PLAN_PRICE = 50000; // 10 mois payés + 2 mois offerts (économie de 10 000 FCFA)
+export const STANDARD_PLAN_PRICE = MONTHLY_PLAN_PRICE;
 
-export const PLANS: Record<string, { name: string; price: number; features: string[] }> = {
-  pro: {
-    name: "Oresto Pro",
-    price: STANDARD_PLAN_PRICE,
+export const ORESTO_PLANS = {
+  monthly: {
+    id: "monthly",
+    name: "Formule Mensuelle",
+    price: MONTHLY_PLAN_PRICE,
+    period: "mois",
+    description: "5 000 FCFA par mois sans engagement, payable par Mobile Money. Résiliable à tout moment.",
+    badge: "Sans engagement",
+    billingCycleMonths: 1,
     features: [
       "Site Web autonome sur-mesure (Site Factory)",
       "0% de commission sur vos ventes (100% pour vous)",
-      "Catalogue illimité (Plats & Menus / Chambres & Nuitées)",
+      "Catalogue illimité (Plats / Articles / Chambres)",
       "Commandes directes & intégration WhatsApp",
       "Paiements Mobile Money (MTN & Moov)",
       "Assistant IA Opérationnel IZI intégré",
-      "Programme de fidélité & avis clients",
-      "Support prioritaire 7j/7"
+      "Support technique 7j/7"
     ]
   },
-  starter: {
-    name: "Oresto Pro",
-    price: STANDARD_PLAN_PRICE,
+  annual: {
+    id: "annual",
+    name: "Formule Annuelle (2 mois offerts)",
+    price: ANNUAL_PLAN_PRICE,
+    period: "an",
+    description: "50 000 FCFA au lieu de 60 000 FCFA : vous payez 10 mois et bénéficiez de 12 mois complets !",
+    badge: "2 mois offerts — Économisez 10 000 F",
+    billingCycleMonths: 12,
     features: [
-      "Site Web autonome sur-mesure (Site Factory)",
-      "0% de commission sur vos ventes",
-      "Catalogue illimité",
-      "Paiements Mobile Money",
-      "Assistant IA Opérationnel IZI"
+      "Tous les avantages de la Formule Mensuelle",
+      "2 mois 100% offerts (10 000 FCFA d'économie directe)",
+      "Tranquillité d'esprit pendant 1 an complet",
+      "Priorité sur les mises à jour et nouvelles fonctionnalités",
+      "Badge Établissement Certifié Oresto"
     ]
   }
+};
+
+export const PLANS: Record<string, { name: string; price: number; features: string[] }> = {
+  monthly: ORESTO_PLANS.monthly,
+  annual: ORESTO_PLANS.annual,
+  pro: ORESTO_PLANS.monthly,
+  starter: ORESTO_PLANS.monthly
 };
 
 export const TRIAL_DURATION_DAYS = 14;
@@ -151,31 +169,32 @@ export async function runSubscriptionBillingCheck(db: Database) {
 export async function confirmVendorSubscriptionPayment(
   db: Database,
   vendorId: string,
-  invoiceId?: string
+  invoiceId?: string,
+  billingCycle: "monthly" | "annual" = "monthly"
 ) {
   const snap = await get(ref(db, `vendors/${vendorId}`));
   if (!snap.exists()) throw new Error("Vendeur introuvable");
 
   const v = snap.val() as VendorProfile;
-  const isFirstPayment = !v.paymentHistory || v.paymentHistory.length === 0;
-  const amount = STANDARD_PLAN_PRICE;
-  const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
-  const newNextBillingDate = Date.now() + THIRTY_DAYS_MS;
+  const isAnnual = billingCycle === "annual";
+  const amount = isAnnual ? ANNUAL_PLAN_PRICE : MONTHLY_PLAN_PRICE;
+  const durationMs = isAnnual ? 365 * 24 * 60 * 60 * 1000 : 30 * 24 * 60 * 60 * 1000;
+  const newNextBillingDate = Date.now() + durationMs;
 
   const paymentRecord = {
     id: invoiceId || `pay_${Date.now()}`,
-    plan: "pro",
+    plan: isAnnual ? "annual" : "monthly",
     amount,
     date: new Date().toISOString(),
     status: "paid" as const,
-    method: "Maketou Mobile Money",
+    method: "Mobile Money (MTN / Moov)",
   };
 
   const history = v.paymentHistory || [];
   const updatedHistory = [paymentRecord, ...history];
 
   await update(ref(db, `vendors/${vendorId}`), {
-    subscriptionPlan: "pro",
+    subscriptionPlan: isAnnual ? "annual" : "monthly",
     subscriptionStatus: "active",
     nextBillingDate: newNextBillingDate,
     pendingInvoice: null,
@@ -183,13 +202,13 @@ export async function confirmVendorSubscriptionPayment(
   });
 
   await dispatchVendorNotification(db, vendorId, "payment_confirmed", {
-    plan: "pro",
+    plan: isAnnual ? "annual" : "monthly",
     nextBillingDate: newNextBillingDate,
     phone: v.phone,
     email: (v as any).email,
   });
 
-  return { success: true, nextBillingDate: newNextBillingDate };
+  return { success: true, nextBillingDate: newNextBillingDate, amount };
 }
 
 /**

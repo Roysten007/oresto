@@ -14,14 +14,61 @@ import LandingChoiceComparison from '../components/landing/LandingChoiceComparis
 import LandingFAQ from '../components/landing/LandingFAQ';
 import LandingFinalCTA from '../components/landing/LandingFinalCTA';
 import LandingWhatsAppFloat from '../components/landing/LandingWhatsAppFloat';
+import SEOHead from '../components/SEOHead';
 
 const AIChatBot = React.lazy(() => import('../components/AIChatBot'));
+
+const LANDING_JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Oresto",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web",
+  "offers": [
+    {
+      "@type": "Offer",
+      "name": "Formule Mensuelle",
+      "price": "5000",
+      "priceCurrency": "XOF",
+      "description": "5 000 FCFA / mois par établissement, sans engagement, 14 jours d'essai gratuit."
+    },
+    {
+      "@type": "Offer",
+      "name": "Formule Annuelle (2 mois offerts)",
+      "price": "50000",
+      "priceCurrency": "XOF",
+      "description": "50 000 FCFA / an par établissement (au lieu de 60 000 FCFA). Économisez 10 000 FCFA."
+    }
+  ],
+  "description": "Plateforme SaaS tout-en-un pour digitaliser restaurants, boutiques en ligne et résidences/hôtels en Afrique.",
+  "url": "https://oresto.app"
+};
 
 export default function ProLanding() {
   const [activeSector, setActiveSector] = useState<BusinessSector>('restaurant');
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] text-zinc-900 font-sub selection:bg-orange-100 selection:text-[#EA580C] overflow-x-hidden">
+      {/* Balises SEO & Schema.org JSON-LD */}
+      <SEOHead
+        title="Oresto — Digitalisez votre Restaurant, Boutique ou Hôtel en Afrique"
+        description="Plateforme SaaS tout-en-un pour restaurants, boutiques e-commerce et résidences/hôtels en Afrique. Catalogue en ligne, commandes directes WhatsApp et Mobile Money sans commission."
+        keywords={[
+          "oresto",
+          "restaurant bénin",
+          "boutique en ligne cotonou",
+          "créer site vitrine afrique",
+          "menu qr code restaurant",
+          "mobile money mtn moov",
+          "commande whatsapp bénin",
+          "site hôtel cotonou",
+          "logiciel restaurant afrique"
+        ]}
+        url="https://oresto.app"
+        type="website"
+        jsonLd={LANDING_JSON_LD}
+      />
+
       {/* Sticky Navigation Flottante */}
       <Navbar />
 

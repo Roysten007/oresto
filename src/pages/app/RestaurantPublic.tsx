@@ -37,6 +37,7 @@ import FAQSection from "@/components/showcase/FAQSection";
 import ContactSection from "@/components/showcase/ContactSection";
 import PublicFooter from "@/components/showcase/PublicFooter";
 import ProductDetailModal from "@/components/ecommerce/ProductDetailModal";
+import SEOHead from "@/components/SEOHead";
 
 export default function RestaurantPublic() {
   const { slug } = useParams();
@@ -345,9 +346,86 @@ export default function RestaurantPublic() {
     ? "'Montserrat', sans-serif" 
     : "'Inter', sans-serif";
 
+  // Dynamic SEO metadata & Rich Snippets Schema.org
+  const sectorLabel = businessType === "ecommerce" ? "Boutique en ligne" : businessType === "hotel" ? "Hôtel & Résidence" : "Restaurant & Grillades";
+  const seoTitle = `${vendor.name} — ${sectorLabel} à ${vendor.city || 'Cotonou'}`;
+  const seoDescription = vendor.description || `Commandez directement chez ${vendor.name} à ${vendor.city || 'Cotonou'} (${vendor.neighborhood || 'Bénin'}). Paiement sécurisé par Mobile Money sans commission.`;
+  const seoImage = vendor.cover_url || vendor.logo_url || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80";
+
+  const schemaJsonLd = useMemo(() => {
+    if (!vendor) return null;
+    const baseSchema: Record<string, any> = {
+      "@context": "https://schema.org",
+      "@type": businessType === "restaurant" ? "Restaurant" : businessType === "hotel" ? "Hotel" : "Store",
+      "name": vendor.name,
+      "description": seoDescription,
+      "image": seoImage,
+      "telephone": vendor.phone || vendor.whatsapp || "+229",
+      "priceRange": "FCFA",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": vendor.city || "Cotonou",
+        "streetAddress": vendor.neighborhood || "Centre-ville",
+        "addressCountry": "BJ"
+      },
+      "url": typeof window !== "undefined" ? window.location.href : `https://oresto.app/r/${slug}`
+    };
+
+    if (businessType === "restaurant") {
+      baseSchema.servesCuisine = vendor.category || "Cuisine Africaine & Internationale";
+      if (products.length > 0) {
+        baseSchema.hasMenu = {
+          "@type": "Menu",
+          "name": `Carte de ${vendor.name}`,
+          "hasMenuItem": products.slice(0, 15).map(p => ({
+            "@type": "MenuItem",
+            "name": p.name,
+            "description": p.description || p.name,
+            "offers": {
+              "@type": "Offer",
+              "price": p.price,
+              "priceCurrency": "XOF",
+              "availability": "https://schema.org/InStock"
+            }
+          }))
+        };
+      }
+    } else if (businessType === "ecommerce") {
+      if (products.length > 0) {
+        baseSchema.hasOfferCatalog = {
+          "@type": "OfferCatalog",
+          "name": `Catalogue ${vendor.name}`,
+          "itemListElement": products.slice(0, 15).map(p => ({
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Product",
+              "name": p.name,
+              "description": p.description || p.name,
+              "image": p.image
+            },
+            "price": p.price,
+            "priceCurrency": "XOF",
+            "availability": "https://schema.org/InStock"
+          }))
+        };
+      }
+    }
+
+    return baseSchema;
+  }, [vendor, products, businessType, seoDescription, seoImage, slug]);
+
   return (
     <div className="min-h-screen bg-[#F8F9FA] font-body text-gray-900 selection:bg-primary selection:text-white" style={{ fontFamily: themeFont }}>
       
+      {/* Balises SEO dynamiques, OpenGraph, Twitter & Schema.org JSON-LD */}
+      <SEOHead 
+        title={seoTitle} 
+        description={seoDescription} 
+        image={seoImage} 
+        type={businessType === "restaurant" ? "restaurant" : "website"} 
+        jsonLd={schemaJsonLd} 
+      />
+
       {/* Top Shipping Bar for E-Commerce */}
       {businessType === "ecommerce" && (
         <div className="bg-black text-white px-4 py-2 text-[11px] font-bold text-center flex items-center justify-center gap-2">

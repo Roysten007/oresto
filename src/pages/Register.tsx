@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import SEOHead from "@/components/SEOHead";
 
 export default function Register() {
   const { register } = useAuth();
@@ -92,6 +93,12 @@ export default function Register() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col lg:flex-row font-body">
+      <SEOHead
+        title="Créer un compte Commerçant — 14 jours d'essai gratuit"
+        description="Créez votre compte Oresto en 2 minutes. Digitalisez votre restaurant, boutique en ligne ou hôtel en Afrique sans engagement et sans carte bancaire."
+        keywords={["créer site restaurant", "ouvrir boutique en ligne bénin", "logiciel restaurant afrique", "inscription oresto"]}
+        url="https://oresto.app/register"
+      />
       
       {/* Left Panel - Hero Info */}
       <div className="hidden lg:flex lg:w-1/3 bg-[#0A0A0A] p-10 lg:p-14 flex-col justify-between relative overflow-hidden text-white">

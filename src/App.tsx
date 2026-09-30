@@ -34,6 +34,7 @@ const VendorStats = lazy(() => import("./pages/vendor/VendorStats"));
 const VendorSubscription = lazy(() => import("./pages/vendor/VendorSubscription"));
 const VendorSettings = lazy(() => import("./pages/vendor/VendorSettings"));
 const VendorSiteBuilder = lazy(() => import("./pages/vendor/VendorSiteBuilder"));
+const NewEstablishment = lazy(() => import("./pages/vendor/NewEstablishment"));
 
 // Admin routes
 const AdminRoute = lazy(() => import("@/components/AdminRoute"));
@@ -111,6 +112,8 @@ const App = () => (
               <Route path="stats" element={<VendorStats />} />
               <Route path="subscription" element={<VendorSubscription />} />
               <Route path="settings" element={<VendorSettings />} />
+              <Route path="establishments/new" element={<NewEstablishment />} />
+              <Route path="new-establishment" element={<NewEstablishment />} />
             </Route>
 
             {/* Admin routes */}

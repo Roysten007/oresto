@@ -48,15 +48,7 @@ export function getVendorSector(
   vendorProfile?: any,
   searchParamSector?: string | null
 ): BusinessSector {
-  // 1. URL Query param if explicitly requested
-  if (searchParamSector) {
-    const s = searchParamSector.toLowerCase();
-    if (s.includes("ecom") || s.includes("boutique") || s.includes("shop")) return "ecommerce";
-    if (s.includes("hotel") || s.includes("residence") || s.includes("chambre")) return "hotel";
-    if (s.includes("resto") || s.includes("restaurant") || s.includes("maquis")) return "restaurant";
-  }
-
-  // 2. Vendor profile stored business_type
+  // 1. Le profil de l'établissement actif dicte TOUJOURS son secteur en priorité absolue !
   if (vendorProfile?.business_type) {
     const bt = String(vendorProfile.business_type).toLowerCase();
     if (bt === "ecommerce" || bt === "boutique") return "ecommerce";
@@ -64,17 +56,7 @@ export function getVendorSector(
     if (bt === "restaurant") return "restaurant";
   }
 
-  // 3. Browser active workspace persistence
-  if (typeof window !== "undefined") {
-    try {
-      const stored = localStorage.getItem("oresto_active_workspace");
-      if (stored === "ecommerce" || stored === "hotel" || stored === "restaurant") {
-        return stored as BusinessSector;
-      }
-    } catch {}
-  }
-
-  // 4. Analysis of profile category or name
+  // 2. Analyse de la catégorie ou du nom de l'établissement
   const cat = `${vendorProfile?.category || ""} ${vendorProfile?.name || ""}`.toLowerCase();
   if (
     cat.includes("boutique") ||
@@ -101,6 +83,24 @@ export function getVendorSector(
     cat.includes("hébergement")
   ) {
     return "hotel";
+  }
+
+  // 3. Fallback sur le paramètre URL si aucun profil n'est encore chargé
+  if (searchParamSector) {
+    const s = searchParamSector.toLowerCase();
+    if (s.includes("ecom") || s.includes("boutique") || s.includes("shop")) return "ecommerce";
+    if (s.includes("hotel") || s.includes("residence") || s.includes("chambre")) return "hotel";
+    if (s.includes("resto") || s.includes("restaurant") || s.includes("maquis")) return "restaurant";
+  }
+
+  // 4. Fallback sur le dernier espace actif en local
+  if (typeof window !== "undefined") {
+    try {
+      const stored = localStorage.getItem("oresto_active_workspace");
+      if (stored === "ecommerce" || stored === "hotel" || stored === "restaurant") {
+        return stored as BusinessSector;
+      }
+    } catch {}
   }
 
   return "restaurant";

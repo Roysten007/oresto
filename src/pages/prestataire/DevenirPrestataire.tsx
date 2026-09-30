@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { usePrestataire } from "@/contexts/PrestataireContext";
 import { toast } from "sonner";
+import SEOHead from "@/components/SEOHead";
 
 export default function DevenirPrestataire() {
   const { registerPrestataire } = usePrestataire();
@@ -93,7 +94,21 @@ export default function DevenirPrestataire() {
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] text-zinc-900 font-sub selection:bg-orange-100 selection:text-[#EA580C] overflow-x-hidden">
-      
+      {/* Balises SEO & Réseaux Sociaux */}
+      <SEOHead
+        title="Devenir Partenaire Oresto — Gagnez 20% de commissions récurrentes"
+        description="Rejoignez le programme partenaire Oresto. Recommandez notre plateforme aux restaurants, boutiques et hôtels et touchez 20% de commission récurrente chaque mois par Mobile Money."
+        keywords={[
+          "programme affiliation oresto",
+          "devenir partenaire oresto",
+          "gagner de l'argent bénin",
+          "commission récurrente mobile money",
+          "apporteur d'affaires cotonou"
+        ]}
+        url="https://oresto.app/devenir-prestataire"
+        type="website"
+      />
+
       {/* Header de navigation flottant */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-[#FAFAFA]/90 backdrop-blur-md border-b border-zinc-200/80 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] py-3.5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">

@@ -34,7 +34,11 @@ interface AuthContextType extends AuthState {
     name: string;
     business_type: BusinessSector;
     city: string;
+    neighborhood?: string;
+    whatsapp?: string;
+    phone?: string;
     category?: string;
+    billingCycle?: "monthly" | "annual";
   }) => Promise<{ success: boolean; vendorId?: string; error?: string }>;
   failedAttempts: number;
   lockedUntil: number | null;
@@ -876,23 +880,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     name: string;
     business_type: BusinessSector;
     city: string;
+    neighborhood?: string;
+    whatsapp?: string;
+    phone?: string;
     category?: string;
+    billingCycle?: "monthly" | "annual";
   }) => {
     if (!auth?.currentUser || !db) {
       return { success: false, error: "Vous devez être connecté pour ajouter un établissement." };
     }
 
     const uid = auth.currentUser.uid;
-    const currentVendors = state.userVendors;
-    const currentPlan = (state.vendorProfile?.subscriptionPlan || "solo").toLowerCase();
-    const maxAllowed = currentPlan === "trio" ? 3 : currentPlan === "duo" ? 2 : 1;
-
-    if (currentVendors.length >= maxAllowed) {
-      return { 
-        success: false, 
-        error: `Votre formule actuelle (${currentPlan.toUpperCase()}) est limitée à ${maxAllowed} établissement(s). Passez à la formule supérieure pour en ajouter un autre.` 
-      };
-    }
+    const isAnnual = data.billingCycle === "annual";
 
     try {
       const newVendorId = `v_${uid}_${Date.now().toString(36)}`;
@@ -902,6 +901,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const activeVendor = state.vendorProfile;
       const { trialStartedAt, trialEndsAt } = calculateTrialDates();
+      const planId = isAnnual ? "annual" : "monthly";
+      const nextBilling = isAnnual ? trialEndsAt + 365 * 24 * 60 * 60 * 1000 : trialEndsAt;
 
       const newVendor: VendorProfile = {
         id: newVendorId,
@@ -912,9 +913,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         category: data.category || (bType === "ecommerce" ? "Mode & Boutique" : bType === "hotel" ? "Hôtel & Résidence" : "Restaurant & Grillades"),
         categories: [data.category || (bType === "ecommerce" ? "Mode & Boutique" : bType === "hotel" ? "Hôtel & Résidence" : "Restaurant & Grillades")],
         city: data.city.trim() || activeVendor?.city || "Cotonou",
-        neighborhood: activeVendor?.neighborhood || "Haie Vive",
-        phone: activeVendor?.phone || "+229 97 00 00 00",
-        whatsapp: activeVendor?.whatsapp || "+229 97 00 00 00",
+        neighborhood: data.neighborhood?.trim() || activeVendor?.neighborhood || "Haie Vive",
+        phone: data.phone?.trim() || activeVendor?.phone || "+229 97 00 00 00",
+        whatsapp: data.whatsapp?.trim() || activeVendor?.whatsapp || "+229 97 00 00 00",
         description: bType === "ecommerce"
           ? "Boutique en ligne officielle. Articles de qualité et livraison rapide."
           : bType === "hotel"
@@ -929,12 +930,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         totalOrders: 0,
         revenue: 0,
         joinedDate: new Date().toISOString().split("T")[0],
-        plan: activeVendor?.plan || "solo",
-        subscriptionPlan: activeVendor?.subscriptionPlan || "solo",
-        subscriptionStatus: activeVendor?.subscriptionStatus || "active",
-        trialStartedAt: activeVendor?.trialStartedAt || trialStartedAt,
-        trialEndsAt: activeVendor?.trialEndsAt || trialEndsAt,
-        nextBillingDate: activeVendor?.nextBillingDate || trialEndsAt,
+        plan: planId,
+        subscriptionPlan: planId,
+        subscriptionStatus: "trial",
+        trialStartedAt,
+        trialEndsAt,
+        nextBillingDate: nextBilling,
         verified: true,
         primary_color: bType === "ecommerce" ? "#000000" : bType === "hotel" ? "#4F46E5" : "#EA580C",
         secondary_color: "#FFFFFF",

@@ -13,57 +13,47 @@ interface PricingTier {
   isPopular?: boolean;
   desc: string;
   price: number;
+  periodText: string;
   perStoreText?: string;
   features: string[];
 }
 
 const PRICING_TIERS: PricingTier[] = [
   {
-    id: "solo",
-    name: "1 Établissement",
-    desc: "Idéal pour lancer et digitaliser 1 restaurant, 1 boutique ou 1 résidence.",
+    id: "mensuel",
+    name: "Formule Mensuelle",
+    desc: "Idéal pour tester ou digitaliser votre activité avec un budget maîtrisé et flexible.",
     price: 5000,
-    perStoreText: "Tout inclus • Sans engagement",
+    periodText: "FCFA / mois / établissement",
+    perStoreText: "Sans engagement • Résiliable à tout moment",
     features: [
-      "1 Vitrine web & QR Codes HD prêts à imprimer",
-      "Encaissements MoMo 100% directs (0% de commission)",
-      "Tableau de bord gérant & alertes en temps réel",
-      "Assistant IA IZA conversationnel 24h/24",
+      "Vitrine web & QR Codes HD personnalisés",
+      "Catalogue produits / Menu / Réservations en ligne",
+      "Commandes directes reçues sur WhatsApp",
+      "Encaissements Mobile Money 100% directs (0% commission)",
       "Paiements MTN, Moov et Celtiis Cash",
+      "Tableau de bord gérant & suivi des ventes",
+      "Assistant IA IZA conversationnel 24h/24",
       "Assistance WhatsApp locale au Bénin (7j/7)",
     ],
   },
   {
-    id: "duo",
-    name: "2 Établissements",
-    badge: "Le plus populaire",
+    id: "annuel",
+    name: "Formule Annuelle",
+    badge: "2 MOIS OFFERTS — ÉCONOMIE DE 10 000 FCFA",
     isPopular: true,
-    desc: "Pour les gérants ayant 2 points de vente ou 2 activités distinctes.",
-    price: 9000,
-    perStoreText: "Soit 4 500 FCFA / mois par établissement",
+    desc: "La formule la plus avantageuse pour pérenniser votre commerce toute l'année.",
+    price: 50000,
+    periodText: "FCFA / an / établissement",
+    perStoreText: "Soit seulement ~4 160 FCFA / mois au lieu de 60 000 FCFA",
     features: [
-      "2 Vitrines web & QR Codes distincts",
-      "2 Espaces de gestion totalement indépendants",
+      "Tous les avantages de la formule mensuelle",
+      "2 mois d'abonnement 100% offerts (10 000 FCFA économisés)",
+      "Vitrines web illimitées en ajout multi-établissements",
       "Encaissements MoMo 100% directs (0% de commission)",
-      "Assistant IA IZA sur chaque établissement",
-      "Paiements MTN, Moov et Celtiis Cash",
-      "Support prioritaire WhatsApp au Bénin (7j/7)",
-    ],
-  },
-  {
-    id: "trio",
-    name: "3 Établissements",
-    badge: "Pack multi-activités",
-    desc: "Pack multi-activités (ex : Restaurant + Boutique + Résidence meublée).",
-    price: 12000,
-    perStoreText: "Soit 4 000 FCFA / mois par établissement",
-    features: [
-      "3 Vitrines web & QR Codes dédiés",
-      "3 Espaces de gestion totalement indépendants",
-      "Encaissements MoMo 100% directs (0% de commission)",
-      "Assistant IA IZA multi-profils 24h/24",
-      "Paiements MTN, Moov et Celtiis Cash",
-      "Accompagnement & configuration personnalisée",
+      "Badge vérifié & indexation Google prioritaire",
+      "Accompagnement & configuration initiale sur-mesure",
+      "Support prioritaire VIP WhatsApp 7j/7",
     ],
   },
 ];
@@ -90,8 +80,8 @@ export function LandingValueStack({ activeSector }: LandingValueStackProps) {
           </p>
         </div>
 
-        {/* 3 Pricing Cards Side-by-Side */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto items-stretch">
+        {/* 2 Pricing Cards Side-by-Side */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto items-stretch">
           {PRICING_TIERS.map((tier) => (
             <div
               key={tier.id}
@@ -130,7 +120,7 @@ export function LandingValueStack({ activeSector }: LandingValueStackProps) {
                       {tier.price.toLocaleString("fr-FR")}
                     </span>
                     <span className="text-xs font-sub font-bold text-zinc-500">
-                      FCFA / mois
+                      {tier.periodText}
                     </span>
                   </div>
 
@@ -178,17 +168,25 @@ export function LandingValueStack({ activeSector }: LandingValueStackProps) {
           ))}
         </div>
 
-        {/* Reassurance Footer */}
-        <div className="mt-12 text-center text-xs text-zinc-500 font-sub">
-          <p>
-            Besoin de plus de 3 établissements ou d'une intégration sur-mesure ?{" "}
+        {/* Reassurance Multi-établissements & Contact */}
+        <div className="mt-12 max-w-2xl mx-auto text-center space-y-4">
+          <div className="p-4 rounded-2xl bg-orange-50/80 border border-orange-200/70 text-xs text-orange-950 font-sub">
+            <span className="font-heading font-black text-[#FF6B00] block mb-1">
+              <i className="fa-solid fa-layer-group mr-1.5"></i>
+              Vous gérez plusieurs commerces ? (ex: Restaurant + Boutique)
+            </span>
+            Un seul compte et un seul mot de passe vous permettent d'ajouter tous vos établissements et de basculer de l'un à l'autre en 1 clic depuis votre tableau de bord.
+          </div>
+
+          <p className="text-xs text-zinc-500 font-sub">
+            Une question ou besoin d'un accompagnement personnalisé ?{" "}
             <a
-              href="https://wa.me/2290143405361?text=Bonjour%20Oresto%2C%20je%20souhaite%20une%20formule%20sur-mesure"
+              href="https://wa.me/2290143405361?text=Bonjour%20Oresto%2C%20je%20souhaite%20des%20informations%20sur%20les%20tarifs"
               target="_blank"
               rel="noopener noreferrer"
               className="text-[#FF6B00] font-bold hover:underline"
             >
-              Contactez notre équipe locale sur WhatsApp
+              Échangez directement avec notre équipe locale sur WhatsApp
             </a>
           </p>
         </div>

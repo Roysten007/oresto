@@ -3,10 +3,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase";
 import { ref, update } from "firebase/database";
 import MapComponent from "@/components/MapComponent";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 export default function VendorSettings() {
-  const { vendorProfile, user } = useAuth();
+  const { vendorProfile, user, userVendors = [], switchVendor } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
   const [markerPos, setMarkerPos] = useState({ lat: 6.3654, lng: 2.4183 });
@@ -18,6 +20,7 @@ export default function VendorSettings() {
 
   const tabs = [
     { id: 0, label: establishmentLabel, icon: isHotel ? "fa-solid fa-hotel" : isEcommerce ? "fa-solid fa-store" : "fa-solid fa-utensils" },
+    { id: 7, label: "Mes Entreprises (Changer de compte)", icon: "fa-solid fa-building" },
     { id: 1, label: "Localisation", icon: "fa-solid fa-location-dot" },
     { id: 2, label: "Horaires", icon: "fa-solid fa-clock" },
     { id: 3, label: isHotel ? "Arrivées & Séjours" : "Livraison", icon: isHotel ? "fa-solid fa-key" : "fa-solid fa-truck-fast" },
@@ -433,6 +436,109 @@ export default function VendorSettings() {
                     <i className="fa-solid fa-envelope"></i> Recevoir le lien de réinitialisation
                   </button>
                </div>
+            </div>
+          )}
+
+          {/* Section 7: Mes Entreprises / Changer de compte */}
+          {activeTab === 7 && (
+            <div className="p-8 rounded-[40px] bg-card border border-border shadow-sm space-y-6 animate-in fade-in duration-300">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
+                <div>
+                  <h3 className="font-heading text-xl font-bold text-foreground">Mes Établissements &amp; Changement de Compte</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Tous vos commerces sont regroupés sous votre compte unique ({user?.email}). Basculez de l'un à l'autre en un clic.
+                  </p>
+                </div>
+                <button
+                  onClick={() => navigate("/vendor/establishments/new")}
+                  className="px-5 py-2.5 rounded-2xl bg-[#FF6B00] hover:bg-[#EA580C] text-white font-sub text-xs font-bold shadow-xs flex items-center gap-2 transition-all shrink-0"
+                >
+                  <i className="fa-solid fa-plus text-xs"></i>
+                  <span>Ajouter un établissement</span>
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {userVendors.map((v) => {
+                  const isActive = v.id === vendorProfile?.id;
+                  const bType = v.business_type || "restaurant";
+                  const sectorName = bType === "ecommerce" ? "Boutique" : bType === "hotel" ? "Hôtel" : "Restaurant";
+                  const isAnn = v.subscriptionPlan === "annual";
+
+                  return (
+                    <div 
+                      key={v.id}
+                      className={`p-5 rounded-3xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+                        isActive 
+                          ? "bg-zinc-900 text-white border-zinc-900 shadow-md ring-2 ring-orange-500/30" 
+                          : "bg-muted/10 border-border hover:bg-muted/30"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3.5">
+                        <div className={`w-11 h-11 rounded-2xl flex items-center justify-center text-lg shrink-0 ${
+                          isActive ? "bg-white/10 text-orange-400" : "bg-card border border-border text-foreground"
+                        }`}>
+                          <i className={bType === "ecommerce" ? "fa-solid fa-bag-shopping text-purple-500" : bType === "hotel" ? "fa-solid fa-hotel text-indigo-500" : "fa-solid fa-utensils text-[#FF6B00]"}></i>
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-heading font-black text-sm">{v.name}</h4>
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                              isActive ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" : "bg-muted text-muted-foreground"
+                            }`}>
+                              {sectorName}
+                            </span>
+                            <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
+                              isActive ? "bg-white/10 text-zinc-300" : "bg-zinc-100 text-zinc-600"
+                            }`}>
+                              {isAnn ? "50 000 F/an" : "5 000 F/mois"}
+                            </span>
+                          </div>
+                          <p className={`text-xs mt-0.5 ${isActive ? "text-zinc-400" : "text-muted-foreground"}`}>
+                            {v.city || "Cotonou"} • {v.phone || "+229"} • Vitrine : /r/{v.slug || v.id}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2.5 shrink-0">
+                        {isActive ? (
+                          <span className="px-4 py-2 rounded-xl bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs">
+                            <i className="fa-solid fa-check text-xs"></i>
+                            <span>Établissement actif</span>
+                          </span>
+                        ) : (
+                          <button
+                            onClick={async () => {
+                              try {
+                                await switchVendor(v.id);
+                                toast.success(`Bascule vers « ${v.name} » effectuée !`);
+                                navigate("/vendor/dashboard");
+                              } catch {
+                                toast.error("Erreur lors du changement d'établissement");
+                              }
+                            }}
+                            className="px-5 py-2.5 rounded-xl bg-black hover:bg-zinc-800 text-white font-bold text-xs flex items-center gap-2 transition-all shadow-xs"
+                          >
+                            <i className="fa-solid fa-arrow-right-arrow-left text-xs text-[#FF6B00]"></i>
+                            <span>Basculez sur cette entreprise</span>
+                          </button>
+                        )}
+                        <a
+                          href={`/r/${v.slug || v.id}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className={`p-2 rounded-xl border transition-colors ${
+                            isActive ? "border-white/20 hover:bg-white/10 text-white" : "border-border hover:bg-muted text-muted-foreground"
+                          }`}
+                          title="Voir la vitrine"
+                        >
+                          <i className="fa-solid fa-external-link text-xs"></i>
+                        </a>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>

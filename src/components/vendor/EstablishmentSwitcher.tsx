@@ -61,7 +61,7 @@ export default function EstablishmentSwitcher() {
         setVendorSector(target.business_type as BusinessSector);
       }
       toast.success(`Bascule vers « ${target?.name || "l'établissement"} » effectuée !`);
-      navigate(`/vendor/dashboard?sector=${target?.business_type || "restaurant"}`);
+      navigate("/vendor/dashboard");
     } catch {
       toast.error("Erreur lors du changement d'établissement");
     }
@@ -132,9 +132,9 @@ export default function EstablishmentSwitcher() {
           <div className="absolute top-full left-0 right-0 mt-1.5 z-50 bg-white rounded-2xl border border-zinc-200/90 shadow-xl p-2 animate-in fade-in zoom-in-95 duration-150">
             {/* Header Formule */}
             <div className="px-2.5 py-1.5 border-b border-zinc-100 flex items-center justify-between text-[11px] font-sub">
-              <span className="font-bold text-zinc-500">Mes Établissements</span>
-              <span className="px-2 py-0.5 rounded-full bg-orange-100 text-[#EA580C] font-bold text-[10px]">
-                {planLabel}
+              <span className="font-bold text-zinc-700">Mes Établissements ({userVendors.length})</span>
+              <span className="px-2 py-0.5 rounded-full bg-orange-50 text-[#EA580C] font-bold text-[10px]">
+                {vendorProfile?.subscriptionPlan === "annual" ? "50 000 F/an" : "5 000 F/mois"}
               </span>
             </div>
 
@@ -142,6 +142,7 @@ export default function EstablishmentSwitcher() {
             <div className="max-h-56 overflow-y-auto space-y-1 py-1.5">
               {userVendors.map((v) => {
                 const isActive = v.id === currentVendorId;
+                const isAnn = v.subscriptionPlan === "annual";
                 return (
                   <button
                     key={v.id}
@@ -164,39 +165,30 @@ export default function EstablishmentSwitcher() {
                         </p>
                       </div>
                     </div>
-                    {isActive && <Check size={14} className="text-emerald-400 shrink-0 ml-2" />}
+                    <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded-sm font-mono ${isActive ? "bg-white/20 text-white" : "bg-zinc-100 text-zinc-500"}`}>
+                        {isAnn ? "Annuel" : "5 000 F"}
+                      </span>
+                      {isActive && <Check size={14} className="text-emerald-400 shrink-0" />}
+                    </div>
                   </button>
                 );
               })}
             </div>
 
-            {/* Bouton d'ajout */}
+            {/* Bouton d'ajout vers la page dédiée */}
             <div className="pt-1.5 border-t border-zinc-100">
-              {userVendors.length < maxAllowed ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsOpen(false);
-                    setShowAddModal(true);
-                  }}
-                  className="w-full py-2 px-2.5 rounded-xl bg-orange-50 hover:bg-orange-100 text-[#EA580C] text-xs font-sub font-bold flex items-center justify-center gap-1.5 transition-colors"
-                >
-                  <Plus size={14} />
-                  <span>Ajouter un établissement ({userVendors.length}/{maxAllowed})</span>
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsOpen(false);
-                    navigate("/vendor/subscription");
-                  }}
-                  className="w-full py-2 px-2.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-xs font-sub font-bold flex items-center justify-center gap-1.5 transition-colors"
-                >
-                  <Sparkles size={13} className="text-[#FF6B00]" />
-                  <span>Passer à {currentPlan === "solo" ? "Duo (2)" : "Trio (3)"} pour ajouter</span>
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsOpen(false);
+                  navigate("/vendor/establishments/new");
+                }}
+                className="w-full py-2 px-2.5 rounded-xl bg-orange-50 hover:bg-orange-100 text-[#EA580C] text-xs font-sub font-bold flex items-center justify-center gap-1.5 transition-colors"
+              >
+                <Plus size={14} />
+                <span>+ Ajouter un établissement</span>
+              </button>
             </div>
           </div>
         )}
