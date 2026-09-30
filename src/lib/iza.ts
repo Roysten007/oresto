@@ -5,19 +5,104 @@ export type { IZAResponse, IZAMode };
 /**
  * Moteur intelligent IZI IA connecté aux statistiques et opérations réelles de chaque secteur
  */
-function getLocalIZIResponse(message: string, contextStr?: string): IZAResponse {
+/**
+ * Moteur local de secours IZI IA — garantit des réponses vraies sans chiffres inventés
+ */
+function getLocalIZIResponse(message: string, contextStr?: string, mode: IZAMode = "dashboard"): IZAResponse {
   const msg = message.toLowerCase().trim();
-  
+
+  // ══════════════════════════════════════════════════════════════════════════════
+  // MODE LANDING : Information publique sur Oresto, protection stricte des boutiques
+  // ══════════════════════════════════════════════════════════════════════════════
+  if (mode === "landing") {
+    // Règle de confidentialité : question sur un établissement ou des tiers
+    if (msg.includes("autre") || msg.includes("boutique") || msg.includes("restaurant") || msg.includes("magasin") || msg.includes("chez ") || msg.includes("concurrent") || msg.includes("client") || msg.includes("donnée") || msg.includes("résultat")) {
+      return {
+        text: `🔒 **Confidentialité & Sécurité Oresto :**\n\n` +
+          `Sur Oresto Connect, chaque commerçant bénéficie d'un espace **strictement privé, protégé et isolé**.\n\n` +
+          `• Les données financières, commandes, stocks et clients d'une boutique ne sont **jamais partagées ni accessibles** à d'autres utilisateurs.\n` +
+          `• Pour suivre et gérer votre propre boutique avec IZI IA opérationnel, [créez votre compte gratuit](/register) ou [connectez-vous](/login).`,
+      };
+    }
+
+    if (msg.includes("prix") || msg.includes("tarif") || msg.includes("combien") || msg.includes("abonnement") || msg.includes("formule") || msg.includes("coûte") || msg.includes("coute")) {
+      return {
+        text: `💰 **Tarifs transparents Oresto Connect :**\n\n` +
+          `• **Formule Starter :** Gratuite à vie (idéale pour débuter et tester).\n` +
+          `• **Formule Pro :** **5 000 FCFA / mois** seulement (ou 50 000 FCFA / an avec 2 mois offerts).\n` +
+          `• **Essai gratuit :** 14 jours complets en Formule Pro offerts, sans carte bancaire ni engagement.\n` +
+          `• **0% de commission :** Oresto ne prend aucun pourcentage sur vos ventes.\n\n` +
+          `👉 Démarrez votre essai gratuit en 2 minutes sur **/register**`,
+      };
+    }
+
+    if (msg.includes("fonctionnalit") || msg.includes("fait quoi") || msg.includes("vitrine") || msg.includes("comment") || msg.includes("avantage") || msg.includes("pourquoi")) {
+      return {
+        text: `⚡ **Ce qu'Oresto Connect fait pour votre commerce :**\n\n` +
+          `• 🌐 **Vitrine web personnalisée :** menu ou catalogue consultable avec QR Code et lien direct.\n` +
+          `• 📦 **Gestion des commandes en direct :** alertes temps réel, suivi en cuisine et livraison.\n` +
+          `• 📱 **Paiements Mobile Money :** MTN MoMo, Moov Money, Celtiis Cash — 0% de commission.\n` +
+          `• 🧾 **Reçus certifiés :** impression thermique 80mm et partage WhatsApp en 1 clic.\n` +
+          `• 🤖 **IZI IA :** assistant opérationnel pour ajuster vos prix, surveiller vos stocks et analyser vos ventes.\n\n` +
+          `Tout inclus pour **5 000 FCFA/mois** après **14 jours d'essai gratuit** !`,
+      };
+    }
+
+    if (msg.includes("momo") || msg.includes("paiement") || msg.includes("mobile money") || msg.includes("commission") || msg.includes("mtn") || msg.includes("moov") || msg.includes("celtiis")) {
+      return {
+        text: `📱 **Paiement Mobile Money direct & sans commission :**\n\n` +
+          `• Vos clients règlent directement sur vos numéros **MTN MoMo, Moov Money ou Celtiis Cash**.\n` +
+          `• **0% de commission :** Oresto ne touche à aucun centime de vos encaissements.\n` +
+          `• Validation instantanée : vous vérifiez le SMS de réception et validez la commande d'un simple clic.`,
+      };
+    }
+
+    if (msg.includes("inscription") || msg.includes("inscrire") || msg.includes("commencer") || msg.includes("essai") || msg.includes("démarrer") || msg.includes("demarrer")) {
+      return {
+        text: `🚀 **Comment démarrer en 2 minutes :**\n\n` +
+          `1. Cliquez sur **/register** et renseignez le nom de votre établissement.\n` +
+          `2. Ajoutez vos premiers articles ou plats.\n` +
+          `3. Votre vitrine est immédiatement en ligne et prête pour vos clients !\n\n` +
+          `Vous bénéficiez automatiquement de **14 jours d'essai Pro gratuit**, sans carte bancaire.`,
+      };
+    }
+
+    if (msg.includes("bonjour") || msg.includes("salut") || msg.includes("hello") || msg.includes("bonsoir") || msg.includes("coucou")) {
+      return {
+        text: `Bonjour ! 👋 Je suis **IZI IA**, votre assistant Oresto Connect.\n\n` +
+          `Je suis là pour vous renseigner sur la plateforme :\n` +
+          `• 💰 Nos tarifs (5 000 FCFA/mois avec 14 jours d'essai gratuit)\n` +
+          `• ⚡ Les fonctionnalités pour restaurants, boutiques et résidences\n` +
+          `• 📱 Les encaissements Mobile Money à 0% de commission\n` +
+          `• 🚀 Comment créer votre vitrine en 2 minutes\n\nQue souhaitez-vous savoir ?`,
+      };
+    }
+
+    return {
+      text: `Bonjour ! Je suis **IZI IA**, l'assistant d'accueil d'Oresto Connect. 😊\n\n` +
+        `Oresto Connect est la plateforme digitale tout-en-un pour gérer votre restaurant, boutique ou hôtel au Bénin :\n` +
+        `• Vitrine en ligne & QR Code\n` +
+        `• Commandes directes sans intermédiaire\n` +
+        `• Mobile Money direct (MTN, Moov, Celtiis) à **0% de commission**\n` +
+        `• Formule Pro à seulement **5 000 FCFA / mois** avec **14 jours d'essai gratuit**\n\n` +
+        `Posez-moi vos questions ou rendez-vous sur **/register** pour créer votre compte !`,
+    };
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════════
+  // MODE DASHBOARD : Données réelles et strictes du commerçant connecté uniquement
+  // ══════════════════════════════════════════════════════════════════════════════
   let ctx: any = {
+    hasStore: true,
     vendorName: "Mon Établissement",
     business_type: "restaurant",
-    totalRevenue: 1250000,
-    totalOrders: 184,
-    todayRevenue: 87500,
-    todayOrders: 19,
-    avgOrder: 4600,
-    rating: 4.9,
-    reviewCount: 48,
+    totalRevenue: 0,
+    totalOrders: 0,
+    todayRevenue: 0,
+    todayOrders: 0,
+    avgOrder: 0,
+    rating: 5.0,
+    reviewCount: 0,
     isOpen: true,
     recentOrdersList: [],
     productsList: []
@@ -30,107 +115,62 @@ function getLocalIZIResponse(message: string, contextStr?: string): IZAResponse 
     } catch {}
   }
 
-  const isEcommerce = ctx.business_type === "ecommerce" || (ctx.category || "").toLowerCase().includes("boutique") || (ctx.category || "").toLowerCase().includes("mode");
-  const isHotel = ctx.business_type === "hotel" || (ctx.category || "").toLowerCase().includes("hotel") || (ctx.category || "").toLowerCase().includes("résidence");
-
-  // 1. Chiffre d'affaires & Ventes
-  if (msg.includes("chiffre") || msg.includes("ca") || msg.includes("vente") || msg.includes("argent") || msg.includes("gain") || msg.includes("stat") || msg.includes("revenu")) {
-    if (isEcommerce) {
-      return {
-        text: `📊 **Statistiques de Vente E-Commerce (${ctx.vendorName}) :**\n\n` +
-          `• **Chiffre d'affaires du Jour :** **${Number(ctx.todayRevenue || 125000).toLocaleString()} FCFA**\n` +
-          `• **Colis Expédiés Aujourd'hui :** **${ctx.todayOrders || 12} commandes**\n` +
-          `• **Panier Moyen Boutique :** **${Number(ctx.avgOrder || 18500).toLocaleString()} FCFA**\n` +
-          `• **Total Historique Encaissé :** **${Number(ctx.totalRevenue || 1850000).toLocaleString()} FCFA**\n` +
-          `• **Commissions Oresto :** **0 FCFA** (100% de la marge pour vous)\n` +
-          `• **Note Clients :** ⭐ **${ctx.rating || 4.9}/5** (${ctx.reviewCount || 38} avis vérifiés)\n\n` +
-          `💡 *Conseil E-Commerce : Les sneakers et accessoires high-tech génèrent 65% de votre volume.*`,
-      };
-    } else if (isHotel) {
-      return {
-        text: `📊 **Bilan d'Exploitation Hôtel & Résidence (${ctx.vendorName}) :**\n\n` +
-          `• **Chiffre d'affaires Nuitées :** **${Number(ctx.todayRevenue || 145000).toLocaleString()} FCFA** aujourd'hui\n` +
-          `• **Chambres & Suites Occupées :** **3 / 4 (75% d'occupation)**\n` +
-          `• **Tarif Moyen par Nuit :** **45 000 FCFA**\n` +
-          `• **Total Nuitées Encaissées :** **${Number(ctx.totalRevenue || 2350000).toLocaleString()} FCFA**\n` +
-          `• **Commissions Plateforme :** **0 FCFA** (Réservation directe sans frais d'agence)\n\n` +
-          `💡 *Conseil Hôtel : Vos suites King sont très demandées le week-end, pensez à ouvrir les réservations anticipées.*`,
-      };
-    } else {
-      return {
-        text: `📊 **Statistiques Réelles de ${ctx.vendorName} :**\n\n` +
-          `• **Chiffre d'affaires du Jour :** **${Number(ctx.todayRevenue || 87500).toLocaleString()} FCFA**\n` +
-          `• **Repas & Commandes du Jour :** **${ctx.todayOrders || 19} commandes servies**\n` +
-          `• **Panier Moyen :** **${Number(ctx.avgOrder || 4600).toLocaleString()} FCFA**\n` +
-          `• **Total Historique Encaissé :** **${Number(ctx.totalRevenue || 1250000).toLocaleString()} FCFA** (${ctx.totalOrders || 184} commandes)\n` +
-          `• **Commissions Oresto :** **0 FCFA** (100% de vos gains conservés sans intermédiaire)\n` +
-          `• **Note Clients :** ⭐ **${ctx.rating || 4.9}/5** (${ctx.reviewCount || 48} avis vérifiés)\n\n` +
-          `💡 *Conseil IZI IA : Vos pics de commandes ont lieu entre 12h-14h et 19h-22h.*`,
-      };
-    }
+  if (ctx.hasStore === false) {
+    return {
+      text: `⚠️ **Aucun établissement configuré :**\n\n` +
+        `Votre compte n'est pas encore associé à un profil commerçant actif.\n` +
+        `Rendez-vous dans vos paramètres pour compléter votre profil et accéder à la gestion de vos commandes et stocks.`,
+    };
   }
 
-  // 2. Suivi des commandes & Colis & Reçus
-  if (msg.includes("commande") || msg.includes("order") || msg.includes("colis") || msg.includes("livraison") || msg.includes("recu") || msg.includes("reçu") || msg.includes("ticket") || msg.includes("cuisine")) {
-    if (isEcommerce) {
-      return {
-        text: `📦 **Gestion des Colis & Commandes E-Commerce (${ctx.vendorName}) :**\n\n` +
-          `• **Colis en préparation :** 2 commandes à emballer (Sneakers Streetwear T.42, Smartwatch 4G)\n` +
-          `• **Colis en cours d'acheminement :** 1 expédition vers Calavi Arconville\n` +
-          `• **Colis livrés avec succès :** 8 commandes aujourd'hui\n\n` +
-          `🧾 **Reçus & Factures de vente :**\n` +
-          `Sur chaque commande dans **Commandes & Ventes**, cliquez sur le bouton **« Reçu »** pour générer le ticket de caisse officiel (format 80mm thermique ou PDF) et l'envoyer au client par WhatsApp en 1 clic.`,
-      };
-    } else {
-      const ordersFormatted = ctx.recentOrdersList && ctx.recentOrdersList.length > 0
-        ? ctx.recentOrdersList.map((o: any) => `- **${o.id}** : ${o.items} • **${Number(o.total).toLocaleString()} F** (${o.payment} • ${o.status})`).join("\n")
-        : "- **#042** : Poulet Braisé & Alloco • 4 500 F (MTN MoMo • En cuisine)\n- **#041** : Capitaine Braisé • 6 000 F (Moov Money • En livraison)\n- **#040** : Chawarma Viande & Frites • 2 500 F (Espèces • Livré)";
+  // 1. Chiffre d'affaires & Ventes réelles
+  if (msg.includes("chiffre") || msg.includes("ca") || msg.includes("vente") || msg.includes("argent") || msg.includes("gain") || msg.includes("stat") || msg.includes("revenu") || msg.includes("bilan")) {
+    return {
+      text: `📊 **Statistiques réelles de ${ctx.vendorName} :**\n\n` +
+        `• **Chiffre d'affaires du jour :** **${Number(ctx.todayRevenue || 0).toLocaleString("fr-FR")} FCFA**\n` +
+        `• **Commandes du jour :** **${ctx.todayOrders || 0} commande(s)**\n` +
+        `• **Panier moyen :** **${Number(ctx.avgOrder || 0).toLocaleString("fr-FR")} FCFA**\n` +
+        `• **Total historique encaissé :** **${Number(ctx.totalRevenue || 0).toLocaleString("fr-FR")} FCFA** (${ctx.totalOrders || 0} commande(s) au total)\n` +
+        `• **Commissions Oresto :** **0 FCFA** (100% de la marge pour vous)\n` +
+        `• **Note clients :** ⭐ **${ctx.rating || 5.0}/5** (${ctx.reviewCount || 0} avis)\n\n` +
+        (Number(ctx.totalRevenue || 0) === 0 ? `💡 *Conseil : Partagez le lien de votre vitrine sur vos réseaux pour enregistrer vos premières ventes !*` : `💡 *Commissions prélevées : 0 FCFA.*`),
+    };
+  }
 
-      return {
-        text: `📦 **Suivi des Commandes en direct (${ctx.vendorName}) :**\n\n` +
-          `${ordersFormatted}\n\n` +
-          `🧾 **Impression des Reçus de Vente :**\n` +
-          `Depuis votre écran **Commandes & MoMo** ou le tableau de bord, cliquez sur **« Reçu »** sur n'importe quelle commande pour imprimer le ticket de caisse certifié avec QR Code et l'envoyer directement sur le WhatsApp du client.`,
-      };
-    }
+  // 2. Suivi des commandes en temps réel
+  if (msg.includes("commande") || msg.includes("order") || msg.includes("colis") || msg.includes("livraison") || msg.includes("recu") || msg.includes("reçu") || msg.includes("ticket") || msg.includes("cuisine")) {
+    const ordersFormatted = ctx.recentOrdersList && ctx.recentOrdersList.length > 0
+      ? ctx.recentOrdersList.map((o: any) => `- **${o.shortId || o.id}** : ${o.items} • **${Number(o.total || 0).toLocaleString("fr-FR")} FCFA** (${o.payment || "MoMo"} • ${o.statusLabel || o.status})`).join("\n")
+      : "Aucune commande enregistrée pour le moment.";
+
+    return {
+      text: `📦 **Suivi des commandes en direct (${ctx.vendorName}) :**\n\n` +
+        `${ordersFormatted}\n\n` +
+        `📊 **Commandes aujourd'hui :** ${ctx.todayOrders || 0}\n\n` +
+        `🧾 **Impression des reçus :** Dans votre onglet Commandes, cliquez sur **« Reçu »** sur n'importe quelle commande pour imprimer le ticket thermique certifié ou l'envoyer au client sur WhatsApp.`,
+    };
   }
 
   // 3. Stocks, Produits & Carte
   if (msg.includes("stock") || msg.includes("produit") || msg.includes("article") || msg.includes("plat") || msg.includes("menu") || msg.includes("chambre") || msg.includes("carte") || msg.includes("prix") || msg.includes("tarif")) {
-    if (isEcommerce) {
-      return {
-        text: `🛍️ **Inventaire & Alertes de Stock (${ctx.vendorName}) :**\n\n` +
-          `• **Total articles en catalogue :** ${ctx.productsList?.length || 4} fiches produits actives\n` +
-          `• ⚠️ **Alerte stock faible (≤ 3 unités) :**\n` +
-          `  - *Smartwatch Ultra Pro 4G* : Plus que **2 unités en stock** !\n` +
-          `  - *AirPods Pro Wireless ANC* : Plus que **1 unité disponible** !\n\n` +
-          `👉 Pour réapprovisionner ou modifier un tarif, rendez-vous dans **Mon Catalogue / Fiches Produits**.`,
-      };
-    } else if (isHotel) {
-      return {
-        text: `🛏️ **État des Chambres & Tarifs Nuitées :**\n\n` +
-          `• **Suite Exécutive King & Balcon :** 65 000 FCFA / nuit (Disponible)\n` +
-          `• **Chambre Prestige Deluxe :** 35 000 FCFA / nuit (Occupée jusqu'à demain 11h)\n` +
-          `• **Appartement Meublé 2 Pièces :** 45 000 FCFA / nuit (En cours de nettoyage)\n\n` +
-          `👉 Cliquez sur **Chambres & Tarifs** pour ajuster les disponibilités instantanément.`,
-      };
-    } else {
-      return {
-        text: `🍽️ **Optimisation de votre Carte & Plats :**\n\n` +
-          `Votre carte compte actuellement **${ctx.productsList?.length || 4} plats enregistrés**.\n\n` +
-          `💡 *Recommandations pour maximiser votre rentabilité :*\n` +
-          `1. **Menu du Jour :** Activez la suggestion du jour dans le **Site Builder (Étape 3)** pour booster les commandes midi.\n` +
-          `2. **Visuels Appétissants :** Les plats avec photo claire et description détaillée se vendent 3x plus vite.\n` +
-          `3. **Gestion Rupture :** Désactivez en 1 clic un plat épuisé pour éviter les déceptions clients.`,
-      };
-    }
+    const prodsCount = ctx.productsList?.length || 0;
+    const lowStock = ctx.lowStockAlerts || [];
+
+    return {
+      text: `🛍️ **Catalogue & Inventaire (${ctx.vendorName}) :**\n\n` +
+        `• **Nombre d'articles au catalogue :** ${prodsCount} produit(s) actif(s)\n` +
+        (lowStock.length > 0
+          ? `• ⚠️ **Alertes stock faible (≤ 3) :**\n` + lowStock.map((p: any) => `  - *${p.name}* : plus que **${p.stock} en stock**`).join("\n") + `\n`
+          : (prodsCount === 0 ? `\n💡 Votre catalogue est encore vide. Ajoutez vos premiers articles dans l'onglet **Catalogue** pour commencer à vendre.\n` : `• ✅ Aucun produit en rupture critique actuellement.\n`)) +
+        `\n👉 Vous pouvez me demander de mettre à jour le prix d'un article ou de modifier sa disponibilité à tout moment.`,
+    };
   }
 
   // 4. Paiement Mobile Money & Sécurité
   if (msg.includes("momo") || msg.includes("paiement") || msg.includes("transfert") || msg.includes("mtn") || msg.includes("moov") || msg.includes("celtiis")) {
     return {
       text: `📱 **Encaissements Mobile Money 100% Directs :**\n\n` +
-        `• **Paiement sans intermédiaire :** Vos clients règlent directement sur votre compte MoMo (MTN MoMo, Moov Money, Celtiis Cash).\n` +
+        `• Vos clients règlent directement sur vos comptes **MTN MoMo, Moov Money ou Celtiis Cash**.\n` +
         `• **0% de Commission :** Oresto ne prélève aucun pourcentage sur vos transactions.\n` +
         `• **Validation instantanée :** Vous vérifiez le SMS de réception et validez la commande d'un simple clic pour lancer la préparation ou l'expédition.`,
     };
@@ -139,24 +179,23 @@ function getLocalIZIResponse(message: string, contextStr?: string): IZAResponse 
   // 5. Salutations
   if (msg.includes("bonjour") || msg.includes("salut") || msg.includes("hello") || msg.includes("coucou") || msg.includes("qui es-tu") || msg.includes("aide")) {
     return {
-      text: `Bonjour ${ctx.userName || "Partenaire"} ! 👋 Je suis **IZI IA**, votre assistant intelligent dédié à **${ctx.vendorName}**.\n\n` +
-        `Je suis connecté en direct à votre activité :\n` +
-        `• 📊 **Chiffre d'affaires :** ${Number(ctx.todayRevenue || (isEcommerce ? 125000 : isHotel ? 145000 : 87500)).toLocaleString()} FCFA aujourd'hui\n` +
-        `• 📦 **Activité :** ${ctx.todayOrders || (isEcommerce ? 12 : 19)} ${isEcommerce ? "colis traités" : isHotel ? "réservations actives" : "commandes servies"}\n` +
-        `• ⭐ **Score de satisfaction :** ${ctx.rating || 4.9}/5\n\n` +
-        `Que souhaitez-vous vérifier ou optimiser en ce moment ?`,
+      text: `Bonjour ${ctx.userName || "Chef"} ! 👋 Je suis **IZI IA**, votre assistant opérationnel dédié à **${ctx.vendorName}**.\n\n` +
+        `Je suis connecté en direct à votre établissement :\n` +
+        `• 📊 **Ventes du jour :** ${Number(ctx.todayRevenue || 0).toLocaleString("fr-FR")} FCFA (${ctx.todayOrders || 0} commande(s))\n` +
+        `• 📦 **Total historique :** ${Number(ctx.totalRevenue || 0).toLocaleString("fr-FR")} FCFA\n` +
+        `• 🟢 **Statut :** ${ctx.isOpen ? "Ouvert aux commandes" : "Fermé"}\n\n` +
+        `Que souhaitez-vous vérifier ou modifier aujourd'hui ?`,
     };
   }
 
   // Fallback intelligent
   return {
-    text: `⚡ **IZI IA — Assistant Connecté (${ctx.vendorName}) :**\n\n` +
-      `J'ai bien analysé votre demande : *« ${message} »*.\n\n` +
-      `Voici l'état actuel de votre établissement :\n` +
-      `• **Chiffre d'affaires du jour :** ${Number(ctx.todayRevenue || (isEcommerce ? 125000 : isHotel ? 145000 : 87500)).toLocaleString()} FCFA\n` +
-      `• **Total encaissé (0% commission) :** ${Number(ctx.totalRevenue || 1250000).toLocaleString()} FCFA\n` +
-      `• **Statut de votre vitrine :** En ligne & prête à recevoir des commandes\n\n` +
-      `Posez-moi vos questions sur vos ventes, le stock, l'impression de reçus ou vos livraisons !`,
+    text: `⚡ **IZI IA — Assistant Opérationnel (${ctx.vendorName}) :**\n\n` +
+      `J'ai bien reçu votre demande : *« ${message} »*.\n\n` +
+      `• **Ventes du jour :** ${Number(ctx.todayRevenue || 0).toLocaleString("fr-FR")} FCFA (${ctx.todayOrders || 0} commande(s))\n` +
+      `• **Statut de votre vitrine :** ${ctx.isOpen ? "🟢 En ligne & prête" : "🔴 Fermée"}\n` +
+      `• **Commissions Oresto :** 0 FCFA (100% pour vous)\n\n` +
+      `Posez-moi vos questions sur vos ventes, commandes, stocks ou modification de tarifs !`,
   };
 }
 
@@ -183,16 +222,16 @@ export async function askIZA(
     });
 
     if (!res.ok) {
-      return getLocalIZIResponse(userMessage, platformContext);
+      return getLocalIZIResponse(userMessage, platformContext, mode);
     }
 
     const data = await res.json();
     if (!data.text && (!data.functionCalls || data.functionCalls.length === 0)) {
-      return getLocalIZIResponse(userMessage, platformContext);
+      return getLocalIZIResponse(userMessage, platformContext, mode);
     }
 
     return data;
   } catch {
-    return getLocalIZIResponse(userMessage, platformContext);
+    return getLocalIZIResponse(userMessage, platformContext, mode);
   }
 }

@@ -42,14 +42,15 @@ export default function AIChatBot({ mode = "dashboard" }: AIChatBotProps) {
   const isEcommerce = businessType === "ecommerce";
   const isHotel = businessType === "hotel";
 
-  const defaultVendorName = isEcommerce ? "KiffStyle & Tech Store" : isHotel ? "Palmier Royal Résidence" : "L'Atelier du Chef & Grill";
-  const currentVendorName = vendorProfile?.name && !vendorProfile.name.toLowerCase().includes("maquis") ? vendorProfile.name : defaultVendorName;
+  const currentVendorName = vendorProfile?.name || user?.name || "Votre Établissement";
 
-  const initialGreeting = isEcommerce
-    ? `Bonjour ! Je suis **IZI IA**, votre assistant e-commerce intelligent. ⚡\n\nJe suis connecté en direct aux données de votre boutique **${currentVendorName}** :\n- 📊 Vos ventes & chiffre d'affaires\n- 📦 Le suivi de vos colis & expéditions\n- ⚠️ Vos alertes de stock faible\n- 🧾 L'impression de reçus de vente & factures\n- 📱 Vos encaissements Mobile Money\n\nQue souhaitez-vous vérifier aujourd'hui ?`
+  const initialGreeting = isLanding
+    ? `Bonjour ! 👋 Je suis **IZI IA**, votre conseiller Oresto Connect.\n\nJe suis là pour vous faire découvrir la plateforme et répondre à toutes vos questions :\n• 💰 Formules & tarifs (5 000 FCFA/mois, 14 jours d'essai gratuit)\n• ⚡ Fonctionnalités pour restaurants, boutiques et résidences\n• 📱 Encaissements Mobile Money sans commission (0%)\n• 🚀 Comment créer votre vitrine en 2 minutes\n\nQue souhaitez-vous savoir ?`
+    : isEcommerce
+    ? `Bonjour ! Je suis **IZI IA**, votre assistant e-commerce dédié à **${currentVendorName}**.\n\nJe suis connecté en direct à votre boutique :\n• 📊 Ventes & chiffre d'affaires réels\n• 📦 Suivi des colis & expéditions\n• ⚠️ Alertes de stock faible\n• 🧾 Impression des reçus de vente & factures\n• 📱 Encaissements Mobile Money\n\nQue souhaitez-vous vérifier aujourd'hui ?`
     : isHotel
-    ? `Bonjour ! Je suis **IZI IA**, votre assistant hôtelier intelligent. ⚡\n\nJe suis connecté en direct aux réservations de **${currentVendorName}** :\n- 📊 Nuitées encaissées & chiffre d'affaires\n- 🛏️ Disponibilité des suites & chambres\n- 📅 Planning des arrivées et séjours\n- 📱 Encaissements MoMo sans intermédiaire\n\nQue souhaitez-vous vérifier aujourd'hui ?`
-    : `Bonjour ! Je suis **IZI IA**, votre assistant restaurant intelligent. ⚡\n\nJe suis connecté en direct aux données de **${currentVendorName}** :\n- 📊 Vos ventes & chiffre d'affaires exact\n- 🍳 Le suivi en direct de vos commandes en cuisine\n- 🍽️ L'optimisation de vos prix et de votre carte\n- 🧾 L'impression des tickets de caisse certifiés\n- 📱 Vos encaissements Mobile Money\n\nQue souhaitez-vous vérifier aujourd'hui ?`;
+    ? `Bonjour ! Je suis **IZI IA**, votre assistant hôtelier dédié à **${currentVendorName}**.\n\nJe suis connecté en direct à votre établissement :\n• 📊 Nuitées & chiffre d'affaires\n• 🛏️ Disponibilité des chambres & réservations\n• 📅 Planning des séjours\n• 📱 Encaissements Mobile Money directs\n\nQue souhaitez-vous vérifier aujourd'hui ?`
+    : `Bonjour ! Je suis **IZI IA**, votre assistant opérationnel dédié à **${currentVendorName}**.\n\nJe suis connecté en direct à votre établissement :\n• 📊 Ventes & chiffre d'affaires réels\n• 🍳 Suivi des commandes en cuisine & livraison\n• 🍽️ Gestion des prix et du catalogue\n• 🧾 Impression des tickets de caisse certifiés\n• 📱 Encaissements Mobile Money\n\nQue souhaitez-vous vérifier aujourd'hui ?`;
 
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -101,7 +102,21 @@ export default function AIChatBot({ mode = "dashboard" }: AIChatBotProps) {
   }, [isOpen, messages]);
 
   const buildContext = async (): Promise<string> => {
-    const vId = vendorProfile?.id || user?.vendorId || "v_demo";
+    const vId = vendorProfile?.id || user?.vendorId;
+    if (!vId) {
+      return JSON.stringify({
+        hasStore: false,
+        userName: user?.name || "Commerçant",
+        vendorName: "Mon Établissement",
+        totalRevenue: 0,
+        totalOrders: 0,
+        todayRevenue: 0,
+        todayOrders: 0,
+        avgOrder: 0,
+        recentOrdersList: [],
+        productsList: [],
+      });
+    }
 
     // Données de base depuis le profil
     let contextData: any = {
@@ -111,7 +126,7 @@ export default function AIChatBot({ mode = "dashboard" }: AIChatBotProps) {
       vendorName: currentVendorName,
       business_type: businessType,
       isOpen: vendorProfile?.open !== false,
-      rating: vendorProfile?.rating || 4.9,
+      rating: vendorProfile?.rating || 5.0,
       reviewCount: vendorProfile?.reviewCount || 0,
       // Métriques (seront recalculées depuis Firebase si disponible)
       totalRevenue: 0,
@@ -256,8 +271,11 @@ export default function AIChatBot({ mode = "dashboard" }: AIChatBotProps) {
 
 
   const executeTools = async (calls: any[]): Promise<string[]> => {
+    const vId = vendorProfile?.id || user?.vendorId;
+    if (!vId) {
+      return ["Action impossible : aucun établissement associé à ce compte."];
+    }
     const results: string[] = [];
-    const vId = vendorProfile?.id || user?.vendorId || "v_demo";
     for (const call of calls) {
       try {
         if (call.name === "update_product_price" && db) {
@@ -334,7 +352,9 @@ export default function AIChatBot({ mode = "dashboard" }: AIChatBotProps) {
     } catch {
       const fallbackMsg: Message = {
         role: "assistant",
-        content: `⚡ **IZI IA :** Je suis là pour vous aider avec **${currentVendorName}** ! Vous pouvez me demander vos ventes, le suivi de vos commandes/colis ou l'impression de vos reçus de vente.`,
+        content: isLanding
+          ? `Bonjour ! Je suis **IZI IA**, votre conseiller Oresto Connect. Posez-moi vos questions sur nos tarifs, nos fonctionnalités ou rendez-vous sur **/register** pour démarrer votre essai gratuit.`
+          : `⚡ **IZI IA :** Je suis là pour vous aider avec **${currentVendorName}** ! Vous pouvez me demander vos ventes, le suivi de vos commandes ou l'impression de vos reçus.`,
         timestamp: new Date().toISOString(),
       };
       setMessages(prev => [...prev, fallbackMsg]);
