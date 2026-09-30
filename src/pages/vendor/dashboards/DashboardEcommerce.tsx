@@ -26,6 +26,7 @@ import {
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import ReceiptModal from "@/components/orders/ReceiptModal";
+import LiveSitePublicationBanner from "@/components/vendor/LiveSitePublicationBanner";
 
 export default function DashboardEcommerce() {
   const { vendorProfile, user } = useAuth();
@@ -130,8 +131,18 @@ export default function DashboardEcommerce() {
               <h1 className="font-heading font-black text-xl sm:text-2xl text-zinc-950 tracking-tight">
                 Tableau de bord <span className="text-purple-600">E-Commerce &amp; Boutique</span>
               </h1>
-              <span className="px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-700 text-[10px] font-sub font-bold">
-                Boutique ouverte
+              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-sub font-bold ${
+                vendorProfile?.is_published === false
+                  ? "bg-amber-100 text-amber-800"
+                  : vendorProfile?.open === false
+                  ? "bg-zinc-200 text-zinc-700"
+                  : "bg-purple-100 text-purple-700"
+              }`}>
+                {vendorProfile?.is_published === false 
+                  ? "Brouillon (non publié)" 
+                  : vendorProfile?.open === false 
+                  ? "Fermé temporairement" 
+                  : "Boutique ouverte & En ligne"}
               </span>
             </div>
             <p className="text-xs text-zinc-500 font-sub mt-0.5">
@@ -157,6 +168,13 @@ export default function DashboardEcommerce() {
           </button>
         </div>
       </div>
+
+      {/* Bannière de publication et partage vitrine en direct */}
+      <LiveSitePublicationBanner 
+        vendorProfile={vendorProfile} 
+        businessType="ecommerce" 
+        productsCount={products.length} 
+      />
 
       {/* 4 KPIs E-Commerce Réels */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

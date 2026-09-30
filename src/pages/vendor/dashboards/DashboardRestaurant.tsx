@@ -30,6 +30,7 @@ import {
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import ReceiptModal from "@/components/orders/ReceiptModal";
+import LiveSitePublicationBanner from "@/components/vendor/LiveSitePublicationBanner";
 
 export default function DashboardRestaurant() {
   const { vendorProfile, user } = useAuth();
@@ -135,8 +136,18 @@ export default function DashboardRestaurant() {
               <h1 className="font-heading font-black text-xl sm:text-2xl text-zinc-950 tracking-tight">
                 Tableau de bord <span className="text-[#FF6B00]">Restaurant</span>
               </h1>
-              <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-sub font-bold">
-                Cuisine ouverte
+              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-sub font-bold ${
+                vendorProfile?.is_published === false
+                  ? "bg-amber-100 text-amber-800"
+                  : vendorProfile?.open === false
+                  ? "bg-zinc-200 text-zinc-700"
+                  : "bg-emerald-100 text-emerald-700"
+              }`}>
+                {vendorProfile?.is_published === false 
+                  ? "Brouillon (non publié)" 
+                  : vendorProfile?.open === false 
+                  ? "Fermé temporairement" 
+                  : "Cuisine ouverte & En ligne"}
               </span>
             </div>
             <p className="text-xs text-zinc-500 font-sub mt-0.5">
@@ -162,6 +173,13 @@ export default function DashboardRestaurant() {
           </button>
         </div>
       </div>
+
+      {/* Bannière de publication et partage vitrine en direct */}
+      <LiveSitePublicationBanner 
+        vendorProfile={vendorProfile} 
+        businessType="restaurant" 
+        productsCount={products.length} 
+      />
 
       {/* 4 KPIs Restaurant Réels */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

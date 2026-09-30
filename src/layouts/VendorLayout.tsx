@@ -5,6 +5,7 @@ import { db } from "@/lib/firebase";
 import { confirmVendorSubscriptionPayment, STANDARD_PLAN_PRICE } from "@/services/subscriptionService";
 import { getVendorSector, setVendorSector, BusinessSector, SECTORS } from "@/lib/vendorSector";
 import AIChatBot from "@/components/AIChatBot";
+import EstablishmentSwitcher from "@/components/vendor/EstablishmentSwitcher";
 import { toast } from "sonner";
 
 const restoNavItems = [
@@ -58,10 +59,7 @@ export default function VendorLayout() {
   const currentSector: BusinessSector = getVendorSector(vendorProfile, sectorQuery);
   const sectorMeta = SECTORS[currentSector];
 
-  const handleSwitchSector = (newSector: BusinessSector) => {
-    setVendorSector(newSector);
-    navigate(`${location.pathname}?sector=${newSector}`);
-  };
+
 
   const handlePayNow = async () => {
     if (!db || !vendorProfile?.id) return;
@@ -114,36 +112,8 @@ export default function VendorLayout() {
             </button>
           </div>
 
-          {/* Profile & Sector Card */}
-          <div className="mb-4 p-3 rounded-2xl bg-zinc-50 border border-zinc-200/80 space-y-2">
-            <div className="flex items-center justify-between">
-              <p className="font-heading text-xs font-bold text-zinc-900 truncate max-w-[140px]" title={displayName}>
-                {displayName}
-              </p>
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
-            </div>
-
-            {/* Quick Sector Selector Buttons */}
-            <div className="grid grid-cols-3 gap-1 pt-1 border-t border-zinc-200/60">
-              {(["restaurant", "ecommerce", "hotel"] as BusinessSector[]).map(sec => {
-                const isCurrent = currentSector === sec;
-                return (
-                  <button
-                    key={sec}
-                    type="button"
-                    onClick={() => handleSwitchSector(sec)}
-                    className={`py-1 px-1 rounded-lg text-[10px] font-sub font-bold text-center transition-all ${
-                      isCurrent
-                        ? "bg-zinc-900 text-white shadow-xs"
-                        : "bg-white text-zinc-600 hover:bg-zinc-200/60 border border-zinc-200/60"
-                    }`}
-                  >
-                    {sec === "restaurant" ? "Resto" : sec === "ecommerce" ? "Boutique" : "Hôtel"}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          {/* Sélecteur et basculeur multi-établissements */}
+          <EstablishmentSwitcher />
 
           {/* Dedicated Nav Items */}
           <nav className="flex-1 space-y-1 overflow-y-auto pr-1">

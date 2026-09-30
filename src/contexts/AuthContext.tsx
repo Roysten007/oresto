@@ -13,12 +13,13 @@ import { ref, get, set, update, child, onValue } from "firebase/database";
 import { calculateTrialDates } from "@/services/subscriptionService";
 import { dispatchVendorNotification } from "@/services/notificationService";
 import { slugify } from "@/lib/slugify";
-import { getStarterProducts, BusinessSector } from "@/lib/vendorSector";
+import { getStarterProducts, BusinessSector, setVendorSector } from "@/lib/vendorSector";
 
 interface AuthState {
   user: User | null;
   role: "client" | "vendor" | null;
   vendorProfile: VendorProfile | null;
+  userVendors: VendorProfile[];
   isAuthenticated: boolean;
   isLoading: boolean;
 }
@@ -28,6 +29,13 @@ interface AuthContextType extends AuthState {
   loginAsGuest: () => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   register: (data: any) => Promise<{ success: boolean; error?: string; role?: string; uid?: string }>;
+  switchVendor: (vendorId: string) => Promise<void>;
+  createEstablishment: (data: {
+    name: string;
+    business_type: BusinessSector;
+    city: string;
+    category?: string;
+  }) => Promise<{ success: boolean; vendorId?: string; error?: string }>;
   failedAttempts: number;
   lockedUntil: number | null;
   sessionWarning: boolean;
@@ -98,6 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user: null, 
     role: null, 
     vendorProfile: null, 
+    userVendors: [],
     isAuthenticated: false, 
     isLoading: true 
   });
@@ -109,7 +118,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Écouteur global de Firebase Auth
   useEffect(() => {
     if (!auth) {
-      setState({ user: null, role: null, vendorProfile: null, isAuthenticated: false, isLoading: false });
+      setState({ user: null, role: null, vendorProfile: null, userVendors: [], isAuthenticated: false, isLoading: false });
       return;
     }
     let unsubUser: (() => void) | null = null;
@@ -126,6 +135,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             user: { id: firebaseUser.uid, name: firebaseUser.email || "Utilisateur", firstName: "", email: firebaseUser.email || "", password: "", role: "vendor" }, 
             role: "vendor", 
             vendorProfile: null, 
+            userVendors: [],
             isAuthenticated: true, 
             isLoading: false 
           });
@@ -156,6 +166,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             user: adminUser,
             role: "admin" as any,
             vendorProfile: null,
+            userVendors: [],
             isAuthenticated: true,
             isLoading: false
           });
@@ -182,6 +193,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   user: adminUser,
                   role: "admin" as any,
                   vendorProfile: null,
+                  userVendors: [],
                   isAuthenticated: true,
                   isLoading: false
                 });
@@ -200,10 +212,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               role: "vendor",
               vendorId: defaultVendorId
             };
+            const fallbackVendor = { ...DEMO_VENDOR, id: defaultVendorId, userId: firebaseUser.uid };
             setState({
               user: fallbackUser,
               role: "vendor",
-              vendorProfile: { ...DEMO_VENDOR, id: defaultVendorId, userId: firebaseUser.uid },
+              vendorProfile: fallbackVendor,
+              userVendors: [fallbackVendor],
               isAuthenticated: true,
               isLoading: false
             });
@@ -219,33 +233,61 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               user: userData,
               role: "admin" as any,
               vendorProfile: null,
+              userVendors: [],
               isAuthenticated: true,
               isLoading: false
             });
             return;
           }
 
-          if (effectiveVendorId) {
-            if (unsubVendor) unsubVendor();
-            unsubVendor = onValue(ref(db, `vendors/${effectiveVendorId}`), (vendorSnap) => {
-              const vendorData = vendorSnap.exists() ? vendorSnap.val() as VendorProfile : DEMO_VENDOR;
-              setState({
-                user: { ...userData, role: "vendor", vendorId: effectiveVendorId },
-                role: "vendor",
-                vendorProfile: vendorData,
-                isAuthenticated: true,
-                isLoading: false
-              });
-            });
-          } else {
+          // Écoute en temps réel de tous les établissements
+          if (unsubVendor) unsubVendor();
+          unsubVendor = onValue(ref(db, "vendors"), (vendorsSnap) => {
+            const allVendors = vendorsSnap.exists() ? (vendorsSnap.val() as Record<string, VendorProfile>) : {};
+            
+            // Tous les établissements appartenant à l'utilisateur
+            let myVendors: VendorProfile[] = Object.entries(allVendors)
+              .map(([id, val]: [string, any]) => ({ id, ...val } as VendorProfile))
+              .filter(v => v.userId === firebaseUser.uid || v.id === effectiveVendorId || (userData as any)?.vendorIds?.includes(v.id));
+
+            if (myVendors.length === 0) {
+              const fallbackVendor: VendorProfile = {
+                ...DEMO_VENDOR,
+                id: effectiveVendorId,
+                userId: firebaseUser.uid,
+                name: userData.name || "Mon Établissement",
+              };
+              myVendors = [fallbackVendor];
+            }
+
+            // Déterminer l'établissement actif :
+            // 1. Choix persisté dans localStorage s'il fait partie de myVendors
+            // 2. userData.vendorId s'il fait partie de myVendors
+            // 3. Premier établissement de la liste
+            const savedActiveId = typeof window !== "undefined" ? localStorage.getItem("oresto_active_vendor_id") : null;
+            const activeVendor = myVendors.find(v => v.id === savedActiveId) 
+              || myVendors.find(v => v.id === userData.vendorId) 
+              || myVendors.find(v => v.id === effectiveVendorId)
+              || myVendors[0];
+
+            const activeVendorId = activeVendor?.id || effectiveVendorId;
+
+            if (typeof window !== "undefined" && activeVendor) {
+              try {
+                localStorage.setItem("oresto_active_vendor_id", activeVendor.id);
+                localStorage.setItem("oresto_vendor_profile", JSON.stringify(activeVendor));
+              } catch {}
+            }
+
             setState({
-              user: { ...userData, role: "vendor" },
+              user: { ...userData, role: "vendor", vendorId: activeVendorId },
               role: "vendor",
-              vendorProfile: DEMO_VENDOR,
+              vendorProfile: activeVendor,
+              userVendors: myVendors,
               isAuthenticated: true,
               isLoading: false
             });
-          }
+          });
           setLastActivity(Date.now());
         }, (err) => {
           console.error("Auth DB Error:", err);
@@ -253,13 +295,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             user: { id: firebaseUser.uid, name: firebaseUser.email || "Utilisateur", firstName: "", email: firebaseUser.email || "", password: "", role: "vendor" }, 
             role: "vendor", 
             vendorProfile: DEMO_VENDOR, 
+            userVendors: [DEMO_VENDOR],
             isAuthenticated: true, 
             isLoading: false 
           });
         });
       } else {
         // Déconnecté propre : aucun utilisateur actif
-        setState({ user: null, role: null, vendorProfile: null, isAuthenticated: false, isLoading: false });
+        setState({ user: null, role: null, vendorProfile: null, userVendors: [], isAuthenticated: false, isLoading: false });
       }
     });
 
@@ -793,17 +836,177 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const switchVendor = useCallback(async (newVendorId: string) => {
+    if (!newVendorId) return;
+    const target = state.userVendors.find(v => v.id === newVendorId);
+    if (!target) {
+      console.warn("Établissement introuvable dans la liste:", newVendorId);
+      return;
+    }
+
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("oresto_active_vendor_id", newVendorId);
+        localStorage.setItem("oresto_vendor_profile", JSON.stringify(target));
+      } catch {}
+    }
+
+    if (auth?.currentUser && db) {
+      try {
+        await update(ref(db, `users/${auth.currentUser.uid}`), {
+          vendorId: newVendorId
+        });
+      } catch (e) {
+        console.warn("Erreur mise à jour vendorId:", e);
+      }
+    }
+
+    if (target.business_type) {
+      setVendorSector(target.business_type as BusinessSector);
+    }
+
+    setState(prev => ({
+      ...prev,
+      user: prev.user ? { ...prev.user, vendorId: newVendorId } : null,
+      vendorProfile: target
+    }));
+  }, [state.userVendors]);
+
+  const createEstablishment = useCallback(async (data: {
+    name: string;
+    business_type: BusinessSector;
+    city: string;
+    category?: string;
+  }) => {
+    if (!auth?.currentUser || !db) {
+      return { success: false, error: "Vous devez être connecté pour ajouter un établissement." };
+    }
+
+    const uid = auth.currentUser.uid;
+    const currentVendors = state.userVendors;
+    const currentPlan = (state.vendorProfile?.subscriptionPlan || "solo").toLowerCase();
+    const maxAllowed = currentPlan === "trio" ? 3 : currentPlan === "duo" ? 2 : 1;
+
+    if (currentVendors.length >= maxAllowed) {
+      return { 
+        success: false, 
+        error: `Votre formule actuelle (${currentPlan.toUpperCase()}) est limitée à ${maxAllowed} établissement(s). Passez à la formule supérieure pour en ajouter un autre.` 
+      };
+    }
+
+    try {
+      const newVendorId = `v_${uid}_${Date.now().toString(36)}`;
+      const rawSlug = slugify(data.name.trim());
+      const cleanSlug = rawSlug && rawSlug.length >= 3 ? rawSlug : `commerce-${Date.now().toString().slice(-5)}`;
+      const bType = data.business_type || "restaurant";
+
+      const activeVendor = state.vendorProfile;
+      const { trialStartedAt, trialEndsAt } = calculateTrialDates();
+
+      const newVendor: VendorProfile = {
+        id: newVendorId,
+        userId: uid,
+        name: data.name.trim(),
+        slug: cleanSlug,
+        business_type: bType,
+        category: data.category || (bType === "ecommerce" ? "Mode & Boutique" : bType === "hotel" ? "Hôtel & Résidence" : "Restaurant & Grillades"),
+        categories: [data.category || (bType === "ecommerce" ? "Mode & Boutique" : bType === "hotel" ? "Hôtel & Résidence" : "Restaurant & Grillades")],
+        city: data.city.trim() || activeVendor?.city || "Cotonou",
+        neighborhood: activeVendor?.neighborhood || "Haie Vive",
+        phone: activeVendor?.phone || "+229 97 00 00 00",
+        whatsapp: activeVendor?.whatsapp || "+229 97 00 00 00",
+        description: bType === "ecommerce"
+          ? "Boutique en ligne officielle. Articles de qualité et livraison rapide."
+          : bType === "hotel"
+          ? "Hôtel de charme et résidence de haut standing. Chambres confortables."
+          : "Restaurant et saveurs authentiques. Cuisine raffinée et grillades.",
+        status: "active",
+        is_published: true,
+        open: true,
+        rating: 5.0,
+        reviewCount: 1,
+        totalSales: 0,
+        totalOrders: 0,
+        revenue: 0,
+        joinedDate: new Date().toISOString().split("T")[0],
+        plan: activeVendor?.plan || "solo",
+        subscriptionPlan: activeVendor?.subscriptionPlan || "solo",
+        subscriptionStatus: activeVendor?.subscriptionStatus || "active",
+        trialStartedAt: activeVendor?.trialStartedAt || trialStartedAt,
+        trialEndsAt: activeVendor?.trialEndsAt || trialEndsAt,
+        nextBillingDate: activeVendor?.nextBillingDate || trialEndsAt,
+        verified: true,
+        primary_color: bType === "ecommerce" ? "#000000" : bType === "hotel" ? "#4F46E5" : "#EA580C",
+        secondary_color: "#FFFFFF",
+        payment_methods: ["MTN MoMo", "Moov Money", "Espèces"],
+        ordering_modes: bType === "ecommerce"
+          ? ["Livraison Express", "Retrait Point Relais"]
+          : bType === "hotel"
+          ? ["Réservation Directe", "Paiement à l'arrivée"]
+          : ["Livraison", "À Emporter", "WhatsApp Direct"],
+        deliveryTime: "30-45 min"
+      };
+
+      const starterProducts = getStarterProducts(bType, newVendorId);
+
+      const dbUpdates: Record<string, any> = {
+        [`vendors/${newVendorId}`]: newVendor,
+        [`slugs/${cleanSlug}`]: { vendorId: newVendorId },
+        [`users/${uid}/vendorId`]: newVendorId,
+      };
+
+      for (const p of starterProducts) {
+        dbUpdates[`products/${p.id}`] = p;
+      }
+
+      await update(ref(db), dbUpdates);
+
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem("oresto_active_vendor_id", newVendorId);
+          localStorage.setItem("oresto_vendor_profile", JSON.stringify(newVendor));
+          localStorage.setItem(`oresto_products_${newVendorId}`, JSON.stringify(starterProducts));
+        } catch {}
+      }
+
+      setVendorSector(bType);
+
+      setState(prev => {
+        const updatedList = [...prev.userVendors.filter(v => v.id !== newVendorId), newVendor];
+        return {
+          ...prev,
+          user: prev.user ? { ...prev.user, vendorId: newVendorId } : null,
+          vendorProfile: newVendor,
+          userVendors: updatedList,
+        };
+      });
+
+      return { success: true, vendorId: newVendorId };
+    } catch (err: any) {
+      console.error("Erreur création nouvel établissement:", err);
+      return { success: false, error: err.message || "Erreur lors de la création de l'établissement." };
+    }
+  }, [state.userVendors, state.vendorProfile]);
+
   const dismissWarning = useCallback(() => {
     setSessionWarning(false);
     setLastActivity(Date.now());
   }, []);
 
   return (
-    <AuthContext.Provider value={{ ...state, login,
+    <AuthContext.Provider value={{ 
+      ...state, 
+      login,
       loginAsGuest,
       logout,
       register,
-      failedAttempts, lockedUntil, sessionWarning, dismissWarning }}>
+      switchVendor,
+      createEstablishment,
+      failedAttempts, 
+      lockedUntil, 
+      sessionWarning, 
+      dismissWarning 
+    }}>
       {children}
     </AuthContext.Provider>
   );
@@ -816,12 +1019,15 @@ export function useAuth(): AuthContextType {
       user: null,
       role: null,
       vendorProfile: null,
+      userVendors: [],
       isAuthenticated: false,
       isLoading: false,
       login: async () => ({ success: false }),
       loginAsGuest: async () => ({ success: false }),
       logout: async () => {},
       register: async () => ({ success: false }),
+      switchVendor: async () => {},
+      createEstablishment: async () => ({ success: false }),
       failedAttempts: 0,
       lockedUntil: null,
       sessionWarning: false,
