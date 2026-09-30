@@ -72,6 +72,17 @@ export default function AIChatBot({ mode = "dashboard" }: AIChatBotProps) {
     ]);
   }, [businessType, currentVendorName]);
 
+  // Fermer la fenêtre de chat avec la touche Échap
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isOpen) {
+        setIsOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen]);
+
   // Speech recognition setup
   useEffect(() => {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -505,12 +516,14 @@ export default function AIChatBot({ mode = "dashboard" }: AIChatBotProps) {
                   onClick={() => setMessages([{ role: "assistant", content: initialGreeting, timestamp: new Date().toISOString() }])}
                   className="w-7 h-7 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-all flex items-center justify-center text-xs"
                   title="Réinitialiser"
+                  aria-label="Réinitialiser la conversation"
                 >
                   <i className="fa-solid fa-rotate-right"></i>
                 </button>
                 <button
                   onClick={() => setIsOpen(false)}
                   className="w-7 h-7 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-all flex items-center justify-center text-xs"
+                  aria-label="Fermer l'assistant IZI IA"
                 >
                   <i className="fa-solid fa-xmark"></i>
                 </button>
@@ -584,6 +597,7 @@ export default function AIChatBot({ mode = "dashboard" }: AIChatBotProps) {
                   isListening ? "bg-red-500 text-white animate-pulse" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
                 title="Dictée vocale"
+                aria-label="Activer la dictée vocale"
               >
                 <i className="fa-solid fa-microphone"></i>
               </button>
@@ -592,6 +606,7 @@ export default function AIChatBot({ mode = "dashboard" }: AIChatBotProps) {
                 onClick={() => handleSend()}
                 disabled={!input.trim() || isLoading}
                 className="w-9 h-9 rounded-xl bg-primary text-white flex items-center justify-center text-xs hover:bg-primary/90 disabled:opacity-40 transition-all shadow-md shadow-primary/25"
+                aria-label="Envoyer le message"
               >
                 <i className="fa-solid fa-paper-plane"></i>
               </button>

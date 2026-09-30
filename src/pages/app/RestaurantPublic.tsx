@@ -78,6 +78,18 @@ export default function RestaurantPublic() {
     return "restaurant";
   }, [vendor]);
 
+  // Fermeture des modales avec la touche Échap
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (showOrderForm) setShowOrderForm(false);
+        if (selectedProductForModal) setSelectedProductForModal(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showOrderForm, selectedProductForModal]);
+
   // Chargement des données Firebase en temps réel
   useEffect(() => {
     if (!slug || !db) {
@@ -458,10 +470,11 @@ export default function RestaurantPublic() {
           <button
             type="button"
             onClick={handleShare}
-            className="w-9 h-9 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-700 text-xs transition-colors"
+            className="w-11 h-11 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-700 text-xs transition-colors"
             title="Partager la vitrine"
+            aria-label="Partager la vitrine"
           >
-            <Share2 size={16} />
+            <Share2 size={18} />
           </button>
 
           {vendor.whatsapp && (
@@ -677,8 +690,13 @@ export default function RestaurantPublic() {
             <div className="bg-white w-full max-w-md rounded-3xl p-6 space-y-5 shadow-2xl my-auto animate-in fade-in zoom-in duration-200">
               <div className="flex items-center justify-between border-b border-gray-100 pb-3">
                 <h3 className="font-heading font-black text-base text-gray-900">Finaliser votre commande</h3>
-                <button onClick={() => setShowOrderForm(false)} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600">
-                  <X size={16} />
+                <button
+                  type="button"
+                  onClick={() => setShowOrderForm(false)}
+                  className="w-11 h-11 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 transition-colors"
+                  aria-label="Fermer le formulaire de commande"
+                >
+                  <X size={18} />
                 </button>
               </div>
 

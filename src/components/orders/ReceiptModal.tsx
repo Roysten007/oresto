@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Order, VendorProfile } from "@/data/mockData";
 import { QRCodeSVG } from "qrcode.react";
 import { 
@@ -25,6 +25,16 @@ interface Props {
 
 export default function ReceiptModal({ order, vendorProfile, onClose }: Props) {
   const [isPrinting, setIsPrinting] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
 
   const vendorName = vendorProfile?.name || order.vendorName || "Oresto Commerce";
   const vendorPhone = vendorProfile?.phone || vendorProfile?.whatsapp || "+229 97 00 00 00";
@@ -89,10 +99,12 @@ export default function ReceiptModal({ order, vendorProfile, onClose }: Props) {
               <span>Imprimer</span>
             </button>
             <button
+              type="button"
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-xs transition-colors"
+              className="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-xs transition-colors"
+              aria-label="Fermer le reçu officiel"
             >
-              <X size={16} />
+              <X size={18} />
             </button>
           </div>
         </div>

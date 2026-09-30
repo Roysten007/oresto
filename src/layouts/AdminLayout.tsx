@@ -39,6 +39,16 @@ export default function AdminLayout() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && open) {
+        setOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [open]);
+
   return (
     <div className="min-h-screen flex bg-[#F8F9FA] text-foreground font-body">
       {/* Sidebar desktop */}
@@ -104,7 +114,7 @@ export default function AdminLayout() {
       <div className="flex-1 flex flex-col min-w-0 w-full overflow-x-hidden">
         <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 sm:px-6 py-3.5 sm:py-4 md:hidden flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button onClick={() => setOpen(true)} className="p-2 rounded-xl bg-gray-100" aria-label="Ouvrir le menu admin"><Menu size={20} /></button>
+            <button onClick={() => setOpen(true)} className="w-11 h-11 rounded-xl bg-gray-100 flex items-center justify-center text-foreground hover:bg-gray-200 transition-colors" aria-label="Ouvrir le menu d'administration"><Menu size={20} /></button>
             <span className="font-heading text-lg font-black uppercase text-foreground">Oresto Admin</span>
           </div>
           <div className="w-8 h-8 rounded-xl bg-primary text-white flex items-center justify-center">

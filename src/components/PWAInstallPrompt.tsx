@@ -71,9 +71,17 @@ export default function PWAInstallPrompt() {
     };
     window.addEventListener("open-pwa-install", handleManualTrigger);
 
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setShowIOSGuide(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstall);
       window.removeEventListener("open-pwa-install", handleManualTrigger);
+      window.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
 
@@ -148,10 +156,10 @@ export default function PWAInstallPrompt() {
                 <button
                   type="button"
                   onClick={handleDismiss}
-                  className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-zinc-400 hover:text-white flex items-center justify-center transition-colors shrink-0"
-                  aria-label="Fermer"
+                  className="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-zinc-400 hover:text-white flex items-center justify-center transition-colors shrink-0"
+                  aria-label="Fermer l'invitation d'installation"
                 >
-                  <X size={14} />
+                  <X size={16} />
                 </button>
               </div>
 
@@ -208,9 +216,10 @@ export default function PWAInstallPrompt() {
                 <button
                   type="button"
                   onClick={() => setShowIOSGuide(false)}
-                  className="w-8 h-8 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-500 flex items-center justify-center transition-colors"
+                  className="w-11 h-11 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-500 flex items-center justify-center transition-colors"
+                  aria-label="Fermer le guide d'installation"
                 >
-                  <X size={16} />
+                  <X size={18} />
                 </button>
               </div>
 

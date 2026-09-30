@@ -35,6 +35,17 @@ export default function EstablishmentSwitcher({ currentSector }: EstablishmentSw
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (showAddModal) setShowAddModal(false);
+        if (isOpen) setIsOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showAddModal, isOpen]);
+
   // Secteur effectif (priorité au workspace actif puis au profil)
   const effectiveSector: BusinessSector = currentSector || getVendorSector(vendorProfile);
 
@@ -293,9 +304,10 @@ export default function EstablishmentSwitcher({ currentSector }: EstablishmentSw
               <button
                 type="button"
                 onClick={() => setShowAddModal(false)}
-                className="w-7 h-7 rounded-full bg-zinc-100 hover:bg-zinc-200 flex items-center justify-center text-zinc-500"
+                className="w-11 h-11 rounded-full bg-zinc-100 hover:bg-zinc-200 flex items-center justify-center text-zinc-500 transition-colors"
+                aria-label="Fermer la fenêtre d'ajout d'établissement"
               >
-                <X size={14} />
+                <X size={16} />
               </button>
             </div>
 

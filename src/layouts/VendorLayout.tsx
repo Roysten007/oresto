@@ -59,7 +59,16 @@ export default function VendorLayout() {
   const currentSector: BusinessSector = getVendorSector(vendorProfile, sectorQuery);
   const sectorMeta = SECTORS[currentSector];
 
-
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (sidebarOpen) setSidebarOpen(false);
+        if (showUnblockModal) setShowUnblockModal(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [sidebarOpen, showUnblockModal]);
 
   const handlePayNow = async () => {
     if (!db || !vendorProfile?.id) return;
@@ -107,7 +116,11 @@ export default function VendorLayout() {
                 <span className="text-[10px] font-sub text-zinc-500 block">Espace professionnel</span>
               </div>
             </Link>
-            <button className="md:hidden text-zinc-500 hover:text-zinc-950" onClick={() => setSidebarOpen(false)}>
+            <button 
+              className="md:hidden text-zinc-500 hover:text-zinc-950 w-11 h-11 -mr-2 flex items-center justify-center rounded-xl hover:bg-zinc-100 transition-colors" 
+              onClick={() => setSidebarOpen(false)}
+              aria-label="Fermer le menu de navigation"
+            >
               <i className="fa-solid fa-xmark text-lg"></i>
             </button>
           </div>
@@ -168,8 +181,8 @@ export default function VendorLayout() {
           <div className="flex items-center gap-2.5 min-w-0">
             <button 
               onClick={() => setSidebarOpen(true)} 
-              className="p-2 -ml-1 text-zinc-700 hover:text-zinc-950 rounded-xl hover:bg-zinc-100 transition-colors"
-              aria-label="Ouvrir le menu"
+              className="w-11 h-11 -ml-1 text-zinc-700 hover:text-zinc-950 rounded-xl hover:bg-zinc-100 transition-colors flex items-center justify-center"
+              aria-label="Ouvrir le menu de navigation"
             >
               <i className="fa-solid fa-bars text-lg"></i>
             </button>

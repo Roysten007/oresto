@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Product } from "@/data/mockData";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -19,6 +19,16 @@ export default function ProductDetailModal({
   onInstantBuy,
   primaryColor = "#EA580C",
 }: Props) {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!product || !isOpen) return null;
 
   const allImages = product.images && product.images.length > 0 
@@ -61,10 +71,12 @@ export default function ProductDetailModal({
         >
           {/* Close button */}
           <button
+            type="button"
             onClick={onClose}
-            className="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-white/90 shadow-md border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-black hover:text-white transition-all text-xs"
+            aria-label="Fermer la fiche produit"
+            className="absolute top-4 right-4 z-20 w-11 h-11 rounded-full bg-white/95 shadow-md border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-black hover:text-white transition-all text-xs"
           >
-            <i className="fa-solid fa-xmark"></i>
+            <i className="fa-solid fa-xmark text-sm"></i>
           </button>
 
           {/* Left: Image Gallery */}
@@ -107,6 +119,7 @@ export default function ProductDetailModal({
                     key={idx}
                     type="button"
                     onClick={() => setActiveImageIndex(idx)}
+                    aria-label={`Afficher la photo ${idx + 1} de ${product.name}`}
                     className={`relative w-14 h-14 rounded-xl overflow-hidden border-2 transition-all shrink-0 bg-white ${
                       activeImageIndex === idx ? "border-primary ring-2 ring-primary/20 scale-105" : "border-gray-200 opacity-70 hover:opacity-100"
                     }`}
