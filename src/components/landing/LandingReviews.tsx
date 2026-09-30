@@ -123,7 +123,7 @@ export default function LandingReviews() {
             {[...REVIEWS, ...REVIEWS].map((review, index) => (
               <div
                 key={`${review.id}-${index}`}
-                className="w-[320px] sm:w-[400px] md:w-[450px] shrink-0 bg-white rounded-3xl p-6 sm:p-7 border border-zinc-200/90 shadow-sm hover:shadow-float hover:border-orange-300/80 transition-all duration-300 flex flex-col justify-between group"
+                className="w-[min(320px,calc(100vw-32px))] sm:w-[400px] md:w-[450px] shrink-0 bg-white rounded-3xl p-6 sm:p-7 border border-zinc-200/90 shadow-sm hover:shadow-float hover:border-orange-300/80 transition-all duration-300 flex flex-col justify-between group"
               >
                 <div>
                   {/* Top Card Bar: Sector & Stars */}

@@ -93,7 +93,7 @@ export default function HeroDashboardCarousel() {
         {loopedDashboards.map((item, index) => (
           <div
             key={`${item.id}-${index}`}
-            className="relative flex-shrink-0 w-[330px] sm:w-[500px] md:w-[600px] lg:w-[660px] rounded-2xl sm:rounded-3xl bg-white/95 backdrop-blur-md border border-zinc-200/90 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.12),0_0_0_1px_rgba(0,0,0,0.03)] overflow-hidden flex flex-col text-left transition-transform duration-300"
+            className="relative flex-shrink-0 w-[min(330px,calc(100vw-32px))] sm:w-[500px] md:w-[600px] lg:w-[660px] rounded-2xl sm:rounded-3xl bg-white/95 backdrop-blur-md border border-zinc-200/90 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.12),0_0_0_1px_rgba(0,0,0,0.03)] overflow-hidden flex flex-col text-left transition-transform duration-300"
           >
             {/* Header façon Navigateur Mac / App Dashboard */}
             <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-3.5 bg-zinc-50/90 border-b border-zinc-200/80">

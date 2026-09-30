@@ -193,7 +193,7 @@ export default function PrestataireDashboard() {
       </header>
 
       {/* Contenu principal du tableau de bord */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 space-y-8">
+      <main className="max-w-6xl mx-auto px-3.5 sm:px-6 pt-6 sm:pt-8 space-y-6 sm:space-y-8 w-full min-w-0 overflow-x-hidden">
         
         {/* 1. Bannière Lien de Parrainage Personnel */}
         <div className="p-6 sm:p-8 rounded-3xl sm:rounded-[36px] bg-[#09090B] text-white shadow-2xl relative overflow-hidden space-y-5 border border-zinc-800">

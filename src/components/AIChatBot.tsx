@@ -486,7 +486,7 @@ export default function AIChatBot({ mode = "dashboard" }: AIChatBotProps) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ type: "spring", stiffness: 300, damping: 28 }}
-            className="w-[340px] md:w-[380px] h-[520px] flex flex-col bg-white border border-gray-200 shadow-2xl shadow-black/20 rounded-[28px] overflow-hidden"
+            className="w-[calc(100vw-32px)] sm:w-[360px] md:w-[380px] max-w-[380px] h-[min(520px,calc(100vh-140px))] flex flex-col bg-white border border-gray-200 shadow-2xl shadow-black/20 rounded-[28px] overflow-hidden"
           >
             {/* Header */}
             <div className="flex items-center gap-3 px-5 py-4 bg-[#0A0A0A] border-b border-white/10 flex-shrink-0">

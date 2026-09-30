@@ -375,7 +375,7 @@ export default function OrderChat({ orderId, vendorName, clientName, compact = f
                 type="button"
                 onClick={handleClientDeclarePaymentSent}
                 disabled={currentStatus === "preparing" || currentStatus === "delivering" || currentStatus === "delivered"}
-                className="flex-1 min-w-[200px] py-2.5 px-4 rounded-xl bg-primary text-white font-black text-xs uppercase tracking-wider shadow-md hover:bg-primary/90 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                className="flex-1 min-w-0 w-full sm:w-auto py-2.5 px-4 rounded-xl bg-primary text-white font-black text-xs uppercase tracking-wider shadow-md hover:bg-primary/90 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 <Sparkles size={14} /> J'ai envoyé le paiement
               </button>

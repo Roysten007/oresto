@@ -101,10 +101,10 @@ export default function AdminLayout() {
 
       {open && <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden" onClick={() => setOpen(false)} />}
 
-      <div className="flex-1 flex flex-col min-w-0">
-        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-6 py-4 md:hidden flex items-center justify-between">
+      <div className="flex-1 flex flex-col min-w-0 w-full overflow-x-hidden">
+        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 sm:px-6 py-3.5 sm:py-4 md:hidden flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button onClick={() => setOpen(true)} className="p-2 rounded-xl bg-gray-100"><Menu size={20} /></button>
+            <button onClick={() => setOpen(true)} className="p-2 rounded-xl bg-gray-100" aria-label="Ouvrir le menu admin"><Menu size={20} /></button>
             <span className="font-heading text-lg font-black uppercase text-foreground">Oresto Admin</span>
           </div>
           <div className="w-8 h-8 rounded-xl bg-primary text-white flex items-center justify-center">
@@ -112,7 +112,7 @@ export default function AdminLayout() {
           </div>
         </header>
 
-        <main className="flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full">
+        <main className="flex-1 p-3.5 sm:p-6 md:p-10 max-w-7xl mx-auto w-full min-w-0 overflow-x-hidden">
           <Outlet />
         </main>
       </div>
