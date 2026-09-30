@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 export default function VendorSettings() {
-  const { vendorProfile, user, userVendors = [], switchVendor } = useAuth();
+  const { vendorProfile, user, userVendors = [], switchVendor, updateVendorBusinessType } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
@@ -34,6 +34,7 @@ export default function VendorSettings() {
     name: "",
     description: "",
     category: "",
+    business_type: "ecommerce" as "ecommerce" | "restaurant" | "hotel",
     phone: "",
     whatsapp: ""
   });
@@ -56,10 +57,12 @@ export default function VendorSettings() {
 
   useEffect(() => {
     if (vendorProfile) {
+      const bType = (vendorProfile.business_type || (vendorProfile.category?.toLowerCase().includes("hôtel") ? "hotel" : vendorProfile.category?.toLowerCase().includes("boutique") ? "ecommerce" : "ecommerce")) as "ecommerce" | "restaurant" | "hotel";
       setShopData({
         name: vendorProfile.name || "",
         description: vendorProfile.description || "",
         category: vendorProfile.category || "",
+        business_type: bType,
         phone: vendorProfile.phone || "",
         whatsapp: vendorProfile.whatsapp || ""
       });
@@ -164,6 +167,81 @@ export default function VendorSettings() {
                   <button className="px-6 py-3 rounded-2xl bg-black text-white font-sub text-[10px] font-black uppercase tracking-widest hover:bg-primary transition-colors flex items-center gap-2">
                     <i className="fa-solid fa-camera"></i> Changer le logo
                   </button>
+                </div>
+              </div>
+
+              {/* Secteur d'activité de l'établissement */}
+              <div className="space-y-3 pt-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-2">
+                  Secteur d'activité de l'établissement *
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {[
+                    {
+                      id: "ecommerce" as const,
+                      label: "Boutique & E-Commerce",
+                      sub: "Articles, stocks, expéditions, colis, vêtements, high-tech",
+                      icon: "fa-solid fa-bag-shopping",
+                      color: "#9333EA",
+                      activeClass: "border-purple-600 bg-purple-50/50 ring-2 ring-purple-600/30 text-purple-950"
+                    },
+                    {
+                      id: "restaurant" as const,
+                      label: "Restaurant & Cuisine",
+                      sub: "Menus, plats, cuisine, tables, commandes repas & livraison",
+                      icon: "fa-solid fa-utensils",
+                      color: "#FF6B00",
+                      activeClass: "border-orange-500 bg-orange-50/50 ring-2 ring-orange-500/30 text-orange-950"
+                    },
+                    {
+                      id: "hotel" as const,
+                      label: "Hôtel & Résidence",
+                      sub: "Chambres, suites, réservations de séjours & nuitées",
+                      icon: "fa-solid fa-hotel",
+                      color: "#4F46E5",
+                      activeClass: "border-indigo-600 bg-indigo-50/50 ring-2 ring-indigo-600/30 text-indigo-950"
+                    },
+                  ].map((s) => {
+                    const isSelected = shopData.business_type === s.id;
+                    return (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={async () => {
+                          setShopData(prev => ({
+                            ...prev,
+                            business_type: s.id,
+                            category: prev.category || (s.id === "ecommerce" ? "Boutique & E-Commerce" : s.id === "hotel" ? "Hôtel & Résidence" : "Restaurant & Cuisine")
+                          }));
+                          await updateVendorBusinessType(s.id);
+                          toast.success(`🎉 Votre établissement est maintenant configuré en « ${s.label} » !`);
+                        }}
+                        className={`p-4 rounded-2xl border text-left flex flex-col justify-between transition-all ${
+                          isSelected
+                            ? `${s.activeClass} shadow-xs font-bold`
+                            : "bg-muted/10 border-border hover:bg-muted/30 text-muted-foreground"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <div 
+                            className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-xs shadow-xs"
+                            style={{ backgroundColor: s.color }}
+                          >
+                            <i className={s.icon}></i>
+                          </div>
+                          {isSelected && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full text-white" style={{ backgroundColor: s.color }}>
+                              Actif
+                            </span>
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-heading text-xs font-black">{s.label}</p>
+                          <p className="text-[10px] text-muted-foreground mt-0.5 leading-snug">{s.sub}</p>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 

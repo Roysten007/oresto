@@ -51,13 +51,13 @@ export function getVendorSector(
   // 1. Le profil de l'établissement actif dicte TOUJOURS son secteur en priorité absolue !
   if (vendorProfile?.business_type) {
     const bt = String(vendorProfile.business_type).toLowerCase();
-    if (bt === "ecommerce" || bt === "boutique") return "ecommerce";
-    if (bt === "hotel" || bt === "residence") return "hotel";
-    if (bt === "restaurant") return "restaurant";
+    if (bt === "ecommerce" || bt === "boutique" || bt === "shop") return "ecommerce";
+    if (bt === "hotel" || bt === "residence" || bt === "hebergement") return "hotel";
+    if (bt === "restaurant" || bt === "resto" || bt === "fastfood") return "restaurant";
   }
 
-  // 2. Analyse de la catégorie ou du nom de l'établissement
-  const cat = `${vendorProfile?.category || ""} ${vendorProfile?.name || ""}`.toLowerCase();
+  // 2. Analyse précise de la catégorie ou du nom de l'établissement
+  const cat = `${vendorProfile?.category || ""} ${vendorProfile?.name || ""} ${vendorProfile?.description || ""}`.toLowerCase();
   if (
     cat.includes("boutique") ||
     cat.includes("mode") ||
@@ -67,7 +67,9 @@ export function getVendorSector(
     cat.includes("vêtement") ||
     cat.includes("sneakers") ||
     cat.includes("chaussure") ||
-    cat.includes("cosmétique")
+    cat.includes("cosmétique") ||
+    cat.includes("bijoux") ||
+    cat.includes("accessoire")
   ) {
     return "ecommerce";
   }
@@ -85,15 +87,19 @@ export function getVendorSector(
     return "hotel";
   }
 
-  // 3. Fallback sur le paramètre URL si aucun profil n'est encore chargé
-  if (searchParamSector) {
-    const s = searchParamSector.toLowerCase();
-    if (s.includes("ecom") || s.includes("boutique") || s.includes("shop")) return "ecommerce";
-    if (s.includes("hotel") || s.includes("residence") || s.includes("chambre")) return "hotel";
-    if (s.includes("resto") || s.includes("restaurant") || s.includes("maquis")) return "restaurant";
+  if (
+    cat.includes("resto") ||
+    cat.includes("restaurant") ||
+    cat.includes("maquis") ||
+    cat.includes("grill") ||
+    cat.includes("cuisine") ||
+    cat.includes("burger") ||
+    cat.includes("plat")
+  ) {
+    return "restaurant";
   }
 
-  // 4. Fallback sur le dernier espace actif en local
+  // 3. Dernier espace de travail actif validé par l'utilisateur
   if (typeof window !== "undefined") {
     try {
       const stored = localStorage.getItem("oresto_active_workspace");
@@ -103,7 +109,16 @@ export function getVendorSector(
     } catch {}
   }
 
-  return "restaurant";
+  // 4. Paramètre URL explicite en secours
+  if (searchParamSector) {
+    const s = searchParamSector.toLowerCase();
+    if (s.includes("ecom") || s.includes("boutique") || s.includes("shop")) return "ecommerce";
+    if (s.includes("hotel") || s.includes("residence") || s.includes("chambre")) return "hotel";
+    if (s.includes("resto") || s.includes("restaurant") || s.includes("maquis")) return "restaurant";
+  }
+
+  // Par défaut : Boutique
+  return "ecommerce";
 }
 
 export function setVendorSector(sector: BusinessSector): void {

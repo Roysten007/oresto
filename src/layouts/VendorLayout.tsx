@@ -122,7 +122,7 @@ export default function VendorLayout() {
               return (
                 <Link 
                   key={item.path} 
-                  to={isBlocked ? "/vendor/subscription" : `${item.path}?sector=${currentSector}`} 
+                  to={isBlocked ? "/vendor/subscription" : item.path} 
                   onClick={() => setSidebarOpen(false)}
                   className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-sub text-xs font-bold transition-all ${
                     active 

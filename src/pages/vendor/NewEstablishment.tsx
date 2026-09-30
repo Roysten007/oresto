@@ -16,16 +16,18 @@ import {
   MapPin,
   Clock
 } from "lucide-react";
-import { BusinessSector, setVendorSector } from "@/lib/vendorSector";
+import { BusinessSector, setVendorSector, getVendorSector } from "@/lib/vendorSector";
 import { MONTHLY_PLAN_PRICE, ANNUAL_PLAN_PRICE } from "@/services/subscriptionService";
 
 export default function NewEstablishment() {
   const { user, vendorProfile, createEstablishment } = useAuth();
   const navigate = useNavigate();
 
+  const activeSector = getVendorSector(vendorProfile);
+
   const [formData, setFormData] = useState({
     name: "",
-    business_type: "restaurant" as BusinessSector,
+    business_type: (activeSector || "ecommerce") as BusinessSector,
     city: vendorProfile?.city || "Cotonou",
     neighborhood: vendorProfile?.neighborhood || "Haie Vive",
     whatsapp: vendorProfile?.whatsapp || user?.phone || "+229 ",
@@ -85,7 +87,7 @@ export default function NewEstablishment() {
           Ajouter un nouvel <span className="text-[#FF6B00]">établissement</span>
         </h1>
         <p className="text-xs text-zinc-500 font-sub mt-1 leading-relaxed max-w-2xl">
-          Créez une nouvelle boutique, un restaurant ou un hôtel sous votre compte unique (<strong className="text-zinc-800">{user?.email}</strong>). Vous pourrez ensuite basculer librement de l'un à l'autre en un clic depuis votre tableau de bord.
+          Créez une nouvelle boutique, un restaurant ou un hôtel sous votre compte unique (<strong className="text-zinc-800">{user?.email || "votre compte professionnel"}</strong>). Vous pourrez ensuite basculer librement de l'un à l'autre en un clic depuis votre tableau de bord.
         </p>
       </div>
 

@@ -30,6 +30,7 @@ interface AuthContextType extends AuthState {
   logout: () => Promise<void>;
   register: (data: any) => Promise<{ success: boolean; error?: string; role?: string; uid?: string }>;
   switchVendor: (vendorId: string) => Promise<void>;
+  updateVendorBusinessType: (businessType: BusinessSector) => Promise<void>;
   createEstablishment: (data: {
     name: string;
     business_type: BusinessSector;
@@ -56,9 +57,11 @@ const MAX_ATTEMPTS = 3;
 const DEMO_VENDOR: VendorProfile = {
   id: "v_demo",
   userId: "u_demo",
-  name: "L'Atelier du Chef & Grill",
-  description: "Poissons braisés au feu de bois et spécialités africaines",
-  category: "Restaurants",
+  name: "Ma Boutique Tendance",
+  description: "Boutique officielle de mode, sneakers streetwear et accessoires tendance",
+  category: "Boutique & E-Commerce",
+  categories: ["Mode, Vêtements & Prêt-à-porter", "Chaussures & Sneakers Streetwear", "High-Tech & Gadgets"],
+  business_type: "ecommerce",
   status: "active",
   joinedDate: "2026-01-01",
   plan: "pro",
@@ -74,25 +77,25 @@ const DEMO_VENDOR: VendorProfile = {
   city: "Cotonou",
   neighborhood: "Haie Vive",
   logo_url: "",
-  cover_url: "",
-  primary_color: "#EA580C",
+  cover_url: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80",
+  primary_color: "#9333EA",
   secondary_color: "#FFFFFF",
-  slug: "latelier-du-chef",
+  slug: "ma-boutique",
   is_published: true,
   rating: 4.9,
   reviewCount: 48,
   totalSales: 1250000,
   totalOrders: 184,
   revenue: 1250000,
-  deliveryTime: "25-35 min",
+  deliveryTime: "24-48h",
   payment_methods: ["MTN MoMo", "Moov Money", "Espèces"],
-  ordering_modes: ["Sur place", "Livraison", "À emporter"],
+  ordering_modes: ["Livraison Express", "Retrait Point Relais"],
   sections_config: { hero: true, menu: true, daily: true, footer: true }
 };
 
 const DEMO_USER: User = {
   id: "u_demo",
-  name: "Chef Restaurateur",
+  name: "Responsable Boutique",
   firstName: "Chef",
   email: "contact@oresto.me",
   password: "",
@@ -876,6 +879,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }));
   }, [state.userVendors]);
 
+  const updateVendorBusinessType = useCallback(async (newSector: BusinessSector) => {
+    if (!state.vendorProfile) return;
+    const vendorId = state.vendorProfile.id;
+
+    setVendorSector(newSector);
+    const updatedCategory = newSector === "ecommerce"
+      ? "Boutique & E-Commerce"
+      : newSector === "hotel"
+      ? "Hôtel & Résidence"
+      : "Restaurant & Cuisine";
+
+    const updatedProfile: VendorProfile = {
+      ...state.vendorProfile,
+      business_type: newSector,
+      category: updatedCategory,
+      primary_color: newSector === "ecommerce" ? "#9333EA" : newSector === "hotel" ? "#4F46E5" : "#EA580C",
+    };
+
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("oresto_active_workspace", newSector);
+        localStorage.setItem("oresto_vendor_profile", JSON.stringify(updatedProfile));
+      } catch {}
+    }
+
+    setState(prev => ({
+      ...prev,
+      vendorProfile: updatedProfile,
+      userVendors: prev.userVendors.map(v => v.id === vendorId ? { ...v, business_type: newSector, category: updatedCategory } : v)
+    }));
+
+    if (db && vendorId) {
+      try {
+        await update(ref(db, `vendors/${vendorId}`), {
+          business_type: newSector,
+          category: updatedCategory
+        });
+      } catch (err) {
+        console.warn("Erreur mise à jour business_type Firebase:", err);
+      }
+    }
+  }, [state.vendorProfile]);
+
   const createEstablishment = useCallback(async (data: {
     name: string;
     business_type: BusinessSector;
@@ -1002,6 +1048,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       logout,
       register,
       switchVendor,
+      updateVendorBusinessType,
       createEstablishment,
       failedAttempts, 
       lockedUntil, 
@@ -1028,6 +1075,7 @@ export function useAuth(): AuthContextType {
       logout: async () => {},
       register: async () => ({ success: false }),
       switchVendor: async () => {},
+      updateVendorBusinessType: async () => {},
       createEstablishment: async () => ({ success: false }),
       failedAttempts: 0,
       lockedUntil: null,

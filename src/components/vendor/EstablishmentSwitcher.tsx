@@ -22,14 +22,14 @@ interface EstablishmentSwitcherProps {
 }
 
 export default function EstablishmentSwitcher({ currentSector }: EstablishmentSwitcherProps) {
-  const { vendorProfile, userVendors = [], switchVendor, createEstablishment } = useAuth();
+  const { vendorProfile, userVendors = [], switchVendor, createEstablishment, updateVendorBusinessType } = useAuth();
   const navigate = useNavigate();
 
   const [isOpen, setIsOpen] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newStore, setNewStore] = useState({
     name: "",
-    business_type: (currentSector || "restaurant") as BusinessSector,
+    business_type: (currentSector || "ecommerce") as BusinessSector,
     city: "Cotonou",
     category: "",
   });
@@ -98,8 +98,8 @@ export default function EstablishmentSwitcher({ currentSector }: EstablishmentSw
         toast.success(`🎉 Nouvel établissement « ${newStore.name} » créé avec succès !`);
         setShowAddModal(false);
         setIsOpen(false);
-        setNewStore({ name: "", business_type: "restaurant", city: "Cotonou", category: "" });
-        navigate(`/vendor/dashboard?sector=${newStore.business_type}`);
+        setNewStore({ name: "", business_type: "ecommerce", city: "Cotonou", category: "" });
+        navigate(`/vendor/dashboard`);
       } else {
         toast.error(result.error || "Impossible d'ajouter cet établissement");
       }
@@ -164,7 +164,7 @@ export default function EstablishmentSwitcher({ currentSector }: EstablishmentSw
             </div>
 
             {/* Liste des établissements */}
-            <div className="max-h-56 overflow-y-auto space-y-1 py-1.5">
+            <div className="max-h-48 overflow-y-auto space-y-1 py-1.5">
               {userVendors.map((v) => {
                 const isActive = v.id === currentVendorId;
                 const isAnn = v.subscriptionPlan === "annual";
@@ -199,6 +199,63 @@ export default function EstablishmentSwitcher({ currentSector }: EstablishmentSw
                   </button>
                 );
               })}
+            </div>
+
+            {/* Sélecteur de secteur rapide pour l'établissement actif */}
+            <div className="p-2 my-1 rounded-xl bg-zinc-50 border border-zinc-100">
+              <div className="flex items-center justify-between mb-1.5 px-0.5">
+                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Activité de l'établissement</span>
+                <span className="text-[10px] font-bold capitalize" style={{ color: effectiveSector === "ecommerce" ? "#9333EA" : effectiveSector === "hotel" ? "#4F46E5" : "#EA580C" }}>
+                  {effectiveSector === "ecommerce" ? "Boutique" : effectiveSector === "hotel" ? "Hôtel" : "Restaurant"}
+                </span>
+              </div>
+              <div className="grid grid-cols-3 gap-1">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await updateVendorBusinessType("ecommerce");
+                    toast.success("✨ Établissement configuré en Boutique !");
+                  }}
+                  className={`py-1.5 px-1 rounded-lg text-[10px] font-bold flex items-center justify-center gap-1 transition-all ${
+                    effectiveSector === "ecommerce"
+                      ? "bg-purple-600 text-white shadow-xs"
+                      : "bg-white text-zinc-600 hover:bg-zinc-100 border border-zinc-200/60"
+                  }`}
+                >
+                  <ShoppingBag size={11} />
+                  <span>Boutique</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await updateVendorBusinessType("restaurant");
+                    toast.success("✨ Établissement configuré en Restaurant !");
+                  }}
+                  className={`py-1.5 px-1 rounded-lg text-[10px] font-bold flex items-center justify-center gap-1 transition-all ${
+                    effectiveSector === "restaurant"
+                      ? "bg-[#FF6B00] text-white shadow-xs"
+                      : "bg-white text-zinc-600 hover:bg-zinc-100 border border-zinc-200/60"
+                  }`}
+                >
+                  <Utensils size={11} />
+                  <span>Resto</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await updateVendorBusinessType("hotel");
+                    toast.success("✨ Établissement configuré en Hôtel !");
+                  }}
+                  className={`py-1.5 px-1 rounded-lg text-[10px] font-bold flex items-center justify-center gap-1 transition-all ${
+                    effectiveSector === "hotel"
+                      ? "bg-indigo-600 text-white shadow-xs"
+                      : "bg-white text-zinc-600 hover:bg-zinc-100 border border-zinc-200/60"
+                  }`}
+                >
+                  <Hotel size={11} />
+                  <span>Hôtel</span>
+                </button>
+              </div>
             </div>
 
             {/* Bouton d'ajout vers la page dédiée */}
