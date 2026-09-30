@@ -161,29 +161,37 @@ export default function VendorLayout() {
 
       {sidebarOpen && <div className="fixed inset-0 bg-black/40 z-40 md:hidden" onClick={() => setSidebarOpen(false)} />}
 
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 w-full overflow-x-hidden">
         
         {/* Mobile Header */}
-        <header className="sticky top-0 z-30 bg-white border-b border-zinc-200 px-4 py-3 md:hidden flex items-center justify-between">
-          <button onClick={() => setSidebarOpen(true)} className="p-2 text-zinc-700">
-            <i className="fa-solid fa-bars text-lg"></i>
-          </button>
-          <div className="flex items-center gap-2">
-            <span className="font-heading text-sm font-black text-zinc-950">
-              Oresto <span style={{ color: sectorMeta.primaryColor }}>{sectorMeta.label}</span>
-            </span>
+        <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-xs border-b border-zinc-200 px-3 sm:px-4 py-2.5 sm:py-3 md:hidden flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <button 
+              onClick={() => setSidebarOpen(true)} 
+              className="p-2 -ml-1 text-zinc-700 hover:text-zinc-950 rounded-xl hover:bg-zinc-100 transition-colors"
+              aria-label="Ouvrir le menu"
+            >
+              <i className="fa-solid fa-bars text-lg"></i>
+            </button>
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="font-heading text-sm font-black text-zinc-950 truncate">
+                Oresto <span style={{ color: sectorMeta.primaryColor }}>{sectorMeta.label.split(" ")[0]}</span>
+              </span>
+            </div>
           </div>
           <Link 
             to={showcaseSlug ? `/r/${showcaseSlug}` : "#"} 
             target="_blank" 
-            className="text-xs font-bold"
-            style={{ color: sectorMeta.primaryColor }}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-bold transition-opacity hover:opacity-85 shrink-0"
+            style={{ color: sectorMeta.primaryColor, backgroundColor: `${sectorMeta.primaryColor}15` }}
           >
-            <i className="fa-solid fa-globe text-base"></i>
+            <i className="fa-solid fa-globe text-xs"></i>
+            <span className="text-[11px] hidden xs:inline">Ma vitrine</span>
           </Link>
         </header>
         
-        <main className="flex-1 p-4 md:p-8">
+        <main className="flex-1 p-3 sm:p-5 md:p-8 min-w-0 w-full overflow-x-hidden">
+          <div className="max-w-7xl mx-auto w-full min-w-0">
           {/* Écran de blocage si impayé après délai de grâce J+3 */}
           {isBlocked && location.pathname !== "/vendor/subscription" ? (
             <div className="min-h-[75vh] flex items-center justify-center">
@@ -220,6 +228,7 @@ export default function VendorLayout() {
           ) : (
             <Outlet />
           )}
+          </div>
         </main>
       </div>
 

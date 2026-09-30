@@ -31,7 +31,7 @@ export default function StepDesign({ formData, setFormData }: Props) {
           Couleurs & Typographie
         </h2>
         <p className="text-xs text-gray-500 font-medium">
-          Personnalisez la charte graphique de votre vitrine. Les changements s'affichent instantanément sur le smartphone à droite.
+          Personnalisez la charte graphique de votre vitrine (couleurs, polices et ambiances). Vos modifications sont appliquées instantanément.
         </p>
       </div>
 
@@ -123,7 +123,7 @@ export default function StepDesign({ formData, setFormData }: Props) {
               >
                 <div>
                   <span style={{ fontFamily: f.family }} className="text-sm font-bold block">{f.name}</span>
-                  <span className="text-[11px] text-gray-400">Poulet Braisé & Alloco</span>
+                  <span className="text-[11px] text-gray-400">Exemple de présentation soignée</span>
                 </div>
                 {isSelected && (
                   <div className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs shadow-sm">

@@ -154,7 +154,7 @@ export default function VendorSettings() {
           
           {/* Section 0: Ma Boutique */}
           {activeTab === 0 && (
-            <div className="p-8 rounded-[40px] bg-card border border-border shadow-sm space-y-8 animate-in fade-in duration-300">
+            <div className="p-4 sm:p-6 md:p-8 rounded-3xl sm:rounded-[40px] bg-card border border-border shadow-sm space-y-6 sm:space-y-8 animate-in fade-in duration-300">
               <div className="space-y-4">
                 <div className="h-48 rounded-[32px] bg-muted/50 border border-dashed border-border flex flex-col items-center justify-center text-muted-foreground gap-3 group cursor-pointer hover:bg-muted transition-colors">
                   <i className="fa-solid fa-image text-3xl opacity-30 group-hover:scale-110 transition-transform"></i>
@@ -285,7 +285,7 @@ export default function VendorSettings() {
 
           {/* Section 1: Localisation (Leaflet Natif Stable & GPS Automatique) */}
           {activeTab === 1 && (
-            <div className="p-8 rounded-[40px] bg-card border border-border shadow-sm space-y-8 animate-in fade-in duration-300">
+            <div className="p-4 sm:p-6 md:p-8 rounded-3xl sm:rounded-[40px] bg-card border border-border shadow-sm space-y-6 sm:space-y-8 animate-in fade-in duration-300">
               
               {/* Carte GPS */}
               <div className="space-y-3">
@@ -366,7 +366,7 @@ export default function VendorSettings() {
 
           {/* Section 2: Horaires */}
           {activeTab === 2 && (
-            <div className="p-8 rounded-[40px] bg-card border border-border shadow-sm space-y-8 animate-in fade-in duration-300">
+            <div className="p-4 sm:p-6 md:p-8 rounded-3xl sm:rounded-[40px] bg-card border border-border shadow-sm space-y-6 sm:space-y-8 animate-in fade-in duration-300">
                <h3 className="font-heading text-xl font-bold text-foreground">Horaires d'ouverture</h3>
                <div className="space-y-3">
                   {["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"].map(day => (
@@ -388,7 +388,7 @@ export default function VendorSettings() {
 
           {/* Section 3: Livraison */}
           {activeTab === 3 && (
-            <div className="p-8 rounded-[40px] bg-card border border-border shadow-sm space-y-8 animate-in fade-in duration-300">
+            <div className="p-4 sm:p-6 md:p-8 rounded-3xl sm:rounded-[40px] bg-card border border-border shadow-sm space-y-6 sm:space-y-8 animate-in fade-in duration-300">
               <h3 className="font-heading text-xl font-bold text-foreground">Configuration Logistique & Livraison</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {[
@@ -428,7 +428,7 @@ export default function VendorSettings() {
 
           {/* Section 4: Paiements */}
           {activeTab === 4 && (
-            <div className="p-8 rounded-[40px] bg-card border border-border shadow-sm space-y-8 animate-in fade-in duration-300">
+            <div className="p-4 sm:p-6 md:p-8 rounded-3xl sm:rounded-[40px] bg-card border border-border shadow-sm space-y-6 sm:space-y-8 animate-in fade-in duration-300">
               <h3 className="font-heading text-xl font-bold text-foreground">Modes de Paiement Acceptés</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[
@@ -471,7 +471,7 @@ export default function VendorSettings() {
 
           {/* Section 5: Offres */}
           {activeTab === 5 && (
-            <div className="p-8 rounded-[40px] bg-card border border-border shadow-sm space-y-8 animate-in fade-in duration-300">
+            <div className="p-4 sm:p-6 md:p-8 rounded-3xl sm:rounded-[40px] bg-card border border-border shadow-sm space-y-6 sm:space-y-8 animate-in fade-in duration-300">
                <h3 className="font-heading text-xl font-bold text-foreground">Promotions & Réductions</h3>
                <div className="p-12 border-2 border-dashed border-border rounded-[32px] flex flex-col items-center justify-center text-center gap-4">
                   <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl">
@@ -489,7 +489,7 @@ export default function VendorSettings() {
           {/* Section 6: Sécurité */}
           {activeTab === 6 && (
             <div className="space-y-8 animate-in fade-in duration-300">
-               <div className="p-8 rounded-[40px] bg-card border border-border shadow-sm space-y-6">
+               <div className="p-4 sm:p-6 md:p-8 rounded-3xl sm:rounded-[40px] bg-card border border-border shadow-sm space-y-6">
                   <h3 className="font-heading text-xl font-bold text-foreground">Sécurité du Compte</h3>
                   <div className="space-y-4">
                     <p className="text-xs text-muted-foreground leading-relaxed">
@@ -519,7 +519,7 @@ export default function VendorSettings() {
 
           {/* Section 7: Mes Entreprises / Changer de compte */}
           {activeTab === 7 && (
-            <div className="p-8 rounded-[40px] bg-card border border-border shadow-sm space-y-6 animate-in fade-in duration-300">
+            <div className="p-4 sm:p-6 md:p-8 rounded-3xl sm:rounded-[40px] bg-card border border-border shadow-sm space-y-6 animate-in fade-in duration-300">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
                 <div>
                   <h3 className="font-heading text-xl font-bold text-foreground">Mes Établissements &amp; Changement de Compte</h3>
