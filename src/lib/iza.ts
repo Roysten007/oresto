@@ -177,7 +177,20 @@ function getLocalIZIResponse(message: string, contextStr?: string, mode: IZAMode
     };
   }
 
-  // 5. Salutations
+  // 5. Site vitrine, activation & lien public
+  if (msg.includes("site") || msg.includes("lien") || msg.includes("vitrine") || msg.includes("fonctionnel") || msg.includes("en ligne") || msg.includes("adresse") || msg.includes("url") || msg.includes("partager")) {
+    const slug = ctx.slug || "boutique";
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    const siteUrl = ctx.publicSiteUrl || (origin ? `${origin}/r/${slug}` : `/r/${slug}`);
+    return {
+      text: `🌐 **Vitrine en ligne de ${ctx.vendorName} :**\n\n` +
+        `• **Statut :** 🟢 **100% Fonctionnel & En ligne**\n` +
+        `• **Lien public direct :** [${siteUrl}](${siteUrl})\n\n` +
+        `Partagez ce lien à vos clients sur WhatsApp ou vos réseaux sociaux : ils peuvent consulter votre carte, passer commande et régler directement par Mobile Money sans commission !`,
+    };
+  }
+
+  // 6. Salutations
   if (msg.includes("bonjour") || msg.includes("salut") || msg.includes("hello") || msg.includes("coucou") || msg.includes("qui es-tu") || msg.includes("aide")) {
     return {
       text: `Bonjour ${ctx.userName || "Chef"} ! 👋 Je suis **IZI IA**, votre assistant opérationnel dédié à **${ctx.vendorName}**.\n\n` +

@@ -4,7 +4,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { db } from "@/lib/firebase";
-import { ref, update, push, get } from "firebase/database";
+import { ref, update, push, get, set } from "firebase/database";
+import { slugify } from "@/lib/slugify";
 
 interface Message {
   role: "user" | "assistant";
@@ -119,6 +120,8 @@ export default function AIChatBot({ mode = "dashboard" }: AIChatBotProps) {
     }
 
     // Données de base depuis le profil
+    const initialSlug = vendorProfile?.slug || slugify(currentVendorName) || vId;
+    const siteOrigin = typeof window !== "undefined" ? window.location.origin : "";
     let contextData: any = {
       userName: user?.name || "Chef",
       role: user?.role || "vendor",
@@ -126,6 +129,10 @@ export default function AIChatBot({ mode = "dashboard" }: AIChatBotProps) {
       vendorName: currentVendorName,
       business_type: businessType,
       isOpen: vendorProfile?.open !== false,
+      is_published: vendorProfile?.is_published !== false,
+      slug: initialSlug,
+      publicSiteUrl: `${siteOrigin}/r/${initialSlug}`,
+      siteRelativeUrl: `/r/${initialSlug}`,
       rating: vendorProfile?.rating || 5.0,
       reviewCount: vendorProfile?.reviewCount || 0,
       // Métriques (seront recalculées depuis Firebase si disponible)
@@ -155,6 +162,11 @@ export default function AIChatBot({ mode = "dashboard" }: AIChatBotProps) {
           const v = vendorSnap.val();
           contextData.vendorName = v.name || contextData.vendorName;
           contextData.isOpen = v.open !== undefined ? v.open : contextData.isOpen;
+          contextData.is_published = v.is_published !== false;
+          const liveSlug = v.slug || slugify(v.name || currentVendorName) || vId;
+          contextData.slug = liveSlug;
+          contextData.publicSiteUrl = `${siteOrigin}/r/${liveSlug}`;
+          contextData.siteRelativeUrl = `/r/${liveSlug}`;
           contextData.rating = v.rating || contextData.rating;
           contextData.reviewCount = v.reviewCount || contextData.reviewCount;
           contextData.phone = v.phone || v.whatsapp || "";
@@ -278,7 +290,47 @@ export default function AIChatBot({ mode = "dashboard" }: AIChatBotProps) {
     const results: string[] = [];
     for (const call of calls) {
       try {
-        if (call.name === "update_product_price" && db) {
+        if (call.name === "publish_or_activate_site" && db) {
+          const snap = await get(ref(db, `vendors/${vId}`));
+          const currentData = snap.exists() ? snap.val() : {};
+          const chosenSlug = call.args.slug ? slugify(call.args.slug) : (currentData.slug || slugify(currentData.name || currentVendorName) || vId);
+          await update(ref(db, `vendors/${vId}`), {
+            isOpen: true,
+            open: true,
+            is_published: true,
+            status: "active",
+            slug: chosenSlug,
+          });
+          await set(ref(db, `slugs/${chosenSlug}`), { vendorId: vId });
+          const origin = typeof window !== "undefined" ? window.location.origin : "";
+          const fullUrl = `${origin}/r/${chosenSlug}`;
+          results.push(`🎉 **Votre vitrine en ligne est désormais 100% active et fonctionnelle !**\n\n🔗 **Lien direct pour vos clients :** [${fullUrl}](${fullUrl})\n\n💡 Vos clients peuvent dès maintenant consulter votre carte/catalogue, passer commande et régler directement par Mobile Money sans commission.`);
+        }
+        else if (call.name === "get_store_link" && db) {
+          const snap = await get(ref(db, `vendors/${vId}`));
+          const currentData = snap.exists() ? snap.val() : {};
+          const currentSlug = currentData.slug || slugify(currentData.name || currentVendorName) || vId;
+          const origin = typeof window !== "undefined" ? window.location.origin : "";
+          const fullUrl = `${origin}/r/${currentSlug}`;
+          results.push(`🔗 **Lien public de votre établissement :**\n[${fullUrl}](${fullUrl})\n\n📱 Partagez ce lien à vos clients sur WhatsApp, Facebook ou Instagram pour recevoir des commandes directes.`);
+        }
+        else if (call.name === "update_store_info" && db) {
+          const updates: any = {};
+          if (call.args.name) updates.name = call.args.name;
+          if (call.args.description) updates.description = call.args.description;
+          if (call.args.phone) updates.phone = call.args.phone;
+          if (call.args.whatsapp) updates.whatsapp = call.args.whatsapp;
+          if (call.args.city) updates.city = call.args.city;
+          if (call.args.neighborhood) updates.neighborhood = call.args.neighborhood;
+          if (call.args.slug) {
+            const newSlug = slugify(call.args.slug);
+            updates.slug = newSlug;
+            await set(ref(db, `slugs/${newSlug}`), { vendorId: vId });
+          }
+          await update(ref(db, `vendors/${vId}`), updates);
+          results.push(`✅ Les informations de votre établissement ont été mises à jour avec succès.`);
+        }
+        else if (call.name === "update_product_price" && db) {
           await update(ref(db, `products/${call.args.productId}`), { price: Number(call.args.newPrice) });
           let pName = call.args.productName;
           if (!pName) {

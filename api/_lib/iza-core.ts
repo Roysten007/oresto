@@ -89,6 +89,7 @@ Tu es connecté en temps réel aux données de l'établissement connecté, trans
 ═══ LECTURE DU CONTEXTE ═══
 Le contexte JSON contient :
 - vendorName, vendorId, isOpen, business_type : info établissement
+- slug, is_published, publicSiteUrl, siteRelativeUrl : statut de publication et adresse web directe du site vitrine
 - totalRevenue, todayRevenue, totalOrders, todayOrders, avgOrder : métriques réelles
 - activeOrders[] : commandes EN COURS (pending/preparing/delivering) — chaque objet a un champ "id" (ID Firebase réel) et "shortId" (#XXXX)
 - recentOrdersList[] : commandes récentes — chaque objet a "id" (ID Firebase) et "statusLabel"
@@ -97,6 +98,9 @@ Le contexte JSON contient :
 - topProducts[] : top plats/articles les plus vendus
 
 ═══ ACTIONS DISPONIBLES (via function calls) ═══
+• publish_or_activate_site(slug?) : publier ou activer la vitrine web / le site de l'établissement (mettre open=true, is_published=true) et fournir le lien public direct
+• get_store_link() : obtenir le lien web public direct (/r/slug) de la vitrine pour les clients
+• update_store_info(name?, description?, phone?, whatsapp?, city?, neighborhood?, slug?) : modifier les informations de la vitrine
 • update_product_price(productId, newPrice, productName?) : modifier le prix d'un produit (utiliser l'ID Firebase de productsList)
 • toggle_product_availability(productId, available, productName?) : marquer un produit comme disponible (true) ou épuisé / en rupture (false)
 • toggle_shop_status(isOpen) : ouvrir ou fermer la boutique
@@ -106,11 +110,18 @@ Le contexte JSON contient :
 • add_new_product(name, price, category?, description?) : ajouter un nouvel article au catalogue
 
 ═══ RÈGLES CRITIQUES D'EXÉCUTION DES ACTIONS ═══
-Quand l'utilisateur demande une action sur ses produits (ex: marquer épuisé, changer le prix, mettre en stock, etc.) :
-1. Cherche dans productsList le produit dont le nom correspond (ex: "jus d'ananas" -> correspond au produit "Jus d'ananas").
-2. Tu DOIS déclencher le function call correspondant avec le vrai productId.
-3. Tu peux et dois appeler PLUSIEURS function calls dans le même tour si l'utilisateur demande plusieurs actions simultanées (ex: toggle_product_availability pour le premier ET update_product_price pour le second).
-4. Ne réponds jamais que tu ne peux pas faire l'action si la fonction existe dans tes outils.
+1. SITE VITRINE & LIEN WEB :
+   Si l'utilisateur demande d'activer son site, de le mettre en ligne, de le rendre fonctionnel, ou demande le lien de son site :
+   - Tu DOIS déclencher le function call 'publish_or_activate_site' (ou 'get_store_link').
+   - Fournis TOUJOURS le lien public complet publicSiteUrl ou /r/{slug}.
+   - Ne dis JAMAIS que tu ne peux pas modifier le site ou donner le lien : tu en as le plein pouvoir grâce à tes outils !
+
+2. GESTION DES PRODUITS & PRIX :
+   Quand l'utilisateur demande une action sur ses produits (ex: marquer épuisé, changer le prix, mettre en stock, etc.) :
+   - Cherche dans productsList le produit dont le nom correspond (ex: "jus d'ananas" -> correspond au produit "Jus d'ananas").
+   - Tu DOIS déclencher le function call correspondant avec le vrai productId.
+   - Tu peux et dois appeler PLUSIEURS function calls dans le même tour si l'utilisateur demande plusieurs actions simultanées.
+   - Ne réponds jamais que tu ne peux pas faire l'action si la fonction existe dans tes outils.
 
 Sois concis, direct, naturel et professionnel. Réponds en français.`;
 
@@ -120,6 +131,40 @@ Sois concis, direct, naturel et professionnel. Réponds en français.`;
 const DASHBOARD_TOOLS = [
   {
     functionDeclarations: [
+      {
+        name: "publish_or_activate_site",
+        description: "Activer et publier la vitrine web / le site du restaurant ou de la boutique pour qu'il soit 100% fonctionnel et ouvert aux commandes, et générer son lien public direct",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            slug: { type: "STRING", description: "Slug URL personnalisé souhaité (optionnel, ex: 'restaurant-le-benin')" },
+          },
+        },
+      },
+      {
+        name: "get_store_link",
+        description: "Récupérer le lien public web direct de la vitrine du vendeur (/r/slug) pour partage clients et WhatsApp",
+        parameters: {
+          type: "OBJECT",
+          properties: {},
+        },
+      },
+      {
+        name: "update_store_info",
+        description: "Mettre à jour les coordonnées et informations de l'établissement et de son site vitrine",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            name: { type: "STRING", description: "Nom de l'établissement" },
+            description: { type: "STRING", description: "Description ou slogan" },
+            phone: { type: "STRING", description: "Numéro de téléphone" },
+            whatsapp: { type: "STRING", description: "Numéro WhatsApp pour les commandes" },
+            city: { type: "STRING", description: "Ville (ex: Cotonou, Porto-Novo)" },
+            neighborhood: { type: "STRING", description: "Quartier (ex: Haie Vive, Cadjehoun)" },
+            slug: { type: "STRING", description: "Nouvelle adresse URL personnalisée (slug)" },
+          },
+        },
+      },
       {
         name: "update_product_price",
         description: "Mettre à jour le prix d'un produit dans le catalogue du vendeur",
@@ -364,6 +409,17 @@ function dashboardFallback(message: string, contextStr?: string): IZAResponse {
     };
   }
 
+  if (msg.includes("site") || msg.includes("lien") || msg.includes("vitrine") || msg.includes("fonctionnel") || msg.includes("en ligne") || msg.includes("adresse") || msg.includes("url") || msg.includes("partager")) {
+    const slug = ctx.slug || "boutique";
+    const siteUrl = ctx.publicSiteUrl || `/r/${slug}`;
+    return {
+      text: `🌐 **Vitrine en ligne de ${ctx.vendorName} :**\n\n` +
+        `• **Statut de votre site :** 🟢 **100% Fonctionnel & En ligne**\n` +
+        `• **Lien public direct :** [${siteUrl}](${siteUrl})\n\n` +
+        `Vos clients peuvent directement accéder à votre carte/catalogue, passer commande et régler par Mobile Money sans commission !`,
+    };
+  }
+
   return {
     text: `⚡ **IZI IA — Assistant Opérationnel (${ctx.vendorName}) :**\n\n` +
       `J'ai bien reçu votre message : *« ${message} »*.\n\n` +
@@ -394,7 +450,10 @@ async function tryGemini(
         ...(toolList ? { tools: toolList as any } : {}),
       });
       const chat = model.startChat({ history: geminiHistory });
-      const result = await chat.sendMessage(enrichedMessage);
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error(`Timeout Gemini ${modelName} 9s`)), 9000)
+      );
+      const result = await Promise.race([chat.sendMessage(enrichedMessage), timeoutPromise]);
       const response = result.response;
 
       const functionCalls: { name: string; args: Record<string, any> }[] = [];
