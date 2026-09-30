@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { VendorProfile } from "@/data/mockData";
 import { Star, MessageSquarePlus, CheckCircle2, X } from "lucide-react";
 import { toast } from "sonner";
@@ -39,6 +39,16 @@ export default function ReviewsSection({ vendor, businessType }: Props) {
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && showModal) {
+        setShowModal(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showModal]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -153,8 +163,13 @@ export default function ReviewsSection({ vendor, businessType }: Props) {
           <div className="bg-white w-full max-w-md rounded-3xl p-6 space-y-5 shadow-2xl animate-in fade-in zoom-in duration-200">
             <div className="flex items-center justify-between border-b border-gray-100 pb-3">
               <h3 className="font-heading font-black text-base text-gray-900">Votre Avis Compte</h3>
-              <button onClick={() => setShowModal(false)} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600">
-                <X size={16} />
+              <button
+                type="button"
+                onClick={() => setShowModal(false)}
+                className="w-11 h-11 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 transition-colors"
+                aria-label="Fermer la boîte d'avis"
+              >
+                <X size={18} />
               </button>
             </div>
 

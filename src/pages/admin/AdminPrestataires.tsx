@@ -90,6 +90,16 @@ export default function AdminPrestataires() {
     };
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && selectedPrestataire) {
+        setSelectedPrestataire(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedPrestataire]);
+
   // Calculs par prestataire
   const prestatairesWithStats = prestataires.map(p => {
     const myClients = vendors.filter(v => v.prestataire_id === p.uid || v.referral_code === p.code_referral);
@@ -361,10 +371,12 @@ export default function AdminPrestataires() {
                 </p>
               </div>
               <button
+                type="button"
                 onClick={() => setSelectedPrestataire(null)}
-                className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200"
+                className="w-11 h-11 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors"
+                aria-label="Fermer la fiche apporteur d'affaires"
               >
-                <X size={16} />
+                <X size={18} />
               </button>
             </div>
 

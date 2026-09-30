@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Product, ProductVariant } from "@/data/mockData";
 import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "@/lib/firebase";
@@ -28,6 +28,16 @@ export default function StepEcommerceCatalogue({ products, vendorId, onSave, onD
   const [editing, setEditing] = useState<Partial<Product> | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && editing) {
+        setEditing(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [editing]);
 
   // Variant editing temporary states
   const [newVariantName, setNewVariantName] = useState("");
@@ -332,10 +342,12 @@ export default function StepEcommerceCatalogue({ products, vendorId, onSave, onD
                 </p>
               </div>
               <button 
+                type="button"
                 onClick={() => setEditing(null)} 
-                className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 text-gray-600 text-xs"
+                className="w-11 h-11 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 text-gray-600 transition-colors"
+                aria-label="Fermer la fiche produit"
               >
-                <i className="fa-solid fa-xmark"></i>
+                <i className="fa-solid fa-xmark text-sm"></i>
               </button>
             </div>
 

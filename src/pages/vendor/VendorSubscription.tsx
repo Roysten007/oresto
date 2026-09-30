@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase";
 import { 
@@ -19,6 +19,16 @@ export default function VendorSubscription() {
   const { vendorProfile } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && showPaymentModal) {
+        setShowPaymentModal(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showPaymentModal]);
 
   const subStatus = vendorProfile?.subscriptionStatus || "trial";
   
@@ -269,8 +279,10 @@ export default function VendorSubscription() {
                 </div>
               </div>
               <button 
+                type="button"
                 onClick={() => setShowPaymentModal(false)}
-                className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 hover:text-zinc-950"
+                className="w-11 h-11 rounded-full bg-zinc-100 hover:bg-zinc-200 flex items-center justify-center text-zinc-500 hover:text-zinc-950 transition-colors"
+                aria-label="Fermer la fenêtre de paiement"
               >
                 ✕
               </button>

@@ -61,6 +61,16 @@ export default function VendorCatalogue() {
     return () => unsubscribe();
   }, [user?.vendorId, vendorProfile?.id]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && showModal) {
+        setShowModal(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showModal]);
+
   const saveProductEcommerce = async (product: Partial<Product>) => {
     const vId = user?.vendorId || vendorProfile?.id || "v_demo";
     const productId = product.id || `prod_${Date.now()}`;
@@ -383,7 +393,14 @@ export default function VendorCatalogue() {
           <div className="relative bg-card w-full max-w-lg rounded-[32px] p-6 sm:p-8 space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <h3 className="font-heading text-lg font-black uppercase tracking-tight">{editingId ? "Modifier le plat" : "Nouveau plat"}</h3>
-              <button onClick={() => setShowModal(false)} className="w-8 h-8 rounded-full bg-muted flex items-center justify-center"><X size={16} /></button>
+              <button
+                type="button"
+                onClick={() => setShowModal(false)}
+                className="w-11 h-11 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center transition-colors"
+                aria-label="Fermer la fenêtre d'édition"
+              >
+                <X size={18} />
+              </button>
             </div>
 
             <div className="grid grid-cols-2 gap-4 text-xs">

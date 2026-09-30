@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAdmin } from "@/contexts/AdminContext";
 import { 
@@ -68,7 +68,14 @@ export default function AdminLayout() {
                 </span>
               </div>
             </Link>
-            <button className="md:hidden text-white/70 hover:text-white" onClick={() => setOpen(false)}><X size={20} /></button>
+            <button
+              type="button"
+              className="md:hidden text-white/70 hover:text-white w-11 h-11 flex items-center justify-center rounded-xl hover:bg-white/10 transition-colors"
+              onClick={() => setOpen(false)}
+              aria-label="Fermer le menu d'administration"
+            >
+              <X size={20} />
+            </button>
           </div>
 
           <nav className="flex-1 space-y-1.5 overflow-y-auto">
