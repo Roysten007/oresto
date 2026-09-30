@@ -21,10 +21,14 @@ function izaDevApiPlugin(env: Record<string, string>): Plugin {
           return;
         }
 
-        const apiKey = process.env.GEMINI_API_KEY || env.GEMINI_API_KEY;
-        if (!apiKey) {
+        const keys = {
+          gemini: process.env.GEMINI_API_KEY || env.GEMINI_API_KEY,
+          nvidia: process.env.NVIDIA_API_KEY || env.NVIDIA_API_KEY,
+          mistral: process.env.MISTRAL_API_KEY || env.MISTRAL_API_KEY,
+        };
+        if (!keys.gemini && !keys.nvidia && !keys.mistral) {
           res.statusCode = 500;
-          res.end(JSON.stringify({ error: "GEMINI_API_KEY manquante (ajoute-la dans .env.local ou .env)" }));
+          res.end(JSON.stringify({ error: "Aucune clé API configurée (GEMINI_API_KEY ou NVIDIA_API_KEY requise dans .env.local)" }));
           return;
         }
 
@@ -34,7 +38,7 @@ function izaDevApiPlugin(env: Record<string, string>): Plugin {
           const body = JSON.parse(Buffer.concat(chunks).toString("utf-8") || "{}");
 
           const { runIZA } = await server.ssrLoadModule("/api/_lib/iza-core.ts");
-          const result = await runIZA(body, apiKey);
+          const result = await runIZA(body, keys);
           res.end(JSON.stringify(result));
         } catch (error: any) {
           res.statusCode = 500;

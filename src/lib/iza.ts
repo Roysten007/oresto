@@ -25,14 +25,15 @@ function getLocalIZIResponse(message: string, contextStr?: string, mode: IZAMode
       };
     }
 
-    if (msg.includes("prix") || msg.includes("tarif") || msg.includes("combien") || msg.includes("abonnement") || msg.includes("formule") || msg.includes("coûte") || msg.includes("coute")) {
+    if (msg.includes("prix") || msg.includes("tarif") || msg.includes("combien") || msg.includes("abonnement") || msg.includes("formule") || msg.includes("coûte") || msg.includes("coute") || msg.includes("pack")) {
       return {
-        text: `💰 **Tarifs transparents Oresto Connect :**\n\n` +
-          `• **Formule Starter :** Gratuite à vie (idéale pour débuter et tester).\n` +
-          `• **Formule Pro :** **5 000 FCFA / mois** seulement (ou 50 000 FCFA / an avec 2 mois offerts).\n` +
-          `• **Essai gratuit :** 14 jours complets en Formule Pro offerts, sans carte bancaire ni engagement.\n` +
-          `• **0% de commission :** Oresto ne prend aucun pourcentage sur vos ventes.\n\n` +
-          `👉 Démarrez votre essai gratuit en 2 minutes sur **/register**`,
+        text: `💰 **Tarifs transparents Oresto Connect (0% commission) :**\n\n` +
+          `Profitez de **14 jours d'essai gratuit** (0 FCFA) sans carte bancaire pour tester toutes les fonctionnalités !\n\n` +
+          `• **1 Établissement (Solo) :** **5 000 FCFA / mois** — formule tout inclus (vitrine web, QR Code, commandes directes, reçus certifiés, Mobile Money, IZI IA).\n` +
+          `• **2 Établissements (Duo - Le plus populaire) :** **9 000 FCFA / mois** (soit *4 500 FCFA / mois* par établissement).\n` +
+          `• **3 Établissements (Trio - Multi-activités) :** **12 000 FCFA / mois** (soit *4 000 FCFA / mois* par établissement, ex: restaurant + boutique + résidence).\n\n` +
+          `✨ **0% de commission** sur tous vos encaissements. Sans engagement, résiliable en 1 clic.\n\n` +
+          `👉 Démarrez votre essai gratuit de 14 jours sur **/register**`,
       };
     }
 

@@ -279,8 +279,29 @@ export default function AIChatBot({ mode = "dashboard" }: AIChatBotProps) {
     for (const call of calls) {
       try {
         if (call.name === "update_product_price" && db) {
-          await update(ref(db, `products/${call.args.productId}`), { price: call.args.newPrice });
-          results.push(`✅ Prix du produit mis à jour à ${call.args.newPrice} F`);
+          await update(ref(db, `products/${call.args.productId}`), { price: Number(call.args.newPrice) });
+          let pName = call.args.productName;
+          if (!pName) {
+            try {
+              const snap = await get(ref(db, `products/${call.args.productId}`));
+              if (snap.exists()) pName = snap.val()?.name;
+            } catch {}
+          }
+          const label = pName ? ` de « ${pName} »` : "";
+          results.push(`✅ Prix${label} mis à jour à ${Number(call.args.newPrice).toLocaleString("fr-FR")} FCFA.`);
+        }
+        else if (call.name === "toggle_product_availability" && db) {
+          const isAvail = Boolean(call.args.available);
+          await update(ref(db, `products/${call.args.productId}`), { available: isAvail });
+          let pName = call.args.productName;
+          if (!pName) {
+            try {
+              const snap = await get(ref(db, `products/${call.args.productId}`));
+              if (snap.exists()) pName = snap.val()?.name;
+            } catch {}
+          }
+          const label = pName ? `« ${pName} »` : "Le produit";
+          results.push(`✅ ${label} marqué ${isAvail ? "disponible (en stock)" : "épuisé / indisponible"}.`);
         }
         else if (call.name === "toggle_shop_status" && db) {
           await update(ref(db, `vendors/${vId}`), { isOpen: call.args.isOpen, open: call.args.isOpen });
@@ -308,7 +329,7 @@ export default function AIChatBot({ mode = "dashboard" }: AIChatBotProps) {
             vendorId: vId, name: call.args.name, price: call.args.price, 
             category: call.args.category || (isEcommerce ? "Mode" : "Plats"), available: true
           });
-          results.push(`✅ Article "${call.args.name}" ajouté à ${call.args.price}F.`);
+          results.push(`✅ Article "${call.args.name}" ajouté à ${Number(call.args.price).toLocaleString("fr-FR")} FCFA.`);
         }
         else {
           results.push(`⚠️ Action complétée.`);
@@ -337,7 +358,9 @@ export default function AIChatBot({ mode = "dashboard" }: AIChatBotProps) {
       if (functionCalls && functionCalls.length > 0) {
         const results = await executeTools(functionCalls);
         const resultsText = results.join("\n");
-        finalContent = replyText ? `${replyText}\n\n${resultsText}` : resultsText;
+        finalContent = replyText 
+          ? `${replyText}\n\n${resultsText}` 
+          : `⚡ **Opérations effectuées avec succès :**\n\n${resultsText}`;
       }
       if (!finalContent) {
         finalContent = "Désolé, je n'ai pas pu générer de réponse. Réessayez.";

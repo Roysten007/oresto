@@ -39,11 +39,14 @@ Ton rôle est de répondre de façon humaine, claire, dynamique et précise aux 
    La plateforme digitale tout-en-un pour restaurants, fast-foods, maquis, bars, traiteurs, boutiques e-commerce et résidences/hôtels au Bénin et en Afrique de l'Ouest.
    Elle permet de créer sa vitrine en ligne en quelques clics, recevoir des commandes directes des clients, imprimer des tickets/reçus de caisse, encaisser par Mobile Money sans commission, et piloter son activité avec IZI IA.
 
-2. Tarifs et Formules réelles :
-   • Essai gratuit : 14 jours complets en Formule Pro offerts, sans carte bancaire ni engagement.
-   • Formule Starter : Gratuite à vie (pour tester et démarrer les bases).
-   • Formule Pro : Seulement 5 000 FCFA / mois (ou formule annuelle avantageuse avec 2 mois offerts).
-     Inclus : catalogue illimité, site vitrine personnalisé avec QR codes de table, gestion des commandes en temps réel, alertes WhatsApp/SMS, reçus imprimables et thermiques 80mm, et IZI IA assistant opérationnel complet.
+2. Tarifs et Formules officielles exactes (100% transparents, 0% commission) :
+   • Essai gratuit : 14 jours complets offerts (0 FCFA), sans carte bancaire ni engagement, annulation en 1 clic.
+   • Formule 1 Établissement (Solo) : 5 000 FCFA / mois — Tout inclus : vitrine web personnalisée, QR Codes HD de table/comptoir, commandes en direct, alertes WhatsApp/SMS, reçus imprimables 80mm, encaissements Mobile Money (MTN, MoMo, Moov, Celtiis) et assistant opérationnel IZI IA 24h/24.
+   • Formule 2 Établissements (Duo - Le plus populaire) : 9 000 FCFA / mois (soit 4 500 FCFA / mois par établissement). Les 2 établissements ont des espaces et vitrines 100% indépendants.
+   • Formule 3 Établissements (Trio - Multi-activités) : 12 000 FCFA / mois (soit 4 000 FCFA / mois par établissement, idéal par ex. Restaurant + Boutique + Résidence meublée).
+   • Au-delà de 3 établissements : tarif dégressif personnalisé sur demande.
+   • POLITIQUE 0% DE COMMISSION : Oresto ne prélève AUCUNE commission sur vos ventes. 100% de l'argent réglé par vos clients arrive directement sur vos comptes Mobile Money.
+   • Il n'y a PAS de frais cachés, PAS d'engagement.
 
 3. Paiements Mobile Money :
    • Compatible avec MTN MoMo, Moov Money, Celtiis Cash (les 3 opérateurs au Bénin).
@@ -94,12 +97,20 @@ Le contexte JSON contient :
 - topProducts[] : top plats/articles les plus vendus
 
 ═══ ACTIONS DISPONIBLES (via function calls) ═══
-• update_product_price(productId, newPrice) : modifier le prix d'un produit (utiliser l'ID Firebase de productsList)
+• update_product_price(productId, newPrice, productName?) : modifier le prix d'un produit (utiliser l'ID Firebase de productsList)
+• toggle_product_availability(productId, available, productName?) : marquer un produit comme disponible (true) ou épuisé / en rupture (false)
 • toggle_shop_status(isOpen) : ouvrir ou fermer la boutique
 • update_order_status(orderId, newStatus) : changer le statut d'une commande (pending, preparing, delivering, delivered, cancelled)
 • create_promo(code, discount, minOrder?) : créer un code promo
 • send_notification(message, target, notifType?) : envoyer une notification
 • add_new_product(name, price, category?, description?) : ajouter un nouvel article au catalogue
+
+═══ RÈGLES CRITIQUES D'EXÉCUTION DES ACTIONS ═══
+Quand l'utilisateur demande une action sur ses produits (ex: marquer épuisé, changer le prix, mettre en stock, etc.) :
+1. Cherche dans productsList le produit dont le nom correspond (ex: "jus d'ananas" -> correspond au produit "Jus d'ananas").
+2. Tu DOIS déclencher le function call correspondant avec le vrai productId.
+3. Tu peux et dois appeler PLUSIEURS function calls dans le même tour si l'utilisateur demande plusieurs actions simultanées (ex: toggle_product_availability pour le premier ET update_product_price pour le second).
+4. Ne réponds jamais que tu ne peux pas faire l'action si la fonction existe dans tes outils.
 
 Sois concis, direct, naturel et professionnel. Réponds en français.`;
 
@@ -115,10 +126,24 @@ const DASHBOARD_TOOLS = [
         parameters: {
           type: "OBJECT",
           properties: {
-            productId: { type: "STRING", description: "ID du produit à modifier" },
+            productId: { type: "STRING", description: "ID Firebase du produit à modifier" },
+            productName: { type: "STRING", description: "Nom du produit (optionnel, ex: 'Jus de bissap')" },
             newPrice: { type: "NUMBER", description: "Nouveau prix en FCFA" },
           },
           required: ["productId", "newPrice"],
+        },
+      },
+      {
+        name: "toggle_product_availability",
+        description: "Marquer un produit comme disponible (en stock) ou épuisé / en rupture dans le catalogue du vendeur",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            productId: { type: "STRING", description: "ID Firebase du produit (trouvé dans productsList)" },
+            productName: { type: "STRING", description: "Nom du produit (optionnel, ex: 'Jus d'ananas')" },
+            available: { type: "BOOLEAN", description: "true pour en stock / disponible, false pour épuisé / rupture" },
+          },
+          required: ["productId", "available"],
         },
       },
       {
@@ -207,14 +232,15 @@ function landingFallback(message: string): IZAResponse {
     };
   }
 
-  if (msg.includes("prix") || msg.includes("tarif") || msg.includes("combien") || msg.includes("abonnement") || msg.includes("formule") || msg.includes("coûte") || msg.includes("coute")) {
+  if (msg.includes("prix") || msg.includes("tarif") || msg.includes("combien") || msg.includes("abonnement") || msg.includes("formule") || msg.includes("coûte") || msg.includes("coute") || msg.includes("pack")) {
     return {
-      text: `💰 **Tarifs transparents Oresto Connect :**\n\n` +
-        `• **Formule Starter :** Gratuit à vie — idéale pour tester et créer sa première vitrine.\n` +
-        `• **Formule Pro :** **5 000 FCFA / mois** seulement (ou 50 000 FCFA / an avec 2 mois offerts).\n` +
-        `• **Essai gratuit :** 14 jours complets en Formule Pro offerts, sans carte bancaire ni engagement.\n` +
-        `• **0% de commission :** Oresto ne prend aucun pourcentage sur vos ventes (100% de la marge pour vous).\n\n` +
-        `👉 Démarrez votre essai gratuit en 2 minutes sur **/register**`,
+      text: `💰 **Tarifs transparents Oresto Connect (0% commission) :**\n\n` +
+        `Profitez de **14 jours d'essai gratuit** (0 FCFA) sans carte bancaire pour tester toutes les fonctionnalités !\n\n` +
+        `• **1 Établissement (Solo) :** **5 000 FCFA / mois** — formule tout inclus (vitrine web, QR Code, commandes directes, reçus certifiés, Mobile Money, IZI IA).\n` +
+        `• **2 Établissements (Duo - Le plus populaire) :** **9 000 FCFA / mois** (soit *4 500 FCFA / mois* par établissement).\n` +
+        `• **3 Établissements (Trio - Multi-activités) :** **12 000 FCFA / mois** (soit *4 000 FCFA / mois* par établissement, ex: restaurant + boutique + résidence).\n\n` +
+        `✨ **0% de commission** prélevée sur vos encaissements. Sans engagement, annulation en 1 clic.\n\n` +
+        `👉 Démarrez votre essai gratuit de 14 jours sur **/register**`,
     };
   }
 
@@ -350,7 +376,7 @@ function dashboardFallback(message: string, contextStr?: string): IZAResponse {
 
 // ─── Provider : Gemini ────────────────────────────────────────────────────────
 
-const GEMINI_MODELS = ["gemini-2.5-flash", "gemini-3.8-flash", "gemini-2.5-flash-lite"];
+const GEMINI_MODELS = ["gemini-2.5-flash", "gemini-3.8-flash", "gemini-flash-latest", "gemini-2.5-flash-lite"];
 
 async function tryGemini(
   apiKey: string,
@@ -465,8 +491,9 @@ async function tryMistral(
 
 export async function runIZA(
   body: IZARequestBody,
-  keys: { gemini?: string; nvidia?: string; mistral?: string },
+  keysInput: { gemini?: string; nvidia?: string; mistral?: string } | string,
 ): Promise<IZAResponse> {
+  const keys = typeof keysInput === "string" ? { gemini: keysInput } : (keysInput || {});
   const { message, history = [], platformContext, mode = "dashboard" } = body || {} as IZARequestBody;
 
   if (!message || typeof message !== "string") {
