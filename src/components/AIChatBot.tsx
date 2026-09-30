@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { askIZA } from "@/lib/iza";
+import { askIZA, type IZAMode } from "@/lib/iza";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -18,7 +18,12 @@ const INITIAL_MESSAGE: Message = {
   timestamp: new Date().toISOString(),
 };
 
-export default function AIChatBot() {
+interface AIChatBotProps {
+  mode?: IZAMode;
+}
+
+export default function AIChatBot({ mode = "dashboard" }: AIChatBotProps) {
+  const isLanding = mode === "landing";
   const { user, vendorProfile } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
@@ -97,77 +102,149 @@ export default function AIChatBot() {
 
   const buildContext = async (): Promise<string> => {
     const vId = vendorProfile?.id || user?.vendorId || "v_demo";
-    
-    // Données métriques calculées en direct
+
+    // Données de base depuis le profil
     let contextData: any = {
-      userName: user?.name || (isEcommerce ? "Commerçant Pro" : isHotel ? "Gérant Résidence" : "Chef Restaurateur"),
+      userName: user?.name || "Chef",
       role: user?.role || "vendor",
       vendorId: vId,
       vendorName: currentVendorName,
       business_type: businessType,
-      totalRevenue: vendorProfile?.revenue || vendorProfile?.totalSales || (isEcommerce ? 1850000 : isHotel ? 2350000 : 1250000),
-      totalOrders: vendorProfile?.totalOrders || (isEcommerce ? 142 : isHotel ? 68 : 184),
-      todayRevenue: isEcommerce ? 125000 : isHotel ? 145000 : 87500,
-      todayOrders: isEcommerce ? 12 : isHotel ? 3 : 19,
-      avgOrder: isEcommerce ? 18500 : isHotel ? 45000 : 4600,
-      rating: vendorProfile?.rating || 4.9,
-      reviewCount: vendorProfile?.reviewCount || 48,
       isOpen: vendorProfile?.open !== false,
-      recentOrdersList: isEcommerce ? [
-        { id: "#COL-201", items: "Sneakers Streetwear Urban (T.42)", total: 18500, status: "En préparation", payment: "MTN MoMo (Reçu)" },
-        { id: "#COL-202", items: "Smartwatch Ultra Pro 4G AMOLED", total: 29000, status: "En expédition", payment: "Moov Money (Reçu)" },
-        { id: "#COL-203", items: "Robe Soirée Satin Prestige", total: 15000, status: "Livré", payment: "MTN MoMo (Reçu)" }
-      ] : [
-        { id: "#042", items: "Poulet Braisé & Alloco", total: 4500, status: "En cuisine", payment: "MTN MoMo (Reçu)" },
-        { id: "#041", items: "Capitaine Braisé Royal", total: 6500, status: "En livraison", payment: "Moov Money (Reçu)" },
-        { id: "#040", items: "Chawarma Viande & Frites", total: 2500, status: "Livré", payment: "Espèces" }
-      ],
-      productsList: []
+      rating: vendorProfile?.rating || 4.9,
+      reviewCount: vendorProfile?.reviewCount || 0,
+      // Métriques (seront recalculées depuis Firebase si disponible)
+      totalRevenue: 0,
+      totalOrders: 0,
+      todayRevenue: 0,
+      todayOrders: 0,
+      avgOrder: 0,
+      // Listes vides par défaut — remplies depuis Firebase
+      activeOrders: [],       // commandes en cours (cuisine / livraison)
+      recentOrdersList: [],   // 10 dernières commandes tous statuts
+      productsList: [],       // catalogue avec IDs réels pour les actions
+      lowStockAlerts: [],     // produits avec stock ≤ 3
+      topProducts: [],        // top 3 plats/produits les + vendus
     };
 
     if (db) {
       try {
-        const snap = await get(ref(db));
-        if (snap.exists()) {
-          const data = snap.val();
-          const myVendor = data.vendors?.[vId] || {};
-          if (myVendor.name) contextData.vendorName = myVendor.name;
-          if (myVendor.rating) contextData.rating = myVendor.rating;
-          if (myVendor.reviewCount) contextData.reviewCount = myVendor.reviewCount;
-          if (myVendor.open !== undefined) contextData.isOpen = myVendor.open;
+        const [ordersSnap, productsSnap, vendorSnap] = await Promise.all([
+          get(ref(db, "orders")),
+          get(ref(db, "products")),
+          get(ref(db, `vendors/${vId}`)),
+        ]);
 
-          const myProducts = Object.entries(data.products || {})
+        // ── Données vendeur ──────────────────────────────────────────────────
+        if (vendorSnap.exists()) {
+          const v = vendorSnap.val();
+          contextData.vendorName = v.name || contextData.vendorName;
+          contextData.isOpen = v.open !== undefined ? v.open : contextData.isOpen;
+          contextData.rating = v.rating || contextData.rating;
+          contextData.reviewCount = v.reviewCount || contextData.reviewCount;
+          contextData.phone = v.phone || v.whatsapp || "";
+          contextData.city = v.city || "";
+          contextData.plan = v.subscriptionPlan || v.plan || "pro";
+          contextData.subscriptionStatus = v.subscriptionStatus || "active";
+        }
+
+        // ── Produits / Catalogue ─────────────────────────────────────────────
+        if (productsSnap.exists()) {
+          const allProducts = productsSnap.val();
+          const myProducts = Object.entries(allProducts)
             .filter(([_, p]: any) => p.vendorId === vId)
-            .map(([id, p]: any) => ({ id, name: p.name, price: p.price, category: p.category, stock: p.stock }));
-          if (myProducts.length > 0) contextData.productsList = myProducts;
-
-          const myOrders = Object.entries(data.orders || {})
-            .filter(([_, o]: any) => o.vendorId === vId)
-            .map(([id, o]: any) => ({ id, ...o }));
-
-          if (myOrders.length > 0) {
-            const validOrders = myOrders.filter((o: any) => o.status !== "cancelled");
-            const totalRev = validOrders.reduce((sum: number, o: any) => sum + (Number(o.total) || 0), 0);
-            const totalCount = validOrders.length;
-            
-            const todayStart = new Date();
-            todayStart.setHours(0, 0, 0, 0);
-            const todayOrders = validOrders.filter((o: any) => new Date(o.date).getTime() >= todayStart.getTime());
-            const todayRev = todayOrders.reduce((sum: number, o: any) => sum + (Number(o.total) || 0), 0);
-
-            contextData.totalRevenue = totalRev > 0 ? totalRev : contextData.totalRevenue;
-            contextData.totalOrders = totalCount > 0 ? totalCount : contextData.totalOrders;
-            contextData.todayRevenue = todayRev > 0 ? todayRev : contextData.todayRevenue;
-            contextData.todayOrders = todayOrders.length > 0 ? todayOrders.length : contextData.todayOrders;
-            contextData.avgOrder = totalCount > 0 ? Math.round(totalRev / totalCount) : contextData.avgOrder;
-            contextData.recentOrdersList = myOrders.slice(0, 5).map((o: any) => ({
-              id: o.id ? `#${o.id.slice(-4)}` : "#---",
-              items: Array.isArray(o.items) ? o.items.map((i: any) => `${i.qty || i.quantity || 1}x ${i.name || "Article"}`).join(", ") : (o.item || "Commande"),
-              total: o.total || 0,
-              status: o.status === "preparing" ? "En préparation" : o.status === "delivering" ? "En livraison" : o.status === "delivered" ? "Livré" : "Reçue",
-              payment: o.paymentMethod || "MoMo"
+            .map(([id, p]: any) => ({
+              id,                         // ID Firebase réel — utilisé par update_product_price
+              name: p.name || "Article",
+              price: Number(p.price) || 0,
+              category: p.category || "Divers",
+              available: p.available !== false,
+              stock: p.stock ?? null,
+              description: p.description || "",
             }));
+
+          contextData.productsList = myProducts;
+
+          // Alertes stock faible (≤ 3 unités)
+          contextData.lowStockAlerts = myProducts
+            .filter(p => p.stock !== null && p.stock <= 3)
+            .map(p => ({ id: p.id, name: p.name, stock: p.stock }));
+        }
+
+        // ── Commandes ────────────────────────────────────────────────────────
+        if (ordersSnap.exists()) {
+          const allOrders = ordersSnap.val();
+          const myOrders: any[] = Object.entries(allOrders)
+            .filter(([_, o]: any) => o.vendorId === vId)
+            .map(([id, o]: any) => ({ id, ...o }))
+            .sort((a: any, b: any) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime());
+
+          const validOrders = myOrders.filter((o: any) => o.status !== "cancelled");
+
+          // Métriques globales
+          const totalRev = validOrders.reduce((sum: number, o: any) => sum + (Number(o.total) || 0), 0);
+          contextData.totalRevenue = totalRev;
+          contextData.totalOrders = validOrders.length;
+          contextData.avgOrder = validOrders.length > 0 ? Math.round(totalRev / validOrders.length) : 0;
+
+          // Métriques du jour
+          const todayStart = new Date();
+          todayStart.setHours(0, 0, 0, 0);
+          const todayOrdersList = validOrders.filter((o: any) => new Date(o.date || 0).getTime() >= todayStart.getTime());
+          contextData.todayRevenue = todayOrdersList.reduce((sum: number, o: any) => sum + (Number(o.total) || 0), 0);
+          contextData.todayOrders = todayOrdersList.length;
+
+          // Commandes ACTIVES — en cuisine ou en livraison (avec ID Firebase pour action)
+          const active = myOrders.filter((o: any) =>
+            o.status === "pending" || o.status === "preparing" || o.status === "delivering" || o.status === "confirmed"
+          );
+          contextData.activeOrders = active.map((o: any) => ({
+            id: o.id,                      // ID Firebase — utilisé par update_order_status
+            shortId: `#${o.id?.slice(-4) || "----"}`,
+            items: Array.isArray(o.items)
+              ? o.items.map((i: any) => `${i.qty || i.quantity || 1}x ${i.name || "Article"}`).join(", ")
+              : (o.item || "Commande"),
+            total: Number(o.total) || 0,
+            status: o.status,
+            statusLabel: o.status === "pending" ? "En attente" : o.status === "preparing" ? "En cuisine" : o.status === "delivering" ? "En livraison" : "Confirmée",
+            payment: o.paymentMethod || "MoMo",
+            clientName: o.clientName || o.userName || "Client",
+            date: o.date || new Date().toISOString(),
+            minutesAgo: o.date ? Math.floor((Date.now() - new Date(o.date).getTime()) / 60000) : 0,
+          }));
+
+          // 10 dernières commandes (tous statuts)
+          contextData.recentOrdersList = myOrders.slice(0, 10).map((o: any) => ({
+            id: o.id,
+            shortId: `#${o.id?.slice(-4) || "----"}`,
+            items: Array.isArray(o.items)
+              ? o.items.map((i: any) => `${i.qty || i.quantity || 1}x ${i.name || "Article"}`).join(", ")
+              : (o.item || "Commande"),
+            total: Number(o.total) || 0,
+            status: o.status,
+            statusLabel: o.status === "pending" ? "En attente" : o.status === "preparing" ? "En cuisine" : o.status === "delivering" ? "En livraison" : o.status === "delivered" ? "Livré" : o.status === "cancelled" ? "Annulée" : o.status,
+            payment: o.paymentMethod || "MoMo",
+            clientName: o.clientName || o.userName || "Client",
+            date: o.date || "",
+          }));
+
+          // Top produits (par nombre de ventes)
+          const salesCount: Record<string, { name: string; count: number; revenue: number }> = {};
+          for (const o of validOrders) {
+            if (Array.isArray(o.items)) {
+              for (const item of o.items) {
+                const name = item.name || "Article";
+                const qty = item.qty || item.quantity || 1;
+                const rev = (item.price || 0) * qty;
+                if (!salesCount[name]) salesCount[name] = { name, count: 0, revenue: 0 };
+                salesCount[name].count += qty;
+                salesCount[name].revenue += rev;
+              }
+            }
           }
+          contextData.topProducts = Object.values(salesCount)
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 3);
         }
       } catch (e) {
         console.warn("Erreur chargement context IZI:", e);
@@ -176,6 +253,7 @@ export default function AIChatBot() {
 
     return JSON.stringify(contextData);
   };
+
 
   const executeTools = async (calls: any[]): Promise<string[]> => {
     const results: string[] = [];
@@ -233,8 +311,9 @@ export default function AIChatBot() {
     setIsLoading(true);
 
     try {
-      const context = await buildContext();
-      const { text: replyText, functionCalls } = await askIZA(text, history, context);
+      // En mode landing : pas de contexte Firebase, on envoie juste le message
+      const context = isLanding ? undefined : await buildContext();
+      const { text: replyText, functionCalls } = await askIZA(text, history, context, mode);
 
       let finalContent = replyText;
       if (functionCalls && functionCalls.length > 0) {
@@ -264,7 +343,16 @@ export default function AIChatBot() {
     }
   };
 
-  const quickButtons = isEcommerce ? [
+  // Quick buttons selon le mode
+  const landingQuickButtons = [
+    { label: "💰 Tarifs & formules", q: "Quels sont les tarifs et formules d'Oresto ?" },
+    { label: "⚡ Fonctionnalités", q: "Qu'est-ce qu'Oresto peut faire pour mon restaurant ?" },
+    { label: "📱 Mobile Money", q: "Comment fonctionne le paiement Mobile Money sur Oresto ?" },
+    { label: "🚀 Comment démarrer", q: "Comment m'inscrire et démarrer mon essai gratuit ?" },
+    { label: "🤖 IZI IA", q: "C'est quoi IZI IA et comment ça m'aide ?" },
+  ];
+
+  const quickButtons = isLanding ? landingQuickButtons : isEcommerce ? [
     { label: "📊 Ventes du jour", q: "Quel est le chiffre d'affaires de ma boutique aujourd'hui et au total ?" },
     { label: "📦 Colis à expédier", q: "Fais-moi le point sur mes commandes et colis à livrer" },
     { label: "⚠️ Alertes stock", q: "Quels sont les articles bientôt en rupture de stock ?" },

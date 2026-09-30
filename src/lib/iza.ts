@@ -1,6 +1,6 @@
-import type { IZARequestBody, IZAResponse } from "../../api/_lib/iza-core";
+import type { IZARequestBody, IZAResponse, IZAMode } from "../../api/_lib/iza-core";
 
-export type { IZAResponse };
+export type { IZAResponse, IZAMode };
 
 /**
  * Moteur intelligent IZI IA connecté aux statistiques et opérations réelles de chaque secteur
@@ -161,14 +161,19 @@ function getLocalIZIResponse(message: string, contextStr?: string): IZAResponse 
 }
 
 /**
- * Service client IZI IA — communique avec le backend et bascule automatiquement sur le moteur local avec données exactes
+ * Service client IZI IA — communique avec le backend et bascule automatiquement sur le moteur local
+ * @param userMessage  Message de l'utilisateur
+ * @param history      Historique de la conversation
+ * @param platformContext  Données temps réel du vendeur (dashboard uniquement)
+ * @param mode         "landing" (FAQ Oresto) | "dashboard" (opérationnel)
  */
 export async function askIZA(
   userMessage: string,
   history: { role: string; content: string }[] = [],
   platformContext?: string,
+  mode: IZAMode = "dashboard",
 ): Promise<IZAResponse> {
-  const body: IZARequestBody = { message: userMessage, history, platformContext };
+  const body: IZARequestBody = { message: userMessage, history, platformContext, mode };
 
   try {
     const res = await fetch("/api/iza", {
@@ -191,4 +196,3 @@ export async function askIZA(
     return getLocalIZIResponse(userMessage, platformContext);
   }
 }
-

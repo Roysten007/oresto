@@ -79,7 +79,7 @@ export default function ProLanding() {
 
       {/* Assistant IA Flottant IZA */}
       <React.Suspense fallback={null}>
-        <AIChatBot />
+      <AIChatBot mode="landing" />
       </React.Suspense>
 
       {/* Footer officiel */}
