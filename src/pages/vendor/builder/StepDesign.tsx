@@ -40,7 +40,7 @@ export default function StepDesign({ formData, setFormData }: Props) {
         <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500">
           Palettes Recommandées
         </label>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
           {THEMES.map(t => {
             const isSelected = formData.primary_color === t.primary && formData.secondary_color === t.bg;
             return (

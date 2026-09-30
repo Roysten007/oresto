@@ -169,7 +169,7 @@ export default function TableReservationWidget({ vendor }: Props) {
                 <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
                   Emplacement préféré
                 </label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   {[
                     { id: "terrace", label: "Terrasse Aérée", icon: "fa-solid fa-umbrella-beach" },
                     { id: "indoor", label: "Salle Climatisée", icon: "fa-solid fa-snowflake" },

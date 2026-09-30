@@ -42,7 +42,7 @@ export default function AdminCategories() {
           <p className="font-body text-sm text-muted-foreground mt-1">Les catégories apparaîtront dès que les restaurants ajouteront des plats.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {categories.map(([cat, count]) => (
             <div key={cat} className="p-5 rounded-2xl bg-card border border-border flex items-center justify-between">
               <div>

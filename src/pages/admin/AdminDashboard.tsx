@@ -134,7 +134,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {kpis.map((k, i) => (
           <div key={i} className="p-5 rounded-[24px] bg-card border-l-4 border-l-primary border border-border shadow-sm hover:shadow-md transition-all">
             <div>{k.icon}</div>
@@ -145,9 +145,9 @@ export default function AdminDashboard() {
       </div>
 
       {/* Charts Row */}
-      <div className="grid md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Line Chart — Growth */}
-        <div className="p-5 rounded-[24px] bg-card border border-border md:col-span-2">
+        <div className="p-5 rounded-[24px] bg-card border border-border lg:col-span-2">
           <h3 className="font-heading font-semibold text-foreground mb-4 flex items-center gap-2">
             <i className="fa-solid fa-chart-line text-primary"></i> Croissance des inscriptions
           </h3>
