@@ -43,7 +43,7 @@ export default function ForgotPassword() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F8F9FA] p-4 font-body">
       <div className="w-full max-w-md text-center">
-        <Link to="/" className="inline-block font-heading text-3xl font-black text-primary mb-8 tracking-tight uppercase no-underline">
+        <Link to="/" className="inline-block font-heading text-2xl sm:text-3xl font-black text-primary mb-8 tracking-tight uppercase no-underline">
           ORESTO
         </Link>
         {sent ? (

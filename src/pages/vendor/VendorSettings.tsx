@@ -125,7 +125,7 @@ export default function VendorSettings() {
   return (
     <div className="space-y-8 pb-20 font-body">
       <div>
-        <h1 className="font-heading text-3xl font-black text-foreground tracking-tight uppercase">
+        <h1 className="font-heading text-2xl sm:text-3xl font-black text-foreground tracking-tight uppercase">
           Configuration <span className="text-primary">Boutique</span>
         </h1>
         <p className="font-sub text-xs text-muted-foreground uppercase tracking-widest font-bold mt-1">

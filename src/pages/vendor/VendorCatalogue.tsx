@@ -256,7 +256,7 @@ export default function VendorCatalogue() {
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="font-heading text-3xl font-black text-foreground tracking-tight uppercase">
+          <h1 className="font-heading text-2xl sm:text-3xl font-black text-foreground tracking-tight uppercase">
             Carte du <span className="text-primary">Restaurant</span>
           </h1>
           <p className="font-sub text-xs text-muted-foreground uppercase tracking-widest mt-1 font-bold">

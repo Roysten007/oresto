@@ -37,7 +37,7 @@ export default function AdminLogin() {
             <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center text-white shadow-xl shadow-primary/30">
               <i className="fa-solid fa-bolt text-xl"></i>
             </div>
-            <span className="font-heading text-3xl font-black tracking-tighter uppercase text-white">
+            <span className="font-heading text-2xl sm:text-3xl font-black tracking-tighter uppercase text-white">
               ORESTO
             </span>
           </Link>
