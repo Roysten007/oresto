@@ -35,6 +35,8 @@ export default function AboutSection({ vendor, businessType }: Props) {
               <img
                 src={vendor.about_image || vendor.logo_url || defaultImage}
                 alt={vendor.name}
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover"
               />
             </div>

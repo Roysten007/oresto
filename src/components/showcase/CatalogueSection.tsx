@@ -98,6 +98,8 @@ export default function CatalogueSection({ products, vendor, onSelectProduct, on
                   <img
                     src={p.image || (p.images?.[0] || "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&auto=format&fit=crop&q=80")}
                     alt={p.name}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
 

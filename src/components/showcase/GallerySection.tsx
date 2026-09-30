@@ -74,6 +74,8 @@ export default function GallerySection({ vendor, businessType }: Props) {
               <img
                 src={item.url}
                 alt={item.caption || "Galerie photo"}
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
               />
               

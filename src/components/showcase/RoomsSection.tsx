@@ -47,6 +47,8 @@ export default function RoomsSection({ rooms, vendor, onBookRoom }: Props) {
                   <img
                     src={room.image || (room.images?.[0] || "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800&auto=format&fit=crop&q=80")}
                     alt={room.name}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
 
