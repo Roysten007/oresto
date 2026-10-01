@@ -25,6 +25,8 @@ seed-test-accounts.mjs
 debug-page.mjs
 test-models.mjs
 list_models.ts
+serviceAccountKey.json
+*serviceAccount*.json
 
 # Editor directories and files
 .vscode/*
