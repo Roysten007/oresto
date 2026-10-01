@@ -55,6 +55,17 @@ export default function ProductDetailModal({
 
   const isOutOfStock = product.stock !== undefined && product.stock <= 0;
 
+  const isFlexible = product.priceType === "flexible" || (product.minPrice !== undefined && product.minPrice > 0);
+  const minPrice = product.minPrice || product.price || 150;
+  const step = product.priceStep || 50;
+  const [customAmount, setCustomAmount] = useState<number>(() => minPrice);
+
+  useEffect(() => {
+    if (product) {
+      setCustomAmount(product.minPrice || product.price || 150);
+    }
+  }, [product]);
+
   const handleVariantSelect = (variantName: string, option: string) => {
     setSelectedVariants(prev => ({ ...prev, [variantName]: option }));
   };
@@ -153,12 +164,24 @@ export default function ProductDetailModal({
 
               {/* Pricing section */}
               <div className="flex items-baseline gap-3 pt-1">
-                <span 
-                  className="font-heading font-black text-2xl sm:text-3xl"
-                  style={{ color: primaryColor }}
-                >
-                  {Number(product.price).toLocaleString()} FCFA
-                </span>
+                {isFlexible ? (
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">À partir de</span>
+                    <span 
+                      className="font-heading font-black text-2xl sm:text-3xl"
+                      style={{ color: primaryColor }}
+                    >
+                      {minPrice.toLocaleString()} FCFA
+                    </span>
+                  </div>
+                ) : (
+                  <span 
+                    className="font-heading font-black text-2xl sm:text-3xl"
+                    style={{ color: primaryColor }}
+                  >
+                    {Number(product.price).toLocaleString()} FCFA
+                  </span>
+                )}
                 {product.originalPrice && product.originalPrice > product.price && (
                   <span className="text-sm font-bold text-gray-400 line-through">
                     {Number(product.originalPrice).toLocaleString()} F
@@ -233,6 +256,72 @@ export default function ProductDetailModal({
               )}
             </div>
 
+            {/* Portion selector for flexible products */}
+            {isFlexible && (
+              <div className="space-y-2.5 pt-3 border-t border-gray-100 bg-orange-50/60 p-3.5 rounded-2xl border border-orange-200/70">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black uppercase tracking-wider text-gray-800">
+                    Montant de votre portion :
+                  </span>
+                  <span className="text-[11px] font-bold text-orange-600">
+                    Min. {minPrice.toLocaleString()} F
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-2 bg-white p-2 rounded-xl border border-orange-200">
+                  <button
+                    type="button"
+                    onClick={() => setCustomAmount(prev => Math.max(minPrice, prev - step))}
+                    disabled={customAmount <= minPrice}
+                    className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-40 flex items-center justify-center font-bold text-xs"
+                    aria-label="Diminuer portion"
+                  >
+                    <i className="fa-solid fa-minus"></i>
+                  </button>
+                  <div className="flex items-center gap-1 font-heading font-black text-lg text-gray-900">
+                    <input
+                      type="number"
+                      min={minPrice}
+                      step={step}
+                      value={customAmount}
+                      onChange={e => {
+                        const val = parseInt(e.target.value, 10);
+                        setCustomAmount(isNaN(val) ? minPrice : Math.max(0, val));
+                      }}
+                      className="w-20 text-center font-black bg-transparent outline-none border-b border-primary"
+                    />
+                    <span className="text-xs text-primary">FCFA</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setCustomAmount(prev => prev + step)}
+                    className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center font-bold text-xs"
+                    aria-label="Augmenter portion"
+                  >
+                    <i className="fa-solid fa-plus"></i>
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-1.5 pt-0.5">
+                  {Array.from(new Set([minPrice, minPrice + step, minPrice + step * 2, 500, 1000]))
+                    .filter(v => v >= minPrice)
+                    .slice(0, 5)
+                    .map(val => (
+                      <button
+                        key={val}
+                        type="button"
+                        onClick={() => setCustomAmount(val)}
+                        className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
+                          customAmount === val
+                            ? "bg-primary text-white shadow-xs"
+                            : "bg-white border border-gray-200 text-gray-700 hover:border-gray-400"
+                        }`}
+                      >
+                        {val.toLocaleString()} F
+                      </button>
+                    ))}
+                </div>
+              </div>
+            )}
+
             {/* Quantity Stepper & Actions */}
             <div className="space-y-3 pt-3 border-t border-gray-100">
               <div className="flex items-center justify-between">
@@ -261,7 +350,16 @@ export default function ProductDetailModal({
                   type="button"
                   disabled={isOutOfStock}
                   onClick={() => {
-                    onAddToCart(product, quantity, selectedVariants);
+                    const finalPrice = Math.max(minPrice, customAmount);
+                    const productToAdd: Product = isFlexible
+                      ? {
+                          ...product,
+                          id: `${product.id}_amt_${finalPrice}`,
+                          price: finalPrice,
+                          name: `${product.name} (Portion ${finalPrice.toLocaleString()} FCFA)`
+                        }
+                      : product;
+                    onAddToCart(productToAdd, quantity, selectedVariants);
                     onClose();
                   }}
                   className="flex-1 py-3.5 px-4 rounded-2xl bg-black text-white font-black text-xs uppercase tracking-wider hover:bg-gray-800 transition-all flex items-center justify-center gap-2 shadow-md active:scale-95 disabled:opacity-50"
@@ -275,7 +373,16 @@ export default function ProductDetailModal({
                     type="button"
                     disabled={isOutOfStock}
                     onClick={() => {
-                      onInstantBuy(product, quantity, selectedVariants);
+                      const finalPrice = Math.max(minPrice, customAmount);
+                      const productToAdd: Product = isFlexible
+                        ? {
+                            ...product,
+                            id: `${product.id}_amt_${finalPrice}`,
+                            price: finalPrice,
+                            name: `${product.name} (Portion ${finalPrice.toLocaleString()} FCFA)`
+                          }
+                        : product;
+                      onInstantBuy(productToAdd, quantity, selectedVariants);
                       onClose();
                     }}
                     className="flex-1 py-3.5 px-4 rounded-2xl text-white font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-lg active:scale-95 disabled:opacity-50"
