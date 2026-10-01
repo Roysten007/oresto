@@ -96,14 +96,7 @@ const App = () => (
           <Route path="/insights" element={<SurveyPublic />} />
           <Route path="/etude" element={<SurveyPublic />} />
 
-          {/* Redirections rapides pour l'administration d'étude */}
-          <Route path="/admin" element={<Navigate to="/oresto-admin/insights" replace />} />
-          <Route path="/admin/pricing-insights" element={<Navigate to="/oresto-admin/insights?tab=pricing" replace />} />
-          <Route path="/admin/features" element={<Navigate to="/oresto-admin/insights?tab=features" replace />} />
-          <Route path="/admin/problems" element={<Navigate to="/oresto-admin/insights?tab=problems" replace />} />
-          <Route path="/admin/respondents" element={<Navigate to="/oresto-admin/insights?tab=respondents" replace />} />
-          <Route path="/admin/leads" element={<Navigate to="/oresto-admin/insights?tab=leads" replace />} />
-          <Route path="/admin/exports" element={<Navigate to="/oresto-admin/insights?tab=exports" replace />} />
+
 
           {/* App & Authenticated Routes — Lazy-loads AuthProvider, Firebase & Toasts on demand */}
           <Route element={<AppProvidersLayout />}>
@@ -137,7 +130,6 @@ const App = () => (
             </Route>
 
             {/* Admin routes */}
-            <Route path="/insights/admin" element={<AdminRoute><InsightsAdminDashboard /></AdminRoute>} />
             <Route path="/oresto-admin/login" element={<AdminLogin />} />
             <Route path="/oresto-admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
               <Route path="dashboard" element={<AdminDashboard />} />
