@@ -140,13 +140,6 @@ export function PrestataireProvider({ children }: { children: ReactNode }) {
       const cleanPhone = cleanIdent.replace(/\D/g, "");
       let email = cleanIdent.includes("@") ? cleanIdent.toLowerCase() : "";
 
-      // Fallback compte démo
-      if (cleanIdent === "demo" || cleanPhone === "97123456" || cleanIdent === "JEA482") {
-        setPrestataire(DEMO_PRESTATAIRE);
-        try { localStorage.setItem("oresto_prestataire", JSON.stringify(DEMO_PRESTATAIRE)); } catch {}
-        return { success: true };
-      }
-
       // Si l'identifiant est un code de parrainage (ex: JEA482), chercher son email
       if (!email && db && cleanIdent.length >= 4 && !cleanIdent.startsWith("+")) {
         try {

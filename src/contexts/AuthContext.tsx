@@ -351,50 +351,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const cleanEmail = email.trim().toLowerCase();
     const cleanPassword = password.trim();
 
-    // === Dev Fallback for test accounts ===
-    const isDemoAccount = (cleanEmail === "aminat@test.com" || cleanEmail === "aminata@test.com" || cleanEmail === "kofi@test.com") && cleanPassword === "password";
-    
-    if (isDemoAccount) {
-      console.log("Demo login triggered for:", cleanEmail);
-      const mockVendorId = "v_mock_" + cleanEmail.split("@")[0];
-      const mockUser: User = {
-        id: "mock_" + cleanEmail.split("@")[0],
-        name: cleanEmail === "kofi@test.com" ? "Kofi Test" : "Aminat Test",
-        firstName: cleanEmail === "kofi@test.com" ? "Kofi" : "Aminat",
-        email: cleanEmail,
-        password: "",
-        role: "vendor",
-        phone: "+229 00000000",
-        city: "Cotonou",
-        neighborhood: "Cadjèhoun",
-        vendorId: mockVendorId
-      };
-      
-      const mockVendor: VendorProfile = {
-        id: mockVendorId,
-        userId: mockUser.id,
-        name: cleanEmail === "kofi@test.com" ? "Kofi's Restaurant" : "Aminat's Kitchen",
-        description: "Boutique de test Oresto B2B",
-        category: "Restaurants",
-        status: "active",
-        joinedDate: "2024-01-01",
-        plan: "pro",
-        subscriptionPlan: "pro",
-        subscriptionStatus: "trial",
-        verified: true,
-        open: true
-      } as any;
-
-      setState({
-        user: mockUser,
-        role: "vendor",
-        vendorProfile: mockVendor,
-        isAuthenticated: true,
-        isLoading: false
-      });
-      return { success: true, role: "vendor" };
-    }
-
     if (!auth || !db) {
       console.error("Firebase not initialized");
       return { success: false, error: "Le service d'authentification est indisponible." };
