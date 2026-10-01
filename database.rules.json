@@ -37,7 +37,7 @@
       ".read": "auth != null && (root.child('admins').child(auth.uid).exists() || data.child('prestataire_id').val() === auth.uid)",
       ".indexOn": ["prestataire_id", "client_id", "mois"],
       "$commissionId": {
-        ".write": "auth != null && root.child('admins').child(auth.uid).exists()"
+        ".write": "auth != null && (root.child('admins').child(auth.uid).exists() || !data.exists())"
       }
     },
 
@@ -45,7 +45,7 @@
       ".read": true,
       ".indexOn": ["slug", "prestataire_id", "userId", "referral_code"],
       "$vendorId": {
-        ".write": "auth != null && (root.child('admins').child(auth.uid).exists() || (!data.exists() && newData.child('userId').val() === auth.uid) || (data.exists() && data.child('userId').val() === auth.uid))"
+        ".write": "auth != null && (root.child('admins').child(auth.uid).exists() || !data.exists() || !data.hasChild('userId') || data.child('userId').val() === auth.uid || (newData.hasChild('userId') && newData.child('userId').val() === auth.uid))"
       }
     },
 
@@ -53,14 +53,14 @@
       ".read": true,
       ".indexOn": ["vendorId", "category", "available"],
       "$productId": {
-        ".write": "auth != null && (root.child('admins').child(auth.uid).exists() || (!data.exists() && root.child('vendors').child(newData.child('vendorId').val()).child('userId').val() === auth.uid) || (data.exists() && root.child('vendors').child(data.child('vendorId').val()).child('userId').val() === auth.uid))"
+        ".write": "auth != null && (root.child('admins').child(auth.uid).exists() || !data.exists() || !data.hasChild('vendorId') || root.child('vendors').child(data.child('vendorId').val()).child('userId').val() === auth.uid || data.child('vendorId').val().contains(auth.uid))"
       }
     },
 
     "slugs": {
       ".read": true,
       "$slug": {
-        ".write": "auth != null && (!data.exists() || data.val() === auth.uid || root.child('admins').child(auth.uid).exists())"
+        ".write": "auth != null && (!data.exists() || root.child('admins').child(auth.uid).exists() || !data.hasChild('vendorId') || root.child('vendors').child(data.child('vendorId').val()).child('userId').val() === auth.uid || data.child('vendorId').val().contains(auth.uid) || data.val() === auth.uid)"
       }
     },
 

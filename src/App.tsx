@@ -91,15 +91,13 @@ const App = () => (
           <Route path="/hotel" element={<Navigate to="/register?sector=hotel" replace />} />
           <Route path="/decouvrir" element={<ProLanding />} />
 
-          {/* Oresto Insights — Questionnaire Public Étude de Marché Bénin */}
-          <Route path="/survey" element={<SurveyPublic />} />
-          <Route path="/insights" element={<SurveyPublic />} />
-          <Route path="/etude" element={<SurveyPublic />} />
-
-
-
           {/* App & Authenticated Routes — Lazy-loads AuthProvider, Firebase & Toasts on demand */}
           <Route element={<AppProvidersLayout />}>
+            {/* Oresto Insights — Questionnaire Public Étude de Marché Bénin */}
+            <Route path="/survey" element={<SurveyPublic />} />
+            <Route path="/insights" element={<SurveyPublic />} />
+            <Route path="/etude" element={<SurveyPublic />} />
+
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />

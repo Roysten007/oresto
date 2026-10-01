@@ -10,6 +10,7 @@ interface Props {
   onSave: (product: Partial<Product>) => Promise<void>;
   onDelete: (id: string) => void;
   category?: string;
+  isHotel?: boolean;
 }
 
 const DISH_CATEGORIES = [
@@ -22,7 +23,8 @@ const DISH_CATEGORIES = [
   "Accompagnements"
 ];
 
-export default function StepCarte({ products, vendorId, onSave, onDelete }: Props) {
+export default function StepCarte({ products, vendorId, onSave, onDelete, isHotel = false }: Props) {
+  const defaultCategories = DISH_CATEGORIES;
   const [editing, setEditing] = useState<Partial<Product> | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);

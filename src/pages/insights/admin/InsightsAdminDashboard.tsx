@@ -48,7 +48,8 @@ import {
   ShieldAlert,
   Database,
   Phone,
-  FileSpreadsheet
+  FileSpreadsheet,
+  CreditCard
 } from "lucide-react";
 import { toast } from "sonner";
 

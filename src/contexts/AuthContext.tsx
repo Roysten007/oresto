@@ -688,7 +688,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      await update(ref(db), dbUpdates);
+      try {
+        await update(ref(db), dbUpdates);
+      } catch (dbErr: any) {
+        console.warn("Multi-path update failed during registration, attempting individual sets:", dbErr);
+        try {
+          if (uid && newUser) await set(ref(db, `users/${uid}`), newUser);
+          if (vendorId && createdVendorProfile) await set(ref(db, `vendors/${vendorId}`), createdVendorProfile);
+          if (cleanSlug && vendorId) await set(ref(db, `slugs/${cleanSlug}`), { vendorId });
+          for (const p of starterProducts) {
+            await set(ref(db, `products/${p.id}`), p);
+          }
+        } catch (indivErr) {
+          console.warn("Individual Firebase writes warning during register:", indivErr);
+        }
+      }
 
       if (vendorId && createdVendorProfile) {
         // Envoyer la notification de bienvenue essai gratuit
@@ -956,7 +970,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         dbUpdates[`products/${p.id}`] = p;
       }
 
-      await update(ref(db), dbUpdates);
+      try {
+        await update(ref(db), dbUpdates);
+      } catch (dbErr: any) {
+        console.warn("Multi-path update failed, attempting individual sets:", dbErr);
+        try {
+          await set(ref(db, `vendors/${newVendorId}`), newVendor);
+          await set(ref(db, `slugs/${cleanSlug}`), { vendorId: newVendorId });
+          await set(ref(db, `users/${uid}/vendorId`), newVendorId);
+          for (const p of starterProducts) {
+            await set(ref(db, `products/${p.id}`), p);
+          }
+        } catch (indivErr) {
+          console.warn("Individual Firebase writes warning:", indivErr);
+        }
+      }
 
       if (typeof window !== "undefined") {
         try {

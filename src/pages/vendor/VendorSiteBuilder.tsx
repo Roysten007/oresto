@@ -407,6 +407,7 @@ export default function VendorSiteBuilder() {
 
       const updates: any = {
         id: activeVId,
+        userId: user?.id || (user as any)?.uid || vendorProfile?.userId,
         name: shopTitle,
         description: formData.description || "",
         slug: cleanSlug,
