@@ -275,6 +275,24 @@ export default function RestaurantPublic() {
     toast.success(`${product.name} ajouté au panier`);
   };
 
+  const handleAddToCartWithAmount = (product: Product, amount: number) => {
+    const customProduct: Product = {
+      ...product,
+      id: `${product.id}_amt_${amount}`,
+      price: amount,
+      name: `${product.name} (Portion ${amount.toLocaleString()} FCFA)`
+    };
+
+    setCart(prev => {
+      const exists = prev.find(i => i.product.id === customProduct.id);
+      if (exists) {
+        return prev.map(i => i.product.id === customProduct.id ? { ...i, qty: i.qty + 1 } : i);
+      }
+      return [...prev, { product: customProduct, qty: 1 }];
+    });
+    toast.success(`${customProduct.name} ajouté au panier`);
+  };
+
   const handleAddToCartWithVariants = (product: Product, quantity: number, selectedVariants: Record<string, string>) => {
     const variantStr = Object.entries(selectedVariants).length > 0
       ? ` (${Object.entries(selectedVariants).map(([k, v]) => `${k}: ${v}`).join(", ")})`
@@ -514,7 +532,12 @@ export default function RestaurantPublic() {
           <AboutSection vendor={vendor} businessType="restaurant" />
 
           {/* 3. Menu / Carte */}
-          <MenuSection products={products} vendor={vendor} onAddToCart={handleAddToCart} />
+          <MenuSection 
+            products={products} 
+            vendor={vendor} 
+            onAddToCart={handleAddToCart} 
+            onAddToCartWithAmount={handleAddToCartWithAmount} 
+          />
 
           {/* 4. Galerie photos */}
           <GallerySection vendor={vendor} businessType="restaurant" />

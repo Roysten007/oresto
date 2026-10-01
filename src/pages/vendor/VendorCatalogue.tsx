@@ -32,7 +32,16 @@ export default function VendorCatalogue() {
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const emptyForm = { name: "", price: "", category: "", description: "", image: "" };
+  const emptyForm = { 
+    name: "", 
+    price: "", 
+    category: "", 
+    description: "", 
+    image: "",
+    priceType: "fixed" as "fixed" | "flexible",
+    minPrice: "150",
+    priceStep: "50"
+  };
   const [form, setForm] = useState(emptyForm);
 
   const isEcommerce = sector === "ecommerce";
@@ -149,13 +158,17 @@ export default function VendorCatalogue() {
       category: p.category || "",
       description: p.description || "",
       image: p.image || "",
+      priceType: p.priceType || "fixed",
+      minPrice: String(p.minPrice || p.price || "150"),
+      priceStep: String(p.priceStep || "50"),
     });
     setShowModal(true);
   };
 
   const handleSave = async () => {
-    if (!form.name.trim() || !form.price) { toast.error("Nom et prix obligatoires"); return; }
-    const price = Number(form.price);
+    if (!form.name.trim() || (!form.price && !form.minPrice)) { toast.error("Nom et prix obligatoires"); return; }
+    const isFlex = form.priceType === "flexible";
+    const price = isFlex ? Number(form.minPrice || form.price || 150) : Number(form.price);
     if (isNaN(price) || price < 0) { toast.error("Prix invalide"); return; }
     const vId = user?.vendorId || vendorProfile?.id || "v_demo";
     const productId = editingId || `prod_${Date.now()}`;
@@ -165,6 +178,9 @@ export default function VendorCatalogue() {
         id: productId,
         name: form.name.trim(),
         price,
+        priceType: form.priceType,
+        minPrice: isFlex ? price : undefined,
+        priceStep: isFlex ? Number(form.priceStep || 50) : undefined,
         category: form.category.trim() || "Catalogue",
         description: form.description.trim() || "",
         image: form.image.trim() || "",
@@ -357,7 +373,14 @@ export default function VendorCatalogue() {
                 <div>
                   <div className="flex justify-between items-start mb-1">
                     <h3 className="font-heading text-base font-black text-foreground leading-tight">{p.name}</h3>
-                    <p className="font-heading text-base font-black text-primary">{p.price.toLocaleString()} F</p>
+                    <div className="text-right">
+                      {p.priceType === "flexible" && (
+                        <span className="text-[9px] font-bold text-orange-600 block leading-tight">À partir de</span>
+                      )}
+                      <p className="font-heading text-base font-black text-primary">
+                        {(p.minPrice || p.price).toLocaleString()} F
+                      </p>
+                    </div>
                   </div>
                   <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{p.description || "Recette du chef"}</p>
                 </div>
@@ -418,6 +441,75 @@ export default function VendorCatalogue() {
                 <datalist id="cat-list">
                   {[...new Set(products.map(p => p.category).filter(Boolean))].map(c => <option key={c} value={c} />)}
                 </datalist>
+              </div>
+
+              {/* Toggle Montant Libre / Portion Flexible */}
+              <div className="col-span-2 p-3 bg-orange-50/80 border border-orange-200/80 rounded-2xl space-y-2.5">
+                <div 
+                  className="flex items-center justify-between cursor-pointer select-none"
+                  onClick={() => setForm(prev => ({
+                    ...prev,
+                    priceType: prev.priceType === "flexible" ? "fixed" : "flexible",
+                    minPrice: prev.minPrice || prev.price || "150",
+                    priceStep: prev.priceStep || "50"
+                  }))}
+                >
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="cat-flexible-toggle"
+                      checked={form.priceType === "flexible"}
+                      onChange={e => setForm(prev => ({
+                        ...prev,
+                        priceType: e.target.checked ? "flexible" : "fixed",
+                        minPrice: prev.minPrice || prev.price || "150",
+                        priceStep: prev.priceStep || "50"
+                      }))}
+                      className="w-4 h-4 text-primary rounded-sm border-gray-300 focus:ring-primary cursor-pointer"
+                    />
+                    <label htmlFor="cat-flexible-toggle" className="text-xs font-bold text-gray-900 cursor-pointer">
+                      Plat à montant libre / portion flexible (ex: Atassi, Alloco, Riz...)
+                    </label>
+                  </div>
+                  <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                    form.priceType === "flexible" ? "bg-primary text-white" : "bg-muted text-muted-foreground"
+                  }`}>
+                    {form.priceType === "flexible" ? "Activé" : "Fixe"}
+                  </span>
+                </div>
+
+                {form.priceType === "flexible" && (
+                  <div className="grid grid-cols-2 gap-3 pt-2 border-t border-orange-200/60 animate-in fade-in duration-150">
+                    <div>
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-gray-600 block mb-1">
+                        Montant minimum (FCFA) *
+                      </label>
+                      <input
+                        type="number"
+                        min="50"
+                        step="50"
+                        value={form.minPrice}
+                        onChange={e => setForm(prev => ({ ...prev, minPrice: e.target.value, price: e.target.value }))}
+                        className="w-full px-3 py-2 rounded-xl bg-white border border-orange-200 text-xs font-bold text-gray-900 outline-none focus:border-primary"
+                        placeholder="150"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-gray-600 block mb-1">
+                        Pas de tranche (FCFA)
+                      </label>
+                      <input
+                        type="number"
+                        min="25"
+                        step="25"
+                        value={form.priceStep}
+                        onChange={e => setForm(prev => ({ ...prev, priceStep: e.target.value }))}
+                        className="w-full px-3 py-2 rounded-xl bg-white border border-orange-200 text-xs font-bold text-gray-900 outline-none focus:border-primary"
+                        placeholder="50"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="col-span-2 space-y-1">
                 <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Description</label>

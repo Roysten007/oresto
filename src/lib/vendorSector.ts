@@ -243,6 +243,36 @@ export function getStarterProducts(type: BusinessSector, vId: string): any[] {
     {
       id: `prod_${vId}_p1`,
       vendorId: vId,
+      name: "Atassi Traditionnel & Piment Noir",
+      price: 150,
+      priceType: "flexible",
+      minPrice: 150,
+      priceStep: 50,
+      suggestedAmounts: [150, 200, 250, 300, 500, 1000],
+      category: "Spécialités Africaines",
+      description: "Riz aux haricots et spaghetti cuisinés à l'africaine. Choisissez librement votre portion à partir de 150 FCFA.",
+      image: "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=800&q=80",
+      available: true,
+      badge: "MONTANT AU CHOIX"
+    },
+    {
+      id: `prod_${vId}_p2`,
+      vendorId: vId,
+      name: "Alloco Chaud & Piment Maison",
+      price: 200,
+      priceType: "flexible",
+      minPrice: 200,
+      priceStep: 50,
+      suggestedAmounts: [200, 300, 500, 1000],
+      category: "Accompagnements",
+      description: "Bananes plantains mûres frites dorées et croustillantes. Portion au choix à partir de 200 FCFA.",
+      image: "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=800&q=80",
+      available: true,
+      badge: "PORTION AU CHOIX"
+    },
+    {
+      id: `prod_${vId}_p3`,
+      vendorId: vId,
       name: "Poulet Braisé & Alloco",
       price: 4500,
       category: "Plats Principaux & Grillades",
@@ -252,7 +282,7 @@ export function getStarterProducts(type: BusinessSector, vId: string): any[] {
       badge: "RECOMMANDÉ"
     },
     {
-      id: `prod_${vId}_p2`,
+      id: `prod_${vId}_p4`,
       vendorId: vId,
       name: "Capitaine Braisé Royal",
       price: 6500,
@@ -262,16 +292,6 @@ export function getStarterProducts(type: BusinessSector, vId: string): any[] {
       image: "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=800&q=80",
       available: true,
       badge: "BESTSELLER"
-    },
-    {
-      id: `prod_${vId}_p3`,
-      vendorId: vId,
-      name: "Brochettes de Filet de Bœuf",
-      price: 3500,
-      category: "Plats Principaux & Grillades",
-      description: "Viande tendre marinée au kankankan et grillée à la braise",
-      image: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
-      available: true
     }
   ];
 }

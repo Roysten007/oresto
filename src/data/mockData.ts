@@ -142,6 +142,10 @@ export interface Product {
   badge?: "PROMO" | "BESTSELLER" | "NOUVEAU" | "VENTE FLASH" | "STOCK LIMITÉ" | string;
   variants?: ProductVariant[];
   features?: string[]; // Points forts / Caractéristiques clés
+  priceType?: "fixed" | "flexible"; // "fixed" ou "flexible" (montant libre / à la portion)
+  minPrice?: number; // Montant minimum pour les plats à portion libre (ex: 150, 200, 250)
+  priceStep?: number; // Pas d'incrément (ex: 50 FCFA)
+  suggestedAmounts?: number[]; // Montants rapides suggérés (ex: [150, 200, 250, 300, 500, 1000])
 }
 
 export interface Order {

@@ -71,14 +71,20 @@ export default function StepCarte({ products, vendorId, onSave, onDelete, isHote
   };
 
   const handleSave = async () => {
-    if (!editing?.name || !editing?.price) { 
+    if (!editing?.name || (!editing?.price && !editing?.minPrice)) { 
       toast.error("Nom et prix du plat requis"); 
       return; 
     }
     setSaving(true);
     try { 
+      const isFlex = editing.priceType === "flexible";
+      const basePrice = isFlex ? Number(editing.minPrice || editing.price || 150) : Number(editing.price);
       await onSave({
         ...editing,
+        price: basePrice,
+        minPrice: isFlex ? basePrice : undefined,
+        priceType: isFlex ? "flexible" : "fixed",
+        priceStep: isFlex ? Number(editing.priceStep || 50) : undefined,
         category: editing.category || DISH_CATEGORIES[1]
       }); 
       setEditing(null); 
@@ -161,8 +167,13 @@ export default function StepCarte({ products, vendorId, onSave, onDelete, isHote
                   <div className="flex-1 min-w-0">
                     <p className="font-bold text-xs text-gray-900 truncate">{p.name}</p>
                     <p className="text-[10px] text-gray-500 line-clamp-1">{p.description || "Recette maison"}</p>
-                    <p className="font-heading font-black text-xs text-primary mt-1">
-                      {Number(p.price).toLocaleString()} F {isHotel ? "/ nuit" : ""}
+                    <p className="font-heading font-black text-xs text-primary mt-1 flex items-center gap-1.5 flex-wrap">
+                      <span>{p.priceType === "flexible" ? `À partir de ${(p.minPrice || p.price).toLocaleString()} F` : `${Number(p.price).toLocaleString()} F`}</span>
+                      {p.priceType === "flexible" && (
+                        <span className="text-[9px] font-bold text-orange-600 bg-orange-100 px-1.5 py-0.2 rounded-sm">
+                          Portion libre
+                        </span>
+                      )}
                     </p>
                   </div>
 
@@ -277,6 +288,84 @@ export default function StepCarte({ products, vendorId, onSave, onDelete, isHote
                   placeholder="4500"
                   min="0"
                 />
+              </div>
+
+              {/* Option Plat à la portion / Montant libre */}
+              <div className="p-3.5 bg-orange-50/80 border border-orange-200/80 rounded-2xl space-y-3">
+                <div 
+                  className="flex items-center justify-between cursor-pointer select-none"
+                  onClick={() => setEditing(prev => prev ? ({
+                    ...prev,
+                    priceType: prev.priceType === "flexible" ? "fixed" : "flexible",
+                    minPrice: prev.minPrice || prev.price || 150,
+                    priceStep: prev.priceStep || 50
+                  }) : prev)}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <input
+                      type="checkbox"
+                      id="flexible-toggle"
+                      checked={editing.priceType === "flexible"}
+                      onChange={e => setEditing(prev => prev ? ({
+                        ...prev,
+                        priceType: e.target.checked ? "flexible" : "fixed",
+                        minPrice: prev.minPrice || prev.price || 150,
+                        priceStep: prev.priceStep || 50
+                      }) : prev)}
+                      className="w-4 h-4 text-primary rounded-sm border-gray-300 focus:ring-primary cursor-pointer"
+                    />
+                    <label htmlFor="flexible-toggle" className="text-xs font-bold text-gray-900 cursor-pointer">
+                      Plat à montant libre / portion au choix
+                    </label>
+                  </div>
+                  <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                    editing.priceType === "flexible" ? "bg-primary text-white" : "bg-gray-200 text-gray-600"
+                  }`}>
+                    {editing.priceType === "flexible" ? "Activé" : "Fixe"}
+                  </span>
+                </div>
+
+                {editing.priceType === "flexible" && (
+                  <div className="grid grid-cols-2 gap-3 pt-2.5 border-t border-orange-200/60 animate-in fade-in duration-150">
+                    <div>
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-gray-600 block mb-1">
+                        Montant minimum (FCFA) *
+                      </label>
+                      <input
+                        type="number"
+                        min="50"
+                        step="50"
+                        value={editing.minPrice || editing.price || 150}
+                        onChange={e => {
+                          const val = Number(e.target.value);
+                          setEditing(prev => prev ? ({ ...prev, minPrice: val, price: val }) : prev);
+                        }}
+                        className="w-full px-3 py-2 rounded-xl bg-white border border-orange-200 text-xs font-bold text-gray-900 outline-none focus:border-primary"
+                        placeholder="150"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-gray-600 block mb-1">
+                        Pas de tranche (FCFA)
+                      </label>
+                      <input
+                        type="number"
+                        min="25"
+                        step="25"
+                        value={editing.priceStep || 50}
+                        onChange={e => {
+                          const val = Number(e.target.value);
+                          setEditing(prev => prev ? ({ ...prev, priceStep: val }) : prev);
+                        }}
+                        className="w-full px-3 py-2 rounded-xl bg-white border border-orange-200 text-xs font-bold text-gray-900 outline-none focus:border-primary"
+                        placeholder="50"
+                      />
+                    </div>
+                    <p className="col-span-2 text-[10px] text-gray-600 leading-tight">
+                      💡 Exemples au Bénin : Atassi, Alloco, Riz, Spaghetti, Pâte... Le client verra <strong>« À partir de {(editing.minPrice || 150).toLocaleString()} FCFA »</strong> et pourra choisir sa portion librement par tranche de {(editing.priceStep || 50).toLocaleString()} FCFA.
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div>

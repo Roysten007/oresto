@@ -2,16 +2,19 @@ import { useState, useMemo } from "react";
 import { Product, VendorProfile } from "@/data/mockData";
 import { Plus, Search, Utensils, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
+import FlexiblePortionModal from "./FlexiblePortionModal";
 
 interface Props {
   products: Product[];
   vendor: VendorProfile;
   onAddToCart: (product: Product) => void;
+  onAddToCartWithAmount?: (product: Product, amount: number) => void;
 }
 
-export default function MenuSection({ products, vendor, onAddToCart }: Props) {
+export default function MenuSection({ products, vendor, onAddToCart, onAddToCartWithAmount }: Props) {
   const [activeCategory, setActiveCategory] = useState("Tous");
   const [searchQuery, setSearchQuery] = useState("");
+  const [flexibleProduct, setFlexibleProduct] = useState<Product | null>(null);
 
   const categories = useMemo(() => {
     const cats = new Set(products.map(p => p.category?.trim()).filter(Boolean));
@@ -119,11 +122,18 @@ export default function MenuSection({ products, vendor, onAddToCart }: Props) {
                   decoding="async"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
-                {p.category && (
-                  <span className="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-black/70 backdrop-blur-sm text-white text-[9px] font-black uppercase tracking-wider">
-                    {p.category}
-                  </span>
-                )}
+                <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
+                  {p.category && (
+                    <span className="px-2.5 py-1 rounded-lg bg-black/70 backdrop-blur-sm text-white text-[9px] font-black uppercase tracking-wider">
+                      {p.category}
+                    </span>
+                  )}
+                  {(p.priceType === "flexible" || (p.minPrice !== undefined && p.minPrice > 0)) && (
+                    <span className="px-2 py-0.5 rounded-lg bg-primary text-white text-[9px] font-black uppercase tracking-wider shadow-sm flex items-center gap-1">
+                      <Sparkles size={9} /> Portion libre
+                    </span>
+                  )}
+                </div>
               </div>
 
               {/* Content */}
@@ -140,17 +150,42 @@ export default function MenuSection({ products, vendor, onAddToCart }: Props) {
                 </div>
 
                 <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
-                  <span className="font-heading font-black text-lg text-primary">
-                    {Number(p.price).toLocaleString()} FCFA
-                  </span>
+                  {p.priceType === "flexible" || (p.minPrice !== undefined && p.minPrice > 0) ? (
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider leading-none">
+                        À partir de
+                      </span>
+                      <span className="font-heading font-black text-lg text-primary mt-0.5">
+                        {Number(p.minPrice || p.price).toLocaleString()} FCFA
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="font-heading font-black text-lg text-primary">
+                      {Number(p.price).toLocaleString()} FCFA
+                    </span>
+                  )}
 
                   <button
                     type="button"
-                    onClick={() => onAddToCart(p)}
-                    className="px-4 py-2 rounded-xl bg-black text-white hover:bg-primary font-bold text-xs flex items-center gap-1.5 transition-colors shadow-sm active:scale-95"
+                    onClick={() => {
+                      if (p.priceType === "flexible" || (p.minPrice !== undefined && p.minPrice > 0)) {
+                        setFlexibleProduct(p);
+                      } else {
+                        onAddToCart(p);
+                      }
+                    }}
+                    className={`px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm active:scale-95 ${
+                      p.priceType === "flexible" || (p.minPrice !== undefined && p.minPrice > 0)
+                        ? "bg-primary text-white hover:bg-primary/90"
+                        : "bg-black text-white hover:bg-primary"
+                    }`}
                   >
                     <Plus size={14} />
-                    <span>Ajouter</span>
+                    <span>
+                      {p.priceType === "flexible" || (p.minPrice !== undefined && p.minPrice > 0)
+                        ? "Choisir portion"
+                        : "Ajouter"}
+                    </span>
                   </button>
                 </div>
               </div>
@@ -159,6 +194,24 @@ export default function MenuSection({ products, vendor, onAddToCart }: Props) {
         </div>
 
       </div>
+
+      {/* Modal interactif pour choix de portion / montant libre */}
+      <FlexiblePortionModal
+        product={flexibleProduct}
+        isOpen={!!flexibleProduct}
+        onClose={() => setFlexibleProduct(null)}
+        onConfirm={(prod, amt) => {
+          if (onAddToCartWithAmount) {
+            onAddToCartWithAmount(prod, amt);
+          } else {
+            onAddToCart({
+              ...prod,
+              price: amt,
+              name: `${prod.name} (Portion ${amt.toLocaleString()} FCFA)`
+            });
+          }
+        }}
+      />
     </section>
   );
 }
