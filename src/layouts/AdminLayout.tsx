@@ -18,10 +18,11 @@ import {
   Globe
 } from "lucide-react";
 import AIChatBot from "@/components/AIChatBot";
-import { Handshake } from "lucide-react";
+import { Handshake, Sparkles } from "lucide-react";
 
 const navItems = [
   { path: "/oresto-admin/dashboard", icon: LayoutDashboard, label: "Vue générale" },
+  { path: "/oresto-admin/insights", icon: Sparkles, label: "Oresto Insights" },
   { path: "/oresto-admin/prestataires", icon: Handshake, label: "Prestataires" },
   { path: "/oresto-admin/vendors", icon: Store, label: "Vendeurs" },
   { path: "/oresto-admin/clients", icon: Users, label: "Clients" },
