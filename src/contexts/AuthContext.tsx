@@ -150,22 +150,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         // 1. Vérification Admin prioritaire
-        const isSuperAdminEmail = (firebaseUser.email || "").toLowerCase() === "roystendesign@gmail.com";
-        let isConfirmedAdmin = isSuperAdminEmail;
-
-        if (!isConfirmedAdmin) {
-          try {
-            const adminSnap = await get(ref(db, `admins/${firebaseUser.uid}`));
-            if (adminSnap.exists() && adminSnap.val() !== false) isConfirmedAdmin = true;
-          } catch {}
-        }
+        let isConfirmedAdmin = false;
+        try {
+          const adminSnap = await get(ref(db, `admins/${firebaseUser.uid}`));
+          if (adminSnap.exists() && adminSnap.val() !== false) isConfirmedAdmin = true;
+        } catch {}
 
         if (isConfirmedAdmin) {
           const adminUser: User = {
             id: firebaseUser.uid,
             name: "Super Administrateur",
             firstName: "Admin",
-            email: firebaseUser.email || "roystendesign@gmail.com",
+            email: firebaseUser.email || "",
             role: "admin" as any,
             created_at: new Date().toISOString()
           };
@@ -414,13 +410,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const uid = userCredential.user.uid;
 
       // 1. Détection Admin immédiate
-      let isAdminAccount = cleanEmail === "roystendesign@gmail.com";
-      if (!isAdminAccount) {
-        try {
-          const adminSnap = await get(ref(db, `admins/${uid}`));
-          if (adminSnap.exists() && adminSnap.val() !== false) isAdminAccount = true;
-        } catch {}
-      }
+      let isAdminAccount = false;
+      try {
+        const adminSnap = await get(ref(db, `admins/${uid}`));
+        if (adminSnap.exists() && adminSnap.val() !== false) isAdminAccount = true;
+      } catch {}
 
       if (isAdminAccount) {
         const adminUser: User = {

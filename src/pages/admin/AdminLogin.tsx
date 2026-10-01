@@ -113,19 +113,6 @@ export default function AdminLogin() {
               </>
             )}
           </button>
-
-          <div className="pt-2 text-center">
-            <button
-              type="button"
-              onClick={() => {
-                setEmail("roystendesign@gmail.com");
-                setPassword("creativecode@2025");
-              }}
-              className="text-[11px] font-bold text-white/50 hover:text-primary transition-colors flex items-center justify-center gap-1.5 mx-auto"
-            >
-              <i className="fa-solid fa-key text-[10px]"></i> Pré-remplir les accès Admin
-            </button>
-          </div>
         </form>
 
         <div className="text-center mt-8">

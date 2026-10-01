@@ -29,16 +29,11 @@ const AdminContext = createContext<AdminContextType | null>(null);
 const LOCKOUT_DURATION = 15 * 60 * 1000;
 const MAX_ATTEMPTS = 5;
 
-async function checkIsAdmin(uid: string, email?: string | null): Promise<boolean> {
-  if (email && email.toLowerCase() === "roystendesign@gmail.com") return true;
+async function checkIsAdmin(uid: string): Promise<boolean> {
   if (!db) return false;
   try {
     const adminSnap = await get(ref(db, `admins/${uid}`));
     if (adminSnap.exists() && adminSnap.val() !== false) return true;
-  } catch {}
-  try {
-    const userRoleSnap = await get(ref(db, `users/${uid}/role`));
-    if (userRoleSnap.exists() && userRoleSnap.val() === "admin") return true;
   } catch {}
   return false;
 }
@@ -59,7 +54,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       return;
     }
     const unsub = onAuthStateChanged(auth, async (fbUser) => {
-      if (fbUser && (await checkIsAdmin(fbUser.uid, fbUser.email))) {
+      if (fbUser && (await checkIsAdmin(fbUser.uid))) {
         setState({ isAdminAuthenticated: true, adminEmail: fbUser.email, isAdminLoading: false });
       } else {
         setState({ isAdminAuthenticated: false, adminEmail: null, isAdminLoading: false });
@@ -86,26 +81,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     }
     try {
       const cred = await signInWithEmailAndPassword(auth, cleanEmail, cleanPassword);
-      let isAdmin = await checkIsAdmin(cred.user.uid, cred.user.email);
-      if (!isAdmin && cleanEmail === "roystendesign@gmail.com") {
-        isAdmin = true;
-        try {
-          await set(ref(db, `admins/${cred.user.uid}`), {
-            email: cleanEmail,
-            role: "super_admin",
-            createdAt: new Date().toISOString()
-          });
-          await set(ref(db, `users/${cred.user.uid}`), {
-            id: cred.user.uid,
-            name: "Super Administrateur",
-            email: cleanEmail,
-            role: "admin",
-            created_at: new Date().toISOString()
-          });
-        } catch (e) {
-          console.warn("Could not sync admin flags in DB:", e);
-        }
-      }
+      const isAdmin = await checkIsAdmin(cred.user.uid);
       if (!isAdmin) {
         await signOut(auth);
         return { success: false, error: "Ce compte ne possède pas les privilèges administrateur." };

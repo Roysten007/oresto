@@ -15,6 +15,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
+  // Validation du corps de requête
+  const body = req.body;
+  if (!body || typeof body !== "object") {
+    res.status(400).json({ error: "Corps de requête invalide" });
+    return;
+  }
+
+  const { message, mode } = body;
+  if (!message || typeof message !== "string" || message.trim().length === 0) {
+    res.status(400).json({ error: "Message requis" });
+    return;
+  }
+
+  // Protection contre le déni de service et abus de tokens LLM
+  if (message.length > 2500) {
+    res.status(400).json({ error: "Message trop long (maximum 2500 caractères)" });
+    return;
+  }
+
+  if (mode && mode !== "landing" && mode !== "dashboard") {
+    res.status(400).json({ error: "Mode invalide" });
+    return;
+  }
+
   const keys = {
     gemini: process.env.GEMINI_API_KEY || undefined,
     nvidia: process.env.NVIDIA_API_KEY || undefined,
@@ -23,7 +47,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   // Au moins un provider doit être configuré
   if (!keys.gemini && !keys.nvidia && !keys.mistral) {
-    // Pas d'erreur 500 : on laisse runIZA utiliser le fallback local
     console.warn("[IZI] Aucune clé API configurée — mode fallback local");
   }
 
@@ -35,4 +58,3 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.status(500).json({ error: error?.message || "Erreur de communication avec IZI IA" });
   }
 }
-

@@ -1,8 +1,9 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useAdmin } from "@/contexts/AdminContext";
 
 export default function AdminRoute({ children }: { children: React.ReactNode }) {
   const { isAdminAuthenticated, isAdminLoading } = useAdmin();
+  const location = useLocation();
 
   if (isAdminLoading) {
     return (
@@ -12,6 +13,9 @@ export default function AdminRoute({ children }: { children: React.ReactNode }) 
     );
   }
 
-  // Permettre l'accès en mode aperçu/démonstration du portail Admin sans forcer le login
+  if (!isAdminAuthenticated) {
+    return <Navigate to="/oresto-admin/login" state={{ from: location }} replace />;
+  }
+
   return <>{children}</>;
 }

@@ -18,11 +18,13 @@ dist-ssr
 
 # Sensitive DB / Admin setup scripts
 setup-admin-and-reset.mjs
+seed-full-data.mjs
 reset-all.mjs
 reset-clients.mjs
 seed-test-accounts.mjs
 debug-page.mjs
 test-models.mjs
+list_models.ts
 
 # Editor directories and files
 .vscode/*
