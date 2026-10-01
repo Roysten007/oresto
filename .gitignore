@@ -27,6 +27,7 @@ test-models.mjs
 list_models.ts
 serviceAccountKey.json
 *serviceAccount*.json
+cleanup-firebase-accounts.mjs
 
 # Editor directories and files
 .vscode/*
