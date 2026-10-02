@@ -1,11 +1,5 @@
-// Service Worker Oresto PWA - v6 (Anti-Stale Cache Buster)
-const CACHE_NAME = 'oresto-pwa-v6';
-const STATIC_ASSETS = [
-  '/',
-  '/favicon.svg',
-  '/favicon.ico',
-  '/manifest.json'
-];
+// Service Worker Oresto PWA - v7 (Never Intercept JS or Assets)
+const CACHE_NAME = 'oresto-pwa-v7';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -31,34 +25,33 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = event.request.url;
 
-  // Always network-first for navigation with fallback to root index
+  // CRITICAL: NEVER intercept JavaScript chunks, CSS, Vite assets, or API calls!
+  // Let the browser's native network stack fetch them directly without service worker interference.
+  if (
+    url.includes('/assets/') ||
+    url.includes('/api/') ||
+    url.includes('.js') ||
+    url.includes('.css') ||
+    event.request.destination === 'script' ||
+    event.request.destination === 'style'
+  ) {
+    return; // Pass through to browser native networking
+  }
+
+  // Navigation requests: Network-first with fallback to /
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request)
-        .catch(async () => (await caches.match('/')) || caches.match(event.request))
+      fetch(event.request).catch(async () => (await caches.match('/')) || fetch(event.request))
     );
     return;
   }
 
-  // Always network-first for JavaScript bundles, CSS, and dynamic assets
-  if (
-    event.request.destination === 'script' ||
-    event.request.destination === 'style' ||
-    url.includes('/assets/') ||
-    url.includes('.js') ||
-    url.includes('.css')
-  ) {
+  // Only cache-first for static image assets
+  if (event.request.destination === 'image' || url.includes('/favicon')) {
     event.respondWith(
-      fetch(event.request)
-        .catch(() => caches.match(event.request))
+      caches.match(event.request).then((cachedResponse) => {
+        return cachedResponse || fetch(event.request);
+      })
     );
-    return;
   }
-
-  // Cache-first only for static icons and images
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      return cachedResponse || fetch(event.request);
-    })
-  );
 });
