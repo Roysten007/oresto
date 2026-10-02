@@ -52,27 +52,21 @@
   </head>
   <body>
     <script>
-      // Anti-stale Service Worker & Cache Buster (Auto-recovery for existing users)
+      // Anti-stale auto-purge: eliminate any existing service workers and caches immediately
       (function() {
         try {
-          if ('caches' in window) {
-            caches.keys().then(function(keys) {
-              keys.forEach(function(k) {
-                if (!k.includes('oresto-pwa-v7')) {
-                  console.log('[CacheBuster] Purging corrupted cache:', k);
-                  caches.delete(k);
-                }
-              });
-            });
-          }
           if ('serviceWorker' in navigator) {
             navigator.serviceWorker.getRegistrations().then(function(regs) {
-              regs.forEach(function(reg) {
-                if (reg.active && !reg.active.scriptURL.includes('v=7')) {
-                  console.log('[CacheBuster] Unregistering outdated SW:', reg.active.scriptURL);
-                  reg.unregister();
-                }
-              });
+              for (var i = 0; i < regs.length; i++) {
+                regs[i].unregister();
+              }
+            });
+          }
+          if ('caches' in window) {
+            caches.keys().then(function(keys) {
+              for (var i = 0; i < keys.length; i++) {
+                caches.delete(keys[i]);
+              }
             });
           }
         } catch (e) {}
@@ -80,18 +74,5 @@
     </script>
     <div id="root"></div>
     <script type="module" defer src="/src/main.tsx"></script>
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js?v=7', { updateViaCache: 'none' })
-            .then(reg => {
-              reg.update();
-            })
-            .catch(err => {
-              console.log('SW registration error:', err);
-            });
-        });
-      }
-    </script>
   </body>
 </html>

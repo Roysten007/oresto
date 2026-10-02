@@ -22,6 +22,42 @@ class ErrorBoundary extends Component<Props, State> {
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error("Uncaught error:", error, errorInfo);
+
+    // Détection automatique des erreurs de chunks périmés / mise à jour de déploiement
+    const errorMsg = (error?.message || error?.toString() || "").toLowerCase();
+    const isChunkError =
+      errorMsg.includes("dynamically imported module") ||
+      errorMsg.includes("failed to fetch dynamically imported module") ||
+      errorMsg.includes("loading chunk") ||
+      errorMsg.includes("loading css chunk");
+
+    if (isChunkError && typeof window !== "undefined") {
+      const rescueKey = "oresto_chunk_rescue_" + window.location.pathname;
+      const now = Date.now();
+      const lastAttempt = sessionStorage.getItem(rescueKey);
+
+      // Auto-rechargement propre une seule fois pour charger la nouvelle version sans bloquer l'utilisateur
+      if (!lastAttempt || now - parseInt(lastAttempt, 10) > 10000) {
+        sessionStorage.setItem(rescueKey, now.toString());
+
+        // Nettoyage complet
+        if ("serviceWorker" in navigator) {
+          navigator.serviceWorker.getRegistrations().then((regs) => {
+            regs.forEach((r) => r.unregister());
+          });
+        }
+        if ("caches" in window) {
+          caches.keys().then((keys) => {
+            keys.forEach((k) => caches.delete(k));
+          });
+        }
+
+        // Navigation forcée vers la nouvelle URL avec bust de cache
+        const cleanUrl = window.location.pathname + window.location.search;
+        const separator = cleanUrl.includes("?") ? "&" : "?";
+        window.location.replace(cleanUrl + separator + "_v=" + now);
+      }
+    }
   }
 
   public render() {
@@ -74,7 +110,9 @@ class ErrorBoundary extends Component<Props, State> {
                       }
                     }
                   } catch {}
-                  window.location.reload();
+                  const cleanPath = window.location.pathname + window.location.search;
+                  const sep = cleanPath.includes("?") ? "&" : "?";
+                  window.location.replace(cleanPath + sep + "_bust=" + Date.now());
                 }}
                 className="w-full py-4 rounded-2xl bg-black text-white font-black text-xs uppercase tracking-widest hover:bg-primary transition-all flex items-center justify-center gap-2 shadow-xl shadow-black/10"
               >

@@ -18,7 +18,9 @@ const lazyWithRetry = (componentImport: () => Promise<any>) =>
         const key = "oresto_chunk_retry_" + window.location.pathname;
         if (!sessionStorage.getItem(key)) {
           sessionStorage.setItem(key, "true");
-          window.location.reload();
+          const cleanUrl = window.location.pathname + window.location.search;
+          const sep = cleanUrl.includes("?") ? "&" : "?";
+          window.location.replace(cleanUrl + sep + "_bust=" + Date.now());
           return new Promise(() => {});
         }
       }

@@ -57,6 +57,24 @@
       ]
     },
     {
+      "source": "/rescue-chunk.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/assets/RestaurantPublic-CCGFDXfG.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
       "source": "/((?!sw\\.js).*\\.(?:svg|png|jpg|jpeg|webp|ico|woff2|woff|ttf|css|js))",
       "headers": [
         {
