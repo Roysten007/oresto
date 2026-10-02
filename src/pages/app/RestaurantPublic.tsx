@@ -436,7 +436,7 @@ export default function RestaurantPublic() {
   const seoDescription = vendor.description || `Commandez directement chez ${vendor.name} à ${vendor.city || 'Cotonou'} (${vendor.neighborhood || 'Bénin'}). Paiement sécurisé par Mobile Money sans commission.`;
   const seoImage = vendor.cover_url || vendor.logo_url || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80";
 
-  const schemaJsonLd = useMemo(() => {
+  const schemaJsonLd = (() => {
     if (!vendor) return null;
     const baseSchema: Record<string, any> = {
       "@context": "https://schema.org",
@@ -496,7 +496,7 @@ export default function RestaurantPublic() {
     }
 
     return baseSchema;
-  }, [vendor, products, businessType, seoDescription, seoImage, slug]);
+  })();
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] font-body text-gray-900 selection:bg-primary selection:text-white" style={{ fontFamily: themeFont }}>
