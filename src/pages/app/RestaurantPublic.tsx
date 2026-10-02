@@ -152,7 +152,13 @@ export default function RestaurantPublic() {
             });
             if (found) {
               matchedVendorId = found[0];
-              matchedVendor = { id: matchedVendorId, ...(found[1] as any) };
+              const fVal = found[1] as any;
+              matchedVendor = {
+                id: matchedVendorId,
+                slug: fVal.slug || slugify(fVal.name || cleanSlug),
+                business_type: fVal.business_type || "restaurant",
+                ...fVal
+              };
             }
           }
         } catch (e) {
@@ -162,55 +168,77 @@ export default function RestaurantPublic() {
 
       // 4. Si un matchedVendorId a été trouvé, écouter en temps réel vendors/${matchedVendorId}
       if (matchedVendorId) {
-        unsubVendor = onValue(ref(db, `vendors/${matchedVendorId}`), (snap) => {
-          if (snap.exists()) {
-            const val = snap.val();
-            const vData: VendorProfile = { id: matchedVendorId, ...val };
-            const owner = user?.vendorId === matchedVendorId || user?.id === vData.userId;
-            setIsOwner(owner);
-            setVendor(vData);
-            clearTimeout(timeout);
-            setLoading(false);
-          } else if (matchedVendor) {
-            setVendor(matchedVendor);
-            clearTimeout(timeout);
-            setLoading(false);
+        unsubVendor = onValue(
+          ref(db, `vendors/${matchedVendorId}`),
+          (snap) => {
+            if (snap.exists()) {
+              const val = snap.val();
+              const vData: VendorProfile = {
+                id: matchedVendorId,
+                slug: val.slug || slugify(val.name || cleanSlug),
+                business_type: val.business_type || "restaurant",
+                ...val
+              };
+              const owner = user?.vendorId === matchedVendorId || user?.id === vData.userId;
+              setIsOwner(owner);
+              setVendor(vData);
+              clearTimeout(timeout);
+              setLoading(false);
+            } else if (matchedVendor) {
+              setVendor(matchedVendor);
+              clearTimeout(timeout);
+              setLoading(false);
+            }
+          },
+          (err) => {
+            console.warn("Vendor listener warning:", err);
+            if (matchedVendor) {
+              setVendor(matchedVendor);
+              clearTimeout(timeout);
+              setLoading(false);
+            }
           }
-        });
+        );
 
         // Écouter les produits pour ce vendeur (filtrage en mémoire fiable à 100%)
         if (unsubProducts) unsubProducts();
-        unsubProducts = onValue(ref(db, "products"), (prodSnap) => {
-          let list: Product[] = [];
-          if (prodSnap.exists()) {
-            const all = prodSnap.val();
-            list = Object.keys(all)
-              .map(k => ({ id: k, ...all[k] }))
-              .filter((p: any) => p.vendorId === matchedVendorId && p.available !== false);
-          }
-
-          if (list.length > 0) {
-            setProducts(list);
-            return;
-          }
-
-          // Fallback localStorage pour ce vendeur
-          try {
-            const localSaved = localStorage.getItem(`oresto_products_${matchedVendorId}`);
-            if (localSaved) {
-              const parsed = JSON.parse(localSaved);
-              if (Array.isArray(parsed) && parsed.length > 0) {
-                setProducts(parsed);
-                return;
-              }
+        unsubProducts = onValue(
+          ref(db, "products"),
+          (prodSnap) => {
+            let list: Product[] = [];
+            if (prodSnap.exists()) {
+              const all = prodSnap.val();
+              list = Object.keys(all)
+                .map(k => ({ id: k, ...all[k] }))
+                .filter((p: any) => p.vendorId === matchedVendorId && p.available !== false);
             }
-          } catch {}
 
-          // Fallback démo si disponible
-          if (demoCandidate && demoCandidate.products.length > 0) {
-            setProducts(demoCandidate.products);
+            if (list.length > 0) {
+              setProducts(list);
+              return;
+            }
+
+            // Fallback localStorage pour ce vendeur
+            try {
+              const localSaved = localStorage.getItem(`oresto_products_${matchedVendorId}`);
+              if (localSaved) {
+                const parsed = JSON.parse(localSaved);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                  setProducts(parsed);
+                  return;
+                }
+              }
+            } catch {}
+
+            // Fallback démo si disponible
+            if (demoCandidate && demoCandidate.products.length > 0) {
+              setProducts(demoCandidate.products);
+            }
+          },
+          (err) => {
+            console.warn("Products listener warning:", err);
           }
-        });
+        );
         return;
       }
 
@@ -497,7 +525,7 @@ export default function RestaurantPublic() {
 
           {vendor.whatsapp && (
             <a
-              href={`https://wa.me/${vendor.whatsapp.replace(/\D/g, "")}`}
+              href={`https://wa.me/${String(vendor.whatsapp).replace(/\D/g, "")}`}
               target="_blank"
               rel="noreferrer"
               className="px-4 py-2 rounded-xl bg-[#25D366] text-white text-xs font-heading font-black tracking-wide flex items-center gap-1.5 shadow-sm hover:bg-[#20bd5a] transition-all"
@@ -825,7 +853,7 @@ export default function RestaurantPublic() {
                     });
 
                     toast.success("Commande validée ! Redirection WhatsApp en cours...");
-                    const rawPhone = (vendor.whatsapp || vendor.phone || "").replace(/\D/g, "");
+                    const rawPhone = String(vendor.whatsapp || vendor.phone || "").replace(/\D/g, "");
                     const itemsList = cart.map(i => `• ${i.qty}x ${i.product.name} (${(i.product.price * i.qty).toLocaleString()} F)`).join("\n");
                     const modeLabel = orderForm.mode === "pickup" ? "Retrait en boutique" : `Livraison à : ${orderForm.notes.trim()}`;
                     const msg = encodeURIComponent(

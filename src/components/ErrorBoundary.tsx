@@ -59,11 +59,27 @@ class ErrorBoundary extends Component<Props, State> {
 
             <div className="flex flex-col gap-3">
               <button
-                onClick={() => window.location.reload()}
+                onClick={async () => {
+                  try {
+                    if ("serviceWorker" in navigator) {
+                      const registrations = await navigator.serviceWorker.getRegistrations();
+                      for (const reg of registrations) {
+                        await reg.unregister();
+                      }
+                    }
+                    if ("caches" in window) {
+                      const keys = await caches.keys();
+                      for (const key of keys) {
+                        await caches.delete(key);
+                      }
+                    }
+                  } catch {}
+                  window.location.reload();
+                }}
                 className="w-full py-4 rounded-2xl bg-black text-white font-black text-xs uppercase tracking-widest hover:bg-primary transition-all flex items-center justify-center gap-2 shadow-xl shadow-black/10"
               >
                 <RotateCcw size={16} />
-                Recharger l'application
+                Vider le cache & Recharger
               </button>
               
               <a

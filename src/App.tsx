@@ -10,6 +10,7 @@ import ProLanding from "./pages/ProLanding";
 // Lazy-loaded App Providers (AuthProvider, AdminProvider, PrestataireProvider, Toaster)
 // Only loaded when navigating to authenticated/app sections, keeping landing page ultra-light
 const AppProvidersLayout = lazy(() => import("./layouts/AppProvidersLayout"));
+const PublicShowcaseLayout = lazy(() => import("./layouts/PublicShowcaseLayout"));
 
 // Secondary and dashboard pages code-split with lazy loading
 const Login = lazy(() => import("./pages/Login"));
@@ -107,9 +108,14 @@ const App = () => (
             <Route path="/devenir-prestataire" element={<DevenirPrestataire />} />
             <Route path="/prestataire/login" element={<PrestataireLogin />} />
             <Route path="/prestataire/dashboard" element={<PrestataireRoute><PrestataireDashboard /></PrestataireRoute>} />
+          </Route>
 
-            {/* Public Restaurant Site */}
+          {/* Public Restaurant / Showcase Site — 100% Isolated from Admin & Prestataire contexts */}
+          <Route element={<PublicShowcaseLayout />}>
             <Route path="/r/:slug" element={<RestaurantPublic />} />
+          </Route>
+
+          <Route element={<AppProvidersLayout />}>
 
             {/* Vendor routes */}
             <Route path="/vendor" element={<PrivateRoute requiredRole="vendor"><VendorLayout /></PrivateRoute>}>

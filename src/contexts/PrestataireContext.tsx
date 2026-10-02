@@ -57,13 +57,19 @@ export function PrestataireProvider({ children }: { children: ReactNode }) {
     if (!prestataire?.uid || !db) return;
 
     const pRef = ref(db, `prestataires/${prestataire.uid}`);
-    const unsub = onValue(pRef, (snap) => {
-      if (snap.exists()) {
-        const pData = snap.val() as Prestataire;
-        setPrestataire(pData);
-        try { localStorage.setItem("oresto_prestataire", JSON.stringify(pData)); } catch {}
+    const unsub = onValue(
+      pRef,
+      (snap) => {
+        if (snap.exists()) {
+          const pData = snap.val() as Prestataire;
+          setPrestataire(pData);
+          try { localStorage.setItem("oresto_prestataire", JSON.stringify(pData)); } catch {}
+        }
+      },
+      (err) => {
+        console.warn("Prestataire sync warning (guest or unauthenticated):", err?.message);
       }
-    });
+    );
 
     return () => unsub();
   }, [prestataire?.uid]);
