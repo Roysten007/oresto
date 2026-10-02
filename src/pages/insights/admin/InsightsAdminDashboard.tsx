@@ -332,13 +332,13 @@ export default function InsightsAdminDashboard() {
         {/* Navigation Tabs Bar */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-white/5 flex gap-1 overflow-x-auto py-2 scrollbar-none">
           {[
-            { id: "overview", label: "Vue Générale", icon: LayoutDashboard },
-            { id: "pricing", label: "Modèle Éco & Tarifs", icon: DollarSign },
-            { id: "features", label: "Fonctionnalités", icon: Sparkles },
-            { id: "problems", label: "Problèmes & Verbatims", icon: AlertTriangle },
-            { id: "respondents", label: `Répondants (${filteredResponses.length})`, icon: Users },
-            { id: "leads", label: `Leads Bêta (${qualifiedLeads.length})`, icon: MessageSquare },
-            { id: "exports", label: "Exports & Données", icon: Download },
+            { id: "overview", label: "Vue Générale", icon: "fa-solid fa-chart-pie" },
+            { id: "pricing", label: "Modèle Éco & Tarifs", icon: "fa-solid fa-money-bill-wave" },
+            { id: "features", label: "Fonctionnalités", icon: "fa-solid fa-wand-magic-sparkles" },
+            { id: "problems", label: "Problèmes & Verbatims", icon: "fa-solid fa-triangle-exclamation" },
+            { id: "respondents", label: `Répondants (${filteredResponses.length})`, icon: "fa-solid fa-users" },
+            { id: "leads", label: `Leads Bêta (${qualifiedLeads.length})`, icon: "fa-brands fa-whatsapp" },
+            { id: "exports", label: "Exports & Données", icon: "fa-solid fa-download" },
           ].map((tab) => {
             const active = activeTab === tab.id;
             return (
@@ -351,7 +351,7 @@ export default function InsightsAdminDashboard() {
                     : "text-white/60 hover:text-white hover:bg-white/5"
                 }`}
               >
-                <tab.icon size={14} />
+                <i className={`${tab.icon} text-xs`}></i>
                 <span>{tab.label}</span>
               </button>
             );

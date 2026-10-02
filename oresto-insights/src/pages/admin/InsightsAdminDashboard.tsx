@@ -13,7 +13,6 @@ import {
   exportLeadsToCSV 
 } from "@/services/surveyService";
 import RespondentDetailModal from "./RespondentDetailModal";
-import { useAdmin } from "@/contexts/AdminContext";
 import {
   ResponsiveContainer,
   BarChart,
@@ -50,7 +49,7 @@ import {
   Database,
   Phone,
   FileSpreadsheet,
-  LogOut
+  CreditCard
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -72,7 +71,6 @@ const FEATURE_CATALOG: { id: string; title: string; description: string }[] = [
 ];
 
 export default function InsightsAdminDashboard() {
-  const { adminLogout } = useAdmin();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get("tab") || "overview";
 
@@ -282,6 +280,11 @@ export default function InsightsAdminDashboard() {
       <header className="bg-[#0A0A0A] text-white border-b border-white/10 sticky top-0 z-30 shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
           <div className="flex items-center gap-3">
+            <Link to="/oresto-admin/dashboard" className="text-white/60 hover:text-white transition-colors text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 no-underline">
+              <ChevronRight size={14} className="rotate-180 text-primary" />
+              Retour Admin
+            </Link>
+            <div className="h-4 w-px bg-white/20" />
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center text-white font-black text-sm shadow-md shadow-primary/30">
                 OI
@@ -304,23 +307,14 @@ export default function InsightsAdminDashboard() {
 
           <div className="flex items-center gap-2">
             <a
-              href="/"
+              href="/survey"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-colors no-underline"
             >
-              <span>Voir l'étude publique</span>
+              <span>Voir le questionnaire</span>
               <ExternalLink size={13} className="text-primary" />
             </a>
-
-            <button
-              onClick={() => adminLogout()}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-xs font-bold transition-colors"
-              title="Se déconnecter"
-            >
-              <LogOut size={13} />
-              <span>Déconnexion</span>
-            </button>
 
             {responses.length === 0 && (
               <button
@@ -338,13 +332,13 @@ export default function InsightsAdminDashboard() {
         {/* Navigation Tabs Bar */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-white/5 flex gap-1 overflow-x-auto py-2 scrollbar-none">
           {[
-            { id: "overview", label: "Vue Générale", icon: LayoutDashboard },
-            { id: "pricing", label: "Modèle Éco & Tarifs", icon: DollarSign },
-            { id: "features", label: "Fonctionnalités", icon: Sparkles },
-            { id: "problems", label: "Problèmes & Verbatims", icon: AlertTriangle },
-            { id: "respondents", label: `Répondants (${filteredResponses.length})`, icon: Users },
-            { id: "leads", label: `Leads Bêta (${qualifiedLeads.length})`, icon: MessageSquare },
-            { id: "exports", label: "Exports & Données", icon: Download },
+            { id: "overview", label: "Vue Générale", icon: "fa-solid fa-chart-pie" },
+            { id: "pricing", label: "Modèle Éco & Tarifs", icon: "fa-solid fa-money-bill-wave" },
+            { id: "features", label: "Fonctionnalités", icon: "fa-solid fa-wand-magic-sparkles" },
+            { id: "problems", label: "Problèmes & Verbatims", icon: "fa-solid fa-triangle-exclamation" },
+            { id: "respondents", label: `Répondants (${filteredResponses.length})`, icon: "fa-solid fa-users" },
+            { id: "leads", label: `Leads Bêta (${qualifiedLeads.length})`, icon: "fa-brands fa-whatsapp" },
+            { id: "exports", label: "Exports & Données", icon: "fa-solid fa-download" },
           ].map((tab) => {
             const active = activeTab === tab.id;
             return (
@@ -357,7 +351,7 @@ export default function InsightsAdminDashboard() {
                     : "text-white/60 hover:text-white hover:bg-white/5"
                 }`}
               >
-                <tab.icon size={14} />
+                <i className={`${tab.icon} text-xs`}></i>
                 <span>{tab.label}</span>
               </button>
             );

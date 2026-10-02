@@ -749,27 +749,30 @@ export default function SurveyPublic() {
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {[
-                      "Restaurant",
-                      "Maquis",
-                      "Fast-food",
-                      "Traiteur",
-                      "Café / snack",
-                      "Bar / lounge",
-                      "Hôtel avec restaurant",
-                      "Autre",
-                    ].map((type) => (
+                      { label: "Restaurant", icon: "fa-solid fa-utensils" },
+                      { label: "Maquis", icon: "fa-solid fa-fire-burner" },
+                      { label: "Fast-food", icon: "fa-solid fa-burger" },
+                      { label: "Traiteur", icon: "fa-solid fa-wheat-awn" },
+                      { label: "Café / snack", icon: "fa-solid fa-mug-hot" },
+                      { label: "Bar / lounge", icon: "fa-solid fa-martini-glass" },
+                      { label: "Hôtel avec restaurant", icon: "fa-solid fa-hotel" },
+                      { label: "Autre", icon: "fa-solid fa-store" },
+                    ].map(({ label, icon }) => (
                       <button
-                        key={type}
+                        key={label}
                         type="button"
-                        onClick={() => handleSingleSelect("establishmentType", type)}
+                        onClick={() => handleSingleSelect("establishmentType", label)}
                         className={`p-3 rounded-2xl border text-xs font-bold transition-all text-left flex items-center justify-between ${
-                          form.establishmentType === type
+                          form.establishmentType === label
                             ? "border-[#FF6B00] bg-orange-50/70 text-[#EA580C] shadow-xs"
                             : "border-zinc-200 bg-white hover:border-zinc-300 text-zinc-700"
                         }`}
                       >
-                        <span>{type}</span>
-                        {form.establishmentType === type && <CheckCircle2 size={14} className="text-[#FF6B00]" />}
+                        <span className="flex items-center gap-2">
+                          <i className={`${icon} text-[#FF6B00] text-xs`}></i>
+                          <span>{label}</span>
+                        </span>
+                        {form.establishmentType === label && <CheckCircle2 size={14} className="text-[#FF6B00]" />}
                       </button>
                     ))}
                   </div>
@@ -889,28 +892,31 @@ export default function SurveyPublic() {
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {[
-                      "Sur place",
-                      "Téléphone",
-                      "WhatsApp",
-                      "Facebook",
-                      "Instagram",
-                      "Site internet",
-                      "Application",
-                      "Autre",
-                    ].map((channel) => {
-                      const isSel = form.orderChannels.includes(channel);
+                      { label: "Sur place", icon: "fa-solid fa-chair text-amber-500" },
+                      { label: "Téléphone", icon: "fa-solid fa-phone text-blue-500" },
+                      { label: "WhatsApp", icon: "fa-brands fa-whatsapp text-emerald-500" },
+                      { label: "Facebook", icon: "fa-brands fa-facebook text-blue-600" },
+                      { label: "Instagram", icon: "fa-brands fa-instagram text-pink-500" },
+                      { label: "Site internet", icon: "fa-solid fa-globe text-indigo-500" },
+                      { label: "Application", icon: "fa-solid fa-mobile-screen text-purple-500" },
+                      { label: "Autre", icon: "fa-solid fa-ellipsis text-zinc-400" },
+                    ].map(({ label, icon }) => {
+                      const isSel = form.orderChannels.includes(label);
                       return (
                         <button
-                          key={channel}
+                          key={label}
                           type="button"
-                          onClick={() => handleMultiToggle("orderChannels", channel)}
+                          onClick={() => handleMultiToggle("orderChannels", label)}
                           className={`p-3 rounded-2xl border text-xs font-bold transition-all text-left flex items-center justify-between ${
                             isSel
                               ? "border-[#FF6B00] bg-orange-50/70 text-[#EA580C] shadow-xs"
                               : "border-zinc-200 bg-white hover:border-zinc-300 text-zinc-700"
                           }`}
                         >
-                          <span>{channel}</span>
+                          <span className="flex items-center gap-2">
+                            <i className={`${icon} text-xs`}></i>
+                            <span>{label}</span>
+                          </span>
                           {isSel && <CheckCircle2 size={14} className="text-[#FF6B00]" />}
                         </button>
                       );
@@ -996,26 +1002,29 @@ export default function SurveyPublic() {
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {[
-                      "Menu papier",
-                      "Image envoyée sur WhatsApp",
-                      "PDF",
-                      "QR Code",
-                      "Site internet",
-                      "Réseaux sociaux",
-                      "Autre",
-                    ].map((method) => (
+                      { label: "Menu papier", icon: "fa-solid fa-book-open text-amber-600" },
+                      { label: "Image envoyée sur WhatsApp", icon: "fa-brands fa-whatsapp text-emerald-500" },
+                      { label: "PDF", icon: "fa-solid fa-file-pdf text-red-500" },
+                      { label: "QR Code", icon: "fa-solid fa-qrcode text-indigo-600" },
+                      { label: "Site internet", icon: "fa-solid fa-globe text-blue-500" },
+                      { label: "Réseaux sociaux", icon: "fa-brands fa-instagram text-pink-500" },
+                      { label: "Autre", icon: "fa-solid fa-ellipsis text-zinc-400" },
+                    ].map(({ label, icon }) => (
                       <button
-                        key={method}
+                        key={label}
                         type="button"
-                        onClick={() => handleSingleSelect("menuMethod", method)}
+                        onClick={() => handleSingleSelect("menuMethod", label)}
                         className={`p-3 rounded-2xl border text-xs font-bold transition-all text-left flex items-center justify-between ${
-                          form.menuMethod === method
+                          form.menuMethod === label
                             ? "border-[#FF6B00] bg-orange-50/70 text-[#EA580C] shadow-xs"
                             : "border-zinc-200 bg-white hover:border-zinc-300 text-zinc-700"
                         }`}
                       >
-                        <span>{method}</span>
-                        {form.menuMethod === method && <CheckCircle2 size={14} className="text-[#FF6B00]" />}
+                        <span className="flex items-center gap-2">
+                          <i className={`${icon} text-xs`}></i>
+                          <span>{label}</span>
+                        </span>
+                        {form.menuMethod === label && <CheckCircle2 size={14} className="text-[#FF6B00]" />}
                       </button>
                     ))}
                   </div>
@@ -1029,26 +1038,29 @@ export default function SurveyPublic() {
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {[
-                      "Cahier papier",
-                      "WhatsApp",
-                      "Téléphone",
-                      "Excel / Google Sheets",
-                      "Logiciel",
-                      "Application",
-                      "Autre",
-                    ].map((m) => (
+                      { label: "Cahier papier", icon: "fa-solid fa-book text-amber-600" },
+                      { label: "WhatsApp", icon: "fa-brands fa-whatsapp text-emerald-500" },
+                      { label: "Téléphone", icon: "fa-solid fa-phone text-blue-500" },
+                      { label: "Excel / Google Sheets", icon: "fa-solid fa-table text-emerald-600" },
+                      { label: "Logiciel", icon: "fa-solid fa-desktop text-indigo-500" },
+                      { label: "Application", icon: "fa-solid fa-mobile-screen text-purple-500" },
+                      { label: "Autre", icon: "fa-solid fa-ellipsis text-zinc-400" },
+                    ].map(({ label, icon }) => (
                       <button
-                        key={m}
+                        key={label}
                         type="button"
-                        onClick={() => handleSingleSelect("orderManagement", m)}
+                        onClick={() => handleSingleSelect("orderManagement", label)}
                         className={`p-3 rounded-2xl border text-xs font-bold transition-all text-left flex items-center justify-between ${
-                          form.orderManagement === m
+                          form.orderManagement === label
                             ? "border-[#FF6B00] bg-orange-50/70 text-[#EA580C] shadow-xs"
                             : "border-zinc-200 bg-white hover:border-zinc-300 text-zinc-700"
                         }`}
                       >
-                        <span>{m}</span>
-                        {form.orderManagement === m && <CheckCircle2 size={14} className="text-[#FF6B00]" />}
+                        <span className="flex items-center gap-2">
+                          <i className={`${icon} text-xs`}></i>
+                          <span>{label}</span>
+                        </span>
+                        {form.orderManagement === label && <CheckCircle2 size={14} className="text-[#FF6B00]" />}
                       </button>
                     ))}
                   </div>
@@ -1363,26 +1375,29 @@ export default function SurveyPublic() {
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {[
-                      "MTN Mobile Money",
-                      "Moov Money",
-                      "Celtiis",
-                      "Espèces",
-                      "Carte bancaire",
-                      "Autre",
-                    ].map((p) => {
-                      const isSel = form.paymentMethods.includes(p);
+                      { label: "MTN Mobile Money", icon: "fa-solid fa-mobile-screen text-amber-500" },
+                      { label: "Moov Money", icon: "fa-solid fa-mobile-screen-button text-blue-600" },
+                      { label: "Celtiis", icon: "fa-solid fa-wallet text-purple-600" },
+                      { label: "Espèces", icon: "fa-solid fa-money-bill-wave text-emerald-600" },
+                      { label: "Carte bancaire", icon: "fa-solid fa-credit-card text-sky-500" },
+                      { label: "Autre", icon: "fa-solid fa-ellipsis text-zinc-400" },
+                    ].map(({ label, icon }) => {
+                      const isSel = form.paymentMethods.includes(label);
                       return (
                         <button
-                          key={p}
+                          key={label}
                           type="button"
-                          onClick={() => handleMultiToggle("paymentMethods", p)}
+                          onClick={() => handleMultiToggle("paymentMethods", label)}
                           className={`p-3 rounded-2xl border text-xs font-bold transition-all text-left flex items-center justify-between ${
                             isSel
                               ? "border-[#FF6B00] bg-orange-50/70 text-[#EA580C] shadow-xs"
                               : "border-zinc-200 bg-white hover:border-zinc-300 text-zinc-700"
                           }`}
                         >
-                          <span>{p}</span>
+                          <span className="flex items-center gap-2">
+                            <i className={`${icon} text-xs`}></i>
+                            <span>{label}</span>
+                          </span>
                           {isSel && <CheckCircle2 size={14} className="text-[#FF6B00]" />}
                         </button>
                       );
