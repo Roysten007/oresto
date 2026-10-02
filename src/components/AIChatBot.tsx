@@ -83,18 +83,13 @@ export default function AIChatBot({ mode = "dashboard" }: AIChatBotProps) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen]);
 
-  // Speech recognition setup
+  // Speech recognition cleanup on unmount
   useEffect(() => {
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (SR) {
-      recognitionRef.current = new SR();
-      recognitionRef.current.lang = "fr-FR";
-      recognitionRef.current.onresult = (e: any) => {
-        setInput(e.results[0][0].transcript);
-        setIsListening(false);
-      };
-      recognitionRef.current.onerror = () => setIsListening(false);
-    }
+    return () => {
+      try {
+        recognitionRef.current?.stop();
+      } catch {}
+    };
   }, []);
 
   // Ouverture programmatique depuis d'autres écrans
@@ -477,10 +472,74 @@ export default function AIChatBot({ mode = "dashboard" }: AIChatBotProps) {
     { label: "📱 Paiement MoMo", q: "Combien ai-je encaissé par Mobile Money sans commission ?" }
   ];
 
-  const startListening = () => {
-    if (!recognitionRef.current) { toast.error("Micro non disponible sur ce navigateur"); return; }
-    setIsListening(true);
-    recognitionRef.current.start();
+  const toggleListening = () => {
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) {
+      toast.error("La dictée vocale nécessite un navigateur compatible (Google Chrome, Microsoft Edge ou Safari).", {
+        duration: 4000
+      });
+      return;
+    }
+
+    if (isListening) {
+      try {
+        recognitionRef.current?.stop();
+      } catch {}
+      setIsListening(false);
+      toast.info("Micro désactivé.");
+      return;
+    }
+
+    try {
+      const rec = new SR();
+      rec.lang = "fr-FR";
+      rec.continuous = false;
+      rec.interimResults = true;
+
+      rec.onstart = () => {
+        setIsListening(true);
+        toast.info("🎙️ Parlez maintenant, IZI IA vous écoute...", { id: "voice-listening", duration: 3000 });
+      };
+
+      rec.onresult = (e: any) => {
+        let finalTranscript = "";
+        let interimTranscript = "";
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          const trans = e.results[i][0].transcript;
+          if (e.results[i].isFinal) {
+            finalTranscript += trans;
+          } else {
+            interimTranscript += trans;
+          }
+        }
+        const textFound = (finalTranscript || interimTranscript).trim();
+        if (textFound) {
+          setInput(textFound);
+        }
+      };
+
+      rec.onerror = (e: any) => {
+        setIsListening(false);
+        if (e.error === "not-allowed" || e.error === "service-not-allowed") {
+          toast.error("Accès micro refusé. Veuillez autoriser le microphone dans les paramètres de votre navigateur.");
+        } else if (e.error === "no-speech") {
+          toast.info("Aucune voix détectée. Vous pouvez réessayer.");
+        } else {
+          toast.error(`Erreur microphone (${e.error || "Inconnu"}).`);
+        }
+      };
+
+      rec.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current = rec;
+      rec.start();
+    } catch (err) {
+      console.warn("Speech recognition start error:", err);
+      setIsListening(false);
+      toast.error("Impossible de démarrer le micro.");
+    }
   };
 
   const formatContent = (text: string) => {
@@ -600,14 +659,14 @@ export default function AIChatBot({ mode = "dashboard" }: AIChatBotProps) {
               />
               <button
                 type="button"
-                onClick={startListening}
-                className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs transition-all ${
-                  isListening ? "bg-red-500 text-white animate-pulse" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                onClick={toggleListening}
+                className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs transition-all relative ${
+                  isListening ? "bg-red-500 text-white animate-pulse shadow-md shadow-red-500/30" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
-                title="Dictée vocale"
-                aria-label="Activer la dictée vocale"
+                title={isListening ? "Arrêter l'écoute" : "Dictée vocale"}
+                aria-label={isListening ? "Arrêter l'écoute" : "Activer la dictée vocale"}
               >
-                <i className="fa-solid fa-microphone"></i>
+                <i className={`fa-solid ${isListening ? "fa-microphone-lines" : "fa-microphone"}`}></i>
               </button>
               <button
                 type="button"
