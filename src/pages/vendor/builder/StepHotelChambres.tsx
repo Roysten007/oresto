@@ -183,24 +183,15 @@ export default function StepHotelChambres({ products, vendorId, onSave, onDelete
         <button
           onClick={() => setEditing({
             name: "",
-            price: 35000,
-            originalPrice: 45000,
-            category: "Chambre Deluxe",
-            image: "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800&auto=format&fit=crop&q=80",
-            images: [
-              "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800&auto=format&fit=crop&q=80",
-              "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&auto=format&fit=crop&q=80"
-            ],
-            stock: 3,
-            badge: "PETIT-DÉJ INCLUS",
-            features: [
-              "Wi-Fi Fibre Haut Débit",
-              "Climatisation Split 24h",
-              "Lit King Size Confort Palace",
-              "Salle de bain privée & Eau chaude",
-              "Smart TV 4K avec Canal+"
-            ],
-            description: "Chambre spacieuse et lumineuse avec literie haut de gamme, salle de bain privative et vue dégagée."
+            price: undefined as any,
+            originalPrice: undefined as any,
+            category: HOTEL_CATEGORIES[0],
+            image: "",
+            images: [],
+            stock: 1,
+            badge: "",
+            features: [],
+            description: ""
           })}
           className="px-5 py-3 bg-indigo-600 text-white rounded-2xl font-bold text-xs hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2 shrink-0 active:scale-95"
         >
@@ -216,22 +207,28 @@ export default function StepHotelChambres({ products, vendorId, onSave, onDelete
             <i className="fa-solid fa-bed"></i>
           </div>
           <div>
-            <h3 className="font-heading font-bold text-gray-900 text-base">Aucune chambre ajoutée pour le moment</h3>
+            <h3 className="font-heading font-bold text-gray-900 text-base">Aucune chambre enregistrée</h3>
             <p className="text-xs text-gray-500 max-w-sm mt-1">
-              Créez vos suites, chambres standard et appartements meublés pour permettre à vos clients de réserver leurs séjours.
+              Créez vos suites, chambres standard et hébergements pour permettre à vos clients de réserver directement.
             </p>
           </div>
           <button
             onClick={() => setEditing({
-              name: "Chambre Deluxe King",
-              price: 35000,
-              category: "Chambre Deluxe",
-              stock: 3,
-              features: ["Climatisation", "Wi-Fi Fibre", "Lit King Size"]
+              name: "",
+              price: undefined as any,
+              originalPrice: undefined as any,
+              category: HOTEL_CATEGORIES[0],
+              image: "",
+              images: [],
+              stock: 1,
+              badge: "",
+              features: [],
+              description: ""
             })}
-            className="mt-2 px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold shadow-md"
+            className="mt-2 px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-bold shadow-md hover:bg-indigo-700 transition-all flex items-center gap-2"
           >
-            + Créer ma première chambre
+            <i className="fa-solid fa-plus"></i>
+            <span>Ajouter ma première chambre</span>
           </button>
         </div>
       ) : (
@@ -433,7 +430,7 @@ export default function StepHotelChambres({ products, vendorId, onSave, onDelete
                     type="number"
                     value={editing.price || ""}
                     onChange={e => setEditing({ ...editing, price: Number(e.target.value) })}
-                    placeholder="35000"
+                    placeholder="Ex: 35000"
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 font-heading font-black text-base text-indigo-600 outline-none focus:border-indigo-600"
                   />
                 </div>
@@ -446,7 +443,7 @@ export default function StepHotelChambres({ products, vendorId, onSave, onDelete
                     type="number"
                     value={editing.originalPrice || ""}
                     onChange={e => setEditing({ ...editing, originalPrice: Number(e.target.value) })}
-                    placeholder="45000"
+                    placeholder="Ex: 45000"
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 font-bold text-sm text-gray-500 outline-none focus:border-indigo-600"
                   />
                 </div>

@@ -11,7 +11,7 @@ interface Props {
 
 export default function StepLancement({ formData, products, isSaving, onPublish }: Props) {
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-  const displaySlug = formData.slug || "le-maquis-etoile";
+  const displaySlug = formData.slug || "mon-commerce";
   const displayUrl = typeof window !== 'undefined' ? `${window.location.host}/r/${displaySlug}` : `oresto.app/r/${displaySlug}`;
   const fullUrl = `${baseUrl}/r/${displaySlug}`;
 

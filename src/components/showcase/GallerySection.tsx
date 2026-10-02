@@ -13,30 +13,7 @@ export default function GallerySection({ vendor, businessType }: Props) {
   const isHotel = businessType === "hotel";
 
   const customGallery = vendor.gallery_images || [];
-  
-  // Images par défaut si le commerçant n'a pas encore téléversé de galerie spécifique
-  const defaultGallery = isEcommerce
-    ? [
-        { id: "g1", url: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&auto=format&fit=crop&q=80", caption: "Collection Urbaine 2026", category: "Lookbook" },
-        { id: "g2", url: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&auto=format&fit=crop&q=80", caption: "Sneakers Streetwear", category: "Chaussures" },
-        { id: "g3", url: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&auto=format&fit=crop&q=80", caption: "Accessoires High-Tech", category: "Accessoires" },
-        { id: "g4", url: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&auto=format&fit=crop&q=80", caption: "Style Tendance", category: "Mode" }
-      ]
-    : isHotel
-    ? [
-        { id: "g1", url: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&auto=format&fit=crop&q=80", caption: "Suite Exécutive King", category: "Chambres" },
-        { id: "g2", url: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800&auto=format&fit=crop&q=80", caption: "Piscine & Espace Détente", category: "Extérieurs" },
-        { id: "g3", url: "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800&auto=format&fit=crop&q=80", caption: "Chambre Prestige Deluxe", category: "Chambres" },
-        { id: "g4", url: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80", caption: "Restaurant & Bar Lounge", category: "Espaces Communs" }
-      ]
-    : [
-        { id: "g1", url: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80", caption: "Ambiance Salle & Terrasse", category: "Ambiance" },
-        { id: "g2", url: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=80", caption: "Grillades du Terroir", category: "Plats" },
-        { id: "g3", url: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80", caption: "Cuisine & Préparations", category: "Cuisine" },
-        { id: "g4", url: "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80", caption: "Cocktails & Rafraîchissements", category: "Boissons" }
-      ];
-
-  const galleryList = customGallery.length > 0 ? customGallery : defaultGallery;
+  const galleryList = customGallery;
   const [selectedImage, setSelectedImage] = useState<{ url: string; caption?: string } | null>(null);
 
   if (galleryList.length === 0) return null;

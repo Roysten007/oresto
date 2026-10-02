@@ -91,18 +91,22 @@ export default function HeroSection({ vendor, businessType, onPrimaryCta, onSeco
         </div>
 
         {/* Location Subtext */}
-        <div className="flex items-center gap-4 text-[11px] text-gray-300 font-medium pt-1">
-          <span className="flex items-center gap-1.5">
-            <i className="fa-solid fa-location-dot text-primary"></i>
-            {vendor.neighborhood || "Haie Vive"}, {vendor.city || "Cotonou"}
-          </span>
-          {vendor.phone && (
-            <span className="flex items-center gap-1.5">
-              <i className="fa-solid fa-phone text-emerald-400"></i>
-              {vendor.phone}
-            </span>
-          )}
-        </div>
+        {(vendor.city || vendor.neighborhood || vendor.phone) && (
+          <div className="flex flex-wrap items-center gap-4 text-[11px] text-gray-300 font-medium pt-1">
+            {(vendor.city || vendor.neighborhood) && (
+              <span className="flex items-center gap-1.5">
+                <i className="fa-solid fa-location-dot text-primary"></i>
+                {[vendor.neighborhood, vendor.city].filter(Boolean).join(", ")}
+              </span>
+            )}
+            {vendor.phone && (
+              <span className="flex items-center gap-1.5">
+                <i className="fa-solid fa-phone text-emerald-400"></i>
+                {vendor.phone}
+              </span>
+            )}
+          </div>
+        )}
       </div>
     </section>
   );

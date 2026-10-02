@@ -177,18 +177,15 @@ export default function StepEcommerceCatalogue({ products, vendorId, onSave, onD
         <button
           onClick={() => setEditing({
             name: "",
-            price: 0,
-            originalPrice: 0,
-            category: "Mode & Vêtements",
+            price: undefined as any,
+            originalPrice: undefined as any,
+            category: ECOMMERCE_CATEGORIES[0],
             image: "",
             images: [],
-            stock: 15,
-            badge: "NOUVEAU",
-            variants: [
-              { name: "Taille", options: ["S", "M", "L", "XL"] },
-              { name: "Couleur", options: ["Noir", "Blanc"] }
-            ],
-            features: ["Livraison express 24h", "Produit 100% authentique"],
+            stock: 10,
+            badge: "",
+            variants: [],
+            features: [],
             description: ""
           })}
           className="px-5 py-3 bg-black text-white rounded-2xl font-bold text-xs hover:bg-primary transition-all shadow-lg shadow-black/15 flex items-center justify-center gap-2 shrink-0 active:scale-95"
@@ -201,28 +198,31 @@ export default function StepEcommerceCatalogue({ products, vendorId, onSave, onD
       {/* Empty State */}
       {products.length === 0 && (
         <div className="py-14 border-2 border-dashed border-gray-200 rounded-3xl flex flex-col items-center justify-center gap-3 text-center bg-gray-50/50 p-6">
-          <div className="w-16 h-16 rounded-3xl bg-primary/10 text-primary flex items-center justify-center text-2xl shadow-sm">
+          <div className="w-16 h-16 rounded-3xl bg-primary/10 text-primary flex items-center justify-center text-2xl shadow-xs">
             <i className="fa-solid fa-bag-shopping"></i>
           </div>
-          <p className="font-heading font-black text-gray-800 text-base">Votre vitrine e-commerce est prête</p>
+          <p className="font-heading font-black text-gray-800 text-base">Votre catalogue est vide</p>
           <p className="text-xs text-gray-400 max-w-sm">
-            Ajoutez vos premiers articles (vêtements, chaussures, smartphones, cosmétiques...) avec plusieurs photos et prix barrés.
+            Ajoutez vos premiers articles (mode, high-tech, accessoires, cosmétiques, alimentation...) avec leurs photos, prix et options.
           </p>
           <button
             onClick={() => setEditing({
-              name: "Sneakers Streetwear Urban",
-              price: 18500,
-              originalPrice: 25000,
-              category: "Chaussures & Baskets",
-              stock: 20,
-              badge: "PROMO",
-              variants: [{ name: "Pointure", options: ["40", "41", "42", "43", "44"] }],
-              features: ["Semelle amortissante", "Livraison gratuite"],
-              description: "Chaussures tendance confortables et résistantes."
+              name: "",
+              price: undefined as any,
+              originalPrice: undefined as any,
+              category: ECOMMERCE_CATEGORIES[0],
+              image: "",
+              images: [],
+              stock: 10,
+              badge: "",
+              variants: [],
+              features: [],
+              description: ""
             })}
-            className="mt-2 px-5 py-2.5 bg-primary text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-md hover:bg-primary/90 transition-all"
+            className="mt-2 px-5 py-2.5 bg-primary text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-md hover:bg-primary/90 transition-all flex items-center gap-2"
           >
-            Créer un produit exemple
+            <i className="fa-solid fa-plus"></i>
+            <span>Ajouter mon premier article</span>
           </button>
         </div>
       )}

@@ -10,7 +10,7 @@ interface Props {
 const HOTEL_SERVICES_LIST = [
   { id: "breakfast", name: "Petit-déjeuner inclus / buffet", icon: "fa-solid fa-mug-hot", desc: "Servi chaque matin de 07h à 10h30" },
   { id: "wifi", name: "Wi-Fi Fibre Haut Débit", icon: "fa-solid fa-wifi", desc: "Connexion illimitée dans les chambres et parties communes" },
-  { id: "shuttle", name: "Navette Aéroport Cadjehoun", icon: "fa-solid fa-van-shuttle", desc: "Accueil et transfert aller-retour sur réservation" },
+  { id: "shuttle", name: "Navette Aéroport / Gare", icon: "fa-solid fa-van-shuttle", desc: "Accueil et transfert aller-retour sur réservation" },
   { id: "pool", name: "Piscine & Espace Transats", icon: "fa-solid fa-water-ladder", desc: "Accès libre pour tous les résidents" },
   { id: "generator", name: "Groupe électrogène 24h/24", icon: "fa-solid fa-bolt", desc: "Continuité garantie en électricité et climatisation" },
   { id: "parking", name: "Parking privé sécurisé", icon: "fa-solid fa-square-parking", desc: "Surveillance par caméra et gardiennage 24h/24" },

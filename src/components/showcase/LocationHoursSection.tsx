@@ -12,8 +12,9 @@ export default function LocationHoursSection({ vendor, businessType }: Props) {
   const isHotel = businessType === "hotel";
   const isEcommerce = businessType === "ecommerce";
 
-  const neighborhood = vendor.neighborhood || "Haie Vive";
-  const city = vendor.city || "Cotonou";
+  const neighborhood = vendor.neighborhood || "";
+  const city = vendor.city || "";
+  const displayAddress = [neighborhood, city].filter(Boolean).join(", ") || "Bénin";
   const hours = vendor.hours || {};
 
   // Horaires par défaut si non renseignés
@@ -47,14 +48,7 @@ export default function LocationHoursSection({ vendor, businessType }: Props) {
         Dimanche: "12:00 - 23:00"
       };
 
-  const pointsOfInterest = vendor.points_of_interest || (isHotel
-    ? [
-        { name: "Aéroport International Cadjehoun (COO)", distance: "8 minutes en voiture", icon: "fa-solid fa-plane-departure" },
-        { name: "Plage & Boulevard de la Marina", distance: "5 minutes à pied", icon: "fa-solid fa-water" },
-        { name: "Centre des Affaires & Ambassades (Haie Vive)", distance: "3 minutes", icon: "fa-solid fa-briefcase" },
-        { name: "Marché Dantokpa & Centre-ville", distance: "12 minutes", icon: "fa-solid fa-city" }
-      ]
-    : []);
+  const pointsOfInterest = vendor.points_of_interest || [];
 
   return (
     <section id="location" className="py-12 sm:py-16 bg-white border-b border-gray-100">
@@ -91,7 +85,7 @@ export default function LocationHoursSection({ vendor, businessType }: Props) {
                   <div>
                     <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Adresse</span>
                     <h3 className="font-heading font-black text-lg text-gray-900 leading-snug mt-0.5">
-                      {neighborhood}, {city}
+                      {displayAddress}
                     </h3>
                     <p className="text-xs text-gray-500 mt-1">
                       République du Bénin • Accès sécurisé et parking disponible
@@ -100,7 +94,7 @@ export default function LocationHoursSection({ vendor, businessType }: Props) {
                 </div>
 
                 <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${vendor.name} ${neighborhood} ${city}`)}`}
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${vendor.name} ${displayAddress}`)}`}
                   target="_blank"
                   rel="noreferrer"
                   className="px-4 py-2.5 rounded-xl bg-black text-white font-heading font-bold text-xs hover:bg-primary transition-colors flex items-center gap-1.5 shrink-0"

@@ -15,23 +15,22 @@ export default function FAQSection({ vendor, businessType }: Props) {
   const defaultFAQ = isHotel
     ? [
         { q: "Quelles sont les heures d'arrivée (Check-in) et de départ (Check-out) ?", a: `L'enregistrement s'effectue à partir de ${vendor.check_in_time || "14h00"} et les départs doivent avoir lieu avant ${vendor.check_out_time || "11h00"}. Un départ tardif peut être arrangé avec la réception selon les disponibilités.` },
-        { q: "Le petit-déjeuner est-il inclus dans la réservation ?", a: "Oui, un petit-déjeuner continental et buffet complet est proposé chaque matin de 07h00 à 10h30 pour tous nos résidents." },
-        { q: "Quels sont les modes de paiement acceptés ?", a: "Nous acceptons les règlements par MTN Mobile Money, Moov Money, Carte bancaire (Visa / Mastercard) ainsi que les espèces à la réception." },
-        { q: "Proposez-vous une navette pour l'aéroport ?", a: "Oui, une navette privée peut vous accueillir directement à l'Aéroport International de Cadjehoun (Cotonou). Il vous suffit de nous communiquer votre numéro de vol lors de votre réservation." },
-        { q: "Y a-t-il une caution remboursable à l'arrivée ?", a: `Une caution de garantie de ${vendor.deposit_amount ? `${Number(vendor.deposit_amount).toLocaleString()} FCFA` : "20 000 FCFA"} est demandée lors du check-in et vous est intégralement restituée lors de votre départ après l'état des lieux.` }
+        { q: "Le petit-déjeuner est-il inclus dans la réservation ?", a: "Oui, un petit-déjeuner continental et buffet complet est proposé chaque matin pour tous nos résidents." },
+        { q: "Quels sont les modes de paiement acceptés ?", a: "Nous acceptons les règlements par MTN Mobile Money, Moov Money, Carte bancaire ainsi que les espèces à la réception." },
+        { q: "Proposez-vous une navette ou un transfert ?", a: "Oui, un transfert privé peut être arrangé sur simple demande lors de votre réservation. Contactez-nous directement sur WhatsApp." }
       ]
     : isEcommerce
     ? [
-        { q: "Quels sont les délais et zones de livraison ?", a: "Nous livrons partout à Cotonou et Calavi sous 24h ouvrées. Pour les autres villes du Bénin (Porto-Novo, Parakou, Bohicon), les expéditions s'effectuent via les gares routières en 24h à 48h." },
-        { q: "Comment payer ma commande en toute sécurité ?", a: "Vous pouvez régler directement par Mobile Money (MTN MoMo ou Moov Money) sans aucun frais supplémentaire. Le paiement est 100% sécurisé et instantané." },
-        { q: "Puis-je échanger un article si la taille ne convient pas ?", a: "Absolument ! Vous disposez de 48h après réception pour nous signaler un souci de taille ou de conformité. L'article doit être non porté et dans son emballage d'origine." },
-        { q: "Peut-on venir récupérer son colis en boutique physique ?", a: `Oui, le retrait en point de vente à ${vendor.neighborhood || "Haie Vive"} est totalement gratuit dès que votre commande est prête.` }
+        { q: "Quels sont les délais et zones de livraison ?", a: "Nous livrons rapidement à votre domicile ou bureau. Les expéditions vers les autres villes s'effectuent en 24h à 48h." },
+        { q: "Comment payer ma commande en toute sécurité ?", a: "Vous pouvez régler directement par Mobile Money (MTN MoMo ou Moov Money) ou en espèces à la livraison selon les modalités disponibles. Le paiement est 100% sécurisé et sans commission." },
+        { q: "Puis-je échanger un article si la taille ne convient pas ?", a: "Oui ! Vous disposez de 48h après réception pour nous signaler un souci de taille ou de conformité. L'article doit être non porté et dans son emballage d'origine." },
+        { q: "Peut-on venir récupérer son colis en boutique ?", a: vendor.neighborhood ? `Oui, le retrait en point de vente à ${vendor.neighborhood} est gratuit dès que votre commande est prête.` : "Oui, le retrait direct est gratuit dès que votre commande est prête." }
       ]
     : [
-        { q: "Faut-il obligatoirement réserver à l'avance ?", a: "La réservation n'est pas obligatoire mais vivement conseillée, en particulier pour les vendredis et samedis soirs ainsi que pour les grandes tablées." },
-        { q: "Acceptez-vous les réservations de groupe et événements privés ?", a: "Oui ! Nous organisons régulièrement des anniversaires, repas d'affaires, mariages et cocktails dînatoires. Contactez-nous directement sur WhatsApp pour un devis personnalisé." },
-        { q: "Proposez-vous un service de livraison à domicile ?", a: "Oui, vous pouvez commander directement tous nos plats sur cette vitrine et vous faire livrer chez vous ou au bureau par nos livreurs partenaires." },
-        { q: "Quels sont les moyens de paiement acceptés ?", a: "Nous acceptons les paiements en espèces, MTN Mobile Money, Moov Money et cartes bancaires." }
+        { q: "Faut-il obligatoirement réserver à l'avance ?", a: "La réservation n'est pas obligatoire mais conseillée pour les heures de forte affluence et les grandes tablées." },
+        { q: "Acceptez-vous les réservations de groupe et événements privés ?", a: "Oui ! Nous accueillons vos repas d'affaires, anniversaires et événements. Contactez-nous directement sur WhatsApp pour convenir des détails." },
+        { q: "Proposez-vous un service de livraison à domicile ?", a: "Oui, vous pouvez commander directement sur cette vitrine et vous faire livrer par nos livreurs partenaires." },
+        { q: "Quels sont les moyens de paiement acceptés ?", a: "Nous acceptons les règlements par Mobile Money (MTN MoMo, Moov Money) ainsi que les espèces à la livraison." }
       ];
 
   const faqList = vendor.faq_items && vendor.faq_items.length > 0 ? vendor.faq_items : defaultFAQ;

@@ -37,64 +37,48 @@ export default function VendorSiteBuilder() {
 
   const vId = vendorProfile?.id || (user as any)?.vendorId || user?.id || "v_demo";
   
-  // Nom & Visuels adaptés au secteur (ne jamais hériter d'un nom de restaurant pour une boutique)
-  const isProfileRestaurantOnly = !vendorProfile?.business_type || vendorProfile?.business_type === "restaurant" || vendorProfile?.name === "L'Atelier du Chef & Grill";
-  
-  const defaultShopName = initialType === "ecommerce"
-    ? (vendorProfile?.business_type === "ecommerce" && vendorProfile?.name ? vendorProfile.name : "KiffStyle & Tech Store")
-    : initialType === "hotel"
-    ? (vendorProfile?.business_type === "hotel" && vendorProfile?.name ? vendorProfile.name : "Palmier Royal Résidence & Suites")
-    : (vendorProfile?.name || "L'Atelier du Chef & Grill");
+  // Nom & Visuels adaptés au profil réel (jamais de faux nom imposé)
+  const defaultShopName = (vendorProfile?.name && vendorProfile.name !== "L'Atelier du Chef & Grill" && vendorProfile.name !== "KiffStyle & Tech Store" && vendorProfile.name !== "Palmier Royal Résidence & Suites")
+    ? vendorProfile.name
+    : "";
 
-  const defaultSlug = initialType === "ecommerce"
-    ? (vendorProfile?.business_type === "ecommerce" && vendorProfile?.slug ? vendorProfile.slug : "kiffstyle-store")
-    : initialType === "hotel"
-    ? (vendorProfile?.business_type === "hotel" && vendorProfile?.slug ? vendorProfile.slug : "palmier-royal")
-    : (vendorProfile?.slug || "latelier-du-chef");
+  const defaultSlug = (vendorProfile?.slug && vendorProfile.slug !== "latelier-du-chef" && vendorProfile.slug !== "kiffstyle-store" && vendorProfile.slug !== "palmier-royal")
+    ? vendorProfile.slug
+    : (defaultShopName ? slugify(defaultShopName) : "");
 
-  const defaultCover = initialType === "ecommerce"
-    ? "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80"
-    : initialType === "hotel"
-    ? "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80"
-    : "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80";
+  const defaultCover = vendorProfile?.cover_url || "";
 
   const [formData, setFormData] = useState<Partial<VendorProfile>>({
     name: defaultShopName,
-    category: initialType === "ecommerce" 
-      ? "Mode, Vêtements & Prêt-à-porter" 
+    category: vendorProfile?.category || (initialType === "ecommerce" 
+      ? "Mode & Boutique" 
       : initialType === "hotel" 
-      ? "Hôtel & Suites de Luxe" 
-      : "Restaurant & Grillades",
-    categories: initialType === "ecommerce" 
-      ? ["Mode, Vêtements & Prêt-à-porter", "Chaussures & Sneakers Streetwear", "High-Tech, Smartphones & Gadgets"] 
-      : initialType === "hotel" 
-      ? ["Hôtel & Suites de Luxe", "Résidence Meublée & Appartements"] 
-      : ["Restaurant & Grillades", "Maquis & Saveurs Africaines"],
-    description: initialType === "ecommerce" 
-      ? "Boutique en ligne spécialisée en sneakers streetwear, vêtements de marque et accessoires high-tech."
-      : initialType === "hotel"
-      ? "Hôtel de charme et résidence meublée de haut standing avec suites climatisées, piscine et Wi-Fi Fibre."
-      : "Restaurant gastronomique et grillades au feu de bois. Spécialités africaines et saveurs du terroir.",
+      ? "Hôtel & Résidence" 
+      : "Restaurant & Grillades"),
+    categories: vendorProfile?.categories || (vendorProfile?.category ? [vendorProfile.category] : []),
+    description: (vendorProfile?.description && !vendorProfile.description.startsWith("Restaurant gastronomique") && !vendorProfile.description.startsWith("Boutique en ligne spécialisée") && !vendorProfile.description.startsWith("Hôtel de charme"))
+      ? vendorProfile.description
+      : "",
     slug: defaultSlug,
     business_type: initialType,
-    logo_url: isProfileRestaurantOnly && initialType !== "restaurant" ? "" : (vendorProfile?.logo_url || ""),
-    cover_url: isProfileRestaurantOnly && initialType !== "restaurant" ? defaultCover : (vendorProfile?.cover_url || defaultCover),
-    primary_color: initialType === "ecommerce" ? "#9333EA" : initialType === "hotel" ? "#4F46E5" : "#EA580C",
+    logo_url: vendorProfile?.logo_url || "",
+    cover_url: defaultCover,
+    primary_color: vendorProfile?.primary_color || (initialType === "ecommerce" ? "#9333EA" : initialType === "hotel" ? "#4F46E5" : "#FF6B00"),
     secondary_color: "#FFFFFF",
     font_choice: vendorProfile?.font_choice || "modern",
     sections_config: { hero: true, menu: true, daily: true, footer: true },
     daily_menus: {},
-    phone: vendorProfile?.phone || "+229 97 00 00 00",
-    whatsapp: vendorProfile?.whatsapp || vendorProfile?.phone || "+229 97 00 00 00",
-    city: vendorProfile?.city || "Cotonou",
-    neighborhood: vendorProfile?.neighborhood || (initialType === "ecommerce" ? "Ganhi" : initialType === "hotel" ? "Haie Vive" : "Cadjehoun"),
+    phone: (vendorProfile?.phone && vendorProfile.phone !== "+229 97 00 00 00") ? vendorProfile.phone : (user?.phone || ""),
+    whatsapp: (vendorProfile?.whatsapp && vendorProfile.whatsapp !== "+229 97 00 00 00") ? vendorProfile.whatsapp : (vendorProfile?.phone || user?.phone || ""),
+    city: vendorProfile?.city || "",
+    neighborhood: (vendorProfile?.neighborhood && vendorProfile.neighborhood !== "Haie Vive" && vendorProfile.neighborhood !== "Cadjehoun" && vendorProfile.neighborhood !== "Ganhi") ? vendorProfile.neighborhood : "",
     social_links: vendorProfile?.social_links || { instagram: "", facebook: "", tiktok: "" },
     payment_methods: vendorProfile?.payment_methods || ["MTN MoMo", "Moov Money", "Espèces"],
-    ordering_modes: initialType === "ecommerce" 
+    ordering_modes: vendorProfile?.ordering_modes || (initialType === "ecommerce" 
       ? ["Livraison Express", "Retrait Point Relais"] 
       : initialType === "hotel" 
       ? ["Réservation Directe", "Paiement à l'arrivée"] 
-      : ["Livraison", "À Emporter", "WhatsApp Direct"],
+      : ["Livraison", "À Emporter", "WhatsApp Direct"]),
     is_published: true,
   });
 
@@ -163,29 +147,17 @@ export default function VendorSiteBuilder() {
     } catch {}
 
     // Adapter l'identité au secteur si le profil est resté sur la démo restaurant
-    const isProfileRestoMismatch = (!mergedProfile.business_type || mergedProfile.business_type === "restaurant" || mergedProfile.name === "L'Atelier du Chef & Grill") && detectedType !== "restaurant";
+    const shopName = (mergedProfile.name && mergedProfile.name !== "L'Atelier du Chef & Grill" && mergedProfile.name !== "KiffStyle & Tech Store" && mergedProfile.name !== "Palmier Royal Résidence & Suites")
+      ? mergedProfile.name
+      : defaultShopName;
 
-    const shopName = isProfileRestoMismatch
-      ? (detectedType === "ecommerce" ? "KiffStyle & Tech Store" : "Palmier Royal Résidence & Suites")
-      : (mergedProfile.name || defaultShopName);
+    const computedSlug = (mergedProfile.slug && mergedProfile.slug !== "latelier-du-chef" && mergedProfile.slug !== "kiffstyle-store" && mergedProfile.slug !== "palmier-royal")
+      ? mergedProfile.slug
+      : (shopName ? slugify(shopName) : defaultSlug);
 
-    const computedSlug = isProfileRestoMismatch
-      ? (detectedType === "ecommerce" ? "kiffstyle-store" : "palmier-royal")
-      : (mergedProfile.slug || slugify(shopName) || defaultSlug);
-
-    const sectorCover = isProfileRestoMismatch
-      ? defaultCover
-      : (mergedProfile.cover_url || defaultCover);
-
-    const sectorCategory = isProfileRestoMismatch
-      ? (detectedType === "ecommerce" ? "Mode, Vêtements & Prêt-à-porter" : "Hôtel & Suites de Luxe")
-      : (mergedProfile.category || (detectedType === "ecommerce" ? "Mode, Vêtements & Prêt-à-porter" : detectedType === "hotel" ? "Hôtel & Suites de Luxe" : "Restaurant & Grillades"));
-
-    const sectorCategories = isProfileRestoMismatch
-      ? (detectedType === "ecommerce" 
-          ? ["Mode, Vêtements & Prêt-à-porter", "Chaussures & Sneakers Streetwear", "High-Tech, Smartphones & Gadgets"] 
-          : ["Hôtel & Suites de Luxe", "Résidence Meublée & Appartements"])
-      : (mergedProfile.categories || [sectorCategory]);
+    const sectorCover = mergedProfile.cover_url || "";
+    const sectorCategory = mergedProfile.category || (detectedType === "ecommerce" ? "Mode & Boutique" : detectedType === "hotel" ? "Hôtel & Résidence" : "Restaurant & Grillades");
+    const sectorCategories = mergedProfile.categories || [sectorCategory];
 
     setFormData(prev => ({
       ...prev,
@@ -196,12 +168,12 @@ export default function VendorSiteBuilder() {
       category: sectorCategory,
       categories: sectorCategories,
       business_type: detectedType,
-      primary_color: detectedType === "ecommerce" ? "#9333EA" : detectedType === "hotel" ? "#4F46E5" : "#EA580C",
+      primary_color: mergedProfile.primary_color || (detectedType === "ecommerce" ? "#9333EA" : detectedType === "hotel" ? "#4F46E5" : "#FF6B00"),
       social_links: mergedProfile.social_links || { instagram: "", facebook: "", tiktok: "" },
       ordering_modes: mergedProfile.ordering_modes || (detectedType === "ecommerce" ? ["Livraison Express", "Retrait Point Relais"] : detectedType === "hotel" ? ["Réservation Directe", "Paiement à l'arrivée"] : ["Livraison", "À Emporter", "WhatsApp Direct"]),
       payment_methods: mergedProfile.payment_methods || ["MTN MoMo", "Moov Money", "Espèces"]
     }));
-    setLocalLogo(isProfileRestoMismatch ? null : (mergedProfile.logo_url || null));
+    setLocalLogo(mergedProfile.logo_url || null);
     setLocalCover(sectorCover || null);
 
     // Charger les produits spécifiquement pour ce vendeur et CE SECTEUR
@@ -213,17 +185,14 @@ export default function VendorSiteBuilder() {
       }
     } catch {}
 
-    // Filtrer pour éliminer rigoureusement tout produit d'un autre secteur (ex: chambres d'hôtel dans une boutique)
+    // Filtrer pour éliminer tout produit d'un autre secteur
     const validLocal = localProducts.filter(p => isProductMatchingSector(p, detectedType));
 
     if (validLocal.length > 0) {
       setProducts(validLocal);
     } else {
-      const defaultSamples = getStarterProducts(detectedType, activeId);
-      setProducts(defaultSamples);
-      try {
-        localStorage.setItem(`oresto_products_${activeId}_${detectedType}`, JSON.stringify(defaultSamples));
-      } catch {}
+      // Démarrer avec un catalogue propre et vide, sans produits factices imposés
+      setProducts([]);
     }
 
     if (!db) return;
@@ -418,13 +387,13 @@ export default function VendorSiteBuilder() {
         business_type: businessType,
         logo_url: formData.logo_url || localLogo || "",
         cover_url: formData.cover_url || localCover || "",
-        primary_color: formData.primary_color || (isEcommerce ? "#000000" : isHotel ? "#4F46E5" : "#EA580C"),
+        primary_color: formData.primary_color || (isEcommerce ? "#9333EA" : isHotel ? "#4F46E5" : "#FF6B00"),
         secondary_color: formData.secondary_color || "#FFFFFF",
         font_choice: formData.font_choice || "modern",
-        phone: formData.phone || "+229 97 00 00 00",
-        whatsapp: formData.whatsapp || formData.phone || "+229 97 00 00 00",
-        city: formData.city || "Cotonou",
-        neighborhood: formData.neighborhood || "Haie Vive",
+        phone: (formData.phone && formData.phone !== "+229 97 00 00 00") ? formData.phone : (vendorProfile?.phone || user?.phone || ""),
+        whatsapp: (formData.whatsapp && formData.whatsapp !== "+229 97 00 00 00") ? formData.whatsapp : (formData.phone || vendorProfile?.whatsapp || user?.phone || ""),
+        city: formData.city || vendorProfile?.city || "",
+        neighborhood: (formData.neighborhood && formData.neighborhood !== "Haie Vive" && formData.neighborhood !== "Cadjehoun") ? formData.neighborhood : (vendorProfile?.neighborhood || ""),
         payment_methods: formData.payment_methods || ["MTN MoMo", "Moov Money", "Espèces"],
         ordering_modes: formData.ordering_modes || (isEcommerce ? ["Livraison Express", "Retrait Point Relais"] : isHotel ? ["Réservation Directe", "Paiement à l'arrivée"] : ["Livraison", "À Emporter", "WhatsApp Direct"]),
         open: true,
@@ -541,13 +510,13 @@ export default function VendorSiteBuilder() {
         {/* Action buttons */}
         <div className="flex items-center gap-3 flex-wrap">
           <a 
-            href={`/r/${formData.slug || (isEcommerce ? "ma-boutique-chic" : "le-maquis-etoile")}`} 
+            href={formData.slug ? `/r/${formData.slug}` : (vendorProfile?.slug ? `/r/${vendorProfile.slug}` : "#")} 
             target="_blank" 
             rel="noreferrer"
             className="px-4 py-2.5 rounded-2xl border border-border text-foreground font-bold text-xs hover:bg-muted transition-colors flex items-center gap-2"
           >
             <i className="fa-solid fa-arrow-up-right-from-square text-xs text-primary"></i>
-            <span>Voir en direct</span>
+            <span>Voir ma vitrine</span>
           </a>
 
           <button 

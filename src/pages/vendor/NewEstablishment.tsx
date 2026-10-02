@@ -27,11 +27,11 @@ export default function NewEstablishment() {
 
   const [formData, setFormData] = useState({
     name: "",
-    business_type: (activeSector || "ecommerce") as BusinessSector,
-    city: vendorProfile?.city || "Cotonou",
-    neighborhood: vendorProfile?.neighborhood || "Haie Vive",
-    whatsapp: vendorProfile?.whatsapp || user?.phone || "+229 ",
-    phone: vendorProfile?.phone || user?.phone || "+229 ",
+    business_type: (activeSector || "restaurant") as BusinessSector,
+    city: vendorProfile?.city || "",
+    neighborhood: "",
+    whatsapp: vendorProfile?.whatsapp || user?.phone || "",
+    phone: vendorProfile?.phone || user?.phone || "",
     billingCycle: "monthly" as "monthly" | "annual",
   });
 
@@ -49,8 +49,8 @@ export default function NewEstablishment() {
       const result = await createEstablishment({
         name: formData.name.trim(),
         business_type: formData.business_type,
-        city: formData.city.trim() || "Cotonou",
-        neighborhood: formData.neighborhood.trim() || "Centre-ville",
+        city: formData.city.trim() || "",
+        neighborhood: formData.neighborhood.trim() || "",
         whatsapp: formData.whatsapp.trim(),
         phone: formData.phone.trim(),
         billingCycle: formData.billingCycle,
@@ -184,7 +184,7 @@ export default function NewEstablishment() {
                 <input
                   type="text"
                   required
-                  placeholder="Ex : Cotonou, Porto-Novo, Parakou..."
+                  placeholder="Ex : Cotonou, Bohicon, Parakou, Porto-Novo..."
                   value={formData.city}
                   onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                   className="w-full px-4 py-2.5 rounded-2xl border border-zinc-200 text-xs focus:ring-2 focus:ring-orange-500 focus:outline-hidden"
@@ -197,7 +197,7 @@ export default function NewEstablishment() {
                 </label>
                 <input
                   type="text"
-                  placeholder="Ex : Haie Vive, Cadjèhoun, Akpakpa..."
+                  placeholder="Ex : Centre-ville, Haie Vive, Kpatalocoli..."
                   value={formData.neighborhood}
                   onChange={(e) => setFormData({ ...formData, neighborhood: e.target.value })}
                   className="w-full px-4 py-2.5 rounded-2xl border border-zinc-200 text-xs focus:ring-2 focus:ring-orange-500 focus:outline-hidden"
@@ -213,7 +213,7 @@ export default function NewEstablishment() {
               <input
                 type="text"
                 required
-                placeholder="+229 97 00 00 00"
+                placeholder="Ex : 01 66 00 00 00 ou +229 97 00 00 00"
                 value={formData.whatsapp}
                 onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value, phone: e.target.value })}
                 className="w-full px-4 py-2.5 rounded-2xl border border-zinc-200 text-xs font-mono focus:ring-2 focus:ring-orange-500 focus:outline-hidden"

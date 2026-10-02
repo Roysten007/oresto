@@ -14,25 +14,7 @@ export default function ReviewsSection({ vendor, businessType }: Props) {
   const isHotel = businessType === "hotel";
   const isEcommerce = businessType === "ecommerce";
 
-  const defaultReviews = isHotel
-    ? [
-        { id: "r1", name: "Marc K.", rating: 5, comment: "Séjour parfait ! Suite très propre, literie ultra confortable et Wi-Fi Fibre rapide pour travailler. Je recommande vivement.", date: "Il y a 3 jours" },
-        { id: "r2", name: "Nadège A.", rating: 5, comment: "Accueil irréprochable et personnel aux petits soins. Le petit-déjeuner au bord de la piscine est un vrai délice.", date: "Il y a 1 semaine" },
-        { id: "r3", name: "Serge D.", rating: 4, comment: "Très bon rapport qualité-prix. Calme et sécurisé, idéal pour les voyages d'affaires à Cotonou.", date: "Il y a 2 semaines" }
-      ]
-    : isEcommerce
-    ? [
-        { id: "r1", name: "Bérénice T.", rating: 5, comment: "Colis reçu en moins de 24h à Cotonou ! Baskets conformes aux photos, pointure impeccable. Vendeur très sérieux.", date: "Il y a 2 jours" },
-        { id: "r2", name: "Romaric H.", rating: 5, comment: "Smartwatch d'excellente qualité, emballage soigné et paiement MoMo super fluide. Je recommanderai sans hésiter !", date: "Il y a 4 jours" },
-        { id: "r3", name: "Fanny G.", rating: 5, comment: "Tissu de qualité supérieure pour les chemises en lin. Service client WhatsApp très réactif.", date: "Il y a 1 semaine" }
-      ]
-    : [
-        { id: "r1", name: "Fabrice O.", rating: 5, comment: "Le meilleur poulet braisé de la ville ! La marinade et l'alloco sont tout simplement exquis. Service rapide et chaleureux.", date: "Hier" },
-        { id: "r2", name: "Chantal B.", rating: 5, comment: "Cadre magnifique et cuisine raffinée. Le capitaine braisé royal vaut vraiment le détour.", date: "Il y a 3 jours" },
-        { id: "r3", name: "Dimitri K.", rating: 5, comment: "Belle découverte pour un dîner entre collègues. Cocktails savoureux et ambiance très agréable.", date: "Il y a 1 semaine" }
-      ];
-
-  const reviews = vendor.reviews_list && vendor.reviews_list.length > 0 ? vendor.reviews_list : defaultReviews;
+  const reviews = (vendor.reviews_list && vendor.reviews_list.length > 0) ? vendor.reviews_list : [];
   
   const [showModal, setShowModal] = useState(false);
   const [name, setName] = useState("");
@@ -84,6 +66,109 @@ export default function ReviewsSection({ vendor, businessType }: Props) {
     }
   };
 
+  const avgRating = reviews.length > 0
+    ? (reviews.reduce((acc, r) => acc + (r.rating || 5), 0) / reviews.length).toFixed(1)
+    : "5.0";
+
+  if (reviews.length === 0) {
+    return (
+      <section id="reviews" className="py-12 sm:py-16 bg-[#FAFAFA] border-b border-gray-100">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center space-y-4">
+          <span className="text-[11px] font-black uppercase tracking-widest text-primary block">
+            Avis Clients
+          </span>
+          <h2 className="font-heading font-black text-2xl sm:text-3xl text-gray-900">
+            Avis & Retours d'expérience
+          </h2>
+          <p className="text-xs text-gray-500 max-w-md mx-auto leading-relaxed">
+            Vous avez commandé ou visité <strong className="text-gray-900">{vendor.name}</strong> ? Soyez le premier à partager votre expérience !
+          </p>
+          <div className="pt-2">
+            <button
+              type="button"
+              onClick={() => setShowModal(true)}
+              className="px-6 py-3.5 rounded-2xl bg-black text-white hover:bg-primary font-heading font-black text-xs uppercase tracking-wider transition-all shadow-md active:scale-95 inline-flex items-center gap-2"
+            >
+              <MessageSquarePlus size={16} />
+              <span>Laisser le premier avis</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Modal Laisser un Avis */}
+        {showModal && (
+          <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white w-full max-w-md rounded-3xl p-6 space-y-5 shadow-2xl animate-in fade-in zoom-in duration-200">
+              <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                <h3 className="font-heading font-black text-base text-gray-900">Votre Avis sur {vendor.name}</h3>
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="w-11 h-11 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 transition-colors"
+                  aria-label="Fermer la boîte d'avis"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Note globale</label>
+                  <div className="flex gap-2">
+                    {[1, 2, 3, 4, 5].map(s => (
+                      <button
+                        type="button"
+                        key={s}
+                        onClick={() => setRating(s)}
+                        className={`w-9 h-9 rounded-xl flex items-center justify-center border transition-all ${
+                          rating >= s ? "bg-amber-400 text-white border-amber-400 shadow-xs" : "bg-gray-50 text-gray-300 border-gray-200"
+                        }`}
+                      >
+                        <Star size={16} fill="currentColor" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Votre nom *</label>
+                  <input
+                    type="text"
+                    required
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    placeholder="Ex: Jean D."
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 font-bold focus:border-primary outline-hidden"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Votre commentaire *</label>
+                  <textarea
+                    required
+                    rows={3}
+                    value={comment}
+                    onChange={e => setComment(e.target.value)}
+                    placeholder="Qualité des produits, service, rapidité..."
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 font-medium focus:border-primary outline-hidden resize-none"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="w-full py-3.5 rounded-xl bg-primary text-white font-heading font-black uppercase tracking-wider hover:bg-orange-600 transition-colors shadow-md disabled:opacity-50"
+                >
+                  {submitting ? "Publication en cours..." : "Publier mon avis"}
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+      </section>
+    );
+  }
+
   return (
     <section id="reviews" className="py-12 sm:py-16 bg-[#FAFAFA] border-b border-gray-100">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-10">
@@ -95,14 +180,14 @@ export default function ReviewsSection({ vendor, businessType }: Props) {
               Retours d'Expérience
             </span>
             <h2 className="font-heading font-black text-2xl sm:text-4xl text-gray-900">
-              Ce que nos clients disent
+              Avis Clients ({reviews.length})
             </h2>
             <div className="flex items-center gap-2 pt-1">
               <div className="flex text-amber-400 text-sm">
                 {[1, 2, 3, 4, 5].map(s => <Star key={s} size={16} fill="currentColor" />)}
               </div>
-              <span className="font-heading font-black text-base text-gray-900">4.9 / 5</span>
-              <span className="text-xs text-gray-400 font-medium">(Plus de 120 avis vérifiés)</span>
+              <span className="font-heading font-black text-base text-gray-900">{avgRating} / 5</span>
+              <span className="text-xs text-gray-400 font-medium">({reviews.length} avis client{reviews.length > 1 ? "s" : ""})</span>
             </div>
           </div>
 
@@ -121,7 +206,7 @@ export default function ReviewsSection({ vendor, businessType }: Props) {
           {reviews.map((rev, idx) => (
             <div
               key={rev.id || idx}
-              className="p-6 rounded-3xl bg-white border border-gray-200/90 shadow-sm hover:shadow-xl transition-all flex flex-col justify-between space-y-4"
+              className="p-6 rounded-3xl bg-white border border-gray-200/90 shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-4"
             >
               <div className="space-y-3">
                 {/* Rating & Date */}
@@ -141,14 +226,14 @@ export default function ReviewsSection({ vendor, businessType }: Props) {
 
               <div className="flex items-center gap-3 pt-3 border-t border-gray-100">
                 <div className="w-8 h-8 rounded-full bg-primary/10 text-primary font-heading font-black text-xs flex items-center justify-center">
-                  {rev.name.charAt(0)}
+                  {(rev.name || "C").charAt(0)}
                 </div>
                 <div>
                   <h4 className="font-heading font-black text-xs text-gray-900 flex items-center gap-1.5">
                     <span>{rev.name}</span>
                     <CheckCircle2 size={12} className="text-emerald-500" />
                   </h4>
-                  <span className="text-[9px] text-gray-400 font-semibold uppercase tracking-wider">Avis certifié</span>
+                  <span className="text-[9px] text-gray-400 font-semibold uppercase tracking-wider">Avis vérifié</span>
                 </div>
               </div>
             </div>

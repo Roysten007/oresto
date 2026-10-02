@@ -532,9 +532,11 @@ export default function RestaurantPublic() {
             <h1 className="font-heading font-black text-sm text-gray-900 leading-tight truncate max-w-[170px] sm:max-w-xs">
               {vendor.name}
             </h1>
-            <p className="text-[10px] text-gray-500 font-medium truncate">
-              {vendor.neighborhood || "Haie Vive"}, {vendor.city || "Cotonou"}
-            </p>
+            {(vendor.neighborhood || vendor.city) && (
+              <p className="text-[10px] text-gray-500 font-medium truncate">
+                {[vendor.neighborhood, vendor.city].filter(Boolean).join(", ")}
+              </p>
+            )}
           </div>
         </div>
 

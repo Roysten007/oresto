@@ -113,7 +113,7 @@ export default function StepCarte({ products, vendorId, onSave, onDelete, isHote
           </p>
         </div>
         <button
-          onClick={() => setEditing({ name: "", price: 4500, category: "Plats Principaux & Grillades", image: "", description: "" })}
+          onClick={() => setEditing({ name: "", price: undefined as any, category: DISH_CATEGORIES[1], image: "", description: "" })}
           className="px-5 py-3 bg-primary text-white rounded-2xl font-bold text-xs hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2 shrink-0 active:scale-95"
         >
           <i className="fa-solid fa-plus"></i>
@@ -121,20 +121,21 @@ export default function StepCarte({ products, vendorId, onSave, onDelete, isHote
         </button>
       </div>
 
-      {products.length === 0 && (
+      {restaurantProducts.length === 0 && (
         <div className="py-14 border-2 border-dashed border-gray-200 rounded-3xl flex flex-col items-center justify-center gap-3 text-center bg-gray-50/50 p-6">
           <div className="w-14 h-14 rounded-2xl bg-orange-50 text-primary flex items-center justify-center text-2xl">
             <i className={`fa-solid ${isHotel ? "fa-bed" : "fa-utensils"}`}></i>
           </div>
           <p className="font-bold text-gray-800 text-sm">{isHotel ? "Aucune chambre enregistrée" : "Votre carte est vide"}</p>
           <p className="text-xs text-gray-400 max-w-xs">
-            Ajoutez vos spécialités ou chambres pour qu'elles s'affichent en temps réel sur votre site.
+            Ajoutez vos spécialités pour qu'elles s'affichent instantanément sur votre site.
           </p>
           <button
-            onClick={() => setEditing({ name: "", price: 0, category: isHotel ? "Standard" : "Plats", image: "", description: "" })}
-            className="mt-2 px-4 py-2 bg-black text-white text-xs font-bold rounded-xl hover:bg-gray-800 transition-colors"
+            onClick={() => setEditing({ name: "", price: undefined as any, category: isHotel ? "Standard" : "Plats Principaux & Grillades", image: "", description: "" })}
+            className="mt-2 px-5 py-2.5 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary/90 transition-all shadow-md flex items-center gap-2"
           >
-            Commencer maintenant
+            <i className="fa-solid fa-plus"></i>
+            <span>Ajouter mon premier plat</span>
           </button>
         </div>
       )}
@@ -285,7 +286,7 @@ export default function StepCarte({ products, vendorId, onSave, onDelete, isHote
                   value={editing.price || ""}
                   onChange={e => setEditing({ ...editing, price: Number(e.target.value) })}
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 font-heading font-black text-lg text-primary outline-none focus:border-primary"
-                  placeholder="4500"
+                  placeholder="Ex: 2500"
                   min="0"
                 />
               </div>
