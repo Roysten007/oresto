@@ -26,10 +26,13 @@ const lazyWithRetry = (componentImport: () => Promise<any>) =>
     }
   });
 
+// Layout et Vitrine Restaurant Public chargés directement pour une fiabilité absolue (0 erreur d'import dynamique)
+import PublicShowcaseLayout from "./layouts/PublicShowcaseLayout";
+import RestaurantPublic from "./pages/app/RestaurantPublic";
+
 // Lazy-loaded App Providers (AuthProvider, AdminProvider, PrestataireProvider, Toaster)
 // Only loaded when navigating to authenticated/app sections, keeping landing page ultra-light
 const AppProvidersLayout = lazyWithRetry(() => import("./layouts/AppProvidersLayout"));
-const PublicShowcaseLayout = lazyWithRetry(() => import("./layouts/PublicShowcaseLayout"));
 
 // Secondary and dashboard pages code-split with lazy loading
 const Login = lazyWithRetry(() => import("./pages/Login"));
@@ -72,8 +75,6 @@ const AdminCategories = lazyWithRetry(() => import("./pages/admin/AdminCategorie
 const AdminNotifications = lazyWithRetry(() => import("./pages/admin/AdminNotifications"));
 const AdminSettings = lazyWithRetry(() => import("./pages/admin/AdminSettings"));
 
-// Public Restaurant Site
-const RestaurantPublic = lazyWithRetry(() => import("./pages/app/RestaurantPublic"));
 
 // Oresto Insights - Étude de marché Bénin (Public & Admin)
 const SurveyPublic = lazyWithRetry(() => import("./pages/insights/SurveyPublic"));
