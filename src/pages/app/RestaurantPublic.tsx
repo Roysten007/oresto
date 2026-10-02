@@ -159,6 +159,10 @@ export default function RestaurantPublic() {
                 business_type: fVal.business_type || "restaurant",
                 ...fVal
               };
+              // Affichage immédiat dès la correspondance trouvée
+              setVendor(matchedVendor);
+              setLoading(false);
+              clearTimeout(timeout);
             }
           }
         } catch (e) {
@@ -166,8 +170,30 @@ export default function RestaurantPublic() {
         }
       }
 
-      // 4. Si un matchedVendorId a été trouvé, écouter en temps réel vendors/${matchedVendorId}
+      // 4. Si un matchedVendorId a été trouvé, charger immédiatement les produits et écouter en temps réel
       if (matchedVendorId) {
+        if (matchedVendor) {
+          setVendor(matchedVendor);
+          setLoading(false);
+          clearTimeout(timeout);
+        }
+
+        // Chargement direct des produits en mode instantané
+        try {
+          const directProdSnap = await get(ref(db, "products"));
+          if (directProdSnap.exists()) {
+            const allP = directProdSnap.val();
+            const pList = Object.keys(allP)
+              .map(k => ({ id: k, ...allP[k] }))
+              .filter((p: any) => p.vendorId === matchedVendorId && p.available !== false);
+            if (pList.length > 0) {
+              setProducts(pList);
+            }
+          }
+        } catch (e) {
+          console.warn("Direct products fetch warning:", e);
+        }
+
         unsubVendor = onValue(
           ref(db, `vendors/${matchedVendorId}`),
           (snap) => {

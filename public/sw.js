@@ -1,5 +1,5 @@
-// Service Worker Oresto PWA - v5 (Anti-Stale Cache Buster)
-const CACHE_NAME = 'oresto-pwa-v5-' + Date.now();
+// Service Worker Oresto PWA - v6 (Anti-Stale Cache Buster)
+const CACHE_NAME = 'oresto-pwa-v6';
 const STATIC_ASSETS = [
   '/',
   '/favicon.svg',

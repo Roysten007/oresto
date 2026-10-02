@@ -51,12 +51,39 @@
     <meta name="twitter:card" content="summary_large_image">
   </head>
   <body>
+    <script>
+      // Anti-stale Service Worker & Cache Buster (Auto-recovery for existing users)
+      (function() {
+        try {
+          if ('caches' in window) {
+            caches.keys().then(function(keys) {
+              keys.forEach(function(k) {
+                if (k.includes('oresto-pwa-v1') || k.includes('oresto-pwa-v2') || k.includes('oresto-pwa-v5')) {
+                  console.log('[CacheBuster] Purging corrupted cache:', k);
+                  caches.delete(k);
+                }
+              });
+            });
+          }
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(regs) {
+              regs.forEach(function(reg) {
+                if (reg.active && !reg.active.scriptURL.includes('v=6')) {
+                  console.log('[CacheBuster] Unregistering outdated SW:', reg.active.scriptURL);
+                  reg.unregister();
+                }
+              });
+            });
+          }
+        } catch (e) {}
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" defer src="/src/main.tsx"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' })
+          navigator.serviceWorker.register('/sw.js?v=6', { updateViaCache: 'none' })
             .then(reg => {
               reg.update();
             })
