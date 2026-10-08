@@ -106,6 +106,9 @@ export function subscribeToSurveyResponses(callback: (responses: SurveyResponse[
     callback(list);
   };
 
+  // Émission immédiate des données en cache pour éviter tout blocage d'interface
+  updateMergedList();
+
   // 1. Écoute du noeud principal survey_responses
   const responsesRef = ref(db, DB_NODE);
   const unsubPrimary = onValue(

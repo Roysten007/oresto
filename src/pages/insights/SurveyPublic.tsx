@@ -1752,18 +1752,6 @@ export default function SurveyPublic() {
       <footer className="py-4 px-6 text-center text-xs text-zinc-400 border-t border-zinc-200/60 bg-white">
         <p>Vos réponses sont strictement confidentielles et utilisées uniquement pour l'étude de marché d'Oresto.</p>
       </footer>
-
-      {/* Bouton flottant d'assistance WhatsApp direct vers le numéro officiel */}
-      <a
-        href={`https://wa.me/${ORESTO_OFFICIAL_WHATSAPP}?text=Bonjour%20l'%C3%A9quipe%20Oresto,%20j'ai%20une%20question%20concernant%20l'%C3%A9tude%20de%20terrain.`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="fixed bottom-4 right-4 z-40 bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2.5 rounded-full shadow-lg shadow-emerald-600/30 flex items-center gap-2 text-xs font-bold transition-all hover:scale-105 select-none"
-        title={`Contacter l'équipe Oresto sur WhatsApp (${ORESTO_OFFICIAL_WHATSAPP_DISPLAY})`}
-      >
-        <i className="fa-brands fa-whatsapp text-lg"></i>
-        <span className="hidden sm:inline">WhatsApp ({ORESTO_OFFICIAL_WHATSAPP_DISPLAY})</span>
-      </a>
     </div>
   );
 }

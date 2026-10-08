@@ -476,11 +476,11 @@ export default function InsightsAdminDashboard() {
             </div>
           </div>
 
-          {(filterCity !== "all" || filterType !== "all" || filterModel !== "all" || filterWantsTest !== "all" || searchQuery) && (
+          {(filterCountry !== "all" || filterType !== "all" || filterModel !== "all" || filterWantsTest !== "all" || searchQuery) && (
             <div className="flex justify-end pt-1">
               <button
                 onClick={() => {
-                  setFilterCity("all");
+                  setFilterCountry("all");
                   setFilterType("all");
                   setFilterModel("all");
                   setFilterWantsTest("all");
