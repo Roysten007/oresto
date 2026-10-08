@@ -7,6 +7,21 @@ const LOCAL_RESPONSES_KEY = "oresto_insights_submitted_responses";
 const LOCAL_STORAGE_KEY = "oresto_insights_responses_cache";
 
 /**
+ * Assainit et limite les chaînes saisies par l'utilisateur pour prévenir
+ * les injections XSS, scripts malveillants et dépassement de taille.
+ */
+function sanitizeCleanString(val: any, maxLength = 500): string {
+  if (val === undefined || val === null) return "";
+  const str = String(val);
+  return str
+    .replace(/\0/g, "") // Supprime les octets nuls
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "") // Supprime les balises script
+    .replace(/<[^>]+>/g, "") // Supprime toute balise HTML
+    .trim()
+    .slice(0, maxLength);
+}
+
+/**
  * Soumettre une réponse au questionnaire Oresto Insights
  * Double enregistrement sécurisé :
  * 1. Cache local permanent (0 perte de données)
@@ -18,8 +33,15 @@ export async function submitSurveyResponse(data: Omit<SurveyResponse, "id" | "cr
 
   const completeData: SurveyResponse = {
     ...data,
-    country: data.country || "Bénin",
-    city: data.city || data.country || "Cotonou",
+    country: sanitizeCleanString(data.country || "Bénin", 60),
+    countryOther: data.countryOther ? sanitizeCleanString(data.countryOther, 80) : undefined,
+    city: sanitizeCleanString(data.city || data.country || "Cotonou", 80),
+    name: data.name ? sanitizeCleanString(data.name, 100) : "",
+    establishmentName: data.establishmentName ? sanitizeCleanString(data.establishmentName, 120) : "",
+    whatsapp: data.whatsapp ? sanitizeCleanString(data.whatsapp, 35) : "",
+    email: data.email ? sanitizeCleanString(data.email, 120) : "",
+    biggestProblem: data.biggestProblem ? sanitizeCleanString(data.biggestProblem, 1500) : "",
+    expectations: data.expectations ? sanitizeCleanString(data.expectations, 1500) : "",
     id: tempId,
     createdAt: timestamp,
   };
@@ -573,7 +595,11 @@ export function exportResponsesToCSV(responses: SurveyResponse[]): void {
 
   const escapeCSV = (str: any) => {
     if (str === undefined || str === null) return '""';
-    const val = Array.isArray(str) ? str.join(", ") : String(str);
+    let val = Array.isArray(str) ? str.join(", ") : String(str);
+    // Neutralisation contre CSV Formula Injection (CWE-1236) : préfixe avec quote si commence par =, +, -, @, tab, cr
+    if (/^[=+\-@\t\r]/.test(val)) {
+      val = `'${val}`;
+    }
     return `"${val.replace(/"/g, '""')}"`;
   };
 
@@ -631,7 +657,12 @@ export function exportLeadsToCSV(responses: SurveyResponse[]): void {
 
   const escapeCSV = (str: any) => {
     if (str === undefined || str === null) return '""';
-    return `"${String(str).replace(/"/g, '""')}"`;
+    let val = String(str);
+    // Neutralisation contre CSV Formula Injection (CWE-1236)
+    if (/^[=+\-@\t\r]/.test(val)) {
+      val = `'${val}`;
+    }
+    return `"${val.replace(/"/g, '""')}"`;
   };
 
   const rows = qualifiedLeads.map((r) => [

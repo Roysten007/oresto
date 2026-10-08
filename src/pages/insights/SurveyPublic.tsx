@@ -423,6 +423,14 @@ export default function SurveyPublic() {
       return;
     }
 
+    // Protection anti-flood / rate limiting local
+    const lastSub = sessionStorage.getItem("oresto_survey_last_sub");
+    if (lastSub && Date.now() - Number(lastSub) < 8000) {
+      toast.warning("Veuillez patienter quelques instants avant une nouvelle soumission.");
+      return;
+    }
+    sessionStorage.setItem("oresto_survey_last_sub", String(Date.now()));
+
     setIsSubmitting(true);
     try {
       const finalCountry = form.country === "Autre pays" && form.countryOther.trim()

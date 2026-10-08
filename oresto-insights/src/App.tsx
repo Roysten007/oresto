@@ -26,11 +26,32 @@ export default function App() {
             <Route path="/survey" element={<SurveyPublic />} />
             <Route path="/etude" element={<SurveyPublic />} />
 
-            {/* Espace Administrateur Oresto Insights */}
-            <Route path="/admin" element={<InsightsAdminDashboard />} />
-            <Route path="/dashboard" element={<InsightsAdminDashboard />} />
-            <Route path="/insights-admin" element={<InsightsAdminDashboard />} />
+            {/* Espace Administrateur Oresto Insights Sécurisé */}
             <Route path="/login" element={<AdminLogin />} />
+            <Route
+              path="/admin"
+              element={
+                <AdminRoute>
+                  <InsightsAdminDashboard />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/dashboard"
+              element={
+                <AdminRoute>
+                  <InsightsAdminDashboard />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/insights-admin"
+              element={
+                <AdminRoute>
+                  <InsightsAdminDashboard />
+                </AdminRoute>
+              }
+            />
 
             {/* Redirection vers l'étude pour toute route inconnue */}
             <Route path="*" element={<Navigate to="/" replace />} />

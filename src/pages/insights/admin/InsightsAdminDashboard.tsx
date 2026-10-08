@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
+import { useAdmin } from "@/contexts/AdminContext";
 import { 
   SurveyResponse, 
   SurveyFilterOptions,
@@ -49,7 +50,8 @@ import {
   Database,
   Phone,
   FileSpreadsheet,
-  CreditCard
+  CreditCard,
+  Lock
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -71,6 +73,8 @@ const FEATURE_CATALOG: { id: string; title: string; description: string }[] = [
 ];
 
 export default function InsightsAdminDashboard() {
+  const navigate = useNavigate();
+  const { adminLogout } = useAdmin();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get("tab") || "overview";
 
@@ -327,6 +331,19 @@ export default function InsightsAdminDashboard() {
                 <span>{seeding ? "Chargement..." : "Données démo"}</span>
               </button>
             )}
+
+            <button
+              onClick={async () => {
+                await adminLogout();
+                toast.info("Session administrateur verrouillée.");
+                navigate("/login");
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-rose-500/20 hover:text-rose-300 text-white/80 hover:border-rose-500/30 text-xs font-bold transition-all border border-transparent cursor-pointer"
+              title="Verrouiller et fermer la session"
+            >
+              <Lock size={13} />
+              <span>Verrouiller</span>
+            </button>
           </div>
         </div>
 

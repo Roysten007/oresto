@@ -11,6 +11,7 @@ interface AdminState {
 
 interface AdminContextType extends AdminState {
   adminLogin: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  adminLoginWithPasscode: (passcode: string) => Promise<{ success: boolean; error?: string }>;
   adminLogout: () => Promise<void>;
   adminFailedAttempts: number;
   adminLockedUntil: number | null;
@@ -20,6 +21,7 @@ const AdminContext = createContext<AdminContextType | null>(null);
 
 const LOCKOUT_DURATION = 15 * 60 * 1000;
 const MAX_ATTEMPTS = 5;
+const ADMIN_SESSION_KEY = "oresto_insights_admin_auth";
 
 async function checkIsAdmin(uid: string): Promise<boolean> {
   if (!db) return false;
@@ -31,15 +33,24 @@ async function checkIsAdmin(uid: string): Promise<boolean> {
 }
 
 export function AdminProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<AdminState>({
-    isAdminAuthenticated: false,
-    adminEmail: null,
-    isAdminLoading: true,
+  const [state, setState] = useState<AdminState>(() => {
+    const hasSession = typeof window !== "undefined" && sessionStorage.getItem(ADMIN_SESSION_KEY) === "true";
+    return {
+      isAdminAuthenticated: hasSession,
+      adminEmail: hasSession ? "direction@oresto.bj" : null,
+      isAdminLoading: !hasSession,
+    };
   });
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
 
   useEffect(() => {
+    // Si déjà authentifié par session, ne pas attendre Firebase
+    if (typeof window !== "undefined" && sessionStorage.getItem(ADMIN_SESSION_KEY) === "true") {
+      setState({ isAdminAuthenticated: true, adminEmail: "direction@oresto.bj", isAdminLoading: false });
+      return;
+    }
+
     if (!auth) {
       setState((s) => ({ ...s, isAdminLoading: false }));
       return;
@@ -61,6 +72,33 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     }
   }, [lockedUntil]);
 
+  // Authentification rapide par code d'accès administrateur
+  const adminLoginWithPasscode = useCallback(async (passcode: string) => {
+    const cleanPass = passcode.trim();
+    if (lockedUntil && Date.now() < lockedUntil) {
+      return { success: false, error: "Trop de tentatives. Accès temporairement verrouillé pendant 15 minutes." };
+    }
+
+    // Codes autorisés : Code principal et numéro WhatsApp officiel
+    const validPasscodes = ["Oresto2026!", "0146305190", "oresto2026", "+2290146305190"];
+    if (validPasscodes.includes(cleanPass)) {
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem(ADMIN_SESSION_KEY, "true");
+      }
+      setState({ isAdminAuthenticated: true, adminEmail: "direction@oresto.bj", isAdminLoading: false });
+      setFailedAttempts(0);
+      return { success: true };
+    }
+
+    const newAttempts = failedAttempts + 1;
+    setFailedAttempts(newAttempts);
+    if (newAttempts >= MAX_ATTEMPTS) {
+      setLockedUntil(Date.now() + LOCKOUT_DURATION);
+      return { success: false, error: "Trop de tentatives échouées. Accès verrouillé pendant 15 minutes." };
+    }
+    return { success: false, error: "Code d'accès administrateur incorrect." };
+  }, [failedAttempts, lockedUntil]);
+
   const adminLogin = useCallback(async (email: string, password: string) => {
     const cleanEmail = email.trim().toLowerCase();
     const cleanPassword = password.trim();
@@ -75,6 +113,9 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       if (!isAdmin) {
         await signOut(auth);
         return { success: false, error: "Ce compte ne possède pas les privilèges administrateur." };
+      }
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem(ADMIN_SESSION_KEY, "true");
       }
       setState({ isAdminAuthenticated: true, adminEmail: cred.user.email, isAdminLoading: false });
       setFailedAttempts(0);
@@ -91,6 +132,9 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   }, [failedAttempts, lockedUntil]);
 
   const adminLogout = useCallback(async () => {
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem(ADMIN_SESSION_KEY);
+    }
     if (auth) await signOut(auth);
     setState({ isAdminAuthenticated: false, adminEmail: null, isAdminLoading: false });
   }, []);
@@ -100,6 +144,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       value={{
         ...state,
         adminLogin,
+        adminLoginWithPasscode,
         adminLogout,
         adminFailedAttempts: failedAttempts,
         adminLockedUntil: lockedUntil,
