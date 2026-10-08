@@ -281,9 +281,9 @@ export default function InsightsAdminDashboard() {
       <header className="bg-[#0A0A0A] text-white border-b border-white/10 sticky top-0 z-30 shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link to="/oresto-admin/dashboard" className="text-white/60 hover:text-white transition-colors text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 no-underline">
+            <Link to="/" className="text-white/60 hover:text-white transition-colors text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 no-underline">
               <ChevronRight size={14} className="rotate-180 text-primary" />
-              Retour Admin
+              Voir l'étude
             </Link>
             <div className="h-4 w-px bg-white/20" />
             <div className="flex items-center gap-2">

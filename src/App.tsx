@@ -116,9 +116,10 @@ const App = () => (
 
           {/* App & Authenticated Routes — Lazy-loads AuthProvider, Firebase & Toasts on demand */}
           <Route element={<AppProvidersLayout />}>
-            {/* Oresto Insights — Questionnaire Public Étude de Marché Bénin */}
+            {/* Oresto Insights — Questionnaire Public & Dashboard Étude de Marché */}
             <Route path="/survey" element={<SurveyPublic />} />
             <Route path="/insights" element={<SurveyPublic />} />
+            <Route path="/insights/admin" element={<InsightsAdminDashboard />} />
             <Route path="/etude" element={<SurveyPublic />} />
 
             <Route path="/login" element={<Login />} />

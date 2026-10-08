@@ -64,6 +64,10 @@ const COUNTRIES_LIST = [
   { name: "Autre pays", flag: "🌍", prefix: "+" },
 ];
 
+// Numéro officiel Oresto pour la réception des réponses d'étude (+229 01 46 30 51 90)
+const ORESTO_OFFICIAL_WHATSAPP = "2290146305190";
+const ORESTO_OFFICIAL_WHATSAPP_DISPLAY = "+229 01 46 30 51 90";
+
 // Liste des 12 fonctionnalités Oresto à évaluer
 const FEATURES_TO_EVALUATE = [
   {
@@ -528,31 +532,63 @@ export default function SurveyPublic() {
             Vos réponses vont nous aider à mieux comprendre les besoins réels des restaurants, boutiques et commerces, et à construire Oresto autour de problèmes concrets du terrain.
           </p>
 
-          {form.contactConsent && (form.wantsToTest === "Oui" || form.wantsToTest === "Peut-être") && (
-            <div className="p-4 rounded-2xl bg-orange-50/80 border border-orange-200/70 text-xs text-[#EA580C] font-medium mb-8 flex items-center gap-3 text-left">
-              <Sparkles size={18} className="shrink-0 text-[#FF6B00]" />
-              <span>
-                <strong>Nous vous contacterons sur WhatsApp</strong> lorsque les premiers tests privés d'Oresto seront ouverts.
-              </span>
+          {/* Bloc d'envoi et de contact WhatsApp officiel */}
+          <div className="bg-emerald-50 border border-emerald-200/90 rounded-2xl p-6 text-center space-y-3 mb-8">
+            <div className="w-12 h-12 bg-emerald-500 text-white rounded-2xl flex items-center justify-center mx-auto shadow-md shadow-emerald-500/20">
+              <i className="fa-brands fa-whatsapp text-2xl"></i>
             </div>
-          )}
+            <h3 className="font-heading font-black text-base text-emerald-950">
+              Transmettre directement sur WhatsApp
+            </h3>
+            <p className="text-xs text-emerald-800 leading-relaxed max-w-md mx-auto">
+              Vos réponses sont bien enregistrées en base. Vous pouvez également transmettre votre récapitulatif directement par WhatsApp au numéro officiel <strong>{ORESTO_OFFICIAL_WHATSAPP_DISPLAY}</strong> pour accélérer la prise en compte de votre dossier.
+            </p>
+            <div className="pt-1">
+              <a
+                href={`https://wa.me/${ORESTO_OFFICIAL_WHATSAPP}?text=${encodeURIComponent(
+                  [
+                    `*📋 NOUVELLE RÉPONSE — ÉTUDE ORESTO INSIGHTS*`,
+                    ``,
+                    `🏪 *Établissement* : ${form.establishmentName || "Non spécifié"}`,
+                    `💼 *Type* : ${form.establishmentType || "Non spécifié"}`,
+                    `🌍 *Pays / Ville* : ${form.country === "Autre" ? (form.countryOther || "Autre") : form.country}${form.city ? ` (${form.city})` : ""}`,
+                    `👥 *Équipe* : ${form.employeeCount || "Non précisé"} employés`,
+                    `👤 *Responsable* : ${form.name || "Non spécifié"}`,
+                    `📱 *WhatsApp* : ${form.whatsapp || "Non spécifié"}`,
+                    form.email ? `✉️ *Email* : ${form.email}` : null,
+                    ``,
+                    `⚠️ *Problème principal rencontré* :`,
+                    `"${form.biggestProblem || "Non renseigné"}"`,
+                    ``,
+                    `💳 *Modèle économique préféré* : ${form.preferredPricingModel || "Non spécifié"}`,
+                    `💰 *Budget abonnement acceptable* : ${form.acceptableSubscription || "Non spécifié"}`,
+                    `🚀 *Souhaite tester Oresto* : *${form.wantsToTest || "Non spécifié"}*`,
+                    form.expectations ? `\n💡 *Attentes* : "${form.expectations}"` : null,
+                  ].filter(Boolean).join("\n")
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-md shadow-emerald-600/20"
+              >
+                <i className="fa-brands fa-whatsapp text-base"></i>
+                <span>Envoyer ma réponse sur WhatsApp ({ORESTO_OFFICIAL_WHATSAPP_DISPLAY})</span>
+                <ArrowRight size={14} />
+              </a>
+            </div>
+          </div>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
             <Link
               to="/"
+              onClick={() => {
+                setIsSubmitted(false);
+                setStarted(false);
+                setCurrentStep(1);
+              }}
               className="px-6 py-3.5 rounded-full bg-white border border-zinc-200 hover:border-zinc-300 text-zinc-700 text-xs font-bold transition-all shadow-xs"
             >
-              Découvrir Oresto
+              Retour à l'accueil
             </Link>
-            <a
-              href="https://wa.me/22997000000?text=Bonjour,%20je%20viens%20de%20participer%20%C3%A0%20l'%C3%A9tude%20Oresto%20Insights%20et%20je%20souhaite%20tester%20la%20plateforme%20en%20avant-premi%C3%A8re."
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-6 py-3.5 rounded-full bg-[#FF6B00] hover:bg-[#EA580C] text-white text-xs font-bold transition-all shadow-md shadow-[#FF6B00]/20 flex items-center justify-center gap-2"
-            >
-              <span>Je souhaite tester Oresto</span>
-              <ArrowRight size={14} />
-            </a>
           </div>
         </main>
 
@@ -1653,6 +1689,11 @@ export default function SurveyPublic() {
                         J'accepte d'être recontacté par l'équipe d'Oresto dans le cadre du lancement ou des tests pilotes de la plateforme.
                       </span>
                     </label>
+
+                    <div className="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200/60 text-[11px] text-emerald-800 flex items-center gap-2.5 mt-2">
+                      <i className="fa-brands fa-whatsapp text-emerald-600 text-base shrink-0"></i>
+                      <span>Vos réponses sont sécurisées et directement traitées par l'équipe Oresto au <strong>{ORESTO_OFFICIAL_WHATSAPP_DISPLAY}</strong>.</span>
+                    </div>
                   </motion.div>
                 )}
               </div>
@@ -1711,6 +1752,18 @@ export default function SurveyPublic() {
       <footer className="py-4 px-6 text-center text-xs text-zinc-400 border-t border-zinc-200/60 bg-white">
         <p>Vos réponses sont strictement confidentielles et utilisées uniquement pour l'étude de marché d'Oresto.</p>
       </footer>
+
+      {/* Bouton flottant d'assistance WhatsApp direct vers le numéro officiel */}
+      <a
+        href={`https://wa.me/${ORESTO_OFFICIAL_WHATSAPP}?text=Bonjour%20l'%C3%A9quipe%20Oresto,%20j'ai%20une%20question%20concernant%20l'%C3%A9tude%20de%20terrain.`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-4 right-4 z-40 bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2.5 rounded-full shadow-lg shadow-emerald-600/30 flex items-center gap-2 text-xs font-bold transition-all hover:scale-105 select-none"
+        title={`Contacter l'équipe Oresto sur WhatsApp (${ORESTO_OFFICIAL_WHATSAPP_DISPLAY})`}
+      >
+        <i className="fa-brands fa-whatsapp text-lg"></i>
+        <span className="hidden sm:inline">WhatsApp ({ORESTO_OFFICIAL_WHATSAPP_DISPLAY})</span>
+      </a>
     </div>
   );
 }
