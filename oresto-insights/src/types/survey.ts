@@ -2,6 +2,8 @@ export type EstablishmentType =
   | "Restaurant"
   | "Maquis"
   | "Fast-food"
+  | "Boutique / Magasin"
+  | "Boutique en ligne / E-commerce"
   | "Traiteur"
   | "Café / snack"
   | "Bar / lounge"
@@ -13,6 +15,22 @@ export type EstablishmentAge =
   | "1 à 3 ans"
   | "3 à 5 ans"
   | "Plus de 5 ans";
+
+export type CountrySurvey =
+  | "Bénin"
+  | "Côte d'Ivoire"
+  | "Sénégal"
+  | "Togo"
+  | "Cameroun"
+  | "Burkina Faso"
+  | "Mali"
+  | "Gabon"
+  | "Guinée"
+  | "Niger"
+  | "Congo"
+  | "RD Congo"
+  | "France"
+  | "Autre";
 
 export type CityBenin =
   | "Cotonou"
@@ -148,7 +166,9 @@ export interface SurveyResponse {
   establishmentType: EstablishmentType | string;
   establishmentTypeOther?: string;
   establishmentAge: EstablishmentAge;
-  city: CityBenin | string;
+  country?: CountrySurvey | string;
+  countryOther?: string;
+  city?: CityBenin | string;
   cityOther?: string;
   employeeCount: EmployeeCount;
 
@@ -189,6 +209,7 @@ export interface SurveyResponse {
   establishmentName?: string;
   whatsapp?: string;
   email?: string;
+  contactCountry?: string;
   contactCity?: string;
   contactConsent: boolean;
 
@@ -199,6 +220,7 @@ export interface SurveyResponse {
 }
 
 export interface SurveyFilterOptions {
+  country?: string;
   city?: string;
   establishmentType?: string;
   employeeCount?: string;

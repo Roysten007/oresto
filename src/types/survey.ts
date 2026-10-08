@@ -2,6 +2,8 @@ export type EstablishmentType =
   | "Restaurant"
   | "Maquis"
   | "Fast-food"
+  | "Boutique / Magasin"
+  | "Boutique en ligne / E-commerce"
   | "Traiteur"
   | "Café / snack"
   | "Bar / lounge"
@@ -13,6 +15,22 @@ export type EstablishmentAge =
   | "1 à 3 ans"
   | "3 à 5 ans"
   | "Plus de 5 ans";
+
+export type CountrySurvey =
+  | "Bénin"
+  | "Côte d'Ivoire"
+  | "Sénégal"
+  | "Togo"
+  | "Cameroun"
+  | "Burkina Faso"
+  | "Mali"
+  | "Gabon"
+  | "Guinée"
+  | "Niger"
+  | "Congo"
+  | "RD Congo"
+  | "France"
+  | "Autre";
 
 export type CityBenin =
   | "Cotonou"
@@ -137,7 +155,7 @@ export interface FeatureRatingItem {
   id: string;
   title: string;
   description: string;
-  score: number; // 1 to 5
+  score: number;
 }
 
 export interface SurveyResponse {
@@ -148,7 +166,9 @@ export interface SurveyResponse {
   establishmentType: EstablishmentType | string;
   establishmentTypeOther?: string;
   establishmentAge: EstablishmentAge;
-  city: CityBenin | string;
+  country?: CountrySurvey | string;
+  countryOther?: string;
+  city?: CityBenin | string;
   cityOther?: string;
   employeeCount: EmployeeCount;
 
@@ -166,9 +186,9 @@ export interface SurveyResponse {
   // Étape 3 : Problèmes
   problems: (RestaurantProblem | string)[];
   problemsOther?: string;
-  biggestProblem: string; // Verbatim texte libre
+  biggestProblem: string;
 
-  // Étape 4 : Intérêt Fonctionnalités (1 to 5)
+  // Étape 4 : Intérêt Fonctionnalités (1 à 5)
   featureScores: Record<string, number>;
 
   // Étape 5 : Modèle économique
@@ -181,7 +201,7 @@ export interface SurveyResponse {
   paymentMethodsOther?: string;
   concerns: (AdoptionConcern | string)[];
   concernsOther?: string;
-  expectations: string; // Verbatim texte libre
+  expectations: string;
 
   // Étape 7 : Contact & Bêta-test
   wantsToTest: WantsToTestStatus;
@@ -189,6 +209,7 @@ export interface SurveyResponse {
   establishmentName?: string;
   whatsapp?: string;
   email?: string;
+  contactCountry?: string;
   contactCity?: string;
   contactConsent: boolean;
 
@@ -199,6 +220,7 @@ export interface SurveyResponse {
 }
 
 export interface SurveyFilterOptions {
+  country?: string;
   city?: string;
   establishmentType?: string;
   employeeCount?: string;

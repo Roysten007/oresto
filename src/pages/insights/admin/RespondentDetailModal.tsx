@@ -90,7 +90,7 @@ export default function RespondentDetailModal({ response, onClose }: RespondentD
               </span>
               <span className="bg-white/10 text-white/90 text-xs font-medium px-2.5 py-1 rounded-lg flex items-center gap-1">
                 <MapPin size={12} className="text-primary" />
-                {response.city}
+                {response.country ? (response.city ? `${response.country} • ${response.city}` : response.country) : (response.city || "Non spécifié")}
               </span>
               {response.wantsToTest === "Oui" && (
                 <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold px-2.5 py-1 rounded-lg flex items-center gap-1">
@@ -154,7 +154,7 @@ export default function RespondentDetailModal({ response, onClose }: RespondentD
                   )}
                   <span className="flex items-center gap-1 text-slate-600">
                     <MapPin size={13} />
-                    {response.city}
+                    {response.country ? (response.city ? `${response.country} • ${response.city}` : response.country) : (response.city || "Non spécifié")}
                   </span>
                 </div>
               </div>
@@ -192,8 +192,10 @@ export default function RespondentDetailModal({ response, onClose }: RespondentD
                   <span className="font-semibold text-slate-900">{response.establishmentAge}</span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-200/50">
-                  <span className="text-slate-500">Ville :</span>
-                  <span className="font-semibold text-slate-900">{response.city}</span>
+                  <span className="text-slate-500">Pays / Ville :</span>
+                  <span className="font-semibold text-slate-900">
+                    {response.country ? (response.city ? `${response.country} (${response.city})` : response.country) : (response.city || "Non spécifié")}
+                  </span>
                 </div>
                 <div className="flex justify-between py-1">
                   <span className="text-slate-500">Taille de l'équipe :</span>

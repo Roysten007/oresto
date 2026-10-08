@@ -80,7 +80,7 @@ export default function InsightsAdminDashboard() {
   const [seeding, setSeeding] = useState(false);
 
   // Filtres
-  const [filterCity, setFilterCity] = useState<string>("all");
+  const [filterCountry, setFilterCountry] = useState<string>("all");
   const [filterType, setFilterType] = useState<string>("all");
   const [filterModel, setFilterModel] = useState<string>("all");
   const [filterWantsTest, setFilterWantsTest] = useState<string>("all");
@@ -116,7 +116,7 @@ export default function InsightsAdminDashboard() {
   // Filtrage dynamique des réponses
   const filteredResponses = useMemo(() => {
     return responses.filter((r) => {
-      if (filterCity !== "all" && r.city !== filterCity) return false;
+      if (filterCountry !== "all" && r.country !== filterCountry && r.city !== filterCountry) return false;
       if (filterType !== "all" && r.establishmentType !== filterType) return false;
       if (filterModel !== "all" && r.preferredPricingModel !== filterModel) return false;
       if (filterWantsTest !== "all" && r.wantsToTest !== filterWantsTest) return false;
@@ -128,13 +128,14 @@ export default function InsightsAdminDashboard() {
         const matchPhone = r.whatsapp?.toLowerCase().includes(q);
         const matchProblem = r.biggestProblem?.toLowerCase().includes(q);
         const matchExpectations = r.expectations?.toLowerCase().includes(q);
+        const matchCountry = r.country?.toLowerCase().includes(q);
         const matchCity = r.city?.toLowerCase().includes(q);
-        return Boolean(matchName || matchEstablishment || matchPhone || matchProblem || matchExpectations || matchCity);
+        return Boolean(matchName || matchEstablishment || matchPhone || matchProblem || matchExpectations || matchCountry || matchCity);
       }
 
       return true;
     });
-  }, [responses, filterCity, filterType, filterModel, filterWantsTest, searchQuery]);
+  }, [responses, filterCountry, filterType, filterModel, filterWantsTest, searchQuery]);
 
   // Statistiques globales calculées dynamiquement
   const totalCount = filteredResponses.length;
@@ -143,11 +144,11 @@ export default function InsightsAdminDashboard() {
   const hotLeadsCount = filteredResponses.filter(r => r.wantsToTest === "Oui" && r.contactConsent && r.whatsapp).length;
   const lastResponseDate = responses.length > 0 ? responses[0].createdAt : null;
 
-  // Calcul répartition Villes
-  const cityDistribution = useMemo(() => {
+  // Calcul répartition Pays / Géographie
+  const countryDistribution = useMemo(() => {
     const counts: Record<string, number> = {};
     filteredResponses.forEach((r) => {
-      const c = r.city || "Non spécifié";
+      const c = r.country || r.city || "Non spécifié";
       counts[c] = (counts[c] || 0) + 1;
     });
     return Object.entries(counts)
@@ -295,7 +296,7 @@ export default function InsightsAdminDashboard() {
                     Oresto Insights
                   </h1>
                   <span className="bg-primary/20 text-primary border border-primary/40 text-[10px] font-black uppercase px-2 py-0.5 rounded-md">
-                    Étude Bénin
+                    Afrique & Global
                   </span>
                 </div>
                 <p className="text-[11px] text-white/50 leading-none mt-0.5">
@@ -323,7 +324,7 @@ export default function InsightsAdminDashboard() {
                 className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary hover:bg-primary/90 text-white text-xs font-bold shadow-md shadow-primary/20 transition-all"
               >
                 <Database size={13} />
-                <span>{seeding ? "Chargement..." : "Données démo Bénin"}</span>
+                <span>{seeding ? "Chargement..." : "Données démo"}</span>
               </button>
             )}
           </div>
@@ -386,24 +387,30 @@ export default function InsightsAdminDashboard() {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1 border-t border-slate-100">
-            {/* Ville */}
+            {/* Pays */}
             <div>
               <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
-                Ville
+                Pays / Région
               </label>
               <select
-                value={filterCity}
-                onChange={(e) => setFilterCity(e.target.value)}
+                value={filterCountry}
+                onChange={(e) => setFilterCountry(e.target.value)}
                 className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-1.5 focus:outline-none focus:border-primary"
               >
-                <option value="all">Toutes les villes</option>
-                <option value="Cotonou">Cotonou</option>
-                <option value="Abomey-Calavi">Abomey-Calavi</option>
-                <option value="Porto-Novo">Porto-Novo</option>
-                <option value="Parakou">Parakou</option>
-                <option value="Abomey">Abomey</option>
-                <option value="Bohicon">Bohicon</option>
-                <option value="Ouidah">Ouidah</option>
+                <option value="all">Tous les pays</option>
+                <option value="Bénin">Bénin</option>
+                <option value="Côte d'Ivoire">Côte d'Ivoire</option>
+                <option value="Sénégal">Sénégal</option>
+                <option value="Togo">Togo</option>
+                <option value="Cameroun">Cameroun</option>
+                <option value="Burkina Faso">Burkina Faso</option>
+                <option value="Mali">Mali</option>
+                <option value="Gabon">Gabon</option>
+                <option value="Guinée">Guinée</option>
+                <option value="Niger">Niger</option>
+                <option value="Congo">Congo</option>
+                <option value="RD Congo">RD Congo</option>
+                <option value="France">France</option>
                 <option value="Autre">Autre</option>
               </select>
             </div>
@@ -420,6 +427,8 @@ export default function InsightsAdminDashboard() {
               >
                 <option value="all">Tous les types</option>
                 <option value="Restaurant">Restaurant</option>
+                <option value="Boutique / Magasin">Boutique / Magasin</option>
+                <option value="Boutique en ligne / E-commerce">Boutique en ligne / E-commerce</option>
                 <option value="Maquis">Maquis</option>
                 <option value="Fast-food">Fast-food</option>
                 <option value="Traiteur">Traiteur</option>
@@ -573,7 +582,7 @@ export default function InsightsAdminDashboard() {
                 </h3>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={cityDistribution} layout="vertical" margin={{ left: 20, right: 20 }}>
+                    <BarChart data={countryDistribution} layout="vertical" margin={{ left: 20, right: 20 }}>
                       <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                       <XAxis type="number" />
                       <YAxis dataKey="name" type="category" width={110} tick={{ fontSize: 11 }} />
@@ -849,7 +858,7 @@ export default function InsightsAdminDashboard() {
                         </span>
                         <span className="text-slate-400 flex items-center gap-1">
                           <MapPin size={11} />
-                          {r.city}
+                          {r.country ? (r.city ? `${r.country} (${r.city})` : r.country) : (r.city || "Non spécifié")}
                         </span>
                       </div>
                       <p className="text-xs text-slate-700 italic leading-relaxed">
@@ -894,7 +903,7 @@ export default function InsightsAdminDashboard() {
                     <tr>
                       <th className="p-4">Établissement</th>
                       <th className="p-4">Type</th>
-                      <th className="p-4">Ville</th>
+                      <th className="p-4">Pays / Ville</th>
                       <th className="p-4">Taille</th>
                       <th className="p-4">Modèle préféré</th>
                       <th className="p-4">Budget abo</th>
@@ -919,7 +928,10 @@ export default function InsightsAdminDashboard() {
                             {r.establishmentType}
                           </span>
                         </td>
-                        <td className="p-4">{r.city}</td>
+                        <td className="p-4">
+                          <span className="font-medium text-slate-900">{r.country || r.city || "Non spécifié"}</span>
+                          {r.country && r.city && <span className="block text-[10px] text-slate-400">{r.city}</span>}
+                        </td>
                         <td className="p-4">{r.employeeCount} emp.</td>
                         <td className="p-4 font-medium text-slate-700">
                           {r.preferredPricingModel?.split(" ")[0]}...
@@ -1017,7 +1029,7 @@ export default function InsightsAdminDashboard() {
                         </span>
                         <span className="text-xs text-slate-500 flex items-center gap-1">
                           <MapPin size={12} />
-                          {lead.city}
+                          {lead.country || lead.city || "Non spécifié"}
                         </span>
                       </div>
 

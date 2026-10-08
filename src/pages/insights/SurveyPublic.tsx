@@ -28,6 +28,7 @@ import { toast } from "sonner";
 import {
   EstablishmentType,
   EstablishmentAge,
+  CountrySurvey,
   CityBenin,
   EmployeeCount,
   OrderChannel,
@@ -45,6 +46,23 @@ import {
   SurveyResponse,
 } from "@/types/survey";
 import { submitSurveyResponse } from "@/services/surveyService";
+
+const COUNTRIES_LIST = [
+  { name: "Bénin", flag: "🇧🇯", prefix: "+229" },
+  { name: "Côte d'Ivoire", flag: "🇨🇮", prefix: "+225" },
+  { name: "Sénégal", flag: "🇸🇳", prefix: "+221" },
+  { name: "Togo", flag: "🇹🇬", prefix: "+228" },
+  { name: "Cameroun", flag: "🇨🇲", prefix: "+237" },
+  { name: "Burkina Faso", flag: "🇧🇫", prefix: "+226" },
+  { name: "Mali", flag: "🇲🇱", prefix: "+223" },
+  { name: "Gabon", flag: "🇬🇦", prefix: "+241" },
+  { name: "Guinée", flag: "🇬🇳", prefix: "+224" },
+  { name: "Niger", flag: "🇳🇪", prefix: "+227" },
+  { name: "Congo", flag: "🇨🇬", prefix: "+242" },
+  { name: "RD Congo", flag: "🇨🇩", prefix: "+243" },
+  { name: "France", flag: "🇫🇷", prefix: "+33" },
+  { name: "Autre pays", flag: "🌍", prefix: "+" },
+];
 
 // Liste des 12 fonctionnalités Oresto à évaluer
 const FEATURES_TO_EVALUATE = [
@@ -126,6 +144,8 @@ export default function SurveyPublic() {
     establishmentType: string;
     establishmentTypeOther: string;
     establishmentAge: string;
+    country: string;
+    countryOther: string;
     city: string;
     cityOther: string;
     employeeCount: string;
@@ -167,12 +187,15 @@ export default function SurveyPublic() {
     establishmentName: string;
     whatsapp: string;
     email: string;
+    contactCountry: string;
     contactCity: string;
     contactConsent: boolean;
   }>({
     establishmentType: "",
     establishmentTypeOther: "",
     establishmentAge: "",
+    country: "",
+    countryOther: "",
     city: "",
     cityOther: "",
     employeeCount: "",
@@ -219,8 +242,9 @@ export default function SurveyPublic() {
     wantsToTest: "",
     name: "",
     establishmentName: "",
-    whatsapp: "+229 ",
+    whatsapp: "+",
     email: "",
+    contactCountry: "",
     contactCity: "",
     contactConsent: true,
   });
@@ -270,8 +294,12 @@ export default function SurveyPublic() {
         toast.error("Veuillez indiquer depuis combien de temps votre établissement existe.");
         return false;
       }
-      if (!form.city) {
-        toast.error("Veuillez indiquer la ville de votre établissement.");
+      if (!form.country) {
+        toast.error("Veuillez sélectionner le pays de votre établissement.");
+        return false;
+      }
+      if (form.country === "Autre pays" && !form.countryOther.trim()) {
+        toast.error("Veuillez préciser le nom de votre pays.");
         return false;
       }
       if (!form.employeeCount) {
@@ -393,11 +421,18 @@ export default function SurveyPublic() {
 
     setIsSubmitting(true);
     try {
+      const finalCountry = form.country === "Autre pays" && form.countryOther.trim()
+        ? form.countryOther.trim()
+        : form.country || "Bénin";
+      const finalCity = form.cityOther?.trim() || form.city?.trim() || finalCountry;
+
       const payload: Omit<SurveyResponse, "id" | "createdAt"> = {
         establishmentType: form.establishmentType,
         establishmentTypeOther: form.establishmentTypeOther,
         establishmentAge: form.establishmentAge as EstablishmentAge,
-        city: form.city,
+        country: finalCountry,
+        countryOther: form.countryOther,
+        city: finalCity,
         cityOther: form.cityOther,
         employeeCount: form.employeeCount as EmployeeCount,
 
@@ -432,7 +467,8 @@ export default function SurveyPublic() {
         establishmentName: form.establishmentName.trim(),
         whatsapp: form.whatsapp.trim(),
         email: form.email.trim(),
-        contactCity: form.contactCity || form.city,
+        contactCountry: finalCountry,
+        contactCity: form.contactCity || finalCity,
         contactConsent: form.contactConsent,
       };
 
@@ -440,6 +476,7 @@ export default function SurveyPublic() {
       if (result.success) {
         localStorage.removeItem("oresto_insights_draft");
         setIsSubmitted(true);
+        toast.success("Votre réponse a bien été enregistrée !");
         window.scrollTo({ top: 0, behavior: "smooth" });
       } else {
         toast.error("Erreur lors de l'enregistrement de votre réponse.");
@@ -488,7 +525,7 @@ export default function SurveyPublic() {
           </h1>
 
           <p className="text-zinc-600 text-sm leading-relaxed mb-6">
-            Vos réponses vont nous aider à mieux comprendre les besoins réels des restaurants et commerces du Bénin, et à construire Oresto autour de problèmes concrets du terrain.
+            Vos réponses vont nous aider à mieux comprendre les besoins réels des restaurants, boutiques et commerces, et à construire Oresto autour de problèmes concrets du terrain.
           </p>
 
           {form.contactConsent && (form.wantsToTest === "Oui" || form.wantsToTest === "Peut-être") && (
@@ -520,7 +557,7 @@ export default function SurveyPublic() {
         </main>
 
         <footer className="p-6 text-center text-xs text-zinc-400 border-t border-zinc-200/60 bg-white">
-          <p>© {new Date().getFullYear()} Oresto • Étude de marché indépendante Bénin</p>
+          <p>© {new Date().getFullYear()} Oresto Insights • Plateforme de consultation des restaurateurs et commerçants</p>
         </footer>
       </div>
     );
@@ -532,7 +569,7 @@ export default function SurveyPublic() {
   if (!started) {
     return (
       <div className="min-h-screen bg-[#FAFAFA] font-sub text-zinc-900 selection:bg-orange-100 selection:text-[#EA580C]">
-        {/* Header simple */}
+        {/* Header simple sans bouton Admin */}
         <header className="py-4 px-6 bg-white border-b border-zinc-200/80 sticky top-0 z-40 backdrop-blur-md bg-white/95">
           <div className="max-w-3xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-2.5">
@@ -544,17 +581,13 @@ export default function SurveyPublic() {
                   Oresto <span className="text-[#FF6B00]">Insights</span>
                 </span>
                 <span className="text-[10px] text-zinc-400 font-medium block">
-                  Étude de marché • Restauration Bénin
+                  Étude de marché • Restauration, Boutiques & Commerces
                 </span>
               </div>
             </div>
-            <Link
-              to="/insights/admin"
-              className="text-[11px] font-bold text-zinc-500 hover:text-zinc-900 px-3 py-1.5 rounded-lg hover:bg-zinc-100 transition-colors flex items-center gap-1.5"
-            >
-              <Lock size={12} />
-              <span>Espace Admin</span>
-            </Link>
+            <span className="text-[11px] font-semibold text-zinc-500 bg-zinc-100 px-3 py-1 rounded-full border border-zinc-200/60">
+              Étude de terrain
+            </span>
           </div>
         </header>
 
@@ -562,17 +595,17 @@ export default function SurveyPublic() {
         <section className="max-w-3xl mx-auto px-5 pt-12 pb-10 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-50 border border-orange-100/80 text-[#EA580C] text-xs font-bold mb-5">
             <Sparkles size={13} className="text-[#FF6B00]" />
-            <span>Consultation des professionnels de terrain au Bénin</span>
+            <span>Consultation des commerçants & professionnels de terrain</span>
           </div>
 
           <h1 className="font-heading font-black text-3xl sm:text-4xl md:text-5xl text-zinc-900 tracking-tight leading-[1.15] mb-5">
-            Les restaurants évoluent. <br className="hidden sm:inline" />
+            Les commerces et restaurants évoluent. <br className="hidden sm:inline" />
             <span className="text-[#FF6B00]">Oresto</span> veut comprendre comment.
           </h1>
 
           <div className="max-w-xl mx-auto text-zinc-600 text-sm sm:text-base leading-relaxed space-y-3 mb-8">
             <p>
-              Nous travaillons sur Oresto, une plateforme conçue pour aider les restaurants, maquis, fast-foods et traiteurs à mieux présenter leurs produits, recevoir leurs commandes et gérer leur activité.
+              Nous concevons Oresto, une solution pensée pour aider les restaurants, maquis, boutiques, magasins et commerces à présenter leurs produits, gérer leurs commandes et développer leur activité.
             </p>
             <p>
               Avant de finaliser notre solution, nous voulons comprendre les <strong>réalités concrètes des professionnels du terrain</strong>.
@@ -594,7 +627,7 @@ export default function SurveyPublic() {
               <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
             </button>
             <p className="text-[11px] text-zinc-500 font-medium">
-              Vos réponses nous aideront à construire une solution réellement adaptée aux restaurants.
+              Vos réponses nous aideront à construire une solution réellement adaptée à vos besoins.
             </p>
           </div>
         </section>
@@ -606,20 +639,20 @@ export default function SurveyPublic() {
               À propos d'Oresto
             </h2>
             <p className="text-zinc-600 text-xs sm:text-sm leading-relaxed mb-6">
-              Oresto est une plateforme destinée aux restaurants et commerces qui souhaitent disposer d'une présence digitale professionnelle et simplifier la gestion de leurs commandes, produits et clients.
+              Oresto est une plateforme destinée aux restaurants, boutiques et commerces qui souhaitent disposer d'une présence digitale professionnelle et simplifier la gestion de leurs commandes, produits et clients.
               Selon les besoins de l'établissement, Oresto peut notamment proposer :
             </p>
 
             {/* Cartes de fonctionnalités */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
               {[
-                { icon: "fa-solid fa-qrcode", title: "Menu digital", desc: "Consultable par QR Code" },
+                { icon: "fa-solid fa-qrcode", title: "Catalogue & Menu digital", desc: "Consultable par QR Code & lien" },
                 { icon: "fa-solid fa-cart-shopping", title: "Commandes en ligne", desc: "Sans intermédiaire" },
-                { icon: "fa-solid fa-store", title: "Vitrine personnalisée", desc: "À vos couleurs" },
-                { icon: "fa-solid fa-utensils", title: "Gestion commandes", desc: "Suivi cuisine en direct" },
+                { icon: "fa-solid fa-store", title: "Vitrine personnalisée", desc: "À vos couleurs et logo" },
+                { icon: "fa-solid fa-bag-shopping", title: "Boutique & Ventes", desc: "Articles & encaissement direct" },
                 { icon: "fa-solid fa-boxes-stacked", title: "Gestion des stocks", desc: "Alertes ruptures" },
-                { icon: "fa-solid fa-calendar-check", title: "Réservations", desc: "Tables & couverts" },
-                { icon: "fa-solid fa-chart-line", title: "Statistiques", desc: "Chiffre d'affaires live" },
+                { icon: "fa-solid fa-calendar-check", title: "Réservations", desc: "Tables, créneaux & rendez-vous" },
+                { icon: "fa-solid fa-chart-line", title: "Statistiques", desc: "Chiffre d'affaires en direct" },
                 { icon: "fa-solid fa-mobile-screen", title: "Paiements", desc: "Mobile Money direct" },
               ].map((card, i) => (
                 <div key={i} className="p-3.5 rounded-2xl bg-[#FAFAFA] border border-zinc-200/80 text-left">
@@ -655,7 +688,7 @@ export default function SurveyPublic() {
 
         {/* Footer */}
         <footer className="py-8 text-center text-xs text-zinc-400 border-t border-zinc-200">
-          <p>© {new Date().getFullYear()} Oresto Insights • Plateforme de consultation des restaurateurs du Bénin.</p>
+          <p>© {new Date().getFullYear()} Oresto Insights • Plateforme de consultation des restaurateurs et commerçants.</p>
         </footer>
       </div>
     );
@@ -752,6 +785,8 @@ export default function SurveyPublic() {
                       { label: "Restaurant", icon: "fa-solid fa-utensils" },
                       { label: "Maquis", icon: "fa-solid fa-fire-burner" },
                       { label: "Fast-food", icon: "fa-solid fa-burger" },
+                      { label: "Boutique / Magasin", icon: "fa-solid fa-bag-shopping" },
+                      { label: "Boutique en ligne / E-commerce", icon: "fa-solid fa-cart-shopping" },
                       { label: "Traiteur", icon: "fa-solid fa-wheat-awn" },
                       { label: "Café / snack", icon: "fa-solid fa-mug-hot" },
                       { label: "Bar / lounge", icon: "fa-solid fa-martini-glass" },
@@ -803,37 +838,80 @@ export default function SurveyPublic() {
                   </div>
                 </div>
 
-                {/* Q3 */}
+                {/* Q3 - Choix du Pays */}
                 <div className="space-y-2.5">
-                  <label className="text-xs font-bold text-zinc-800 flex items-center gap-1.5">
-                    <MapPin size={14} className="text-[#FF6B00]" />
-                    Q3. Dans quelle ville se situe votre établissement ? *
+                  <label className="text-xs font-bold text-zinc-800 flex items-center justify-between">
+                    <span className="flex items-center gap-1.5">
+                      <Globe size={14} className="text-[#FF6B00]" />
+                      Q3. Dans quel pays se situe votre établissement ? *
+                    </span>
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {[
-                      "Cotonou",
-                      "Abomey-Calavi",
-                      "Porto-Novo",
-                      "Parakou",
-                      "Abomey",
-                      "Bohicon",
-                      "Ouidah",
-                      "Autre",
-                    ].map((city) => (
-                      <button
-                        key={city}
-                        type="button"
-                        onClick={() => handleSingleSelect("city", city)}
-                        className={`p-3 rounded-2xl border text-xs font-bold transition-all text-left flex items-center justify-between ${
-                          form.city === city
-                            ? "border-[#FF6B00] bg-orange-50/70 text-[#EA580C] shadow-xs"
-                            : "border-zinc-200 bg-white hover:border-zinc-300 text-zinc-700"
-                        }`}
-                      >
-                        <span>{city}</span>
-                        {form.city === city && <CheckCircle2 size={14} className="text-[#FF6B00]" />}
-                      </button>
-                    ))}
+                    {COUNTRIES_LIST.map(({ name, flag, prefix }) => {
+                      const isSel = form.country === name;
+                      return (
+                        <button
+                          key={name}
+                          type="button"
+                          onClick={() => {
+                            setForm((prev) => {
+                              const update: any = {
+                                ...prev,
+                                country: name,
+                                city: prev.city || name,
+                              };
+                              // Met à jour automatiquement l'indicatif WhatsApp si vide ou valeur par défaut
+                              if (!prev.whatsapp || prev.whatsapp === "+" || prev.whatsapp === "+229 ") {
+                                update.whatsapp = prefix !== "+" ? `${prefix} ` : "+";
+                              }
+                              return update;
+                            });
+                          }}
+                          className={`p-3 rounded-2xl border text-xs font-bold transition-all text-left flex items-center justify-between ${
+                            isSel
+                              ? "border-[#FF6B00] bg-orange-50/70 text-[#EA580C] shadow-xs"
+                              : "border-zinc-200 bg-white hover:border-zinc-300 text-zinc-700"
+                          }`}
+                        >
+                          <span className="flex items-center gap-2">
+                            <span className="text-base">{flag}</span>
+                            <span>{name}</span>
+                          </span>
+                          {isSel && <CheckCircle2 size={14} className="text-[#FF6B00]" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Précision libre si "Autre pays" */}
+                  {form.country === "Autre pays" && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="pt-2"
+                    >
+                      <input
+                        type="text"
+                        value={form.countryOther}
+                        onChange={(e) => setForm((prev) => ({ ...prev, countryOther: e.target.value }))}
+                        placeholder="Précisez votre pays (ex: Canada, Tchad, Belgique, Guinée-Bissau...)"
+                        className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 bg-white text-xs text-zinc-800 placeholder:text-zinc-400 outline-none focus:border-[#FF6B00]"
+                      />
+                    </motion.div>
+                  )}
+
+                  {/* Champ Ville ou quartier facultatif */}
+                  <div className="pt-2">
+                    <label className="text-[11px] font-semibold text-zinc-500 block mb-1">
+                      Ville ou quartier (facultatif)
+                    </label>
+                    <input
+                      type="text"
+                      value={form.cityOther}
+                      onChange={(e) => setForm((prev) => ({ ...prev, city: e.target.value || prev.country, cityOther: e.target.value }))}
+                      placeholder="Ex: Cotonou, Abidjan, Dakar, Lomé, Douala, Bamako..."
+                      className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 bg-white text-xs text-zinc-800 placeholder:text-zinc-400 outline-none focus:border-[#FF6B00]"
+                    />
                   </div>
                 </div>
 
@@ -1478,7 +1556,7 @@ export default function SurveyPublic() {
                     Souhaitez-vous être informé de la suite ?
                   </h2>
                   <p className="text-xs text-zinc-500 mt-1">
-                    Nous sélectionnerons un petit groupe d'établissements au Bénin pour tester Oresto en avant-première.
+                    Nous sélectionnerons un panel de commerçants et restaurateurs pour tester Oresto en avant-première.
                   </p>
                 </div>
 
@@ -1525,7 +1603,7 @@ export default function SurveyPublic() {
                           type="text"
                           value={form.name}
                           onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-                          placeholder="Ex: Gildas Houndégnon"
+                          placeholder="Ex: Gildas Houndégnon, Aïcha Traoré..."
                           className="w-full px-4 py-3 rounded-xl border border-zinc-200 text-xs text-zinc-800 outline-none focus:border-[#FF6B00]"
                         />
                       </div>
@@ -1535,7 +1613,7 @@ export default function SurveyPublic() {
                           type="text"
                           value={form.establishmentName}
                           onChange={(e) => setForm((prev) => ({ ...prev, establishmentName: e.target.value }))}
-                          placeholder="Ex: Restaurant Le Bénin"
+                          placeholder="Ex: Ma Boutique Tendance, Restaurant Saveurs..."
                           className="w-full px-4 py-3 rounded-xl border border-zinc-200 text-xs text-zinc-800 outline-none focus:border-[#FF6B00]"
                         />
                       </div>
@@ -1548,7 +1626,7 @@ export default function SurveyPublic() {
                           type="tel"
                           value={form.whatsapp}
                           onChange={(e) => setForm((prev) => ({ ...prev, whatsapp: e.target.value }))}
-                          placeholder="+229 97 00 00 00"
+                          placeholder="+229 ... ou +225 ..."
                           className="w-full px-4 py-3 rounded-xl border border-zinc-200 text-xs text-zinc-800 outline-none focus:border-[#FF6B00]"
                         />
                       </div>
@@ -1558,7 +1636,7 @@ export default function SurveyPublic() {
                           type="email"
                           value={form.email}
                           onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
-                          placeholder="contact@monresto.bj"
+                          placeholder="contact@mon-etablissement.com"
                           className="w-full px-4 py-3 rounded-xl border border-zinc-200 text-xs text-zinc-800 outline-none focus:border-[#FF6B00]"
                         />
                       </div>
